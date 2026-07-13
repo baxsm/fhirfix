@@ -1,0 +1,42 @@
+# claude config (local only, never pushed)
+.claude/
+
+# planning docs (local only, never pushed)
+docs/
+
+# env and secrets
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# runtime
+*.log
+.DS_Store
+Thumbs.db
+
+# test artifacts
+coverage/
+e2e/screenshots/
+playwright-report/
+test-results/
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# scratch / temp
+tmp/
+temp/
+scratchpad/
