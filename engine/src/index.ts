@@ -4,6 +4,9 @@
 export { ENGINE_VERSION, runRemediation } from "./remediate";
 export type { RemediationInput, EngineDeps } from "./remediate";
 
+export { applyFixes, fixWithAi } from "./apply";
+export type { ApplyFixInput, ApplyFixResult, AiFixInput, AiFixResult } from "./apply";
+
 export { getEngineDeps, _resetEngineDeps } from "./factory";
 export type { EngineConfig } from "./factory";
 

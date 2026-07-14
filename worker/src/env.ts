@@ -18,6 +18,11 @@ const base = createEnv({
     US_CORE_VERSION: z.string().default("6.1.0"),
     BLOB_STORE_DIR: z.string().default(".data/blobs"),
     WORKER_CONCURRENCY: portSchema.default("4"),
+
+    // "Fix with AI" hand-off. prose/patch only, subordinate to the deterministic
+    // engine. empty key => the AI path is unavailable and the run fails cleanly.
+    OPENROUTER_API_KEY: z.string().default(""),
+    OPENROUTER_MODEL: z.string().default("google/gemini-2.5-flash"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

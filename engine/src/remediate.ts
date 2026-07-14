@@ -31,7 +31,7 @@ export interface EngineDeps {
 // pull the top-level resource(s) out of a parsed FHIR value: a single resource or
 // each entry of a bundle. returns [resource, containerPathPrefix] pairs so findings
 // can be validated per resource against the right profile.
-function collectResources(parsed: unknown): unknown[] {
+export function collectResources(parsed: unknown): unknown[] {
   if (!parsed || typeof parsed !== "object") return [];
   const obj = parsed as { resourceType?: string; entry?: Array<{ resource?: unknown }> };
   if (obj.resourceType === "Bundle") {
@@ -42,7 +42,7 @@ function collectResources(parsed: unknown): unknown[] {
 
 // conformance score 0-1000. starts at 1000, each error costs more than each warning,
 // weighted by occurrence. floored at 0. a clean resource scores 1000.
-function scoreFrom(findings: EngineFinding[]): number {
+export function scoreFrom(findings: EngineFinding[]): number {
   let penalty = 0;
   for (const f of findings) {
     const per = f.severity === "error" ? 120 : f.severity === "warning" ? 30 : 5;
@@ -51,7 +51,7 @@ function scoreFrom(findings: EngineFinding[]): number {
   return Math.max(0, 1000 - penalty);
 }
 
-async function validateAll(
+export async function validateAll(
   deps: EngineDeps,
   resources: unknown[],
   explicitProfiles: string[] | undefined,

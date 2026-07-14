@@ -5,6 +5,8 @@ import { auth } from "@/auth/auth";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
+import { exportRoutes } from "@/routes/export";
+import { publicRoutes } from "@/routes/public";
 import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
 
@@ -28,6 +30,11 @@ app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
 
 // Better Auth owns all /api/auth/** routes (sign-in/up, verify, reset, org, etc).
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// unauthenticated marketing demo + public share reads (rate-limited, PHI-safe).
+app.route("/", publicRoutes);
+// authenticated report exports + corrected-artifact fetch (session-gated REST).
+app.route("/", exportRoutes);
 
 // dashboard tRPC surface.
 app.use(
