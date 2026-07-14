@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
 import { useTRPC } from "@/trpc/client";
 
 function slugify(value: string) {
@@ -23,6 +22,7 @@ function slugify(value: string) {
 export function NewWorkspaceView() {
   const router = useRouter();
   const trpc = useTRPC();
+  const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -31,9 +31,9 @@ export function NewWorkspaceView() {
     trpc.workspace.create.mutationOptions({
       onSuccess: async (org) => {
         toast.success("Workspace created");
-        // refetch the client org list so the shell sees the new workspace,
-        // otherwise the dashboard renders "workspace not found" from stale cache.
-        await authClient.organization.list();
+        // invalidate the workspace list so the shell's fresh query includes the
+        // new workspace (avoids "workspace not found" from a stale list).
+        await queryClient.invalidateQueries({ queryKey: trpc.workspace.list.queryKey() });
         router.push(`/app/${org.slug}`);
       },
       onError: (e) => toast.error(e.message ?? "Could not create the workspace."),

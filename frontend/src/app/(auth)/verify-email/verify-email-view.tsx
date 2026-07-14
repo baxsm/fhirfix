@@ -17,7 +17,10 @@ export function VerifyEmailView() {
       return;
     }
     setPending(true);
-    const { error } = await authClient.sendVerificationEmail({ email });
+    const { error } = await authClient.sendVerificationEmail({
+      email,
+      callbackURL: `${window.location.origin}/app`,
+    });
     setPending(false);
     if (error) {
       toast.error(error.message ?? "Could not resend the verification email.");

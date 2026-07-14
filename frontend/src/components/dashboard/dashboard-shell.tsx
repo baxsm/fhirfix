@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useListOrganizations, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@/lib/permissions";
 import { useTRPC } from "@/trpc/client";
 import { AppSidebar } from "./app-sidebar";
@@ -21,22 +21,28 @@ export function DashboardShell({
 }) {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
-  const { data: orgs, isPending: orgsPending } = useListOrganizations();
 
   // not signed in -> sign in.
   useEffect(() => {
     if (!sessionPending && !session) router.replace("/sign-in");
   }, [sessionPending, session, router]);
 
+  // resolve the workspace list from the server (tRPC), not the Better Auth
+  // client cache, so a just-created workspace is visible without a stale race.
+  const trpc = useTRPC();
+  const orgsQuery = useQuery({
+    ...trpc.workspace.list.queryOptions(),
+    enabled: !!session,
+  });
+  const orgs = orgsQuery.data;
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
 
-  const trpc = useTRPC();
   const wsQuery = useQuery({
     ...trpc.workspace.get.queryOptions({ workspaceId: active?.id ?? "" }),
     enabled: !!active?.id,
   });
 
-  if (sessionPending || orgsPending) {
+  if (sessionPending || orgsQuery.isPending) {
     return <ShellSkeleton />;
   }
 
