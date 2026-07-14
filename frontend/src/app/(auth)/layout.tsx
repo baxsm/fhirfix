@@ -1,68 +1,65 @@
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { AuthHero } from "./auth-hero";
 
-// context-rich auth shell: a left brand/explainer panel + the form on the right.
+// context-rich auth shell: a living brand/explainer panel + the form on the right.
 // not a bare centered form on a gradient (ui.md).
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between border-r bg-sidebar p-10 lg:flex">
-        <Link href="/" className="flex items-center gap-2 font-mono text-sm font-semibold">
-          <span className="inline-block size-2.5 rounded-sm bg-primary" />
-          FHIRfix
-        </Link>
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <h2 className="max-w-md text-2xl font-semibold tracking-tight">
-              Turn a wall of FHIR conformance errors into a ranked, fixable report.
-            </h2>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Validate against US Core and Da Vinci profiles, get plain-language findings, apply the
-              safe deterministic fixes, and re-verify to clean.
-            </p>
-          </div>
+    <div className="grid min-h-svh lg:grid-cols-[3fr_2fr]">
+      <AuthHero />
 
-          {/* the product's promise in its own material: a non-conformant field
-              (red) becomes conformant (emerald). real output, not stock art. */}
-          <div className="max-w-md overflow-hidden rounded-lg border bg-card font-mono text-xs">
-            <div className="flex items-center gap-2 border-b px-3 py-2 text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-destructive" />
-              Patient.identifier[0].system
-              <span className="ml-auto rounded border border-destructive/30 px-1.5 py-0.5 text-[10px] text-destructive">
-                error
-              </span>
-            </div>
-            <div className="space-y-1 px-3 py-2.5">
-              <div className="flex gap-2 text-destructive/90">
-                <span className="select-none text-muted-foreground/50">-</span>
-                <span>"system": "MRN"</span>
-              </div>
-              <div className="flex gap-2 text-primary">
-                <span className="select-none text-muted-foreground/50">+</span>
-                <span>"system": "http://hospital.example.org/mrn"</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 border-t px-3 py-2 text-[11px] text-primary">
-              <span className="size-1.5 rounded-full bg-primary" />
-              conformant · re-verified
-            </div>
-          </div>
-        </div>
-        <p className="font-mono text-xs text-muted-foreground">
-          US Core 6.1.0 · FHIR R4 · Da Vinci PAS / PDex
-        </p>
-      </div>
+      {/* form panel. a faint emerald seam glow runs down the divider so the two
+          halves read as one surface, not two boxes. */}
+      <div className="relative flex flex-col p-6 sm:p-10">
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-px lg:block"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent, oklch(0.696 0.15 163.225 / 0.35) 45%, transparent)",
+          }}
+        />
 
-      <div className="flex flex-col items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-sm">
+        {/* top row: mobile brand mark + a quiet docs link (fills the corner
+            without a corporate trust badge). */}
+        <div className="flex items-center justify-between">
           <Link
             href="/"
-            className="mb-8 flex items-center gap-2 font-mono text-sm font-semibold lg:hidden"
+            className="flex items-center gap-2 font-mono text-sm font-semibold lg:invisible"
           >
             <span className="inline-block size-2.5 rounded-sm bg-primary" />
             FHIRfix
           </Link>
-          {children}
+          {/* TODO(gap: marketing pages): /docs, /terms, /privacy do not exist
+              yet — these point at fhirfix.dev placeholders and will 404 until the
+              marketing/docs site ships. keep the links; swap the hrefs then. */}
+          <a
+            href="https://fhirfix.dev/docs"
+            className="flex items-center gap-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Docs
+            <ArrowUpRight className="size-3" />
+          </a>
         </div>
+
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-sm">{children}</div>
+        </div>
+
+        {/* legal microcopy — the honest trust signal (Resend-style), not a badge. */}
+        {/* TODO(gap: marketing pages): Terms/Privacy hrefs are placeholders that
+            404 until the marketing site ships (see the Docs link above). */}
+        <p className="text-center font-mono text-[11px] text-muted-foreground/60">
+          Protected health data stays encrypted. By continuing you agree to the{" "}
+          <a href="https://fhirfix.dev/terms" className="underline-offset-4 hover:underline">
+            Terms
+          </a>{" "}
+          and{" "}
+          <a href="https://fhirfix.dev/privacy" className="underline-offset-4 hover:underline">
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </div>
   );

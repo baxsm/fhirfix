@@ -117,8 +117,11 @@ export function MembersSection({
         </form>
       )}
 
-      <div className="overflow-hidden rounded-lg border">
-        <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2.5">
+      {/* flush divider-based list, NOT a nested bordered box — this renders
+          inside the SettingsSection card, so an inner border would be card-in-
+          card. a hairline top border separates it from the invite form above. */}
+      <div className="-mx-5 border-t">
+        <div className="px-5 pb-1 pt-3">
           <span className="text-xs font-medium text-muted-foreground">
             {membersQuery.data
               ? `${membersQuery.data.total} member${membersQuery.data.total === 1 ? "" : "s"}`
@@ -129,7 +132,7 @@ export function MembersSection({
         {membersQuery.isPending ? (
           <div className="divide-y">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-4 py-3">
+              <div key={i} className="flex items-center gap-3 px-5 py-3">
                 <Skeleton className="size-7 rounded-full" />
                 <div className="flex-1 space-y-1.5">
                   <Skeleton className="h-3 w-32" />
@@ -151,7 +154,7 @@ export function MembersSection({
             {membersQuery.data.members.map((m) => {
               const r = m.role as WorkspaceRole;
               return (
-                <li key={m.id} className="flex items-center gap-3 px-4 py-2.5">
+                <li key={m.id} className="flex items-center gap-3 px-5 py-2.5">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-[11px] font-medium text-muted-foreground">
                     {m.user.name.slice(0, 2).toUpperCase()}
                   </span>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -33,19 +34,21 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
         <WorkspaceSwitcher current={workspace} workspaces={workspaces} />
       </SidebarHeader>
 
-      <SidebarContent>
-        {navGroups(workspace).map((group) => {
+      <SidebarContent className="gap-0 px-2 py-3">
+        {navGroups(workspace).map((group, gi) => {
           const items = group.items.filter(
             (item) => !item.requires || can(role, item.requires.resource, item.requires.action),
           );
           if (items.length === 0) return null;
           return (
-            <SidebarGroup key={group.label}>
-              <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+            <SidebarGroup key={group.label} className={gi === 0 ? "p-0" : "mt-6 p-0"}>
+              <SidebarGroupLabel className="h-auto px-2 pb-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/60">
                 {group.label}
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>
+                {/* gap-1 between rows + rounded inset pills = rows breathe and a
+                    hover no longer bleeds into its neighbor. */}
+                <SidebarMenu className="gap-1">
                   {items.map((item) => {
                     const active =
                       item.href === `/app/${workspace}`
@@ -57,10 +60,19 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
                           asChild
                           isActive={active}
                           tooltip={item.label}
-                          className="h-8 gap-2.5 text-[13px] data-[active=true]:font-medium"
+                          className="relative h-8 gap-2.5 rounded-md px-2 text-[13px] text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
                         >
                           <Link href={item.href}>
-                            <item.icon className="size-4 opacity-80" />
+                            {/* emerald left accent bar marks the active row —
+                                reads as intentional, not a grey highlight block. */}
+                            {active && (
+                              <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-primary" />
+                            )}
+                            <item.icon
+                              className={
+                                active ? "size-4 text-primary" : "size-4 text-muted-foreground/70"
+                              }
+                            />
                             <span>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
@@ -74,8 +86,8 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
         })}
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-2">
-        <CreditsMeter />
+      <SidebarFooter className="p-2">
+        <CreditsMeter workspace={workspace} />
       </SidebarFooter>
     </Sidebar>
   );
@@ -83,18 +95,26 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
 
 // credits balance is wired in phase 4. renders an honest $0.00 with a low-balance
 // meter shell so the slot reads as a real component, not a placeholder.
-function CreditsMeter() {
+// this is a distinct inset card (one step above the sidebar surface + hairline
+// border) so it reads as a deliberate element, not part of the rail chrome. it
+// is the only bordered thing in the borderless sidebar, so no card-in-card.
+function CreditsMeter({ workspace }: { workspace: string }) {
   return (
-    <div className="rounded-md px-2 py-1.5">
-      <div className="flex items-baseline justify-between">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+    <Link
+      href={`/app/${workspace}/billing`}
+      className="raised block rounded-lg border bg-card px-3 py-2.5 transition-colors hover:bg-accent"
+    >
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+          <Wallet className="size-3.5" />
           Credits
         </span>
-        <span className="font-mono text-xs text-muted-foreground">$0.00</span>
+        <span className="font-mono text-xs font-medium tabular-nums text-foreground">$0.00</span>
       </div>
-      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-0 bg-primary" />
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+        <div className="h-full w-0 rounded-full bg-primary" />
       </div>
-    </div>
+      <p className="mt-1.5 text-[10px] text-muted-foreground/70">Add credits to run checks</p>
+    </Link>
   );
 }

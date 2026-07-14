@@ -19,7 +19,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
       </header>
 
       {/* primary focal action - the highest-leverage element on an empty workspace */}
-      <div className="relative overflow-hidden rounded-lg border bg-card">
+      <div className="raised relative overflow-hidden rounded-lg border bg-card">
         <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-primary/[0.07] to-transparent" />
         <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
@@ -50,7 +50,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
         <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
           Set up your workspace
         </h3>
-        <div className="divide-y overflow-hidden rounded-lg border">
+        <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
           <NextStep
             index="01"
             icon={Map}

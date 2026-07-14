@@ -40,14 +40,16 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
   }
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
-      <SidebarTrigger className="-ml-1 size-7 text-muted-foreground" />
+    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur-md sm:px-4">
+      {/* trigger is mobile-only: on desktop the sidebar is fixed and always open,
+          so there is no collapse affordance. */}
+      <SidebarTrigger className="-ml-1 size-7 text-muted-foreground md:hidden" />
       <nav className="flex min-w-0 items-center gap-1.5 text-sm">
-        <span className="truncate font-medium text-muted-foreground">{workspaceName}</span>
+        <span className="truncate text-muted-foreground">{workspaceName}</span>
         {current && (
           <>
             <span className="text-muted-foreground/40">/</span>
-            <span className="truncate font-medium">{current.label}</span>
+            <span className="truncate font-medium text-foreground">{current.label}</span>
           </>
         )}
       </nav>
