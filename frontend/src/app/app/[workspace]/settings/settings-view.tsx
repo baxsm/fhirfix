@@ -70,15 +70,14 @@ export function SettingsView({ workspace }: { workspace: string }) {
                 className={cn(
                   "relative flex shrink-0 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors md:w-full",
                   activeSection
-                    ? "bg-primary/10 font-medium text-foreground"
+                    ? "bg-foreground/[0.07] font-medium text-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
               >
-                {/* emerald left accent, same active language as the app sidebar */}
-                {activeSection && (
-                  <span className="absolute inset-y-1.5 left-0 hidden w-0.5 rounded-full bg-primary md:block" />
-                )}
-                <s.icon className={cn("size-4", activeSection ? "text-primary" : "opacity-70")} />
+                {/* neutral active fill, same language as the app sidebar */}
+                <s.icon
+                  className={cn("size-4", activeSection ? "text-foreground" : "opacity-70")}
+                />
                 {s.label}
               </button>
             );

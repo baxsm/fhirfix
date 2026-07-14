@@ -106,8 +106,8 @@ export function ShareDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="mb-1 flex size-8 items-center justify-center rounded-md border bg-primary/10">
-            <Link2 className="size-4 text-primary" />
+          <div className="mb-1 flex size-8 items-center justify-center rounded-md border bg-interactive/10">
+            <Link2 className="size-4 text-interactive" />
           </div>
           <DialogTitle>Share this report</DialogTitle>
           <DialogDescription>

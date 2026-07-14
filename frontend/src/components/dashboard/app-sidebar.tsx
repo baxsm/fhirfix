@@ -60,17 +60,17 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
                           asChild
                           isActive={active}
                           tooltip={item.label}
-                          className="relative h-8 gap-2.5 rounded-md px-2 text-[13px] text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-primary/10 data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
+                          className="relative h-8 gap-2.5 rounded-md px-2 text-[13px] text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-foreground/[0.07] data-[active=true]:font-medium data-[active=true]:text-foreground"
                         >
                           <Link href={item.href}>
-                            {/* emerald left accent bar marks the active row —
-                                reads as intentional, not a grey highlight block. */}
-                            {active && (
-                              <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-primary" />
-                            )}
+                            {/* active row = a neutral elevation fill + white text
+                                (Linear/Vercel). no colored bar: color is reserved
+                                for meaning, chrome stays neutral. */}
                             <item.icon
                               className={
-                                active ? "size-4 text-primary" : "size-4 text-muted-foreground/70"
+                                active
+                                  ? "size-4 text-foreground"
+                                  : "size-4 text-muted-foreground/70"
                               }
                             />
                             <span>{item.label}</span>
@@ -112,7 +112,7 @@ function CreditsMeter({ workspace }: { workspace: string }) {
         <span className="font-mono text-xs font-medium tabular-nums text-foreground">$0.00</span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-0 rounded-full bg-primary" />
+        <div className="h-full w-0 rounded-full bg-foreground/40" />
       </div>
       <p className="mt-1.5 text-[10px] text-muted-foreground/70">Add credits to run checks</p>
     </Link>

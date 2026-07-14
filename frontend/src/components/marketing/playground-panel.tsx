@@ -107,7 +107,7 @@ export function PlaygroundPanel({ compact = false }: { compact?: boolean }) {
               setContent(s.content);
               void run(s.content);
             }}
-            className="cursor-pointer rounded border bg-background px-2 py-1 text-[11px] hover:border-primary/40"
+            className="cursor-pointer rounded border bg-background px-2 py-1 text-[11px] hover:border-foreground/25"
           >
             {s.label}
             <span className="ml-1.5 font-mono text-[9px] uppercase text-muted-foreground">

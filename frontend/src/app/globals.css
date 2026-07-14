@@ -31,6 +31,9 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-interactive: var(--interactive);
+  --color-interactive-foreground: var(--interactive-foreground);
+  --color-info: var(--info);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -58,9 +61,17 @@
   --card-foreground: oklch(0.18 0.006 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.006 260);
-  /* emerald = conformant / pass / go. the product's core promise. */
+  /* emerald = conformant / pass / applied. RESERVED as a semantic status color,
+     not chrome. it means the product's promise (broken -> conformant); it must not
+     also carry buttons/nav/focus, or the "pass" signal drowns in green. */
   --primary: oklch(0.596 0.145 163.225);
   --primary-foreground: oklch(0.985 0 0);
+  /* blue = interactive. primary buttons, links, focus rings. the dev-tool
+     convention (Vercel/GitHub/Sentry): interactive is blue, success is green,
+     and the two never collide. */
+  --interactive: oklch(0.548 0.204 256);
+  --interactive-foreground: oklch(0.985 0 0);
+  --info: oklch(0.548 0.204 256);
   --secondary: oklch(0.968 0.002 250);
   --secondary-foreground: oklch(0.24 0.006 260);
   --muted: oklch(0.968 0.002 250);
@@ -72,7 +83,7 @@
   --warning-foreground: oklch(0.145 0 0);
   --border: oklch(0.918 0.003 260);
   --input: oklch(0.918 0.003 260);
-  --ring: oklch(0.596 0.145 163.225);
+  --ring: oklch(0.548 0.204 256);
   --chart-1: oklch(0.596 0.145 163.225);
   --chart-2: oklch(0.769 0.188 70.08);
   --chart-3: oklch(0.577 0.245 27.325);
@@ -81,12 +92,12 @@
   --radius: 0.4rem;
   --sidebar: oklch(0.978 0.002 250);
   --sidebar-foreground: oklch(0.3 0.008 260);
-  --sidebar-primary: oklch(0.596 0.145 163.225);
+  --sidebar-primary: oklch(0.548 0.204 256);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.945 0.003 250);
   --sidebar-accent-foreground: oklch(0.18 0.006 260);
   --sidebar-border: oklch(0.918 0.003 260);
-  --sidebar-ring: oklch(0.596 0.145 163.225);
+  --sidebar-ring: oklch(0.548 0.204 256);
 }
 
 .dark {
@@ -103,11 +114,16 @@
   --card-foreground: oklch(0.9784 0.0011 197.14);
   --popover: oklch(0.2162 0.004 264);
   --popover-foreground: oklch(0.9784 0.0011 197.14);
-  /* deeper emerald so WHITE text clears WCAG on the primary button (bold 14px
-     needs 3:1; white on this = 3.77). bright emerald with dark text reads cheap;
-     Linear/Vercel/Stripe all ship white-on-color. */
+  /* emerald = semantic pass/conformant/applied ONLY (score-up, applied badges,
+     re-verified-clean). deep enough that WHITE text clears WCAG where it must. */
   --primary: oklch(0.596 0.1274 163.23);
   --primary-foreground: oklch(1 0 0);
+  /* blue = interactive (buttons, links, focus, active nav). brightened for
+     near-black; white foreground clears contrast. this is the only accent that
+     carries chrome, keeping emerald free to mean "pass". */
+  --interactive: oklch(0.62 0.2 254);
+  --interactive-foreground: oklch(1 0 0);
+  --info: oklch(0.68 0.16 245);
   --secondary: oklch(0.2162 0.004 264);
   --secondary-foreground: oklch(0.8744 0.0152 260.73);
   --muted: oklch(0.2162 0.004 264);
@@ -119,9 +135,8 @@
   --warning-foreground: oklch(0.141 0 0);
   --border: oklch(0.2712 0.006 264);
   --input: oklch(0.2712 0.006 264);
-  /* brighter emerald for thin accents (focus ring, active nav, chart-1, motif
-     glow) where the element carries no text and wants to read against near-black. */
-  --ring: oklch(0.696 0.15 163.225);
+  /* focus ring = interactive blue, so focus reads as "actionable", not "success". */
+  --ring: oklch(0.62 0.2 254);
   --chart-1: oklch(0.696 0.15 163.225);
   --chart-2: oklch(0.769 0.188 70.08);
   --chart-3: oklch(0.637 0.237 27.325);
@@ -131,12 +146,12 @@
      border so the rail edge reads as a real seam. */
   --sidebar: oklch(0.1681 0.004 264);
   --sidebar-foreground: oklch(0.8744 0.0152 260.73);
-  --sidebar-primary: oklch(0.696 0.15 163.225);
+  --sidebar-primary: oklch(0.62 0.2 254);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.2437 0.005 264);
   --sidebar-accent-foreground: oklch(0.9784 0.0011 197.14);
   --sidebar-border: oklch(0.2879 0.007 264);
-  --sidebar-ring: oklch(0.696 0.15 163.225);
+  --sidebar-ring: oklch(0.62 0.2 254);
 }
 
 @layer base {

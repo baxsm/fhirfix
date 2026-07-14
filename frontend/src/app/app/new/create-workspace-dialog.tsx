@@ -33,7 +33,7 @@ export function CreateWorkspaceDialog({
       <DialogContent className="rounded-lg sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <span className="flex size-7 items-center justify-center rounded-md border bg-card text-primary">
+            <span className="flex size-7 items-center justify-center rounded-md border bg-card text-interactive">
               <Plus className="size-4" />
             </span>
             <DialogTitle>New workspace</DialogTitle>

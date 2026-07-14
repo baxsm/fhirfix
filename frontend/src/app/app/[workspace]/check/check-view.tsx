@@ -106,7 +106,7 @@ export function CheckView({ workspace }: { workspace: string }) {
               setContent(s.content);
               setFiles([]);
             }}
-            className="cursor-pointer rounded-md border bg-card px-3 py-1.5 text-left text-xs raised hover:border-primary/40"
+            className="cursor-pointer rounded-md border bg-card px-3 py-1.5 text-left text-xs raised hover:border-foreground/25"
           >
             <span className="font-medium">{s.label}</span>
             <span className="ml-2 font-mono text-[10px] text-muted-foreground">{s.kind}</span>
@@ -126,7 +126,9 @@ export function CheckView({ workspace }: { workspace: string }) {
         onClick={() => inputRef.current?.click()}
         className={cn(
           "flex w-full items-center justify-center gap-2 rounded-md border border-dashed py-3 text-xs text-muted-foreground transition-colors",
-          dragging ? "border-primary bg-primary/5 text-primary" : "hover:border-primary/40",
+          dragging
+            ? "border-interactive bg-interactive/5 text-interactive"
+            : "hover:border-foreground/25",
         )}
       >
         <Upload className="size-3.5" />
@@ -170,7 +172,7 @@ export function CheckView({ workspace }: { workspace: string }) {
                 <button
                   type="button"
                   onClick={() => setContent(f.content)}
-                  className="cursor-pointer text-[10px] text-primary hover:underline"
+                  className="cursor-pointer text-[10px] text-interactive hover:underline"
                 >
                   Load
                 </button>

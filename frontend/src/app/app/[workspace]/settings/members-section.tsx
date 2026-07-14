@@ -21,7 +21,7 @@ const ROLES: WorkspaceRole[] = ["owner", "admin", "member", "billing", "auditor"
 
 // role -> accent. owner/admin carry weight; auditor is muted (read-only).
 const roleTone: Record<WorkspaceRole, string> = {
-  owner: "text-primary",
+  owner: "text-foreground",
   admin: "text-foreground",
   member: "text-foreground",
   billing: "text-foreground",

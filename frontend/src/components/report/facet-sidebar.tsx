@@ -72,7 +72,7 @@ function Row({
       className={cn(
         "flex w-full cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-left text-[13px] transition-colors",
         active
-          ? "bg-primary/10 text-primary"
+          ? "bg-foreground/[0.07] text-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
     >

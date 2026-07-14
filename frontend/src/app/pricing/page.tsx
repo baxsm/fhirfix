@@ -87,14 +87,14 @@ export default function PricingPage() {
               key={tier.name}
               className={cn(
                 "flex flex-col rounded-lg border bg-card p-5 raised",
-                tier.highlight && "border-primary/40",
+                tier.highlight && "border-interactive/50",
               )}
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h2 className="font-medium">{tier.name}</h2>
                   {tier.highlight && (
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase text-primary">
+                    <span className="rounded bg-interactive/10 px-1.5 py-0.5 text-[10px] font-medium uppercase text-interactive">
                       Popular
                     </span>
                   )}
@@ -104,7 +104,7 @@ export default function PricingPage() {
               <ul className="mt-4 flex-1 space-y-2">
                 {tier.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                    <Check className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
                     <span className="text-muted-foreground">{f}</span>
                   </li>
                 ))}

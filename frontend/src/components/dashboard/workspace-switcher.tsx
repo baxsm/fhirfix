@@ -34,7 +34,7 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
                 className="data-[state=open]:bg-sidebar-accent"
                 aria-label="Switch workspace"
               >
-                <span className="flex size-6 items-center justify-center rounded-sm bg-primary/15 font-mono text-xs text-primary">
+                <span className="flex size-6 items-center justify-center rounded-sm bg-foreground/10 font-mono text-xs text-foreground">
                   {(active?.name ?? "?").slice(0, 1).toUpperCase()}
                 </span>
                 <div className="grid flex-1 text-left leading-tight">

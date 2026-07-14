@@ -38,7 +38,7 @@ export default function PlaygroundPage() {
 
         <p className="text-xs text-muted-foreground">
           Want history, batch uploads, the mapping registry, and the API?{" "}
-          <Link href="/sign-up" className="text-primary hover:underline">
+          <Link href="/sign-up" className="text-interactive hover:underline">
             Create a workspace
           </Link>
           .

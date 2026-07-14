@@ -163,7 +163,7 @@ export function DiffView({
             onClick={() => setSplit(true)}
             className={cn(
               "cursor-pointer px-2 py-0.5",
-              split ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted",
+              split ? "bg-interactive/15 text-interactive" : "text-muted-foreground hover:bg-muted",
             )}
           >
             Split
@@ -173,7 +173,9 @@ export function DiffView({
             onClick={() => setSplit(false)}
             className={cn(
               "cursor-pointer border-l px-2 py-0.5",
-              !split ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted",
+              !split
+                ? "bg-interactive/15 text-interactive"
+                : "text-muted-foreground hover:bg-muted",
             )}
           >
             Unified

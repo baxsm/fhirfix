@@ -20,12 +20,12 @@ export function OverviewView({ workspace }: { workspace: string }) {
 
       {/* primary focal action - the highest-leverage element on an empty workspace */}
       <div className="raised relative overflow-hidden rounded-lg border bg-card">
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-primary/[0.07] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-interactive/[0.06] to-transparent" />
         <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="flex size-7 items-center justify-center rounded-md border bg-background">
-                <Terminal className="size-3.5 text-primary" />
+                <Terminal className="size-3.5 text-muted-foreground" />
               </span>
               <h2 className="text-sm font-semibold">Run your first check</h2>
             </div>

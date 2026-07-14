@@ -93,7 +93,7 @@ function SeverityChip({
       onClick={onClick}
       className={cn(
         "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] transition-colors",
-        active ? "border-primary/40 bg-primary/10" : "hover:bg-muted",
+        active ? "border-foreground/25 bg-foreground/[0.06]" : "hover:bg-muted",
       )}
     >
       <span className={cn("size-1.5 rounded-full", dot)} />
@@ -358,15 +358,22 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
 
         {/* the highest-leverage line: turns a scary total into one action. */}
         {fixableNow.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3 raised">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3 raised">
             <div className="flex items-center gap-2 text-sm">
-              <Wrench className="size-4 text-primary" />
+              <Wrench className="size-4 text-emerald-400" />
               <span>
                 <span className="font-medium text-foreground">{fixableNow.length}</span> of{" "}
                 {active.length} findings are safely auto-fixable.
               </span>
             </div>
-            <Button size="sm" disabled={applyingAll || isBusy} onClick={applyAllSafe}>
+            {/* emerald button = this action makes the resource conformant (the one
+                semantic use of the pass color on a CTA). */}
+            <Button
+              variant="success"
+              size="sm"
+              disabled={applyingAll || isBusy}
+              onClick={applyAllSafe}
+            >
               {applyingAll || isBusy ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : (
@@ -494,7 +501,7 @@ function InProgress({
   return (
     <div className="mx-auto max-w-lg space-y-6 py-8">
       <div className="flex flex-col items-center gap-4 rounded-md border bg-card px-6 py-12 text-center raised">
-        <Loader2 className="size-8 animate-spin text-primary" />
+        <Loader2 className="size-8 animate-spin text-interactive" />
         <div>
           <h2 className="font-medium">
             {status === "queued" ? "Queued" : "Validating and remediating"}
