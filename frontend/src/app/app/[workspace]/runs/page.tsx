@@ -1,13 +1,6 @@
-import { Activity } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { RunsView } from "./runs-view";
 
-export default function Page() {
-  return (
-    <PhasePlaceholder
-      title="Runs"
-      phase="Phase 3"
-      icon={Activity}
-      description="History of every conformance check with findings, credits, and before/after scores."
-    />
-  );
+export default async function RunsPage({ params }: { params: Promise<{ workspace: string }> }) {
+  const { workspace } = await params;
+  return <RunsView workspace={workspace} />;
 }

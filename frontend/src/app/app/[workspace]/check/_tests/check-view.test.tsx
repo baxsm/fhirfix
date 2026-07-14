@@ -1,27 +1,31 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-// drive the harness through its states by mocking the data layer. we control
-// what the run query returns so each render path (idle, completed, failed) is
-// exercised without a real backend.
+// the ingestion page: samples + drop zone + a submit that routes to the report.
 const submitMutate = vi.fn();
-let runData: unknown;
+const routerPush = vi.fn();
 
 vi.mock("@/lib/auth-client", () => ({
   useListOrganizations: () => ({ data: [{ id: "wsp_1", slug: "acme", name: "Acme" }] }),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPush }),
+}));
+
 vi.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ mutate: submitMutate, isPending: false }),
-  useQuery: () => ({ data: runData }),
+  useMutation: (opts: { onSuccess?: (r: unknown) => void }) => ({
+    mutate: (vars: unknown) => {
+      submitMutate(vars);
+      opts.onSuccess?.({ runId: "run_new", status: "queued" });
+    },
+    isPending: false,
+  }),
 }));
 
 vi.mock("@/trpc/client", () => ({
   useTRPC: () => ({
-    run: {
-      submit: { mutationOptions: (o: unknown) => o },
-      get: { queryOptions: (o: unknown) => o },
-    },
+    run: { submit: { mutationOptions: (o: unknown) => o } },
   }),
 }));
 
@@ -29,59 +33,31 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 import { CheckView } from "../check-view";
 
-describe("CheckView", () => {
+describe("CheckView (ingestion)", () => {
   beforeEach(() => {
     submitMutate.mockReset();
-    runData = undefined;
+    routerPush.mockReset();
   });
 
-  test("renders the harness with samples loaded", () => {
+  test("renders the ingestion page with samples and a drop zone", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.getByRole("heading", { name: /new check/i })).toBeInTheDocument();
     expect(screen.getByText(/US Core Patient/i)).toBeInTheDocument();
+    expect(screen.getByText(/Drop a file here/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run check/i })).toBeInTheDocument();
   });
 
-  test("shows a completed run with before/after scores and findings", () => {
-    runData = {
-      run: {
-        id: "run_1",
-        status: "completed",
-        conformanceScoreBefore: 880,
-        conformanceScoreAfter: 970,
-      },
-      findings: [
-        {
-          id: "fnd_1",
-          severity: "warning",
-          category: "structural",
-          ruleSource: "fhirfix.placeholder-system",
-          fhirpath: "Patient.identifier[0].system",
-          rawValidatorMessage: "placeholder system",
-          plainMessage: "The identifier system was a placeholder.",
-          suggestedFix: "Set the identifier system.",
-          fixConfidence: "auto",
-          fixStatus: "applied",
-          occurrenceCount: 1,
-        },
-      ],
-      corrected: '{"resourceType":"Patient"}',
-    };
+  test("submitting routes to the new run report", () => {
     render(<CheckView workspace="acme" />);
-    expect(screen.getByText("880")).toBeInTheDocument();
-    expect(screen.getByText("970")).toBeInTheDocument();
-    expect(screen.getByText(/identifier system was a placeholder/i)).toBeInTheDocument();
-    expect(screen.getByText(/applied/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /run check/i }));
+    expect(submitMutate).toHaveBeenCalledOnce();
+    expect(routerPush).toHaveBeenCalledWith("/app/acme/runs/run_new");
   });
 
-  test("shows the failure state with the upstream detail", () => {
-    runData = {
-      run: { id: "run_2", status: "failed", errorMessage: "validator: unreachable" },
-      findings: [],
-      corrected: null,
-    };
+  test("run is disabled with empty content", () => {
     render(<CheckView workspace="acme" />);
-    expect(screen.getByText(/check failed/i)).toBeInTheDocument();
-    expect(screen.getByText(/validator: unreachable/i)).toBeInTheDocument();
+    const textarea = screen.getByPlaceholderText(/Paste a FHIR resource/i);
+    fireEvent.change(textarea, { target: { value: "" } });
+    expect(screen.getByRole("button", { name: /run check/i })).toBeDisabled();
   });
 });
