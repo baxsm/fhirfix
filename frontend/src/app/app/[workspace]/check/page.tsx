@@ -1,13 +1,6 @@
-import { FileScan } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { CheckView } from "./check-view";
 
-export default function Page() {
-  return (
-    <PhasePlaceholder
-      title="New check"
-      phase="Phase 3"
-      icon={FileScan}
-      description="Paste or upload FHIR and HL7v2, pick profiles, and run the remediation engine."
-    />
-  );
+export default async function CheckPage({ params }: { params: Promise<{ workspace: string }> }) {
+  const { workspace } = await params;
+  return <CheckView workspace={workspace} />;
 }

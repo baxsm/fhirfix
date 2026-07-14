@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { eq } from "drizzle-orm";
 import { auth } from "@/auth/auth";
 import { db, schema } from "@/lib/db";
-import { eq } from "drizzle-orm";
 
 // integration: real Better Auth + real Postgres. requires docker postgres up
 // and the schema pushed. runs against EMAIL_TEST_MODE so no real email is sent.
@@ -36,12 +36,13 @@ describe("auth flow", () => {
       .limit(1);
 
     expect(user).toBeDefined();
-    expect(user?.emailVerified).toBe(false);
+    if (!user) throw new Error("user not found");
+    expect(user.emailVerified).toBe(false);
 
     const [account] = await db
       .select()
       .from(schema.account)
-      .where(eq(schema.account.userId, user!.id))
+      .where(eq(schema.account.userId, user.id))
       .limit(1);
     // password is stored hashed, never plaintext.
     expect(account?.password).toBeTruthy();

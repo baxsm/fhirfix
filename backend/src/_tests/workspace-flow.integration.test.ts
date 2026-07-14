@@ -2,8 +2,8 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth/auth";
 import { db, schema } from "@/lib/db";
-import { createCallerFactory } from "@/trpc/trpc";
 import { appRouter } from "@/trpc/routers/index";
+import { createCallerFactory } from "@/trpc/trpc";
 
 // integration: exercises the tRPC workspace/member routers with a real signed-in
 // session against real Postgres + Better Auth.

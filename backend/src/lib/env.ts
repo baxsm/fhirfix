@@ -28,6 +28,15 @@ const baseEnv = createEnv({
 
     SENTRY_DSN: z.string().default(""),
     LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
+
+    // sidecars. comma-separated validator URLs form the ready-gated pool.
+    VALIDATOR_URLS: z.string().default("http://localhost:4567"),
+    VALIDATOR_MAX_INFLIGHT: portSchema.default("4"),
+    CONVERTER_URL: z.url().default("http://localhost:8081"),
+    // default IG pool: US Core 6.1.0.
+    US_CORE_VERSION: z.string().default("6.1.0"),
+    // local blob store root for phase-2 artifacts (input/corrected).
+    BLOB_STORE_DIR: z.string().default(".data/blobs"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
@@ -38,5 +47,8 @@ export const env = {
   IS_PRODUCTION: baseEnv.NODE_ENV === "production",
   TRUSTED_ORIGIN_LIST: baseEnv.TRUSTED_ORIGINS.split(",")
     .map((o) => o.trim())
+    .filter(Boolean),
+  VALIDATOR_URL_LIST: baseEnv.VALIDATOR_URLS.split(",")
+    .map((u) => u.trim())
     .filter(Boolean),
 };

@@ -1,0 +1,31 @@
+import { createEnv } from "@t3-oss/env-core";
+import { z } from "zod";
+
+const portSchema = z
+  .string()
+  .refine((v) => v.length > 0 && !Number.isNaN(Number(v)), "must be a number");
+
+const base = createEnv({
+  server: {
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    DATABASE_URL: z.url(),
+    REDIS_URL: z.url(),
+    LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
+
+    VALIDATOR_URLS: z.string().default("http://localhost:4567"),
+    VALIDATOR_MAX_INFLIGHT: portSchema.default("4"),
+    CONVERTER_URL: z.url().default("http://localhost:8081"),
+    US_CORE_VERSION: z.string().default("6.1.0"),
+    BLOB_STORE_DIR: z.string().default(".data/blobs"),
+    WORKER_CONCURRENCY: portSchema.default("4"),
+  },
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true,
+});
+
+export const env = {
+  ...base,
+  VALIDATOR_URL_LIST: base.VALIDATOR_URLS.split(",")
+    .map((u) => u.trim())
+    .filter(Boolean),
+};

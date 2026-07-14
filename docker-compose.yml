@@ -31,7 +31,36 @@ services:
       timeout: 5s
       retries: 10
 
-# hapi-validator and fhir-converter sidecars are added in Phase 2
+  # HL7 FHIR validator behind the Inferno wrapper. Warm instance; the engine
+  # loads US Core 6.1.0 at boot via PUT /igs and ready-gates on GET /igs.
+  # Terminology validation resolves against the public tx.fhir.org by default.
+  validator:
+    image: infernocommunity/fhir-validator-service:v2.3.6
+    container_name: fhirfix-validator
+    restart: unless-stopped
+    ports:
+      - "4567:4567"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:4567/igs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  # Microsoft FHIR-Converter for HL7v2/C-CDA -> FHIR R4. convertToFhir API.
+  converter:
+    image: mcr.microsoft.com/healthcareapis/fhir-converter:1.0.476-preview
+    container_name: fhirfix-converter
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    healthcheck:
+      # the converter image ships curl but not wget.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health/check || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
 volumes:
   fhirfix-pgdata:

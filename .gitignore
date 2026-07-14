@@ -28,6 +28,10 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# local blob store (run artifacts, may be PHI-adjacent)
+**/.data/
+.data/
+
 # test artifacts (any service)
 **/coverage/
 **/e2e/screenshots/

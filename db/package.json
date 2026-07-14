@@ -7,7 +7,8 @@
   "types": "./index.ts",
   "exports": {
     ".": "./index.ts",
-    "./schema": "./schema/index.ts"
+    "./schema": "./schema/index.ts",
+    "./blob": "./blob.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

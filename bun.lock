@@ -13,6 +13,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@fhirfix/db": "workspace:*",
+        "@fhirfix/engine": "workspace:*",
         "@hono/trpc-server": "0.4.2",
         "@sentry/node": "10.65.0",
         "@t3-oss/env-core": "0.13.11",
@@ -45,7 +46,11 @@
     },
     "engine": {
       "name": "@fhirfix/engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
+      "devDependencies": {
+        "@types/bun": "latest",
+        "vitest": "4.1.10",
+      },
     },
     "worker": {
       "name": "@fhirfix/worker",
@@ -53,8 +58,12 @@
       "dependencies": {
         "@fhirfix/db": "workspace:*",
         "@fhirfix/engine": "workspace:*",
+        "@t3-oss/env-core": "0.13.11",
         "bullmq": "5.80.2",
+        "drizzle-orm": "0.45.2",
         "ioredis": "5.11.1",
+        "nanoid": "6.0.0",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/bun": "latest",
