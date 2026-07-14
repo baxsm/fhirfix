@@ -53,7 +53,7 @@ test("capture shell and system pages in dark and light", async ({ page }) => {
 
     // settings
     await page.getByRole("link", { name: "Settings" }).click();
-    await expect(page.getByRole("heading", { name: "Workspace settings" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
     await page.waitForTimeout(400);
     await hideDevOverlay(page);
     await page.screenshot({ path: `e2e/screenshots/settings-${theme}.png`, fullPage: true });

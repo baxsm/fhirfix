@@ -5,6 +5,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Map,
+  Radar,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -15,34 +16,51 @@ export type NavItem = {
   label: string;
   href: string;
   icon: typeof LayoutDashboard;
-  // minimum resource the role must be able to view. undefined = any member.
   requires?: { resource: "billing" | "audit"; action: "view" };
 };
 
-// nav is workspace-scoped. hrefs are suffixed onto /app/[workspace].
-export function navItems(workspace: string): NavItem[] {
+export type NavGroup = { label: string; items: NavItem[] };
+
+// grouped nav breaks the flat list into meaningful sections: the daily
+// remediation loop, the ongoing governance surfaces, and admin.
+export function navGroups(workspace: string): NavGroup[] {
   const base = `/app/${workspace}`;
   return [
-    { label: "Overview", href: base, icon: LayoutDashboard },
-    { label: "New check", href: `${base}/check`, icon: FileScan },
-    { label: "Runs", href: `${base}/runs`, icon: Activity },
-    { label: "Mappings", href: `${base}/mappings`, icon: Map },
-    { label: "Conformance", href: `${base}/conformance`, icon: ShieldCheck },
-    { label: "Monitoring", href: `${base}/monitoring`, icon: ScrollText },
-    { label: "Developers", href: `${base}/developers`, icon: KeyRound },
     {
-      label: "Billing",
-      href: `${base}/billing`,
-      icon: CreditCard,
-      requires: { resource: "billing", action: "view" },
+      label: "Remediate",
+      items: [
+        { label: "Overview", href: base, icon: LayoutDashboard },
+        { label: "New check", href: `${base}/check`, icon: FileScan },
+        { label: "Runs", href: `${base}/runs`, icon: Activity },
+      ],
     },
     {
-      label: "Audit",
-      href: `${base}/audit`,
-      icon: ScrollText,
-      requires: { resource: "audit", action: "view" },
+      label: "Govern",
+      items: [
+        { label: "Mappings", href: `${base}/mappings`, icon: Map },
+        { label: "Conformance", href: `${base}/conformance`, icon: ShieldCheck },
+        { label: "Monitoring", href: `${base}/monitoring`, icon: Radar },
+      ],
     },
-    { label: "Settings", href: `${base}/settings`, icon: Settings },
+    {
+      label: "Manage",
+      items: [
+        { label: "Developers", href: `${base}/developers`, icon: KeyRound },
+        {
+          label: "Billing",
+          href: `${base}/billing`,
+          icon: CreditCard,
+          requires: { resource: "billing", action: "view" },
+        },
+        {
+          label: "Audit",
+          href: `${base}/audit`,
+          icon: ScrollText,
+          requires: { resource: "audit", action: "view" },
+        },
+        { label: "Settings", href: `${base}/settings`, icon: Settings },
+      ],
+    },
   ];
 }
 

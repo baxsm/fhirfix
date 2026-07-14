@@ -35,13 +35,14 @@ export function SettingsView({ workspace }: { workspace: string }) {
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">Workspace settings</h1>
+    <div className="mx-auto max-w-3xl space-y-5">
+      <header className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Members, roles, defaults, and appearance for {active?.name ?? "this workspace"}.
+          Members, roles, defaults, and appearance for{" "}
+          <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
         </p>
-      </div>
+      </header>
 
       <Tabs defaultValue="members">
         <TabsList>
@@ -50,7 +51,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="members" className="pt-4">
+        <TabsContent value="members" className="pt-5">
           {workspaceId ? (
             <MembersSection workspaceId={workspaceId} role={role} />
           ) : (
@@ -58,7 +59,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
           )}
         </TabsContent>
 
-        <TabsContent value="defaults" className="pt-4">
+        <TabsContent value="defaults" className="pt-5">
           {wsQuery.isPending ? (
             <Skeleton className="h-40 w-full" />
           ) : (
@@ -73,7 +74,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
           )}
         </TabsContent>
 
-        <TabsContent value="appearance" className="space-y-3 pt-4">
+        <TabsContent value="appearance" className="space-y-3 pt-5">
           <div className="space-y-1.5">
             <Label>Theme</Label>
             <p className="text-sm text-muted-foreground">Applies to your account on this device.</p>

@@ -65,9 +65,10 @@ export function DashboardShell({
       <SidebarInset className="min-w-0">
         <Topbar
           workspace={workspace}
+          workspaceName={active.name}
           user={{ name: session.user.name, email: session.user.email }}
         />
-        <main className="min-w-0 flex-1 p-4 sm:p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-5 sm:p-7">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

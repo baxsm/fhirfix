@@ -40,7 +40,7 @@ test("sign up, verify, create workspace, reach dashboard, switch theme", async (
 
   // switch theme on settings
   await page.getByRole("link", { name: "Settings" }).click();
-  await expect(page.getByRole("heading", { name: "Workspace settings" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Appearance" }).click();
   await page.getByRole("button", { name: "Light" }).click();
   await expect(page.locator("html")).toHaveClass(/light/);
