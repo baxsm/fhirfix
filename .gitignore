@@ -9,27 +9,31 @@ docs/
 .env.*
 !.env.example
 
-# dependencies
+# dependencies (any service)
+**/node_modules/
 node_modules/
 .pnp
 .pnp.js
 
-# builds
-.next/
-out/
-dist/
-build/
+# builds (any service)
+**/.next/
+**/out/
+**/dist/
+**/dist-types/
+**/build/
+**/.turbo/
 
 # runtime
 *.log
 .DS_Store
 Thumbs.db
 
-# test artifacts
-coverage/
-e2e/screenshots/
-playwright-report/
-test-results/
+# test artifacts (any service)
+**/coverage/
+**/e2e/screenshots/
+**/playwright-report/
+**/test-results/
+**/.vitest/
 
 # editor
 .vscode/

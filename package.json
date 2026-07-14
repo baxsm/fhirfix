@@ -1,0 +1,20 @@
+{
+  "name": "fhirfix",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["db", "engine", "backend", "worker"],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c green,cyan \"bun run --cwd backend dev\" \"npm --prefix frontend run dev\"",
+    "db:push": "bun run --cwd backend db:push",
+    "db:generate": "bun run --cwd backend db:generate",
+    "db:migrate": "bun run --cwd backend db:migrate",
+    "db:seed": "bun run --cwd backend db:seed",
+    "auth:generate": "bun run --cwd backend auth:generate",
+    "typecheck": "bun run --cwd db typecheck || true && bun run --cwd backend typecheck && npm --prefix frontend run typecheck",
+    "lint": "bun run --cwd backend lint && npm --prefix frontend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.3"
+  }
+}

@@ -1,0 +1,92 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useListOrganizations, useSession } from "@/lib/auth-client";
+import type { WorkspaceRole } from "@/lib/permissions";
+import { useTRPC } from "@/trpc/client";
+import { AppSidebar } from "./app-sidebar";
+import { Topbar } from "./topbar";
+import { WorkspaceNotFound } from "./workspace-not-found";
+
+export function DashboardShell({
+  workspace,
+  children,
+}: {
+  workspace: string;
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const { data: session, isPending: sessionPending } = useSession();
+  const { data: orgs, isPending: orgsPending } = useListOrganizations();
+
+  // not signed in -> sign in.
+  useEffect(() => {
+    if (!sessionPending && !session) router.replace("/sign-in");
+  }, [sessionPending, session, router]);
+
+  const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
+
+  const trpc = useTRPC();
+  const wsQuery = useQuery({
+    ...trpc.workspace.get.queryOptions({ workspaceId: active?.id ?? "" }),
+    enabled: !!active?.id,
+  });
+
+  if (sessionPending || orgsPending) {
+    return <ShellSkeleton />;
+  }
+
+  if (!session) return <ShellSkeleton />;
+
+  // signed in but the slug is not a workspace they belong to.
+  if (!active) {
+    return <WorkspaceNotFound />;
+  }
+
+  const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
+
+  return (
+    <SidebarProvider>
+      <AppSidebar
+        workspace={workspace}
+        role={role}
+        workspaces={orgs?.map((o) => ({ id: o.id, name: o.name, slug: o.slug })) ?? []}
+      />
+      <SidebarInset className="min-w-0">
+        <Topbar
+          workspace={workspace}
+          user={{ name: session.user.name, email: session.user.email }}
+        />
+        <main className="min-w-0 flex-1 p-4 sm:p-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
+function ShellSkeleton() {
+  return (
+    <div className="flex min-h-svh">
+      <div className="hidden w-64 shrink-0 border-r p-4 lg:block">
+        <Skeleton className="h-12 w-full" />
+        <div className="mt-4 space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-full" />
+          ))}
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex h-14 items-center border-b px-4">
+          <Skeleton className="ml-auto h-8 w-28" />
+        </div>
+        <div className="space-y-4 p-6">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}

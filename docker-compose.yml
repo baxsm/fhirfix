@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fhirfix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fhirfix
+      POSTGRES_PASSWORD: fhirfix
+      POSTGRES_DB: fhirfix
+    ports:
+      - "5434:5432"
+    volumes:
+      - fhirfix-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fhirfix -d fhirfix"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: fhirfix-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - fhirfix-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+# hapi-validator and fhir-converter sidecars are added in Phase 2
+
+volumes:
+  fhirfix-pgdata:
+  fhirfix-redisdata:
