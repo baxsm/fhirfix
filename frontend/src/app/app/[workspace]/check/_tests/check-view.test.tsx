@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 // what the run query returns so each render path (idle, completed, failed) is
 // exercised without a real backend.
 const submitMutate = vi.fn();
-let runData: unknown = undefined;
+let runData: unknown;
 
 vi.mock("@/lib/auth-client", () => ({
   useListOrganizations: () => ({ data: [{ id: "wsp_1", slug: "acme", name: "Acme" }] }),

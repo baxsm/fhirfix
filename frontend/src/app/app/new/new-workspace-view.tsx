@@ -1,103 +1,118 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useTRPC } from "@/trpc/client";
+import { FileScan, GitBranch, KeyRound, Layers } from "lucide-react";
+import Link from "next/link";
+import { CreateWorkspaceForm } from "./create-workspace-form";
 
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48);
-}
+// what a workspace actually holds, in the product's own terms. this is the
+// context a first-run user needs, not decorative filler.
+const HOLDS = [
+  { icon: FileScan, label: "Runs", hint: "Every conformance check and its findings" },
+  {
+    icon: GitBranch,
+    label: "Mapping registry",
+    hint: "The authority and code mappings that drive auto-fixes",
+  },
+  {
+    icon: KeyRound,
+    label: "API keys",
+    hint: "Validate, convert, and fix from CI or your own services",
+  },
+  { icon: Layers, label: "Members and billing", hint: "Roles, credits, and retention policy" },
+];
 
+// first-run onboarding. shown when the signed-in user has zero workspaces. it
+// reuses the auth split-panel identity so onboarding reads as one continuous
+// flow from sign-up - a context panel on the left, the create form on the right.
+// no floating card in the void, no dot-grid / glow-orb slop.
 export function NewWorkspaceView() {
-  const router = useRouter();
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugEdited, setSlugEdited] = useState(false);
-
-  const create = useMutation(
-    trpc.workspace.create.mutationOptions({
-      onSuccess: async (org) => {
-        toast.success("Workspace created");
-        // invalidate the workspace list so the shell's fresh query includes the
-        // new workspace (avoids "workspace not found" from a stale list).
-        await queryClient.invalidateQueries({ queryKey: trpc.workspace.list.queryKey() });
-        router.push(`/app/${org.slug}`);
-      },
-      onError: (e) => toast.error(e.message ?? "Could not create the workspace."),
-    }),
-  );
-
-  const effectiveSlug = slugEdited ? slug : slugify(name);
-
   return (
-    <div className="mx-auto flex min-h-svh max-w-md flex-col justify-center p-6">
-      <div className="mb-6 space-y-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight">Create a workspace</h1>
-        <p className="text-sm text-muted-foreground">
-          A workspace holds your runs, mappings, keys, and billing. You can create more later.
-        </p>
+    <div className="grid min-h-svh lg:grid-cols-[3fr_2fr]">
+      {/* context panel. deep canvas, one restrained top-left light wash, and a
+          plain-language explanation of what a workspace is for. */}
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r bg-background p-10 lg:flex xl:p-14">
+        <div
+          className="pointer-events-none absolute -top-40 -left-40 size-[520px] rounded-full opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.696 0.15 163.225 / 0.10), transparent 70%)",
+          }}
+        />
+
+        <Link
+          href="/"
+          className="relative flex w-fit items-center gap-2 font-mono text-sm font-semibold"
+        >
+          <span className="inline-block size-2.5 rounded-sm bg-primary" />
+          FHIRfix
+        </Link>
+
+        <div className="relative max-w-md space-y-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              A workspace is where your conformance work lives.
+            </h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Set one up per team, environment, or source system. Everything below is scoped to it,
+              and you can create more later.
+            </p>
+          </div>
+
+          <ul className="space-y-3">
+            {HOLDS.map((item) => (
+              <li key={item.label} className="flex gap-3">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border bg-card text-muted-foreground">
+                  <item.icon className="size-3.5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.hint}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="pt-1 font-mono text-xs text-muted-foreground/60">
+            US Core 6.1.0 · FHIR R4 · Da Vinci PAS / PDex
+          </p>
+        </div>
+
+        <div />
       </div>
 
-      <Card>
-        <CardContent className="py-6">
-          <form
-            className="space-y-4"
-            noValidate
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!name || !effectiveSlug) return;
-              create.mutate({ name, slug: effectiveSlug });
-            }}
-          >
+      {/* form panel. same emerald seam glow as the auth shell so the two halves
+          read as one surface. */}
+      <div className="relative flex flex-col p-6 sm:p-10">
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-px lg:block"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent, oklch(0.696 0.15 163.225 / 0.35) 45%, transparent)",
+          }}
+        />
+
+        <Link
+          href="/"
+          className="flex w-fit items-center gap-2 font-mono text-sm font-semibold lg:invisible"
+        >
+          <span className="inline-block size-2.5 rounded-sm bg-primary" />
+          FHIRfix
+        </Link>
+
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-sm space-y-6">
             <div className="space-y-1.5">
-              <Label htmlFor="ws-name">Name</Label>
-              <Input
-                id="ws-name"
-                placeholder="Acme Health"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="ws-slug">URL slug</Label>
-              <Input
-                id="ws-slug"
-                placeholder="acme-health"
-                value={effectiveSlug}
-                onChange={(e) => {
-                  setSlugEdited(true);
-                  setSlug(slugify(e.target.value));
-                }}
-                className="font-mono"
-              />
-              <p className="font-mono text-xs text-muted-foreground">
-                /app/{effectiveSlug || "..."}
+              <h1 className="text-xl font-semibold tracking-tight">Create your first workspace</h1>
+              <p className="text-sm text-muted-foreground">
+                Name it after your team or the system you are cleaning up. This takes a few seconds.
               </p>
             </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={create.isPending || !name || !effectiveSlug}
-            >
-              {create.isPending ? "Creating..." : "Create workspace"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <CreateWorkspaceForm layout="page" />
+          </div>
+        </div>
+
+        <div className="h-4" />
+      </div>
     </div>
   );
 }
