@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { AuthHero } from "./auth-hero";
 
 // context-rich auth shell: a living brand/explainer panel + the form on the right.
@@ -23,12 +24,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* top row: mobile brand mark + a quiet docs link (fills the corner
             without a corporate trust badge). */}
         <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-mono text-sm font-semibold lg:invisible"
-          >
-            <span className="inline-block size-2.5 rounded-sm bg-primary" />
-            FHIRfix
+          <Link href="/" className="lg:invisible">
+            <BrandMark size="sm" />
           </Link>
           {/* TODO(gap: marketing pages): /docs, /terms, /privacy do not exist
               yet — these point at fhirfix.dev placeholders and will 404 until the

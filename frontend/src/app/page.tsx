@@ -1,14 +1,12 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="flex h-14 items-center justify-between border-b px-6">
-        <span className="flex items-center gap-2 font-mono text-sm font-semibold">
-          <span className="inline-block size-2.5 rounded-sm bg-primary" />
-          FHIRfix
-        </span>
+        <BrandMark size="md" />
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link href="/sign-in">Sign in</Link>

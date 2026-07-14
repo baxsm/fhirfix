@@ -2,6 +2,7 @@
 
 import { FileScan, GitBranch, KeyRound, Layers } from "lucide-react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { CreateWorkspaceForm } from "./create-workspace-form";
 
 // what a workspace actually holds, in the product's own terms. this is the
@@ -39,12 +40,8 @@ export function NewWorkspaceView() {
           }}
         />
 
-        <Link
-          href="/"
-          className="relative flex w-fit items-center gap-2 font-mono text-sm font-semibold"
-        >
-          <span className="inline-block size-2.5 rounded-sm bg-primary" />
-          FHIRfix
+        <Link href="/" className="relative w-fit">
+          <BrandMark size="sm" />
         </Link>
 
         <div className="relative max-w-md space-y-6">
@@ -91,12 +88,8 @@ export function NewWorkspaceView() {
           }}
         />
 
-        <Link
-          href="/"
-          className="flex w-fit items-center gap-2 font-mono text-sm font-semibold lg:invisible"
-        >
-          <span className="inline-block size-2.5 rounded-sm bg-primary" />
-          FHIRfix
+        <Link href="/" className="w-fit lg:invisible">
+          <BrandMark size="sm" />
         </Link>
 
         <div className="flex flex-1 items-center justify-center">

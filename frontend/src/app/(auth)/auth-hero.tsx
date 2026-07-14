@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { BrandMark } from "@/components/brand-mark";
 import { ReportPreview } from "./report-preview";
 
 // per-route hero copy. sign-in reassures a returning user; sign-up frames the
@@ -36,12 +37,8 @@ export function AuthHero() {
         }}
       />
 
-      <a
-        href="/"
-        className="relative flex w-fit items-center gap-2 font-mono text-sm font-semibold"
-      >
-        <span className="inline-block size-2.5 rounded-sm bg-primary" />
-        FHIRfix
+      <a href="/" className="relative w-fit">
+        <BrandMark size="sm" />
       </a>
 
       <div className="relative flex flex-1 flex-col justify-center py-10">

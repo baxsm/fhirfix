@@ -1,0 +1,8 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="7" fill="#08090a"/>
+  <!-- monogram f: the emerald half of the name (fix), drawn with squared mono
+       terminals so it reads as Geist Mono, not a generic serif f. one crossbar,
+       one hooked ascender. holds shape down to 16px. -->
+  <path d="M20.5 9.2H17.6C15.9 9.2 14.8 10.3 14.8 12V22.8" stroke="#009966" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M11.5 14.6H18.3" stroke="#009966" stroke-width="2.6" stroke-linecap="round"/>
+</svg>
