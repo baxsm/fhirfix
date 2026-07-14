@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, KeyRound, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,7 @@ export function AccountView() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-6">
+    <div className="mx-auto max-w-2xl space-y-6 p-6 sm:p-10">
       <div>
         <Link
           href="/app"
@@ -43,16 +44,28 @@ export function AccountView() {
           <ArrowLeft className="size-4" />
           Back to app
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Account</h1>
         <p className="text-sm text-muted-foreground">Your personal profile and password.</p>
       </div>
 
-      <ProfileForm
-        initialName={accountQuery.data?.name ?? ""}
-        email={accountQuery.data?.email ?? ""}
-      />
-      <div className="border-t" />
-      <PasswordForm />
+      <SettingsSection
+        icon={UserRound}
+        title="Profile"
+        description="Your name and the email you sign in with."
+      >
+        <ProfileForm
+          initialName={accountQuery.data?.name ?? ""}
+          email={accountQuery.data?.email ?? ""}
+        />
+      </SettingsSection>
+
+      <SettingsSection
+        icon={KeyRound}
+        title="Password"
+        description="Change the password used to sign in to your account."
+      >
+        <PasswordForm />
+      </SettingsSection>
     </div>
   );
 }
@@ -71,24 +84,28 @@ function ProfileForm({ initialName, email }: { initialName: string; email: strin
 
   return (
     <form
-      className="max-w-md space-y-4"
+      className="space-y-4"
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate({ name });
       }}
     >
-      <div className="space-y-1.5">
-        <Label htmlFor="acc-email">Email</Label>
-        <Input id="acc-email" value={email} disabled className="font-mono" />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="acc-name">Name</Label>
+          <Input id="acc-name" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="acc-email">Email</Label>
+          <Input id="acc-email" value={email} disabled className="font-mono" />
+        </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="acc-name">Name</Label>
-        <Input id="acc-name" value={name} onChange={(e) => setName(e.target.value)} />
+      <div className="flex justify-end">
+        <Button type="submit" disabled={save.isPending || !name}>
+          {save.isPending ? "Saving..." : "Save profile"}
+        </Button>
       </div>
-      <Button type="submit" disabled={save.isPending || !name}>
-        {save.isPending ? "Saving..." : "Save profile"}
-      </Button>
     </form>
   );
 }
@@ -111,37 +128,41 @@ function PasswordForm() {
 
   return (
     <form
-      className="max-w-md space-y-4"
+      className="space-y-4"
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
         change.mutate({ currentPassword: current, newPassword: next });
       }}
     >
-      <h2 className="text-sm font-medium">Change password</h2>
-      <div className="space-y-1.5">
-        <Label htmlFor="cur-pw">Current password</Label>
-        <Input
-          id="cur-pw"
-          type="password"
-          autoComplete="current-password"
-          value={current}
-          onChange={(e) => setCurrent(e.target.value)}
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="cur-pw">Current password</Label>
+          <Input
+            id="cur-pw"
+            type="password"
+            autoComplete="current-password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="new-pw">New password</Label>
+          <Input
+            id="new-pw"
+            type="password"
+            autoComplete="new-password"
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+          />
+        </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="new-pw">New password</Label>
-        <Input
-          id="new-pw"
-          type="password"
-          autoComplete="new-password"
-          value={next}
-          onChange={(e) => setNext(e.target.value)}
-        />
+      <p className="text-xs text-muted-foreground">Use at least 8 characters.</p>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={change.isPending || !current || next.length < 8}>
+          {change.isPending ? "Updating..." : "Change password"}
+        </Button>
       </div>
-      <Button type="submit" disabled={change.isPending || !current || next.length < 8}>
-        {change.isPending ? "Updating..." : "Change password"}
-      </Button>
     </form>
   );
 }
