@@ -1,11 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { ApiV1Env } from "./context";
+import { convertController, fixController, validateController } from "./controllers";
 import {
   captureIdempotency,
   enforceCredits,
   enforceRateLimit,
   logApiRequest,
+  requireScope,
   resolveApiKey,
 } from "./middleware";
 
@@ -48,5 +50,12 @@ apiV1.get("/ping", (c) =>
 // a credit-gated probe: same as ping but behind enforceCredits, so an integration
 // (or the credit-gate test) can confirm the 402 path without spending anything.
 apiV1.get("/ping-credits", enforceCredits, (c) => c.json({ ok: true, funded: true }));
+
+// charged remediation endpoints. each runs the engine synchronously against the
+// warm pool, persists a run (source=api), debits credits, and returns inline.
+// scope-gated per action; credit-gated so a broke workspace gets 402 before work.
+apiV1.post("/validate", requireScope("validate"), enforceCredits, validateController);
+apiV1.post("/fix", requireScope("fix"), enforceCredits, fixController);
+apiV1.post("/convert", requireScope("convert"), enforceCredits, convertController);
 
 export { enforceCredits };
