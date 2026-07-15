@@ -11,7 +11,8 @@
     "./blob": "./blob.ts",
     "./credits": "./credits.ts",
     "./ledger": "./ledger.ts",
-    "./notifications": "./notifications.ts"
+    "./notifications": "./notifications.ts",
+    "./runs": "./runs.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
