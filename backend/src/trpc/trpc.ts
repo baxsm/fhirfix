@@ -1,5 +1,5 @@
-import { hasCreditFloor } from "@fhirfix/db/credits";
-import { ensureBillingAccount } from "@fhirfix/db/ledger";
+import { hasCreditFloor } from "@shared/db/credits";
+import { ensureBillingAccount } from "@shared/db/ledger";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { hasPermission, type WorkspaceRole } from "@/auth/permissions";

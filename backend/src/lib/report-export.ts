@@ -1,4 +1,4 @@
-import type { Finding, Run } from "@fhirfix/db/schema";
+import type { Finding, Run } from "@shared/db/schema";
 
 // report export formatters. pure functions so they unit-test without a db or
 // sidecar. three formats: a structured JSON report, a FHIR OperationOutcome
