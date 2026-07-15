@@ -8,7 +8,7 @@ import {
   nextAlertThreshold,
   PRICING,
   priceForRun,
-} from "@fhirfix/db/credits";
+} from "@shared/db/credits";
 
 describe("credit conversions", () => {
   test("cents -> micro at 1:1 dollars-to-credits", () => {

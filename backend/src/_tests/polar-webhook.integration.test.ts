@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { reconcileBalance } from "@fhirfix/db/ledger";
+import { reconcileBalance } from "@shared/db/ledger";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { handleOrderPaid, handleOrderRefunded, polarWebhookRoutes } from "@/routes/polar-webhook";

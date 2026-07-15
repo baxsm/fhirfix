@@ -4,7 +4,7 @@ import {
   fixWithAi,
   getEngineDeps,
   SidecarError,
-} from "@fhirfix/engine";
+} from "@shared/engine";
 import { and, eq } from "drizzle-orm";
 import { env } from "./env";
 import { blobKey, blobStore, db, findingId, logger, schema } from "./lib";

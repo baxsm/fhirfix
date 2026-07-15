@@ -10,6 +10,13 @@ import {
   requireScope,
   resolveApiKey,
 } from "./middleware";
+import { getReportController } from "./report";
+import {
+  batchController,
+  getCorrectedController,
+  getRunController,
+  listRunsController,
+} from "./runs";
 
 // the public REST API. served by the standalone backend, decoupled from the
 // dashboard tRPC surface and the frontend deploy. auth is API-key, not session.
@@ -57,5 +64,16 @@ apiV1.get("/ping-credits", enforceCredits, (c) => c.json({ ok: true, funded: tru
 apiV1.post("/validate", requireScope("validate"), enforceCredits, validateController);
 apiV1.post("/fix", requireScope("fix"), enforceCredits, fixController);
 apiV1.post("/convert", requireScope("convert"), enforceCredits, convertController);
+
+// batch is async: it enqueues to the worker and returns 202. still credit-gated so
+// a broke workspace cannot queue work it can never pay for.
+apiV1.post("/batch", requireScope("fix"), enforceCredits, batchController);
+
+// read endpoints. scope "runs" for the run history + report; corrected artifact
+// reuses the anti-download-manager octet-stream pattern.
+apiV1.get("/runs", requireScope("runs"), listRunsController);
+apiV1.get("/runs/:id", requireScope("runs"), getRunController);
+apiV1.get("/runs/:id/corrected", requireScope("runs"), getCorrectedController);
+apiV1.get("/runs/:id/report", requireScope("runs"), getReportController);
 
 export { enforceCredits };

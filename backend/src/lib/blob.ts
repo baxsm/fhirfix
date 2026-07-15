@@ -1,4 +1,4 @@
-import { createBlobStore } from "@fhirfix/db/blob";
+import { createBlobStore } from "@shared/db/blob";
 import { env } from "./env";
 
 // the workspace-scoped local blob store. object keys are namespaced by workspace

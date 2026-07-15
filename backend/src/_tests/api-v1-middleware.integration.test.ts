@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { grantTrialCredits } from "@fhirfix/db/ledger";
+import { grantTrialCredits } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
 import { generateKey } from "@/lib/api-key";
 import { db, schema } from "@/lib/db";

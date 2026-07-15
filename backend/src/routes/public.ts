@@ -1,4 +1,4 @@
-import { type RemediationResult, runRemediation, SidecarError } from "@fhirfix/engine";
+import { type RemediationResult, runRemediation, SidecarError } from "@shared/engine";
 import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db, schema } from "@/lib/db";

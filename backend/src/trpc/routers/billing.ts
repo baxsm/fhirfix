@@ -3,8 +3,8 @@ import {
   evaluateAutoRecharge,
   MICRO_PER_DOLLAR,
   PRICING,
-} from "@fhirfix/db/credits";
-import { ensureBillingAccount } from "@fhirfix/db/ledger";
+} from "@shared/db/credits";
+import { ensureBillingAccount } from "@shared/db/ledger";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";

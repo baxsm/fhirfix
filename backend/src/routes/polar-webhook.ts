@@ -1,4 +1,4 @@
-import { postLedgerEntry } from "@fhirfix/db/ledger";
+import { postLedgerEntry } from "@shared/db/ledger";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db, schema } from "@/lib/db";

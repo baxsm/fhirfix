@@ -1,4 +1,4 @@
-import { type EngineConfig, getEngineDeps } from "@fhirfix/engine";
+import { type EngineConfig, getEngineDeps } from "@shared/engine";
 import { env } from "./env";
 
 // the backend's shared warm validator pool + converter. used by the public demo

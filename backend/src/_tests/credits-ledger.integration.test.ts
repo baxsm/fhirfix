@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { PRICING, priceForRun } from "@fhirfix/db/credits";
-import { grantTrialCredits, postLedgerEntry, reconcileBalance } from "@fhirfix/db/ledger";
+import { PRICING, priceForRun } from "@shared/db/credits";
+import { grantTrialCredits, postLedgerEntry, reconcileBalance } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 

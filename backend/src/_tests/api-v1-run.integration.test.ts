@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { grantTrialCredits } from "@fhirfix/db/ledger";
+import { grantTrialCredits } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
 import { generateKey } from "@/lib/api-key";
 import { db, schema } from "@/lib/db";
@@ -161,4 +161,78 @@ describe("api-v1 validate/fix/convert", () => {
     const res = await post("/validate", full, { notinput: "x" });
     expect(res.status).toBe(400);
   });
+});
+
+function get(path: string, key: string): Promise<Response> {
+  return Promise.resolve(apiV1.request(path, { headers: { authorization: `Bearer ${key}` } }));
+}
+
+describe("api-v1 runs read + batch", () => {
+  test("list, get, report, and corrected all work for a fixed run", async () => {
+    const { full } = await seedKey();
+    const fixed = await post("/fix", full, { input: patientSample });
+    const { runId } = (await fixed.json()) as { runId: string };
+
+    // list includes the run.
+    const list = await get("/runs?limit=10", full);
+    expect(list.status).toBe(200);
+    const listBody = (await list.json()) as { runs: Array<{ id: string }>; hasMore: boolean };
+    expect(listBody.runs.some((r) => r.id === runId)).toBe(true);
+
+    // get returns the run + findings.
+    const one = await get(`/runs/${runId}`, full);
+    expect(one.status).toBe(200);
+    const oneBody = (await one.json()) as { run: { status: string }; findings: unknown[] };
+    expect(oneBody.run.status).toBe("completed");
+
+    // report json + operationoutcome.
+    const json = await get(`/runs/${runId}/report?format=json`, full);
+    expect(json.status).toBe(200);
+    expect(((await json.json()) as { report: string }).report).toBe("fhirfix.remediation");
+    const oo = await get(`/runs/${runId}/report?format=operationoutcome`, full);
+    expect(((await oo.json()) as { resourceType: string }).resourceType).toBe("OperationOutcome");
+
+    // corrected artifact is octet-stream (anti download-manager).
+    const corrected = await get(`/runs/${runId}/corrected`, full);
+    expect(corrected.status).toBe(200);
+    expect(corrected.headers.get("Content-Type")).toBe("application/octet-stream");
+  }, 30_000);
+
+  test("list filters by status and paginates by cursor", async () => {
+    const { full } = await seedKey();
+    await post("/fix", full, { input: patientSample });
+    const res = await get("/runs?status=completed&limit=1", full);
+    const body = (await res.json()) as { runs: Array<{ status: string }>; hasMore: boolean };
+    expect(body.runs.every((r) => r.status === "completed")).toBe(true);
+    expect(body.runs.length).toBeLessThanOrEqual(1);
+  }, 30_000);
+
+  test("batch queues a run and it completes", async () => {
+    const { full } = await seedKey();
+    const res = await post("/batch", full, { input: patientSample });
+    expect(res.status).toBe(202);
+    const { runId, status } = (await res.json()) as { runId: string; status: string };
+    expect(status).toBe("queued");
+
+    // poll until the worker completes it.
+    let done = false;
+    for (let i = 0; i < 40 && !done; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      const g = await get(`/runs/${runId}`, full);
+      const gb = (await g.json()) as { run: { status: string } };
+      if (gb.run.status === "completed" || gb.run.status === "failed") done = true;
+    }
+    const final = await get(`/runs/${runId}`, full);
+    expect(((await final.json()) as { run: { status: string } }).run.status).toBe("completed");
+  }, 30_000);
+
+  test("a run from another workspace is not visible (404)", async () => {
+    const a = await seedKey();
+    const b = await seedKey();
+    const fixed = await post("/fix", a.full, { input: patientSample });
+    const { runId } = (await fixed.json()) as { runId: string };
+    // b's key cannot read a's run.
+    const res = await get(`/runs/${runId}`, b.full);
+    expect(res.status).toBe(404);
+  }, 30_000);
 });

@@ -1,4 +1,4 @@
-import { grantTrialCredits } from "@fhirfix/db/ledger";
+import { grantTrialCredits } from "@shared/db/ledger";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";

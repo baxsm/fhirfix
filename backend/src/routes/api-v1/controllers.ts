@@ -1,4 +1,4 @@
-import { persistCompletedRun } from "@fhirfix/db/runs";
+import { persistCompletedRun } from "@shared/db/runs";
 import {
   detectInput,
   ENGINE_VERSION,
@@ -6,7 +6,7 @@ import {
   type RemediationResult,
   runRemediation,
   SidecarError,
-} from "@fhirfix/engine";
+} from "@shared/engine";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { blobKey, blobStore } from "@/lib/blob";

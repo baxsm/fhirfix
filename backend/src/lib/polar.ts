@@ -1,6 +1,6 @@
-import { PRICING } from "@fhirfix/db/credits";
 import { Polar } from "@polar-sh/sdk";
 import { validateEvent, WebhookVerificationError } from "@polar-sh/sdk/webhooks.js";
+import { PRICING } from "@shared/db/credits";
 import { env } from "./env";
 
 // lazy-init singleton. constructing Polar reads the access token, so building it

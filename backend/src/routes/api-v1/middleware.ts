@@ -1,5 +1,5 @@
-import { hasCreditFloor } from "@fhirfix/db/credits";
-import { ensureBillingAccount } from "@fhirfix/db/ledger";
+import { hasCreditFloor } from "@shared/db/credits";
+import { ensureBillingAccount } from "@shared/db/ledger";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Context, MiddlewareHandler } from "hono";
 import { hashKey, parseKeyMode } from "@/lib/api-key";

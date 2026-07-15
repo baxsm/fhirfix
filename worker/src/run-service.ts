@@ -1,4 +1,4 @@
-import { persistCompletedRun } from "@fhirfix/db/runs";
+import { persistCompletedRun } from "@shared/db/runs";
 import {
   getEngineDeps,
   runRemediation,
@@ -7,7 +7,7 @@ import {
   type MappingSuggestion,
   type RegistryMapping,
   type RemediationResult,
-} from "@fhirfix/engine";
+} from "@shared/engine";
 import { and, eq } from "drizzle-orm";
 import { env } from "./env";
 import { blobKey, blobStore, db, logger, mappingId, schema } from "./lib";

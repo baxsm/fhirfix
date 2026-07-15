@@ -4,18 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "sync:shared": "node ../scripts/sync-shared.mjs",
+    "predev": "node ../scripts/sync-shared.mjs",
     "dev": "bun run --hot src/index.ts",
+    "prestart": "node ../scripts/sync-shared.mjs",
     "start": "bun run src/index.ts",
+    "pretypecheck": "node ../scripts/sync-shared.mjs",
     "typecheck": "bun x tsc --noEmit"
   },
   "dependencies": {
-    "@fhirfix/db": "workspace:*",
-    "@fhirfix/engine": "workspace:*",
     "@t3-oss/env-core": "0.13.11",
     "bullmq": "5.80.2",
     "drizzle-orm": "0.45.2",
     "ioredis": "5.11.1",
     "nanoid": "6.0.0",
+    "postgres": "3.4.9",
     "zod": "4.4.3"
   },
   "devDependencies": {

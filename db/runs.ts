@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte, type SQL } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import type { BlobStore } from "./blob";
 import type { Db } from "./client";
@@ -237,4 +237,68 @@ async function resolveBillingEmail(
     .where(and(eq(schema.member.organizationId, workspaceId), eq(schema.member.role, "owner")))
     .limit(1);
   return owner?.email ?? null;
+}
+
+// run reads for the public REST API. these live in the db package (not the backend
+// route file) so their drizzle queries resolve against one drizzle instance - the
+// backend's route graph mixes drizzle copies and makes the query builder's column
+// types collapse to `never`. the backend controllers call these thin helpers.
+
+export interface RunListFilter {
+  workspaceId: string;
+  status?: string;
+  inputType?: string;
+  from?: Date;
+  to?: Date;
+  cursor?: Date;
+  limit: number;
+}
+
+// a page of runs, newest first, one row past the limit so the caller can tell
+// whether another page exists.
+export function listRuns(db: Db, f: RunListFilter) {
+  const conditions: SQL[] = [eq(schema.run.workspaceId, f.workspaceId)];
+  if (f.status) conditions.push(eq(schema.run.status, f.status as "queued"));
+  if (f.inputType) conditions.push(eq(schema.run.inputType, f.inputType as "fhir_json"));
+  if (f.from) conditions.push(gte(schema.run.createdAt, f.from));
+  if (f.to) conditions.push(lte(schema.run.createdAt, f.to));
+  if (f.cursor) conditions.push(lte(schema.run.createdAt, f.cursor));
+
+  return db
+    .select({
+      id: schema.run.id,
+      status: schema.run.status,
+      inputType: schema.run.inputType,
+      source: schema.run.source,
+      resourceCount: schema.run.resourceCount,
+      conformanceScoreBefore: schema.run.conformanceScoreBefore,
+      conformanceScoreAfter: schema.run.conformanceScoreAfter,
+      findingsTotal: schema.run.findingsTotal,
+      creditsCharged: schema.run.creditsCharged,
+      createdAt: schema.run.createdAt,
+      completedAt: schema.run.completedAt,
+    })
+    .from(schema.run)
+    .where(and(...conditions))
+    .orderBy(desc(schema.run.createdAt))
+    .limit(f.limit);
+}
+
+// one run scoped to a workspace, or undefined.
+export async function getRun(db: Db, workspaceId: string, runId: string) {
+  const [row] = await db
+    .select()
+    .from(schema.run)
+    .where(and(eq(schema.run.id, runId), eq(schema.run.workspaceId, workspaceId)))
+    .limit(1);
+  return row;
+}
+
+// a run's findings, highest rank first.
+export function getRunFindings(db: Db, runId: string) {
+  return db
+    .select()
+    .from(schema.finding)
+    .where(eq(schema.finding.runId, runId))
+    .orderBy(desc(schema.finding.rank));
 }

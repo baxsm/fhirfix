@@ -1,4 +1,4 @@
-import { ENGINE_VERSION } from "@fhirfix/engine";
+import { ENGINE_VERSION } from "@shared/engine";
 import { Worker } from "bullmq";
 import { type ApplyJob, executeApply } from "./apply-service";
 import { env } from "./env";

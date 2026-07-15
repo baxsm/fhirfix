@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { grantTrialCredits, reconcileBalance } from "@fhirfix/db/ledger";
-import { type CompletedRunResult, persistCompletedRun } from "@fhirfix/db/runs";
+import { grantTrialCredits, reconcileBalance } from "@shared/db/ledger";
+import { type CompletedRunResult, persistCompletedRun } from "@shared/db/runs";
 import { eq, inArray } from "drizzle-orm";
 import { blobKey, blobStore } from "@/lib/blob";
 import { db, schema } from "@/lib/db";

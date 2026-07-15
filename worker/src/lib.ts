@@ -1,5 +1,5 @@
-import { createDb, schema } from "@fhirfix/db";
-import { createBlobStore } from "@fhirfix/db/blob";
+import { createDb, schema } from "@shared/db";
+import { createBlobStore } from "@shared/db/blob";
 import { customAlphabet } from "nanoid";
 import { env } from "./env";
 
