@@ -1,13 +1,10 @@
-import { KeyRound } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { DevelopersView } from "@/components/developers/developers-view";
 
-export default function Page() {
-  return (
-    <PhasePlaceholder
-      title="Developers"
-      phase="Phase 5"
-      icon={KeyRound}
-      description="API keys, webhooks, and request logs for the public REST API, SDKs, and CI."
-    />
-  );
+export default async function DevelopersPage({
+  params,
+}: {
+  params: Promise<{ workspace: string }>;
+}) {
+  const { workspace } = await params;
+  return <DevelopersView workspace={workspace} />;
 }

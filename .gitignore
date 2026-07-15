@@ -1,8 +1,14 @@
 # claude config (local only, never pushed)
 .claude/
 
-# planning docs (local only, never pushed)
-docs/
+# planning docs (local only, never pushed). anchored to the repo root so it does
+# not also swallow app source dirs named docs/ (e.g. frontend/src/app/docs).
+/docs/
+
+# the machine-global gitignore has an unanchored `docs/` that would hide these
+# real app source dirs. un-ignore them here so they stay tracked in this repo.
+!frontend/src/app/docs/
+!frontend/src/components/docs/
 
 # env and secrets
 .env

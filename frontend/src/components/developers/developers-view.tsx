@@ -1,0 +1,94 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { KeyRound, ScrollText, Webhook } from "lucide-react";
+import { SettingsSection } from "@/components/dashboard/settings-section";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useListOrganizations } from "@/lib/auth-client";
+import { can, type WorkspaceRole } from "@/lib/permissions";
+import { useTRPC } from "@/trpc/client";
+import { ApiKeysSection } from "./api-keys-section";
+import { RequestLogsSection } from "./request-logs-section";
+import { WebhooksSection } from "./webhooks-section";
+
+export function DevelopersView({ workspace }: { workspace: string }) {
+  const { data: orgs } = useListOrganizations();
+  const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
+  const workspaceId = active?.id ?? "";
+
+  const trpc = useTRPC();
+  const wsQuery = useQuery({
+    ...trpc.workspace.get.queryOptions({ workspaceId }),
+    enabled: !!workspaceId,
+  });
+  const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
+  const canManage = can(role, "apiKey", "create");
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight">Developers</h1>
+        <p className="text-sm text-muted-foreground">
+          API keys, webhooks, and request logs for the FHIRfix REST API in{" "}
+          <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
+        </p>
+      </header>
+
+      {wsQuery.isError ? (
+        <SectionError onRetry={() => wsQuery.refetch()} />
+      ) : wsQuery.isPending || !workspaceId ? (
+        <DevelopersSkeleton />
+      ) : (
+        <>
+          <SettingsSection
+            icon={KeyRound}
+            title="API keys"
+            description="Authenticate REST requests with a Bearer key. Keep live keys secret."
+          >
+            <ApiKeysSection workspaceId={workspaceId} canManage={canManage} />
+          </SettingsSection>
+
+          <SettingsSection
+            icon={Webhook}
+            title="Webhooks"
+            description="Get a signed POST when a run completes or fails, so you can react without polling."
+          >
+            <WebhooksSection workspaceId={workspaceId} canManage={canManage} />
+          </SettingsSection>
+
+          <SettingsSection
+            icon={ScrollText}
+            title="Request logs"
+            description="Every REST call this workspace made, including ones that never started a run."
+          >
+            <RequestLogsSection workspaceId={workspaceId} />
+          </SettingsSection>
+        </>
+      )}
+    </div>
+  );
+}
+
+function DevelopersSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-56 w-full rounded-xl" />
+      <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
+
+function SectionError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="raised flex flex-col items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-16 text-center">
+      <KeyRound className="size-8 text-muted-foreground" />
+      <h2 className="font-medium">Could not load developer settings</h2>
+      <p className="text-sm text-muted-foreground">Check your connection and try again.</p>
+      <Button variant="outline" size="sm" onClick={onRetry}>
+        Retry
+      </Button>
+    </div>
+  );
+}

@@ -14,6 +14,9 @@ export default function LandingPage() {
             <Link href="/playground">Playground</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
+            <Link href="/docs">Docs</Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
             <Link href="/pricing">Pricing</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
