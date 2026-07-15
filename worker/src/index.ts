@@ -3,7 +3,9 @@ import { Worker } from "bullmq";
 import { type ApplyJob, executeApply } from "./apply-service";
 import { env } from "./env";
 import { logger } from "./lib";
+import type { WebhookJob } from "./queues";
 import { executeRun, type RemediationJob } from "./run-service";
+import { executeWebhook } from "./webhook-service";
 
 const connection = { url: env.REDIS_URL };
 const concurrency = Number(env.WORKER_CONCURRENCY);
@@ -26,6 +28,16 @@ const applyWorker = new Worker<ApplyJob>(
   { connection, concurrency },
 );
 
+// outbound webhook delivery: one job per (event, workspace), fans out to every
+// subscribed endpoint, signs with HMAC, retries with backoff on any failure.
+const webhookWorker = new Worker<WebhookJob>(
+  "webhook",
+  async (job) => {
+    await executeWebhook(job.data);
+  },
+  { connection, concurrency },
+);
+
 worker.on("failed", (job, err) => {
   logger.error("worker.failed", `${job?.data.runId ?? "?"}: ${err.message}`);
 });
@@ -41,12 +53,18 @@ applyWorker.on("failed", (job, err) => {
 applyWorker.on("error", (err) => {
   logger.error("apply.error", err.message);
 });
+webhookWorker.on("failed", (job, err) => {
+  logger.error("webhook.failed", `${job?.data.event ?? "?"}: ${err.message}`);
+});
+webhookWorker.on("error", (err) => {
+  logger.error("webhook.error", err.message);
+});
 
 logger.info("worker.start", `fhirfix remediation worker up (engine ${ENGINE_VERSION}), concurrency ${env.WORKER_CONCURRENCY}`);
 
 async function shutdown() {
   logger.info("worker.shutdown", "draining");
-  await Promise.all([worker.close(), applyWorker.close()]);
+  await Promise.all([worker.close(), applyWorker.close(), webhookWorker.close()]);
   process.exit(0);
 }
 process.on("SIGINT", shutdown);

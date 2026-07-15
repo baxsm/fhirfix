@@ -15,6 +15,7 @@ import { engineDeps, ensureEngineWarm } from "@/lib/engine";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
 import { redactPhi } from "@/lib/phi";
+import { dispatchWebhook } from "@/queues/index";
 import type { ApiV1Env } from "./context";
 import { apiError } from "./middleware";
 
@@ -219,6 +220,23 @@ async function runAndPersist(
 
   const correctedKey = blobKey(workspaceId, runId, "corrected");
   await persistCompletedRun(db, blobStore, { workspaceId, runId, result, correctedKey });
+
+  // notify subscribers for this synchronous run too (the worker fires the same
+  // event for async/batch runs). enqueued, never blocks the response.
+  await dispatchWebhook({
+    event: "run.completed",
+    workspaceId,
+    data: {
+      runId,
+      inputType: result.inputType,
+      resourceCount: result.resourceCount,
+      conformanceScoreBefore: result.conformanceScoreBefore,
+      conformanceScoreAfter: result.conformanceScoreAfter,
+      findingsTotal: result.findingsTotal,
+      findingsAutoFixable: result.findingsAutoFixable,
+      reVerifiedClean: result.reVerifiedClean,
+    },
+  }).catch((err) => logger.error("webhook.dispatch", String(err)));
 
   return { result, runId, redact };
 }

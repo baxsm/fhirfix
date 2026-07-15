@@ -11,6 +11,7 @@ import {
 import { and, eq } from "drizzle-orm";
 import { env } from "./env";
 import { blobKey, blobStore, db, logger, mappingId, schema } from "./lib";
+import { dispatchWebhook } from "./queues";
 
 const engineConfig: EngineConfig = {
   validatorUrls: env.VALIDATOR_URL_LIST,
@@ -120,7 +121,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
   try {
     raw = await blobStore.get(runRow.inputRef);
   } catch (err) {
-    await failRun(runId, `could not read input blob: ${String(err)}`);
+    await failRun(runId, `could not read input blob: ${String(err)}`, workspaceId);
     throw new RunFailedError("input blob unreadable", false);
   }
 
@@ -137,7 +138,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
         : err instanceof Error
           ? err.message
           : String(err);
-    await failRun(runId, detail);
+    await failRun(runId, detail, workspaceId);
     logger.error("run.execute", `${runId} failed: ${detail}`);
     // sidecar errors are retriable at the queue level; a bad-input parse is not.
     throw new RunFailedError(detail, err instanceof SidecarError);
@@ -161,11 +162,35 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     "run.execute",
     `${runId} completed: ${result.findingsTotal} findings, score ${result.conformanceScoreBefore}->${result.conformanceScoreAfter}, charged ${chargeMicro} micro (balance ${balanceAfter})`,
   );
+
+  // notify subscribers. enqueued (not awaited-critical) so a webhook problem never
+  // blocks the run from being marked complete.
+  await dispatchWebhook({
+    event: "run.completed",
+    workspaceId,
+    data: {
+      runId,
+      inputType: result.inputType,
+      resourceCount: result.resourceCount,
+      conformanceScoreBefore: result.conformanceScoreBefore,
+      conformanceScoreAfter: result.conformanceScoreAfter,
+      findingsTotal: result.findingsTotal,
+      findingsAutoFixable: result.findingsAutoFixable,
+      reVerifiedClean: result.reVerifiedClean,
+    },
+  }).catch((err) => logger.error("webhook.dispatch", String(err)));
 }
 
-async function failRun(runId: string, detail: string): Promise<void> {
+async function failRun(runId: string, detail: string, workspaceId?: string): Promise<void> {
   await db
     .update(schema.run)
     .set({ status: "failed", errorMessage: detail.slice(0, 1000), completedAt: new Date() })
     .where(eq(schema.run.id, runId));
+  if (workspaceId) {
+    await dispatchWebhook({
+      event: "run.failed",
+      workspaceId,
+      data: { runId, error: detail.slice(0, 500) },
+    }).catch((err) => logger.error("webhook.dispatch", String(err)));
+  }
 }

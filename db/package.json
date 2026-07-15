@@ -12,7 +12,8 @@
     "./credits": "./credits.ts",
     "./ledger": "./ledger.ts",
     "./notifications": "./notifications.ts",
-    "./runs": "./runs.ts"
+    "./runs": "./runs.ts",
+    "./webhooks": "./webhooks.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

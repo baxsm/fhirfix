@@ -23,6 +23,10 @@ const base = createEnv({
     // engine. empty key => the AI path is unavailable and the run fails cleanly.
     OPENROUTER_API_KEY: z.string().default(""),
     OPENROUTER_MODEL: z.string().default("google/gemini-2.5-flash"),
+
+    // decrypts webhook signing secrets for outbound delivery. must match the
+    // backend's value (which encrypts them). dev default matches backend's.
+    WEBHOOK_ENCRYPTION_KEY: z.string().min(32).default("dev-webhook-enc-key-change-me-32byte!"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
