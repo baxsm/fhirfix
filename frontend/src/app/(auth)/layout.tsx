@@ -27,34 +27,31 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" className="lg:invisible">
             <BrandMark size="sm" />
           </Link>
-          {/* TODO(gap: marketing pages): /docs, /terms, /privacy do not exist
-              yet — these point at fhirfix.dev placeholders and will 404 until the
-              marketing/docs site ships. keep the links; swap the hrefs then. */}
-          <a
-            href="https://fhirfix.dev/docs"
+          <Link
+            href="/docs"
             className="flex items-center gap-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             Docs
             <ArrowUpRight className="size-3" />
-          </a>
+          </Link>
         </div>
 
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm">{children}</div>
         </div>
 
-        {/* legal microcopy — the honest trust signal (Resend-style), not a badge. */}
-        {/* TODO(gap: marketing pages): Terms/Privacy hrefs are placeholders that
-            404 until the marketing site ships (see the Docs link above). */}
+        {/* legal microcopy — the honest trust signal (Resend-style), not a badge.
+            /terms and /privacy are placeholder pages until phase 8 writes the real
+            legal copy (see docs/phases/phase-8.md); the links resolve, not 404. */}
         <p className="text-center font-mono text-[11px] text-muted-foreground/60">
           Protected health data stays encrypted. By continuing you agree to the{" "}
-          <a href="https://fhirfix.dev/terms" className="underline-offset-4 hover:underline">
+          <Link href="/terms" className="underline-offset-4 hover:underline">
             Terms
-          </a>{" "}
+          </Link>{" "}
           and{" "}
-          <a href="https://fhirfix.dev/privacy" className="underline-offset-4 hover:underline">
+          <Link href="/privacy" className="underline-offset-4 hover:underline">
             Privacy Policy
-          </a>
+          </Link>
           .
         </p>
       </div>

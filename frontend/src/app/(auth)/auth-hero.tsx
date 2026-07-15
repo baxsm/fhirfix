@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand-mark";
-import { ReportPreview } from "./report-preview";
+import authReport from "../../../public/auth-report.png";
 
 // per-route hero copy. sign-in reassures a returning user; sign-up frames the
 // first action so the two screens don't read as the same page twice.
@@ -19,9 +20,10 @@ const COPY: Record<string, { title: string; body: string }> = {
 };
 
 // the auth left panel. no grid, no glow orbs, no grain, no code-window chrome —
-// those are the default AI moves. a calm deep canvas with room to breathe; the
-// centerpiece is the remediation report (report-preview.tsx, a placeholder until
-// the real report component exists). the product's actual job is the hero.
+// those are the default AI moves. a calm deep canvas with room to breathe, and
+// the centerpiece is the product itself: a real screenshot of a remediation
+// report (a genuine engine run: 640 -> 970, the gender/date fixes shown in the
+// live before/after diff). it is our actual dashboard, not hand-drawn HTML.
 export function AuthHero() {
   const pathname = usePathname();
   const copy = COPY[pathname] ?? DEFAULT_COPY;
@@ -41,8 +43,35 @@ export function AuthHero() {
         <BrandMark size="sm" />
       </a>
 
-      <div className="relative flex flex-1 flex-col justify-center py-10">
-        <ReportPreview />
+      {/* the report screenshot, framed as a floating product shot: tilted a few
+          degrees in perspective and pushed slightly off the right edge (the
+          modern "product UI at an angle" treatment) so it reads as a deliberate
+          artifact, not the report painted onto the panel. a soft emerald ground
+          glow + a deep shadow lift the near-black card off the near-black
+          canvas. it is our real dashboard, not hand-drawn HTML. */}
+      <div className="relative flex flex-1 items-center py-10" style={{ perspective: "1800px" }}>
+        {/* emerald ground glow pooled behind the card so the black frame separates. */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            background:
+              "radial-gradient(55% 50% at 55% 45%, oklch(0.696 0.15 163.225 / 0.12), transparent 72%)",
+          }}
+        />
+        <div
+          className="relative w-[128%] overflow-hidden rounded-xl border border-white/[0.08] bg-card shadow-[0_40px_120px_-20px_rgba(0,0,0,0.7)] ring-1 ring-black/40"
+          style={{ transform: "rotateY(-11deg) rotateX(2.5deg) rotateZ(0.4deg)" }}
+        >
+          <Image
+            src={authReport}
+            alt="A FHIRfix remediation report: a Patient resource lifted from a 640 to a 970 conformance score, with the gender and date fixes shown in a before and after diff."
+            priority
+            className="h-auto w-full select-none"
+            sizes="(min-width: 1024px) 60vw, 100vw"
+          />
+          {/* faint top-edge highlight so the frame catches the light source. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/10" />
+        </div>
       </div>
 
       <div className="relative max-w-md space-y-2">
