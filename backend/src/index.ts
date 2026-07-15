@@ -5,6 +5,7 @@ import { auth } from "@/auth/auth";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
+import { apiV1 } from "@/routes/api-v1/index";
 import { exportRoutes } from "@/routes/export";
 import { polarWebhookRoutes } from "@/routes/polar-webhook";
 import { publicRoutes } from "@/routes/public";
@@ -15,19 +16,30 @@ initSentry();
 
 const app = new Hono();
 
-// cross-origin dashboard: the frontend calls this backend with credentials,
-// so the origin must be reflected exactly (not "*") and credentials allowed.
-app.use(
-  "*",
-  cors({
-    origin: env.TRUSTED_ORIGIN_LIST,
-    credentials: true,
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "OPTIONS"],
-  }),
-);
+// the dashboard/session-cookie CORS policy: reflect trusted origins exactly (not
+// "*") and allow credentials. applied per-path to session surfaces only.
+const dashboardCors = cors({
+  origin: env.TRUSTED_ORIGIN_LIST,
+  credentials: true,
+  allowHeaders: ["Content-Type", "Authorization"],
+  allowMethods: ["GET", "POST", "OPTIONS"],
+});
+
+// cross-origin dashboard: the frontend calls this backend with credentials, so
+// the origin must be reflected exactly (not "*") and credentials allowed. the
+// public REST API (/api/v1) is Bearer-key auth with its OWN permissive CORS, so
+// it is excluded here - dashboard CORS must never widen to "*" with credentials.
+app.use("/trpc/*", dashboardCors);
+app.use("/api/auth/*", dashboardCors);
+app.use("/api/runs/*", dashboardCors);
+app.use("/api/demo/*", dashboardCors);
+app.use("/api/share/*", dashboardCors);
 
 app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
+
+// the public REST API mounts first with its own CORS (Bearer auth, permissive
+// origin, Idempotency-Key allowed). it is intentionally NOT under dashboardCors.
+app.route("/api/v1", apiV1);
 
 // Better Auth owns all /api/auth/** routes (sign-in/up, verify, reset, org, etc).
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));

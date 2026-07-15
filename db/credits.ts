@@ -69,6 +69,32 @@ export function nextAlertThreshold(args: {
   return crossed ?? null;
 }
 
+// can this workspace start a charged run? the exact cost is unknown until the
+// input is parsed (resource count), so this is a floor check: the balance must be
+// positive, OR auto-recharge with a real threshold+amount can cover the next run.
+// both the tRPC creditGatedProcedure and the REST enforceCredits middleware call
+// this, so the gate is defined once. tRPC maps false -> OUT_OF_CREDITS; REST -> 402.
+export function hasCreditFloor(
+  account:
+    | {
+        balanceMicroCredits: number | null;
+        autoRechargeEnabled: boolean | null;
+        autoRechargeThreshold: number | null;
+        autoRechargeAmountCents: number | null;
+      }
+    | null
+    | undefined,
+): boolean {
+  if (!account) return false;
+  const balance = account.balanceMicroCredits ?? 0;
+  const rechargeCanCover =
+    account.autoRechargeEnabled === true &&
+    account.autoRechargeThreshold != null &&
+    account.autoRechargeAmountCents != null &&
+    account.autoRechargeAmountCents > 0;
+  return balance > 0 || rechargeCanCover;
+}
+
 // decide whether auto-recharge should fire, and surface the honest gotcha: a spend
 // cap that is already reached this cycle BLOCKS the recharge (the Anthropic/Vercel
 // footgun). the caller uses blockedByCap to warn the user their apps will stop

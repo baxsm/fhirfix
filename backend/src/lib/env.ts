@@ -49,6 +49,12 @@ const baseEnv = createEnv({
     POLAR_PRODUCT_PACK_100: z.string().default(""),
     // absolute url of the frontend, used to build Polar success/return urls.
     APP_URL: z.url().default("http://localhost:3000"),
+
+    // phase-5 public REST API. pepper for the keyed api-key hash (defense in depth
+    // vs a db-only leak) and the AES key for webhook-secret encryption at rest.
+    // both default to dev-only constants; production MUST set real 32+ byte values.
+    API_KEY_PEPPER: z.string().min(16).default("dev-api-key-pepper-change-in-prod"),
+    WEBHOOK_ENCRYPTION_KEY: z.string().min(32).default("dev-webhook-enc-key-change-me-32byte!"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

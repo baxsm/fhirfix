@@ -1,3 +1,4 @@
+import { hasCreditFloor } from "@fhirfix/db/credits";
 import { ensureBillingAccount } from "@fhirfix/db/ledger";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
@@ -67,15 +68,8 @@ export const workspaceProcedure = protectedProcedure
 // the OUT_OF_CREDITS sentinel (the public REST surface maps this to HTTP 402).
 export const creditGatedProcedure = workspaceProcedure.use(async ({ ctx, next }) => {
   const account = await ensureBillingAccount(ctx.db, ctx.workspaceId);
-  const balance = account?.balanceMicroCredits ?? 0;
-  // auto-recharge with a real threshold means a top-up will cover the next run even
-  // at zero, so we let it through (the top-up happens out of band via Polar).
-  const rechargeCanCover =
-    account?.autoRechargeEnabled === true &&
-    account?.autoRechargeThreshold != null &&
-    account?.autoRechargeAmountCents != null &&
-    account.autoRechargeAmountCents > 0;
-  if (balance <= 0 && !rechargeCanCover) {
+  // shared floor check (db/credits.ts): balance positive, or auto-recharge covers.
+  if (!hasCreditFloor(account)) {
     throw new TRPCError({ code: "FORBIDDEN", message: OUT_OF_CREDITS });
   }
   return next({ ctx });
