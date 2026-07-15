@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +17,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { can, type WorkspaceRole } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
 import { navGroups } from "./nav-items";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
@@ -27,6 +30,8 @@ type Props = {
 
 export function AppSidebar({ workspace, role, workspaces }: Props) {
   const pathname = usePathname();
+  const active = workspaces.find((w) => w.slug === workspace || w.id === workspace);
+  const workspaceId = active?.id ?? "";
 
   return (
     <Sidebar>
@@ -87,18 +92,32 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
       </SidebarContent>
 
       <SidebarFooter className="p-2">
-        <CreditsMeter workspace={workspace} />
+        <CreditsMeter workspace={workspace} workspaceId={workspaceId} />
       </SidebarFooter>
     </Sidebar>
   );
 }
 
-// credits balance is wired in phase 4. renders an honest $0.00 with a low-balance
-// meter shell so the slot reads as a real component, not a placeholder.
-// this is a distinct inset card (one step above the sidebar surface + hairline
-// border) so it reads as a deliberate element, not part of the rail chrome. it
-// is the only bordered thing in the borderless sidebar, so no card-in-card.
-function CreditsMeter({ workspace }: { workspace: string }) {
+// live credits balance. a distinct inset card (one step above the sidebar surface
+// + hairline border) so it reads as a deliberate element, not rail chrome. it is
+// the only bordered thing in the borderless sidebar, so no card-in-card. the meter
+// fills against a $10 comfortable baseline and turns amber when the balance is low.
+const METER_BASELINE_DOLLARS = 10;
+function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspaceId: string }) {
+  const trpc = useTRPC();
+  const summary = useQuery({
+    ...trpc.billing.summary.queryOptions({ workspaceId }),
+    enabled: !!workspaceId,
+    // keep the meter roughly fresh as runs debit, without hammering the backend.
+    refetchInterval: 30_000,
+  });
+
+  const balance = summary.data?.balanceDollars ?? null;
+  const low = balance != null && balance <= 1;
+  const empty = balance != null && balance <= 0;
+  const fillPct =
+    balance != null ? Math.max(0, Math.min(100, (balance / METER_BASELINE_DOLLARS) * 100)) : 0;
+
   return (
     <Link
       href={`/app/${workspace}/billing`}
@@ -109,12 +128,31 @@ function CreditsMeter({ workspace }: { workspace: string }) {
           <Wallet className="size-3.5" />
           Credits
         </span>
-        <span className="font-mono text-xs font-medium tabular-nums text-foreground">$0.00</span>
+        <span
+          className={cn(
+            "font-mono text-xs font-medium tabular-nums",
+            low ? "text-warning" : "text-foreground",
+          )}
+        >
+          {balance != null ? `$${balance.toFixed(2)}` : "—"}
+        </span>
       </div>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-0 rounded-full bg-foreground/40" />
+        <div
+          className={cn(
+            "h-full rounded-full transition-all",
+            empty ? "bg-warning/60" : low ? "bg-warning" : "bg-primary",
+          )}
+          style={{ width: `${fillPct}%` }}
+        />
       </div>
-      <p className="mt-1.5 text-[10px] text-muted-foreground/70">Add credits to run checks</p>
+      <p className="mt-1.5 text-[10px] text-muted-foreground/70">
+        {empty
+          ? "Add credits to run checks"
+          : low
+            ? "Running low — top up soon"
+            : "Balance for this workspace"}
+      </p>
     </Link>
   );
 }

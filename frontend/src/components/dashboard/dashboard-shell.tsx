@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { LowBalanceBanner } from "@/components/billing/low-balance-banner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
@@ -68,6 +69,7 @@ export function DashboardShell({
           workspaceName={active.name}
           user={{ name: session.user.name, email: session.user.email }}
         />
+        <LowBalanceBanner workspace={workspace} workspaceId={active.id} />
         <main className="min-w-0 flex-1 p-5 sm:p-7">{children}</main>
       </SidebarInset>
     </SidebarProvider>

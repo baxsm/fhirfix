@@ -5,17 +5,39 @@ import { cn } from "@/lib/utils";
 // personal account page, so the two sibling "manage your stuff" surfaces read
 // the same. one bordered card per section, dividers inside for grouping
 // (no card-in-card).
+//
+// `slim`: for short, simple sections (e.g. Appearance) the full icon-chip header
+// reads too heavy. slim drops the icon chip and uses a lighter inline header so a
+// two-row section is not dressed up like the members table. content still lives in
+// the same bordered card so the page stays consistent.
 export function SettingsSection({
   icon: Icon,
   title,
   description,
+  slim,
   children,
 }: {
   icon: LucideIcon;
   title: string;
   description: string;
+  slim?: boolean;
   children: React.ReactNode;
 }) {
+  if (slim) {
+    return (
+      <section className="raised overflow-hidden rounded-xl border bg-card">
+        <div className="border-b px-5 py-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold leading-tight">
+            <Icon className="size-4 text-muted-foreground" />
+            {title}
+          </h2>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
+        </div>
+        <div className="px-5 py-4">{children}</div>
+      </section>
+    );
+  }
+
   return (
     <section className="raised overflow-hidden rounded-xl border bg-card">
       <div className="flex items-start gap-3 border-b px-5 py-4">

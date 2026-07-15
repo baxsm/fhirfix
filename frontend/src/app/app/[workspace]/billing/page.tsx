@@ -1,13 +1,14 @@
-import { CreditCard } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { Suspense } from "react";
+import { BillingView } from "@/components/billing/billing-view";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Page() {
+export default async function BillingPage({ params }: { params: Promise<{ workspace: string }> }) {
+  const { workspace } = await params;
+  // BillingView reads searchParams (?success=1 from Polar), so it needs a Suspense
+  // boundary under the App Router.
   return (
-    <PhasePlaceholder
-      title="Billing"
-      phase="Phase 4"
-      icon={CreditCard}
-      description="Prepaid credit balance, usage, invoices, auto-recharge, and spend caps."
-    />
+    <Suspense fallback={<Skeleton className="mx-auto h-64 max-w-5xl rounded-xl" />}>
+      <BillingView workspace={workspace} />
+    </Suspense>
   );
 }

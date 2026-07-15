@@ -125,6 +125,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
               icon={Palette}
               title="Appearance"
               description="Theme applies to your account on this device only."
+              slim
             >
               <SettingRow label="Theme" hint="Switch between light, dark, or your system setting.">
                 <ThemeToggle />

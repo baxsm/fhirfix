@@ -43,7 +43,20 @@ export function CheckView({ workspace }: { workspace: string }) {
         // swaps to the finished report when the worker completes.
         router.push(`/app/${workspace}/runs/${res.runId}`);
       },
-      onError: (e) => toast.error(e.message ?? "Could not start the check."),
+      onError: (e) => {
+        // the backend blocks a broke workspace with the OUT_OF_CREDITS sentinel.
+        // turn it into a clear, actionable message instead of raw error text.
+        if (e.message === "OUT_OF_CREDITS") {
+          toast.error("You're out of credits. Add credits to run checks.", {
+            action: {
+              label: "Add credits",
+              onClick: () => router.push(`/app/${workspace}/billing`),
+            },
+          });
+          return;
+        }
+        toast.error(e.message ?? "Could not start the check.");
+      },
     }),
   );
 
