@@ -1,8 +1,13 @@
+import { ensureBillingAccount } from "@fhirfix/db/ledger";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { hasPermission, type WorkspaceRole } from "@/auth/permissions";
 import { schema } from "@/lib/db";
 import type { TRPCContext } from "./context";
+
+// sentinel the frontend keys on to show the out-of-credits state instead of a
+// generic error. tRPC has no PAYMENT_REQUIRED code, so we tag the message.
+export const OUT_OF_CREDITS = "OUT_OF_CREDITS";
 
 const t = initTRPC.context<TRPCContext>().create();
 
@@ -55,6 +60,26 @@ export const workspaceProcedure = protectedProcedure
       ctx: { ...ctx, workspaceId: input.workspaceId, role: membership.role as WorkspaceRole },
     });
   });
+
+// gate a charged action on having credits. the exact run cost is unknown until the
+// input is parsed (resource count), so this is a floor check: the balance must be
+// positive. a broke workspace whose auto-recharge cannot cover it is blocked with
+// the OUT_OF_CREDITS sentinel (the public REST surface maps this to HTTP 402).
+export const creditGatedProcedure = workspaceProcedure.use(async ({ ctx, next }) => {
+  const account = await ensureBillingAccount(ctx.db, ctx.workspaceId);
+  const balance = account?.balanceMicroCredits ?? 0;
+  // auto-recharge with a real threshold means a top-up will cover the next run even
+  // at zero, so we let it through (the top-up happens out of band via Polar).
+  const rechargeCanCover =
+    account?.autoRechargeEnabled === true &&
+    account?.autoRechargeThreshold != null &&
+    account?.autoRechargeAmountCents != null &&
+    account.autoRechargeAmountCents > 0;
+  if (balance <= 0 && !rechargeCanCover) {
+    throw new TRPCError({ code: "FORBIDDEN", message: OUT_OF_CREDITS });
+  }
+  return next({ ctx });
+});
 
 type Resource = Parameters<typeof hasPermission>[1];
 type Action = Parameters<typeof hasPermission>[2];

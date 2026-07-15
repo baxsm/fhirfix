@@ -8,13 +8,17 @@
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema/index.ts",
-    "./blob": "./blob.ts"
+    "./blob": "./blob.ts",
+    "./credits": "./credits.ts",
+    "./ledger": "./ledger.ts",
+    "./notifications": "./notifications.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",
+    "nanoid": "6.0.0",
     "postgres": "3.4.9"
   }
 }

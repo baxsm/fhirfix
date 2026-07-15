@@ -1,3 +1,4 @@
+import { grantTrialCredits } from "@fhirfix/db/ledger";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -39,6 +40,10 @@ export const workspaceRouter = router({
         id: createId("workspaceSettings"),
         workspaceId: org.id,
       });
+
+      // seed the billing account + trial credits so the aha flow works before
+      // anyone pays. the grant is a normal ledger entry (append-only truth).
+      await grantTrialCredits(ctx.db, org.id, ctx.user.id);
 
       logger.info("workspace.create", `created ${org.id}`);
       return org;

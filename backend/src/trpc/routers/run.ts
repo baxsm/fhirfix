@@ -9,7 +9,7 @@ import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
 import { containsPhi, redactPhi } from "@/lib/phi";
 import { applyQueue, remediationQueue } from "@/queues/index";
-import { router, workspaceProcedure } from "../trpc";
+import { creditGatedProcedure, router, workspaceProcedure } from "../trpc";
 
 const submitSchema = z.object({
   workspaceId: z.string(),
@@ -24,7 +24,8 @@ const SHARE_TTL_DAYS = 30;
 export const runRouter = router({
   // enqueue a validate/convert/fix job. writes the durable run row + input blob,
   // then hands off to the worker via the remediation queue. returns the run id.
-  submit: workspaceProcedure.input(submitSchema).mutation(async ({ ctx, input }) => {
+  // creditGatedProcedure blocks a broke workspace (OUT_OF_CREDITS) before any work.
+  submit: creditGatedProcedure.input(submitSchema).mutation(async ({ ctx, input }) => {
     const runId = createId("run");
     const inputType = detectInput(input.content).inputType;
     const key = blobKey(ctx.workspaceId, runId, "input");

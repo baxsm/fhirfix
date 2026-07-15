@@ -37,6 +37,18 @@ const baseEnv = createEnv({
     US_CORE_VERSION: z.string().default("6.1.0"),
     // local blob store root for phase-2 artifacts (input/corrected).
     BLOB_STORE_DIR: z.string().default(".data/blobs"),
+
+    // phase-4 billing (Polar). empty token => checkout is unavailable and returns
+    // a clean "billing not configured" error instead of throwing at construction.
+    POLAR_ACCESS_TOKEN: z.string().default(""),
+    POLAR_WEBHOOK_SECRET: z.string().default(""),
+    POLAR_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+    // Polar product ids for each credit pack, matched to PRICING.packs by id.
+    POLAR_PRODUCT_PACK_10: z.string().default(""),
+    POLAR_PRODUCT_PACK_25: z.string().default(""),
+    POLAR_PRODUCT_PACK_100: z.string().default(""),
+    // absolute url of the frontend, used to build Polar success/return urls.
+    APP_URL: z.url().default("http://localhost:3000"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

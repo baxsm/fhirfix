@@ -6,6 +6,7 @@ import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
 import { exportRoutes } from "@/routes/export";
+import { polarWebhookRoutes } from "@/routes/polar-webhook";
 import { publicRoutes } from "@/routes/public";
 import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
@@ -35,6 +36,8 @@ app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.route("/", publicRoutes);
 // authenticated report exports + corrected-artifact fetch (session-gated REST).
 app.route("/", exportRoutes);
+// Polar billing webhooks (server-to-server, signature-verified, no session).
+app.route("/", polarWebhookRoutes);
 
 // dashboard tRPC surface.
 app.use(
