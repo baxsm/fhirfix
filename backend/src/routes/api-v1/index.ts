@@ -10,6 +10,7 @@ import {
   requireScope,
   resolveApiKey,
 } from "./middleware";
+import { openApiSpec } from "./openapi";
 import { getReportController } from "./report";
 import {
   batchController,
@@ -34,6 +35,10 @@ apiV1.use(
     exposeHeaders: ["X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"],
   }),
 );
+
+// the OpenAPI spec is PUBLIC (no key): SDK codegen + the docs try-it playground
+// fetch it before a key exists. mounted before the auth chain so it stays open.
+apiV1.get("/openapi.json", (c) => c.json(openApiSpec));
 
 // the auth + accounting chain, in order. logApiRequest is outermost so it records
 // every exit; then resolve key, rate limit, credits, idempotency capture. charged

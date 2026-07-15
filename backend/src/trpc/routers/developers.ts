@@ -1,6 +1,6 @@
 import type { WebhookEvent } from "@shared/db/webhooks";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
 import { generateKey } from "@/lib/api-key";
@@ -231,6 +231,63 @@ export const developersRouter = router({
           data: { test: true, message: "This is a FHIRfix test event." },
         });
         return { dispatched: true, event };
+      }),
+  }),
+
+  requestLogs: router({
+    // the in-dashboard REST traffic log, newest first, cursor-paginated. this is
+    // the traffic a developer debugging an integration needs - it includes calls
+    // that never made a run (401/402/422/429), not just successful runs. filters:
+    // method, statusCode, and a "onlyErrors" toggle (status >= 400).
+    list: workspaceProcedure
+      .input(
+        z.object({
+          workspaceId: z.string(),
+          method: z.string().optional(),
+          statusCode: z.number().int().optional(),
+          onlyErrors: z.boolean().optional(),
+          cursor: z.string().optional(), // ISO createdAt of the last row seen
+          limit: z.number().int().min(1).max(100).default(25),
+        }),
+      )
+      .query(async ({ ctx, input }) => {
+        const conditions = [eq(schema.apiRequestLog.workspaceId, ctx.workspaceId)];
+        if (input.method) conditions.push(eq(schema.apiRequestLog.method, input.method));
+        if (input.statusCode != null) {
+          conditions.push(eq(schema.apiRequestLog.statusCode, input.statusCode));
+        }
+        if (input.onlyErrors) conditions.push(gte(schema.apiRequestLog.statusCode, 400));
+        if (input.cursor) {
+          conditions.push(lte(schema.apiRequestLog.createdAt, new Date(input.cursor)));
+        }
+
+        const rows = await ctx.db
+          .select({
+            id: schema.apiRequestLog.id,
+            method: schema.apiRequestLog.method,
+            path: schema.apiRequestLog.path,
+            statusCode: schema.apiRequestLog.statusCode,
+            latencyMs: schema.apiRequestLog.latencyMs,
+            requestBytes: schema.apiRequestLog.requestBytes,
+            responseBytes: schema.apiRequestLog.responseBytes,
+            idempotencyKey: schema.apiRequestLog.idempotencyKey,
+            runId: schema.apiRequestLog.runId,
+            apiKeyId: schema.apiRequestLog.apiKeyId,
+            errorCode: schema.apiRequestLog.errorCode,
+            ip: schema.apiRequestLog.ip,
+            createdAt: schema.apiRequestLog.createdAt,
+          })
+          .from(schema.apiRequestLog)
+          .where(and(...conditions))
+          .orderBy(desc(schema.apiRequestLog.createdAt))
+          .limit(input.limit + 1);
+
+        const hasMore = rows.length > input.limit;
+        const page = hasMore ? rows.slice(0, input.limit) : rows;
+        const nextCursor = hasMore
+          ? (page[page.length - 1]?.createdAt?.toISOString() ?? null)
+          : null;
+        return { logs: page, nextCursor, hasMore };
       }),
   }),
 });
