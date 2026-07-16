@@ -27,9 +27,8 @@ inputs:
     required: false
     default: ""
   base-url:
-    description: "API base url. Only needed for a self-hosted deployment."
-    required: false
-    default: ""
+    description: "API base url, e.g. https://api.your-host.example/api/v1."
+    required: true
   version:
     description: "Version of @fhirfix/cli to run."
     required: false
@@ -90,6 +89,10 @@ runs:
         fi
         if [ -z "${INPUT_PATH}" ]; then
           echo "::error title=FHIRfix::path is required."
+          exit 1
+        fi
+        if [ -z "${INPUT_BASE_URL}" ]; then
+          echo "::error title=FHIRfix::base-url is required, e.g. https://api.your-host.example/api/v1"
           exit 1
         fi
         case "${INPUT_COMMAND}" in

@@ -155,7 +155,7 @@ Usage
 
 Options
   --api-key <key>      API key. Defaults to $FHIRFIX_API_KEY.
-  --base-url <url>     API base url. Defaults to $FHIRFIX_BASE_URL or the public API.
+  --base-url <url>     API base url. Required. Defaults to $FHIRFIX_BASE_URL.
   --fail-on <level>    Fail on error, warning, or info. Default: error.
   --profile <url>      Validate against a profile. Repeatable.
   --out <file>         Write the corrected output to a file (single input only).

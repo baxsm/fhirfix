@@ -31,10 +31,6 @@ classifiers = [
 # to vendor a transitive tree to call one API.
 dependencies = []
 
-[project.urls]
-Homepage = "https://fhirfix.dev"
-Documentation = "https://fhirfix.dev/docs"
-
 [dependency-groups]
 dev = ["pytest>=8", "mypy>=1.11", "ruff>=0.6"]
 

@@ -34,7 +34,9 @@ from ._types import (
 
 __version__ = "0.1.0"
 
-DEFAULT_BASE_URL = "https://api.fhirfix.dev/api/v1"
+# no default base url on purpose: there is no public host yet, and defaulting to
+# one that does not exist would fail at request time with a DNS error instead of
+# at construction with something a caller can act on.
 # the engine runs synchronously against the validator/converter sidecars, so a fix
 # on a large bundle is slow by nature. this is well above the observed p99.
 DEFAULT_TIMEOUT = 120.0
@@ -72,10 +74,15 @@ class Fhirfix:
                 "No API key. Pass api_key= or set the FHIRFIX_API_KEY environment variable."
             )
         self._api_key = key
+
+        url = base_url or os.environ.get("FHIRFIX_BASE_URL")
+        if not url:
+            raise FhirfixError(
+                "No base URL. Pass base_url= or set the FHIRFIX_BASE_URL environment "
+                'variable, e.g. "http://localhost:3001/api/v1".'
+            )
         # tolerate a trailing slash so base_url + path never doubles up.
-        self.base_url = (base_url or os.environ.get("FHIRFIX_BASE_URL") or DEFAULT_BASE_URL).rstrip(
-            "/"
-        )
+        self.base_url = url.rstrip("/")
         self._timeout = timeout
         self._max_retries = max_retries
 

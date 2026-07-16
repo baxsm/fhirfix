@@ -110,12 +110,19 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<ExitCode>
     return EXIT.auth;
   }
 
+  // there is no public host to fall back on, so a missing base url is a usage
+  // error the caller can fix, not an auth failure or a DNS error mid-run.
+  const baseUrl = args.baseUrl ?? io.env.FHIRFIX_BASE_URL;
+  if (!baseUrl) {
+    io.err(
+      "No API base url. Pass --base-url or set FHIRFIX_BASE_URL, e.g. http://localhost:3001/api/v1",
+    );
+    return EXIT.usage;
+  }
+
   let client: Fhirfix;
   try {
-    client = new Fhirfix({
-      apiKey,
-      baseUrl: args.baseUrl ?? io.env.FHIRFIX_BASE_URL,
-    });
+    client = new Fhirfix({ apiKey, baseUrl });
   } catch (err) {
     io.err(messageFor(err));
     return EXIT.auth;

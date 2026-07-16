@@ -17,6 +17,7 @@ jobs:
         with:
           path: "fhir/**/*.json"
           api-key: ${{ secrets.FHIRFIX_API_KEY }}
+          base-url: ${{ vars.FHIRFIX_BASE_URL }}
 ```
 
 Get an API key from the developers page of your workspace and store it as a repository secret. Never inline it.
@@ -30,7 +31,7 @@ Get an API key from the developers page of your workspace and store it as a repo
 | `command` | `validate` | `validate`, `fix`, or `convert`. |
 | `fail-on` | `error` | Fail the build on `error`, `warning`, or `info`. |
 | `profile` | | Profile URL to validate against. Space-separate multiple. |
-| `base-url` | | API base url. Only for a self-hosted deployment. |
+| `base-url` | required | API base url, e.g. `https://api.your-host.example/api/v1`. |
 | `version` | `latest` | Version of `@fhirfix/cli` to run. |
 | `annotations` | `true` | Annotate the PR diff with each finding. |
 | `working-directory` | `.` | Directory to resolve the path glob from. |
@@ -52,6 +53,7 @@ Gate on warnings too, against a specific profile:
   with:
     path: "fhir/*.json"
     api-key: ${{ secrets.FHIRFIX_API_KEY }}
+    base-url: ${{ vars.FHIRFIX_BASE_URL }}
     fail-on: warning
     profile: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
 ```
@@ -65,6 +67,7 @@ Report findings without failing the build:
   with:
     path: "fhir/*.json"
     api-key: ${{ secrets.FHIRFIX_API_KEY }}
+    base-url: ${{ vars.FHIRFIX_BASE_URL }}
 
 - run: echo "Found ${{ steps.fhir.outputs.error-count }} errors"
 ```
@@ -78,6 +81,7 @@ Check a directory that is generated during the build:
     path: "*.json"
     working-directory: ./dist/fhir
     api-key: ${{ secrets.FHIRFIX_API_KEY }}
+    base-url: ${{ vars.FHIRFIX_BASE_URL }}
 ```
 
 ## Failure modes

@@ -70,6 +70,32 @@ describe("construction", () => {
     }
   });
 
+  test("throws when no base url is given", () => {
+    // there is no public host, so there is no default. a client must be told
+    // where the API is rather than silently resolving a host that does not exist.
+    const saved = process.env.FHIRFIX_BASE_URL;
+    delete process.env.FHIRFIX_BASE_URL;
+    try {
+      expect(() => new Fhirfix({ apiKey: "ffx_test_x" })).toThrow(FhirfixError);
+      expect(() => new Fhirfix({ apiKey: "ffx_test_x" })).toThrow(/FHIRFIX_BASE_URL/);
+    } finally {
+      if (saved) process.env.FHIRFIX_BASE_URL = saved;
+    }
+  });
+
+  test("reads the base url from FHIRFIX_BASE_URL", () => {
+    const saved = process.env.FHIRFIX_BASE_URL;
+    process.env.FHIRFIX_BASE_URL = "http://from-env/api/v1";
+    try {
+      expect(new Fhirfix({ apiKey: "k" }).baseUrl).toBe("http://from-env/api/v1");
+      // an explicit option still wins over the environment.
+      expect(new Fhirfix({ apiKey: "k", baseUrl: BASE }).baseUrl).toBe(BASE);
+    } finally {
+      if (saved) process.env.FHIRFIX_BASE_URL = saved;
+      else delete process.env.FHIRFIX_BASE_URL;
+    }
+  });
+
   test("strips a trailing slash so urls never double up", async () => {
     const stub = stubFetch([jsonResponse(200, { ok: true })]);
     const client = new Fhirfix({ apiKey: "k", baseUrl: `${BASE}/`, fetch: stub.impl });

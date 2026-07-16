@@ -1,6 +1,6 @@
 # fhirfix
 
-Python client for the [FHIRfix](https://fhirfix.dev) REST API. Validate, fix, and convert FHIR conformance issues.
+Python client for the FHIRfix REST API. Validate, fix, and convert FHIR conformance issues.
 
 Python 3.9+. No dependencies.
 
@@ -15,7 +15,10 @@ pip install fhirfix
 ```python
 from fhirfix import Fhirfix
 
-fhirfix = Fhirfix(api_key="ffx_test_...")
+fhirfix = Fhirfix(
+    api_key="ffx_test_...",
+    base_url="http://localhost:3001/api/v1",
+)
 
 result = fhirfix.fix(input=patient_json)
 
@@ -23,7 +26,14 @@ print(result.conformance_score_before, "->", result.conformance_score_after)
 print(result.corrected)
 ```
 
-The key is read from `FHIRFIX_API_KEY` when you do not pass one.
+Both are read from the environment when you do not pass them:
+
+```bash
+export FHIRFIX_API_KEY=ffx_test_...
+export FHIRFIX_BASE_URL=http://localhost:3001/api/v1
+```
+
+`base_url` points at the FHIRfix API you are calling. There is no built-in default, so a client can never silently talk to the wrong host.
 
 ### Validate without changing anything
 
@@ -106,8 +116,8 @@ Rate limited (429) and server (5xx) responses are retried automatically with bac
 
 ```python
 Fhirfix(
-    api_key="ffx_live_...",
-    base_url="https://api.fhirfix.dev/api/v1",
+    api_key="ffx_live_...",  # or $FHIRFIX_API_KEY
+    base_url="http://localhost:3001/api/v1",  # or $FHIRFIX_BASE_URL. required.
     timeout=120.0,
     max_retries=2,
 )

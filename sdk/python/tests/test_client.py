@@ -26,8 +26,17 @@ def test_requires_a_key(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_reads_the_key_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("FHIRFIX_API_KEY", "ffx_test_fromenv")
+    monkeypatch.setenv("FHIRFIX_BASE_URL", "http://localhost:3001/api/v1")
     client = Fhirfix()
-    assert client.base_url == "https://api.fhirfix.dev/api/v1"
+    assert client.base_url == "http://localhost:3001/api/v1"
+
+
+def test_requires_a_base_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    # there is no public host, so there is no default. a client must be told where
+    # the API is rather than silently resolving a hostname that does not exist.
+    monkeypatch.delenv("FHIRFIX_BASE_URL", raising=False)
+    with pytest.raises(FhirfixError, match="FHIRFIX_BASE_URL"):
+        Fhirfix(api_key="ffx_test_x")
 
 
 def test_reads_the_base_url_from_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:

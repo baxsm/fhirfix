@@ -19,7 +19,9 @@ import type {
   ValidateResult,
 } from "./types.js";
 
-const DEFAULT_BASE_URL = "https://api.fhirfix.dev/api/v1";
+// no default base url on purpose: there is no public host yet, and defaulting to
+// one that does not exist would fail at request time with a DNS error instead of
+// at construction with something a caller can act on.
 // the engine runs synchronously against the validator/converter sidecars, so a
 // fix on a large bundle is slow by nature. this is well above the observed p99.
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -28,7 +30,8 @@ const DEFAULT_MAX_RETRIES = 2;
 export interface ClientOptions {
   // an API key: ffx_test_... or ffx_live_.... falls back to $FHIRFIX_API_KEY.
   apiKey?: string;
-  // override for self-hosted deployments. defaults to the public API.
+  // where the API lives, e.g. http://localhost:3001/api/v1. required: falls back
+  // to $FHIRFIX_BASE_URL, and there is no built-in default.
   baseUrl?: string;
   // per-request timeout in ms.
   timeoutMs?: number;
@@ -48,11 +51,11 @@ interface RequestOptions {
   raw?: boolean;
 }
 
-// read $FHIRFIX_API_KEY without assuming node: the SDK also runs in browsers and
+// read an env var without assuming node: the SDK also runs in browsers and
 // workers, where `process` is not defined.
-function envApiKey(): string | undefined {
+function readEnv(name: string): string | undefined {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
-  return proc?.env?.FHIRFIX_API_KEY;
+  return proc?.env?.[name];
 }
 
 function sleep(ms: number): Promise<void> {
@@ -80,15 +83,23 @@ export class Fhirfix {
   private readonly fetchImpl: typeof globalThis.fetch;
 
   constructor(options: ClientOptions = {}) {
-    const apiKey = options.apiKey ?? envApiKey();
+    const apiKey = options.apiKey ?? readEnv("FHIRFIX_API_KEY");
     if (!apiKey) {
       throw new FhirfixError(
         "No API key. Pass { apiKey } or set the FHIRFIX_API_KEY environment variable.",
       );
     }
     this.apiKey = apiKey;
+
+    const baseUrl = options.baseUrl ?? readEnv("FHIRFIX_BASE_URL");
+    if (!baseUrl) {
+      throw new FhirfixError(
+        "No base URL. Pass { baseUrl } or set the FHIRFIX_BASE_URL environment variable, " +
+          'e.g. "http://localhost:3001/api/v1".',
+      );
+    }
     // tolerate a trailing slash so baseUrl + path never doubles up.
-    this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
     // bind: an unbound global fetch throws "Illegal invocation" in browsers.

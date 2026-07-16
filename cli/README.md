@@ -1,6 +1,6 @@
 # @fhirfix/cli
 
-Command line tool for [FHIRfix](https://fhirfix.dev). Validate, fix, and convert FHIR from a terminal or a CI pipeline.
+Command line tool for FHIRfix. Validate, fix, and convert FHIR from a terminal or a CI pipeline.
 
 ## Install
 
@@ -18,6 +18,7 @@ npx @fhirfix/cli validate ./bundle.json
 
 ```bash
 export FHIRFIX_API_KEY=ffx_test_...
+export FHIRFIX_BASE_URL=http://localhost:3001/api/v1
 
 fhirfix validate ./bundle.json
 fhirfix validate ./out/*.json --fail-on warning
@@ -32,7 +33,7 @@ fhirfix convert ./adt.hl7 --out ./patient.json
 | Flag | Description |
 | --- | --- |
 | `--api-key <key>` | API key. Defaults to `$FHIRFIX_API_KEY`. |
-| `--base-url <url>` | API base url. Defaults to `$FHIRFIX_BASE_URL` or the public API. |
+| `--base-url <url>` | API base url. Required. Defaults to `$FHIRFIX_BASE_URL`. |
 | `--fail-on <level>` | Fail on `error`, `warning`, or `info`. Default: `error`. |
 | `--profile <url>` | Validate against a profile. Repeatable. |
 | `--out <file>` | Write the corrected output to a file. Single input only. |
@@ -64,6 +65,7 @@ Only exit 1 means "your FHIR has problems". Everything else means the check coul
 - run: npx @fhirfix/cli validate ./fhir/*.json
   env:
     FHIRFIX_API_KEY: ${{ secrets.FHIRFIX_API_KEY }}
+    FHIRFIX_BASE_URL: ${{ vars.FHIRFIX_BASE_URL }}
 ```
 
 For inline PR annotations, use the action instead:
@@ -73,6 +75,7 @@ For inline PR annotations, use the action instead:
   with:
     path: ./fhir/*.json
     api-key: ${{ secrets.FHIRFIX_API_KEY }}
+    base-url: ${{ vars.FHIRFIX_BASE_URL }}
 ```
 
 ## JSON output

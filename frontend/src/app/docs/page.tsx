@@ -9,8 +9,12 @@ import {
   ScoreLift,
   StatusTable,
 } from "@/components/docs/doc-primitives";
+import { env } from "@/lib/env";
 
-const BASE_URL = "https://api.fhirfix.dev/api/v1";
+// the real API this deployment talks to, same var the playground fires at. every
+// curl and snippet on this page shows the host a reader can actually reach, so
+// deploying is an env change and the docs follow.
+const BASE_URL = `${env.NEXT_PUBLIC_API_URL}/api/v1`;
 
 const CURL_FIX = `curl ${BASE_URL}/fix \\
   -H "Authorization: Bearer ffx_test_..." \\
@@ -41,7 +45,10 @@ const INSTALL_CLI = "npm install -g @fhirfix/cli";
 
 const SDK_NODE = `import { Fhirfix } from "fhirfix";
 
-const fhirfix = new Fhirfix({ apiKey: process.env.FHIRFIX_API_KEY });
+const fhirfix = new Fhirfix({
+  apiKey: process.env.FHIRFIX_API_KEY,
+  baseUrl: "${BASE_URL}",
+});
 
 const result = await fhirfix.fix({ input: patientJson });
 
@@ -50,7 +57,8 @@ console.log(result.corrected);`;
 
 const SDK_PYTHON = `from fhirfix import Fhirfix
 
-fhirfix = Fhirfix()  # reads FHIRFIX_API_KEY
+# or set FHIRFIX_API_KEY and FHIRFIX_BASE_URL in the environment
+fhirfix = Fhirfix(base_url="${BASE_URL}")
 
 result = fhirfix.fix(input=patient_json)
 
@@ -79,6 +87,7 @@ except OutOfCreditsError:
     ...  # add credits or enable auto-recharge`;
 
 const CLI_USAGE = `export FHIRFIX_API_KEY=ffx_test_...
+export FHIRFIX_BASE_URL=${BASE_URL}
 
 # report findings, exit 1 if any are errors
 fhirfix validate ./bundle.json
@@ -93,6 +102,7 @@ const ACTION_YML = `- uses: fhirfix/fhirfix-action@v1
   with:
     path: "fhir/**/*.json"
     api-key: \${{ secrets.FHIRFIX_API_KEY }}
+    base-url: ${BASE_URL}
     fail-on: error`;
 
 const FIX_RESPONSE = `{
@@ -190,7 +200,7 @@ export default function DocsPage() {
           <h1 className="text-3xl font-semibold tracking-tight">FHIRfix REST API</h1>
           <p className="text-muted-foreground">
             Validate against US Core, apply safe deterministic fixes, and convert HL7v2 or C-CDA to
-            FHIR from your own code. REST over HTTPS, JSON in and out, one API key.
+            FHIR from your own code. REST, JSON in and out, one API key.
           </p>
         </header>
 
@@ -228,7 +238,7 @@ export default function DocsPage() {
           rail={<CodeBlock code={BASE_URL} label="base url" />}
         >
           <p className="text-sm text-muted-foreground">
-            Every request goes to this base. HTTPS only.
+            Every request goes to this base. Use HTTPS for any deployment reachable over a network.
           </p>
         </RefSection>
 
