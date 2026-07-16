@@ -1,6 +1,6 @@
 {
   "name": "@fhirfix/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Command line tool for FHIRfix. Validate, fix, and convert FHIR in CI.",
   "license": "MIT",
   "type": "module",
