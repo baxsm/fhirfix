@@ -29,6 +29,9 @@ const CURL_CONVERT = `curl ${BASE_URL}/convert \\
 const CURL_RUNS = `curl "${BASE_URL}/runs?limit=20" \\
   -H "Authorization: Bearer ffx_test_..."`;
 
+const CURL_AUTH = `curl ${BASE_URL}/runs \\
+  -H "Authorization: Bearer ffx_test_..."`;
+
 const FIX_RESPONSE = `{
   "runId": "run_a2xuoyti2ktb7xynihlq",
   "conformanceScoreBefore": 730,
@@ -80,35 +83,48 @@ const RUNS_RESPONSE = `{
 export default function DocsPage() {
   return (
     <div className="space-y-12">
-      <header className="max-w-2xl space-y-2">
-        <p className="text-xs text-muted-foreground">API reference</p>
-        <h1 className="text-3xl font-semibold tracking-tight">FHIRfix REST API</h1>
-        <p className="text-muted-foreground">
-          Validate against US Core, apply safe deterministic fixes, and convert HL7v2 or C-CDA to
-          FHIR from your own code. REST over HTTPS, JSON in and out, one API key.
-        </p>
-      </header>
+      {/* intro: title prose left, the playground callout takes the rail slot so the
+          two-column rhythm starts at the very first screen. */}
+      <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+        <header className="min-w-0 space-y-2">
+          <p className="text-xs text-muted-foreground">API reference</p>
+          <h1 className="text-3xl font-semibold tracking-tight">FHIRfix REST API</h1>
+          <p className="text-muted-foreground">
+            Validate against US Core, apply safe deterministic fixes, and convert HL7v2 or C-CDA to
+            FHIR from your own code. REST over HTTPS, JSON in and out, one API key.
+          </p>
+        </header>
 
-      <div className="flex max-w-2xl items-start gap-2 rounded-lg border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
-        <span>
-          Prefer to try it without writing code? The{" "}
-          <Link href="/docs/playground" className="text-interactive hover:underline">
-            playground
-          </Link>{" "}
-          fires real test-mode requests against this API from your browser.
-        </span>
+        <div className="flex min-w-0 items-start gap-2 self-start rounded-lg border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
+          <span>
+            Prefer to try it without writing code? The{" "}
+            <Link href="/docs/playground" className="text-interactive hover:underline">
+              playground
+            </Link>{" "}
+            fires real test-mode requests against this API from your browser.
+          </span>
+        </div>
       </div>
 
-      {/* overview sections: full-width prose, no rail. */}
-      <div className="max-w-2xl space-y-12">
-        <DocSection id="base-url" title="Base URL">
+      {/* overview sections: same prose-left / rail-right split as the endpoints
+          below, so the reference rhythm starts at the top of the page instead of
+          leaving a dead gap next to the first three sections. */}
+      <div className="space-y-12">
+        <RefSection
+          id="base-url"
+          title="Base URL"
+          rail={<CodeBlock code={BASE_URL} label="base url" />}
+        >
           <p className="text-sm text-muted-foreground">
             Every request goes to this base. HTTPS only.
           </p>
-          <CodeBlock code={BASE_URL} label="base url" />
-        </DocSection>
+        </RefSection>
 
-        <DocSection id="authentication" title="Authentication">
+        <RefSection
+          id="authentication"
+          title="Authentication"
+          rail={<CodeBlock code={CURL_AUTH} label="authenticated request" />}
+        >
           <p className="text-sm text-muted-foreground">
             Authenticate with an API key from your workspace{" "}
             <Link href="/app" className="text-interactive hover:underline">
@@ -119,17 +135,24 @@ export default function DocsPage() {
             keys start with <code className="font-mono text-xs">ffx_live_</code>. Keep live keys
             secret.
           </p>
-          <CodeBlock code={`Authorization: Bearer ffx_test_...`} label="header" />
-        </DocSection>
+        </RefSection>
 
-        <DocSection id="quickstart" title="Quickstart">
+        <RefSection
+          id="quickstart"
+          title="Quickstart"
+          rail={
+            <>
+              <CodeBlock code={CURL_FIX} label="request" />
+              <CodeBlock code={FIX_RESPONSE} label="200 response" />
+            </>
+          }
+        >
           <p className="text-sm text-muted-foreground">
             Post a FHIR resource, bundle, or HL7v2 message as{" "}
             <code className="font-mono text-xs">input</code>. This fixes it and returns the
             corrected artifact plus a before/after conformance score.
           </p>
-          <CodeBlock code={CURL_FIX} label="curl" />
-        </DocSection>
+        </RefSection>
       </div>
 
       {/* endpoint sections: prose + params left, request/response rail right. */}

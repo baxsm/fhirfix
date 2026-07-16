@@ -33,7 +33,10 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         <aside className="sticky top-14 hidden h-[calc(100svh-3.5rem)] w-48 shrink-0 overflow-y-auto py-10 lg:block">
           <DocsNav />
         </aside>
-        <main className="min-w-0 flex-1 py-10">{children}</main>
+        {/* the tail padding gives the last sections room to scroll up to the read
+            position - without it the page bottoms out early and the final nav
+            links all dead-end on the same spot. */}
+        <main className="min-w-0 flex-1 pb-[70svh] pt-10">{children}</main>
       </div>
     </div>
   );
