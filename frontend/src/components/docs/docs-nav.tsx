@@ -139,6 +139,10 @@ export function DocsNav() {
 // the first tracked section, else the id of the section nearest the top of the
 // viewport. uses scroll position (not just intersection ratio) so the active item
 // is stable while scrolling through tall sections.
+//
+// the bottom clamp matters: the last section can never scroll to the marker (the
+// page runs out first), so at max scroll we activate it outright. without this the
+// tail sections are permanently unreachable and the nav lies about where you are.
 function useScrollSpy(ids: string[]): string {
   const [activeId, setActiveId] = useState("top");
 
@@ -146,12 +150,22 @@ function useScrollSpy(ids: string[]): string {
     if (ids.length === 0) return;
 
     const compute = () => {
-      // the point we consider "current" - a bit below the sticky header.
-      const marker = 140;
+      // sections use scroll-mt-24 (96px), so a clicked section lands with its top
+      // at exactly 96. the marker sits just past that - land ON the boundary and
+      // you are in the section, not still in the previous one.
+      const marker = 100;
       if (window.scrollY < 40) {
         setActiveId("top");
         return;
       }
+
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (maxScroll - window.scrollY <= 2) {
+        const last = ids[ids.length - 1];
+        if (last) setActiveId(last);
+        return;
+      }
+
       let current = "top";
       for (const id of ids) {
         const el = document.getElementById(id);

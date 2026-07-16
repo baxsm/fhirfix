@@ -100,15 +100,20 @@ export function RoutePill({ method, path }: { method: "GET" | "POST"; path: stri
 
 // a single request/response field row: name (mono) + type + optional required
 // chip + description. mirrors the stripe/resend body-parameter layout.
+//
+// set `noChip` for rows that are not request parameters (behaviors, events) -
+// "optional" is meaningless there and reads as a mistake.
 export function ParamRow({
   name,
   type,
   required,
+  noChip,
   children,
 }: {
   name: string;
   type: string;
   required?: boolean;
+  noChip?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -116,7 +121,7 @@ export function ParamRow({
       <div className="flex flex-wrap items-center gap-2">
         <code className="font-mono text-sm font-medium">{name}</code>
         <span className="font-mono text-xs text-muted-foreground">{type}</span>
-        {required ? (
+        {noChip ? null : required ? (
           <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
             required
           </span>
@@ -168,7 +173,7 @@ export function DocSection({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-20 space-y-4 border-t pt-10 first:border-0 first:pt-0">
+    <section id={id} className="scroll-mt-24 space-y-4 border-t pt-10 first:border-0 first:pt-0">
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       {children}
     </section>

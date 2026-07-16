@@ -80,6 +80,42 @@ const RUNS_RESPONSE = `{
   "nextCursor": null
 }`;
 
+const CURL_IDEMPOTENT = `curl ${BASE_URL}/fix \\
+  -H "Authorization: Bearer ffx_test_..." \\
+  -H "Idempotency-Key: 8f1c2b9a-4d17-4c1e-9d2a-6b3f0e5c7a19" \\
+  -H "Content-Type: application/json" \\
+  -d '{ "input": "<FHIR or HL7v2>" }'`;
+
+const IDEMPOTENCY_CONFLICT = `{
+  "error": {
+    "code": "idempotency_conflict",
+    "message": "This Idempotency-Key was already used with a different request body."
+  }
+}`;
+
+const WEBHOOK_PAYLOAD = `{
+  "event": "run.completed",
+  "data": {
+    "runId": "run_a2xuoyti2ktb7xynihlq",
+    "inputType": "fhir",
+    "resourceCount": 1,
+    "conformanceScoreBefore": 730,
+    "conformanceScoreAfter": 850,
+    "findingsTotal": 3,
+    "findingsAutoFixable": 1,
+    "reVerifiedClean": false
+  }
+}`;
+
+const VERIFY_SIGNATURE = `const [t, v1] = header.split(",").map((p) => p.split("=")[1]);
+const expected = crypto
+  .createHmac("sha256", process.env.FHIRFIX_SIGNING_SECRET)
+  .update(\`\${t}.\${rawBody}\`)
+  .digest("hex");
+
+// constant-time compare, and reject old timestamps to stop replays
+crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));`;
+
 export default function DocsPage() {
   return (
     <div className="space-y-12">
@@ -252,30 +288,77 @@ export default function DocsPage() {
         <RefSection
           id="idempotency"
           title="Idempotency"
-          rail={<CodeBlock code={`Idempotency-Key: 8f1c2b9a-...`} label="header" />}
+          rail={
+            <>
+              <CodeBlock code={CURL_IDEMPOTENT} label="request" />
+              <CodeBlock code={IDEMPOTENCY_CONFLICT} label="409 conflict" />
+            </>
+          }
         >
           <p className="text-sm text-muted-foreground">
-            Safely retry a request by sending an{" "}
-            <code className="font-mono text-xs">Idempotency-Key</code> header. The same key with the
-            same body replays the original run instead of charging again. The same key with a
-            different body returns <code className="font-mono text-xs">409 Conflict</code>.
+            Network calls fail. Send an <code className="font-mono text-xs">Idempotency-Key</code>{" "}
+            header and you can retry a request without risking a second charge or a duplicate run.
+            Use a fresh UUID per logical request.
+          </p>
+          <div>
+            <h3 className="text-sm font-medium">How a key is resolved</h3>
+            <div className="mt-1">
+              <ParamRow name="same key, same body" type="replay" noChip>
+                Returns the original run and its stored result. Nothing is re-processed and no
+                credits are spent.
+              </ParamRow>
+              <ParamRow name="same key, different body" type="409" noChip>
+                Rejected with <code className="font-mono text-xs">idempotency_conflict</code>. This
+                catches a key accidentally reused for a different payload.
+              </ParamRow>
+              <ParamRow name="no key" type="new run" noChip>
+                Every request creates a new run and is charged normally.
+              </ParamRow>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Keys are scoped to your workspace, so they never collide with another customer. The
+            check runs before any credit is spent, and a retry that arrives while the first is still
+            in flight also returns <code className="font-mono text-xs">409 Conflict</code> rather
+            than double-charging.
           </p>
         </RefSection>
 
         <RefSection
           id="webhooks"
           title="Webhooks"
-          rail={<CodeBlock label="X-FHIRfix-Signature" code={`t=1731628800,v1=3f9a1c...`} />}
+          rail={
+            <>
+              <CodeBlock code={WEBHOOK_PAYLOAD} label="run.completed payload" />
+              <CodeBlock code={VERIFY_SIGNATURE} label="verify the signature (node)" />
+            </>
+          }
         >
           <p className="text-sm text-muted-foreground">
-            Register an endpoint in developer settings to get a signed POST when a run completes or
-            fails, instead of polling. Every delivery carries an{" "}
-            <code className="font-mono text-xs">X-FHIRfix-Signature</code> header of the form{" "}
-            <code className="font-mono text-xs">t=&lt;timestamp&gt;,v1=&lt;hmac&gt;</code>. Verify
-            it by computing the HMAC-SHA256 of{" "}
-            <code className="font-mono text-xs">&lt;timestamp&gt;.&lt;body&gt;</code> with your
-            signing secret and comparing it to <code className="font-mono text-xs">v1</code>.
+            Register an endpoint in developer settings to get a signed POST when a run finishes,
+            instead of polling.
           </p>
+          <div>
+            <h3 className="text-sm font-medium">Events</h3>
+            <div className="mt-1">
+              <ParamRow name="run.completed" type="event" noChip>
+                A run finished. The payload carries the before/after score and finding counts.
+              </ParamRow>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium">Verifying a delivery</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Every delivery carries an{" "}
+              <code className="font-mono text-xs">X-FHIRfix-Signature</code> header of the form{" "}
+              <code className="font-mono text-xs">t=&lt;timestamp&gt;,v1=&lt;hmac&gt;</code>.
+              Compute the HMAC-SHA256 of{" "}
+              <code className="font-mono text-xs">&lt;timestamp&gt;.&lt;raw body&gt;</code> with
+              your signing secret and compare it to <code className="font-mono text-xs">v1</code> in
+              constant time. Sign the raw body, not a re-serialized object, or the hash will not
+              match. Reject deliveries whose timestamp is older than a few minutes to stop replays.
+            </p>
+          </div>
         </RefSection>
       </div>
 
