@@ -30,7 +30,7 @@ interface ApiResult {
   body: string;
 }
 
-export function ApiPlayground() {
+export function ApiExplorer() {
   const [endpoint, setEndpoint] = useState<Endpoint>("fix");
   const [apiKey, setApiKey] = useState("");
   const [input, setInput] = useState(SAMPLE);

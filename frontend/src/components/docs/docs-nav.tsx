@@ -52,7 +52,7 @@ const SECTIONS: { group: string; items: NavItem[] }[] = [
   },
   {
     group: "Try it",
-    items: [{ label: "Playground", id: null, href: "/docs/playground" }],
+    items: [{ label: "API explorer", id: null, href: "/docs/api-explorer" }],
   },
 ];
 

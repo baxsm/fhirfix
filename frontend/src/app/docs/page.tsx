@@ -218,9 +218,9 @@ export default function DocsPage() {
 
           <div className="flex items-start gap-2 rounded-lg border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
             <span>
-              Prefer to try it without writing code? The{" "}
-              <Link href="/docs/playground" className="text-interactive hover:underline">
-                playground
+              Prefer to try it before you write any code? The{" "}
+              <Link href="/docs/api-explorer" className="text-interactive hover:underline">
+                API explorer
               </Link>{" "}
               fires real test-mode requests against this API from your browser.
             </span>
