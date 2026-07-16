@@ -27,7 +27,10 @@ import {
   renderText,
 } from "./report.js";
 
-const VERSION = "0.1.0";
+// replaced at build time by tsup's define, from package.json. the fallback keeps
+// `bun test`/tsx runs working, where no bundler substitution happens.
+declare const __CLI_VERSION__: string | undefined;
+const VERSION = typeof __CLI_VERSION__ === "string" ? __CLI_VERSION__ : "0.0.0-dev";
 
 export interface Io {
   out: (line: string) => void;
