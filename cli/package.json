@@ -5,13 +5,25 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "fhirfix": "./dist/bin.js"
+    "fhirfix": "dist/bin.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["fhir", "hl7", "cli", "validation", "ci", "healthcare"],
+  "keywords": [
+    "fhir",
+    "hl7",
+    "cli",
+    "validation",
+    "ci",
+    "healthcare"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -20,12 +32,10 @@
     "lint:fix": "biome check --write .",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {
-    "fhirfix": "file:../sdk/js"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
     "@types/bun": "latest",
+    "fhirfix": "file:../sdk/js",
     "tsup": "8.5.0",
     "typescript": "5.9.3"
   }
