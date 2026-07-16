@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/docs/code-block";
+import { CodeTabs } from "@/components/docs/code-tabs";
 import {
   DocSection,
   EndpointSection,
@@ -31,6 +32,68 @@ const CURL_RUNS = `curl "${BASE_URL}/runs?limit=20" \\
 
 const CURL_AUTH = `curl ${BASE_URL}/runs \\
   -H "Authorization: Bearer ffx_test_..."`;
+
+// the client libraries. every snippet below is the real shipped surface of
+// sdk/js and sdk/python - not illustrative pseudocode.
+const INSTALL_NODE = "npm install fhirfix";
+const INSTALL_PYTHON = "pip install fhirfix";
+const INSTALL_CLI = "npm install -g @fhirfix/cli";
+
+const SDK_NODE = `import { Fhirfix } from "fhirfix";
+
+const fhirfix = new Fhirfix({ apiKey: process.env.FHIRFIX_API_KEY });
+
+const result = await fhirfix.fix({ input: patientJson });
+
+console.log(result.conformanceScoreBefore, "->", result.conformanceScoreAfter);
+console.log(result.corrected);`;
+
+const SDK_PYTHON = `from fhirfix import Fhirfix
+
+fhirfix = Fhirfix()  # reads FHIRFIX_API_KEY
+
+result = fhirfix.fix(input=patient_json)
+
+print(result.conformance_score_before, "->", result.conformance_score_after)
+print(result.corrected)`;
+
+const SDK_ERRORS_NODE = `import { Fhirfix, RateLimitError, OutOfCreditsError } from "fhirfix";
+
+try {
+  await fhirfix.fix({ input, idempotencyKey: "order-1234" });
+} catch (err) {
+  if (err instanceof RateLimitError) {
+    await sleep((err.retryAfter ?? 1) * 1000);
+  } else if (err instanceof OutOfCreditsError) {
+    // add credits or enable auto-recharge
+  }
+}`;
+
+const SDK_ERRORS_PYTHON = `from fhirfix import RateLimitError, OutOfCreditsError
+
+try:
+    fhirfix.fix(input=patient_json, idempotency_key="order-1234")
+except RateLimitError as err:
+    time.sleep(err.retry_after or 1)
+except OutOfCreditsError:
+    ...  # add credits or enable auto-recharge`;
+
+const CLI_USAGE = `export FHIRFIX_API_KEY=ffx_test_...
+
+# report findings, exit 1 if any are errors
+fhirfix validate ./bundle.json
+
+# apply safe fixes in place
+fhirfix fix ./patient.json --write
+
+# gate on warnings too
+fhirfix validate ./out/*.json --fail-on warning`;
+
+const ACTION_YML = `- uses: fhirfix/fhirfix-action@v1
+  with:
+    path: "fhir/**/*.json"
+    api-key: \${{ secrets.FHIRFIX_API_KEY }}
+    fail-on: error`;
 
 const FIX_RESPONSE = `{
   "runId": "run_a2xuoyti2ktb7xynihlq",
@@ -131,14 +194,27 @@ export default function DocsPage() {
           </p>
         </header>
 
-        <div className="flex min-w-0 items-start gap-2 self-start rounded-lg border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
-          <span>
-            Prefer to try it without writing code? The{" "}
-            <Link href="/docs/playground" className="text-interactive hover:underline">
-              playground
-            </Link>{" "}
-            fires real test-mode requests against this API from your browser.
-          </span>
+        {/* the rail slot: client libraries first (the thing a reader reaches for
+            on arrival), then the playground for anyone not writing code yet. */}
+        <div className="min-w-0 space-y-3 self-start">
+          <div className="rounded-lg border bg-muted/30 p-3">
+            <p className="text-xs font-medium">Client libraries</p>
+            <div className="mt-2 space-y-1.5">
+              <ClientLib name="JavaScript" install={INSTALL_NODE} href="#sdks" />
+              <ClientLib name="Python" install={INSTALL_PYTHON} href="#sdks" />
+              <ClientLib name="CLI" install={INSTALL_CLI} href="#cli" />
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 rounded-lg border bg-muted/30 px-3 py-2.5 text-sm text-muted-foreground">
+            <span>
+              Prefer to try it without writing code? The{" "}
+              <Link href="/docs/playground" className="text-interactive hover:underline">
+                playground
+              </Link>{" "}
+              fires real test-mode requests against this API from your browser.
+            </span>
+          </div>
         </div>
       </div>
 
@@ -410,7 +486,105 @@ export default function DocsPage() {
           />
         </DocSection>
       </div>
+
+      {/* client libraries: the same prose-left / rail-right split, with the rail
+          carrying the reader's own language rather than three stacked blocks. */}
+      <div className="space-y-12">
+        <RefSection
+          id="sdks"
+          title="SDKs"
+          rail={
+            <>
+              <CodeTabs
+                tabs={[
+                  { label: "node", code: INSTALL_NODE },
+                  { label: "python", code: INSTALL_PYTHON },
+                ]}
+              />
+              <CodeTabs
+                tabs={[
+                  { label: "node", code: SDK_NODE },
+                  { label: "python", code: SDK_PYTHON },
+                ]}
+              />
+            </>
+          }
+        >
+          <p className="text-sm text-muted-foreground">
+            Typed clients for JavaScript and Python. Both cover validate, fix, convert, batch, and
+            runs, and both are dependency-free: the JavaScript client runs on Node 18+, Bun, Deno,
+            and edge runtimes, the Python client on 3.9+.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Each client reads <code className="font-mono text-xs">FHIRFIX_API_KEY</code> from the
+            environment when you do not pass a key.
+          </p>
+          <div>
+            <h3 className="text-sm font-medium">Errors and retries</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Failed requests raise a typed error per status, so you branch on the class rather than
+              a code. Rate limits and 5xx are retried automatically with backoff, honouring{" "}
+              <code className="font-mono text-xs">Retry-After</code>. A 4xx you have to fix is never
+              retried.
+            </p>
+          </div>
+        </RefSection>
+
+        <RefSection
+          id="cli"
+          title="CLI and CI"
+          rail={
+            <>
+              <CodeTabs
+                tabs={[
+                  { label: "shell", code: CLI_USAGE },
+                  { label: "github action", code: ACTION_YML },
+                ]}
+              />
+              <CodeTabs
+                tabs={[
+                  { label: "node", code: SDK_ERRORS_NODE },
+                  { label: "python", code: SDK_ERRORS_PYTHON },
+                ]}
+              />
+            </>
+          }
+        >
+          <p className="text-sm text-muted-foreground">
+            The CLI checks files from a terminal or a build. It exits{" "}
+            <code className="font-mono text-xs">1</code> when findings meet the{" "}
+            <code className="font-mono text-xs">--fail-on</code> threshold, so a pipeline fails on
+            non-conformant FHIR before it ships.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Every other exit code is a distinct reason the check could not run:{" "}
+            <code className="font-mono text-xs">3</code> auth,{" "}
+            <code className="font-mono text-xs">4</code> out of credits,{" "}
+            <code className="font-mono text-xs">5</code> API unreachable,{" "}
+            <code className="font-mono text-xs">6</code> unreadable input. A build can tell a real
+            conformance failure from an outage.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            The GitHub Action wraps the CLI and annotates the pull request diff with each finding
+            and its suggested fix.
+          </p>
+        </RefSection>
+      </div>
     </div>
+  );
+}
+
+// one row of the intro rail's client-libraries card: the language and the exact
+// install line, which is the only thing a reader needs off this card.
+function ClientLib({ name, install, href }: { name: string; install: string; href: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-baseline justify-between gap-3 rounded px-1.5 py-1 transition-colors hover:bg-muted/60"
+    >
+      <span className="text-xs text-foreground">{name}</span>
+      <code className="truncate font-mono text-[10px] text-muted-foreground/80">{install}</code>
+    </Link>
   );
 }
 

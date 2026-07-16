@@ -11,7 +11,9 @@ export default defineConfig({
   reporter: [["list"]],
   timeout: 30_000,
   use: {
-    baseURL: "http://localhost:3000",
+    // overridable so the same suite can run against a production build
+    // (next build && next start -p 3100), where dev-only behavior is absent.
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",
     screenshot: "off",
   },

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    // nodenext, NOT bundler: the TS docs are explicit that bundler resolution is
+    // wrong for a published library. authoring under nodenext surfaces the exact
+    // .d.cts/extension errors a node16-resolution consumer would hit.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+    "lib": ["es2023", "dom"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "types": ["bun"]
+    // deliberately NO "paths": tsconfig path aliases are not rewritten in emitted
+    // js, so a published package that used them would break every consumer. this
+    // SDK is standalone - it never imports the backend's @shared alias.
+  },
+  "include": ["src/**/*.ts", "tsup.config.ts"]
+}

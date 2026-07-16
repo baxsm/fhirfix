@@ -56,9 +56,15 @@ test("every nav link lands on its section and is the only active item", async ({
 // the 622px of empty padding this replaced.
 test("the last section is active at the bottom of the page", async ({ page }) => {
   await page.goto("/docs", { waitUntil: "networkidle" });
+  // read the last on-page nav item rather than hardcoding a label: adding a
+  // section at the end should not break this test, only a broken clamp should.
+  const last = await page.evaluate(() => {
+    const links = [...document.querySelectorAll('aside a[href^="/docs#"]')];
+    return links[links.length - 1]?.textContent?.trim() ?? null;
+  });
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await page.waitForTimeout(500);
-  expect(await activeItems(page)).toEqual(["Errors"]);
+  expect(await activeItems(page)).toEqual([last]);
 });
 
 // a deep link must show the right nav item on arrival, without the reader having

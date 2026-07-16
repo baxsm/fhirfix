@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fhirfix"
+version = "0.1.0"
+description = "Python client for the FHIRfix REST API. Validate, fix, and convert FHIR conformance issues."
+readme = "README.md"
+# 3.9 is the conventional floor for a library. pinning the newest interpreter
+# would lock out most of the healthcare integrations this SDK exists to serve.
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+keywords = ["fhir", "hl7", "validation", "healthcare", "interoperability"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",
+  "Typing :: Typed",
+]
+# no runtime dependencies: the client is a thin http wrapper, and the stdlib
+# covers it. an integration in a locked-down clinical environment should not need
+# to vendor a transitive tree to call one API.
+dependencies = []
+
+[project.urls]
+Homepage = "https://fhirfix.dev"
+Documentation = "https://fhirfix.dev/docs"
+
+[dependency-groups]
+dev = ["pytest>=8", "mypy>=1.11", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fhirfix"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+# mypy no longer supports checking against 3.9; 3.10 is its floor. real 3.9
+# compatibility is verified by running the test suite on a 3.9 interpreter.
+python_version = "3.10"
+strict = true
+files = ["src/fhirfix"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -38,12 +38,23 @@ Thumbs.db
 **/.data/
 .data/
 
+# python (sdk/python): bytecode, build output, editable-install metadata, venvs
+**/__pycache__/
+*.py[cod]
+**/*.egg-info/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+
 # test artifacts (any service)
 **/coverage/
 **/e2e/screenshots/
 **/playwright-report/
 **/test-results/
 **/.vitest/
+# ux-probe output: a recording of one run, not source
+**/e2e/ux-trace.json
 
 # editor
 .vscode/

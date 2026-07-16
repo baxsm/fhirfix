@@ -44,6 +44,13 @@ const SECTIONS: { group: string; items: NavItem[] }[] = [
     ],
   },
   {
+    group: "Libraries",
+    items: [
+      { label: "SDKs", id: "sdks", href: "/docs#sdks" },
+      { label: "CLI and CI", id: "cli", href: "/docs#cli" },
+    ],
+  },
+  {
     group: "Try it",
     items: [{ label: "Playground", id: null, href: "/docs/playground" }],
   },

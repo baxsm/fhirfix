@@ -1,0 +1,32 @@
+{
+  "name": "@fhirfix/cli",
+  "version": "0.1.0",
+  "description": "Command line tool for FHIRfix. Validate, fix, and convert FHIR in CI.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "fhirfix": "./dist/bin.js"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["fhir", "hl7", "cli", "validation", "ci", "healthcare"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "fhirfix": "file:../sdk/js"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.3",
+    "@types/bun": "latest",
+    "tsup": "8.5.0",
+    "typescript": "5.9.3"
+  }
+}

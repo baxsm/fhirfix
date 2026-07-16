@@ -1,0 +1,143 @@
+name: "FHIRfix"
+description: "Fail a build on FHIR conformance problems. Annotates the PR with what broke and how to fix it."
+author: "FHIRfix"
+
+branding:
+  icon: "check-circle"
+  color: "green"
+
+inputs:
+  path:
+    description: "File or glob to check. Space-separate multiple globs."
+    required: true
+    default: "**/*.json"
+  api-key:
+    description: "A FHIRfix API key. Store it as a secret, never inline."
+    required: true
+  command:
+    description: "validate, fix, or convert."
+    required: false
+    default: "validate"
+  fail-on:
+    description: "Fail the build on error, warning, or info."
+    required: false
+    default: "error"
+  profile:
+    description: "Profile URL to validate against. Space-separate multiple profiles."
+    required: false
+    default: ""
+  base-url:
+    description: "API base url. Only needed for a self-hosted deployment."
+    required: false
+    default: ""
+  version:
+    description: "Version of @fhirfix/cli to run."
+    required: false
+    default: "latest"
+  annotations:
+    description: "Annotate the PR diff with each finding."
+    required: false
+    default: "true"
+  working-directory:
+    description: "Directory to resolve the path glob from."
+    required: false
+    default: "."
+
+outputs:
+  passed:
+    description: "true when no finding met the fail-on threshold."
+    value: ${{ steps.fhirfix.outputs.passed }}
+  error-count:
+    description: "Number of error-severity findings."
+    value: ${{ steps.fhirfix.outputs.error-count }}
+  warning-count:
+    description: "Number of warning-severity findings."
+    value: ${{ steps.fhirfix.outputs.warning-count }}
+
+runs:
+  using: "composite"
+  steps:
+    # node is not guaranteed on every runner image (and a self-hosted one may have
+    # an old version). pinning it here makes the action's behavior the same
+    # everywhere rather than depending on what the image happens to ship.
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - id: fhirfix
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # inputs are passed as env, not interpolated into the script. a path like
+      # `; rm -rf /` would otherwise execute: ${{ }} is substituted before bash
+      # ever sees the line.
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_API_KEY: ${{ inputs.api-key }}
+        INPUT_COMMAND: ${{ inputs.command }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_PROFILE: ${{ inputs.profile }}
+        INPUT_BASE_URL: ${{ inputs.base-url }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_ANNOTATIONS: ${{ inputs.annotations }}
+      run: |
+        set -uo pipefail
+
+        # `required: true` is documented as NOT enforced by the runner, so a
+        # missing key would otherwise reach the CLI as an empty string.
+        if [ -z "${INPUT_API_KEY}" ]; then
+          echo "::error title=FHIRfix::api-key is required. Pass it from a secret: api-key: \${{ secrets.FHIRFIX_API_KEY }}"
+          exit 1
+        fi
+        if [ -z "${INPUT_PATH}" ]; then
+          echo "::error title=FHIRfix::path is required."
+          exit 1
+        fi
+        case "${INPUT_COMMAND}" in
+          validate|fix|convert) ;;
+          *) echo "::error title=FHIRfix::command must be validate, fix, or convert (got '${INPUT_COMMAND}')."; exit 1 ;;
+        esac
+
+        # expand the globs here: the CLI takes file paths, and bash is what knows
+        # about the checked-out tree. nullglob so a non-match yields nothing
+        # rather than the literal pattern string.
+        shopt -s nullglob globstar
+        files=()
+        for pattern in ${INPUT_PATH}; do
+          for file in ${pattern}; do
+            [ -f "${file}" ] && files+=("${file}")
+          done
+        done
+
+        if [ ${#files[@]} -eq 0 ]; then
+          # a glob that matches nothing is almost always a misconfigured path, not
+          # a clean repo. failing loudly beats a green check that verified nothing.
+          echo "::error title=FHIRfix::No files matched '${INPUT_PATH}' in $(pwd). Check the path input."
+          exit 1
+        fi
+        echo "Checking ${#files[@]} file(s) against FHIRfix."
+
+        args=("${INPUT_COMMAND}" "${files[@]}" "--fail-on" "${INPUT_FAIL_ON}")
+        [ "${INPUT_ANNOTATIONS}" = "true" ] && args+=("--github")
+        [ -n "${INPUT_BASE_URL}" ] && args+=("--base-url" "${INPUT_BASE_URL}")
+        for profile in ${INPUT_PROFILE}; do
+          args+=("--profile" "${profile}")
+        done
+
+        # the CLI writes passed/error-count/warning-count to $GITHUB_OUTPUT and the
+        # findings table to $GITHUB_STEP_SUMMARY itself.
+        FHIRFIX_API_KEY="${INPUT_API_KEY}" npx --yes "@fhirfix/cli@${INPUT_VERSION}" "${args[@]}"
+        code=$?
+
+        # translate the CLI's exit contract into CI terms. 1 means the gate tripped
+        # (the annotations already say why). anything else means the check could
+        # not run, which is a different conversation than "your FHIR is broken".
+        case $code in
+          0) echo "FHIRfix passed." ;;
+          1) echo "::error title=FHIRfix::Conformance findings at or above '${INPUT_FAIL_ON}'. See the annotations and the job summary." ;;
+          3) echo "::error title=FHIRfix::The API key was rejected. Check the secret and its scopes." ;;
+          4) echo "::error title=FHIRfix::The workspace is out of credits." ;;
+          5) echo "::error title=FHIRfix::Could not reach the FHIRfix API. This is not a problem with your files." ;;
+          6) echo "::error title=FHIRfix::An input file is not valid FHIR or HL7v2." ;;
+          *) echo "::error title=FHIRfix::fhirfix exited with code ${code}." ;;
+        esac
+        exit $code
