@@ -47,6 +47,21 @@ function resourceTypeFromPath(fhirpath?: string): string | undefined {
   return head && /^[A-Z]/.test(head) ? head : undefined;
 }
 
+// HAPI reports a cardinality error against the PARENT element, so expression[0] is
+// just "Patient" while the element actually missing ("Patient.identifier") appears
+// only in the message text. taking expression[0] alone tells the reader to add a
+// resource they already have, and collapses every missing element on one resource
+// into a single finding (same path + same message id = same fingerprint).
+// recover the real path from the message when it names a deeper element.
+function pathFromCardinalityMessage(text: string, fhirpath?: string): string | undefined {
+  const named = text.match(/^([A-Z]\w*(?:\.\w+(?:\[\d+\])?)+):\s*(?:minimum required|max)/)?.[1];
+  if (!named) return undefined;
+  // only trust it when it agrees with the resource the validator pointed at, and is
+  // strictly deeper than what expression[0] already gave us.
+  if (fhirpath && !named.startsWith(`${fhirpath}.`)) return undefined;
+  return named;
+}
+
 // turn a cryptic validator message into a plain-language headline. deterministic,
 // no LLM. covers the common error families; LLM prose polish is optional and
 // happens later, never in this hot path.
@@ -78,7 +93,11 @@ function plainLanguage(
     return `${path} uses an element the profile doesn't allow. Remove it or use the profile-defined element.`;
   }
   if (/minimum required|must have|is required/i.test(text)) {
-    return `${path} is required by the profile but missing. Provide a value.`;
+    const min = text.match(/minimum required = (\d+)/)?.[1];
+    // fhirpath is the element the profile wants (recovered from the message when
+    // HAPI blamed the parent), so name it rather than the resource it sits on.
+    const needs = min && Number(min) > 1 ? `at least ${min} values` : "a value";
+    return `${path} is required by the profile but missing. Provide ${needs}.`;
   }
   // fall back to a lightly cleaned version of the raw text.
   const cleaned = text.replace(/\s+/g, " ").trim();
@@ -116,7 +135,9 @@ export function normalizeOutcome(oo: OperationOutcome): EngineFinding[] {
   const byFingerprint = new Map<string, EngineFinding>();
   for (const issue of issues) {
     const { source, messageId } = readExtensions(issue);
-    const fhirpath = issue.expression?.[0] ?? issue.location?.[0];
+    const rawPath = issue.expression?.[0] ?? issue.location?.[0];
+    const issueText = issue.details?.text ?? issue.diagnostics ?? "";
+    const fhirpath = pathFromCardinalityMessage(issueText, rawPath) ?? rawPath;
     const category = categorize(issue, source);
     const resourceType = resourceTypeFromPath(fhirpath);
     const fp = fingerprint({ ruleSource: messageId ?? issue.code, category, resourceType, fhirpath });
