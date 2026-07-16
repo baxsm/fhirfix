@@ -26,12 +26,12 @@ test("sign up, verify, create workspace, reach dashboard, switch theme", async (
   await page.goto(verifyUrl);
 
   // auto-signed-in and sent to create-first-workspace
-  await expect(page.getByRole("heading", { name: "Create a workspace" })).toBeVisible({
+  await expect(page.getByRole("heading", { name: "Create your first workspace" })).toBeVisible({
     timeout: 10_000,
   });
 
   // create the workspace
-  await page.getByLabel("Name").fill(`E2E Health ${stamp}`);
+  await page.getByLabel("Workspace name").fill(`E2E Health ${stamp}`);
   await page.getByRole("button", { name: "Create workspace" }).click();
 
   // dashboard overview
@@ -41,7 +41,7 @@ test("sign up, verify, create workspace, reach dashboard, switch theme", async (
   // switch theme on settings
   await page.getByRole("link", { name: "Settings" }).click();
   await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
-  await page.getByRole("tab", { name: "Appearance" }).click();
+  await page.getByRole("button", { name: "Appearance" }).click();
   await page.getByRole("button", { name: "Light" }).click();
   await expect(page.locator("html")).toHaveClass(/light/);
 

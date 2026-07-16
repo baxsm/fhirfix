@@ -21,9 +21,14 @@ const SEVERITY_LABEL: Record<string, (t: string) => string> = {
   info: blue,
 };
 
-function severityTag(severity: string): string {
-  const paintFn = SEVERITY_LABEL[severity] ?? dim;
-  return paintFn(severity.padEnd(7));
+const green = (t: string) => paint("32", t);
+
+// an applied finding was fixed in the returned artifact, so tagging it "error"
+// would read as a failure in a CI log that actually passed.
+function severityTag(finding: Finding): string {
+  if (finding.fixStatus === "applied") return green("fixed".padEnd(7));
+  const paintFn = SEVERITY_LABEL[finding.severity] ?? dim;
+  return paintFn(finding.severity.padEnd(7));
 }
 
 // where a finding points, for the human reader. fhirpath is the precise locator;
@@ -42,7 +47,7 @@ export function renderText(file: string, summary: GateSummary, findings: Finding
   }
 
   for (const finding of findings) {
-    lines.push(`  ${severityTag(finding.severity)} ${locationOf(finding)}`);
+    lines.push(`  ${severityTag(finding)} ${locationOf(finding)}`);
     lines.push(`          ${finding.plainMessage}`);
     if (finding.suggestedFix) lines.push(`          ${dim(`fix: ${finding.suggestedFix}`)}`);
     if (finding.occurrenceCount > 1) {
@@ -56,8 +61,9 @@ export function renderText(file: string, summary: GateSummary, findings: Finding
       ? yellow(`${summary.warnings} warning${summary.warnings === 1 ? "" : "s"}`)
       : null,
     summary.infos ? blue(`${summary.infos} info`) : null,
+    summary.applied ? green(`${summary.applied} fixed`) : null,
   ].filter(Boolean);
-  lines.push(`  ${counts.join(", ")}`);
+  lines.push(`  ${counts.length > 0 ? counts.join(", ") : dim("no findings")}`);
 
   return lines.join("\n");
 }

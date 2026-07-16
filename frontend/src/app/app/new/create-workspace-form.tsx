@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 import { useTRPC } from "@/trpc/client";
 
 function slugify(value: string) {
@@ -44,6 +45,12 @@ export function CreateWorkspaceForm({ onClose, autoFocus = true, layout = "page"
       onSuccess: async (org) => {
         toast.success("Workspace created");
         await queryClient.invalidateQueries({ queryKey: trpc.workspace.list.queryKey() });
+        // the org is created server-side via trpc, so better-auth's client never
+        // sees /organization/create and its $listOrg atom stays stale for the rest
+        // of the session. every view that resolves the workspace through
+        // useListOrganizations would then render its skeleton forever. flipping the
+        // signal is what better-auth's own atomListeners do on a client-side create.
+        authClient.$store.notify("$listOrg");
         onClose?.();
         router.push(`/app/${org.slug}`);
       },

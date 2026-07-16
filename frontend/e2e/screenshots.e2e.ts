@@ -30,10 +30,10 @@ test("capture shell and system pages in dark and light", async ({ page }) => {
     .not.toBeNull();
   await page.goto(latestLink(/Verify your FHIRfix email/, email));
 
-  await expect(page.getByRole("heading", { name: "Create a workspace" })).toBeVisible({
+  await expect(page.getByRole("heading", { name: "Create your first workspace" })).toBeVisible({
     timeout: 10_000,
   });
-  await page.getByLabel("Name").fill(`Shot Health ${stamp}`);
+  await page.getByLabel("Workspace name").fill(`Shot Health ${stamp}`);
   await page.getByRole("button", { name: "Create workspace" }).click();
   await expect(page.getByRole("heading", { name: "Get started" })).toBeVisible({ timeout: 10_000 });
 

@@ -12,10 +12,23 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+// the form notifies better-auth's $listOrg atom after a create. importing the real
+// client would pull in env.ts, which has no valid env under vitest. hoisted because
+// vi.mock factories run before top-level consts are initialized.
+const { notify } = vi.hoisted(() => ({ notify: vi.fn() }));
+vi.mock("@/lib/auth-client", () => ({ authClient: { $store: { notify } } }));
+// hold the options the form passes to the create mutation so a test can invoke the
+// real onSuccess without a network round trip.
+let capturedOptions: { onSuccess?: (org: { slug: string }) => Promise<void> } | null = null;
 vi.mock("@/trpc/client", () => ({
   useTRPC: () => ({
     workspace: {
-      create: { mutationOptions: (o: unknown) => o },
+      create: {
+        mutationOptions: (o: { onSuccess?: (org: { slug: string }) => Promise<void> }) => {
+          capturedOptions = o;
+          return o;
+        },
+      },
       list: { queryKey: () => ["workspace", "list"] },
     },
   }),
@@ -27,6 +40,7 @@ describe("CreateWorkspaceForm", () => {
   beforeEach(() => {
     mutate.mockReset();
     push.mockReset();
+    notify.mockReset();
     isPending = false;
   });
 
@@ -58,5 +72,21 @@ describe("CreateWorkspaceForm", () => {
     const onClose = vi.fn();
     render(<CreateWorkspaceForm layout="modal" onClose={onClose} />);
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  // the org is created server-side through trpc, so better-auth's client never sees
+  // /organization/create and its $listOrg atom never refetches on its own. without
+  // this notify, every view resolving the workspace via useListOrganizations renders
+  // its skeleton forever.
+  test("refreshes better-auth's org list after a create", async () => {
+    const user = userEvent.setup();
+    render(<CreateWorkspaceForm layout="page" />);
+    await user.type(screen.getByLabelText(/workspace name/i), "Northwind Health");
+    await user.click(screen.getByRole("button", { name: /create workspace/i }));
+
+    // the trpc mock captures mutationOptions, so this is the form's real onSuccess.
+    expect(capturedOptions?.onSuccess).toBeDefined();
+    await capturedOptions?.onSuccess?.({ slug: "northwind-health" });
+    expect(notify).toHaveBeenCalledWith("$listOrg");
   });
 });

@@ -21,7 +21,38 @@ function finding(severity: Severity, message = "problem"): Finding {
   };
 }
 
+// the exact finding POST /fix returns for a gender "M" Patient once the registry
+// mapping is applied: an error, already fixed in the corrected artifact. copied
+// from a real API response (conformanceScoreAfter 1000).
+function appliedFinding(): Finding {
+  return { ...finding("error"), fixStatus: "applied" };
+}
+
 describe("tripsGate", () => {
+  // fix() returns what WAS wrong alongside what remains. gating on an applied
+  // finding fails a build that fix() just made conformant, so `fhirfix fix` in CI
+  // could never pass.
+  test("an applied finding never trips the gate", () => {
+    expect(tripsGate(appliedFinding(), "error")).toBe(false);
+    expect(tripsGate(appliedFinding(), "warning")).toBe(false);
+    expect(tripsGate(appliedFinding(), "info")).toBe(false);
+  });
+
+  test("fix passes when every finding was applied", () => {
+    const summary = summarize([appliedFinding(), appliedFinding()], "error");
+    expect(summary.passed).toBe(true);
+    expect(summary.errors).toBe(0);
+    expect(summary.applied).toBe(2);
+    expect(summary.blocking).toHaveLength(0);
+  });
+
+  test("an unfixed error still trips the gate next to an applied one", () => {
+    const summary = summarize([appliedFinding(), finding("error")], "error");
+    expect(summary.passed).toBe(false);
+    expect(summary.errors).toBe(1);
+    expect(summary.applied).toBe(1);
+  });
+
   test("--fail-on error only trips on errors", () => {
     expect(tripsGate(finding("error"), "error")).toBe(true);
     expect(tripsGate(finding("warning"), "error")).toBe(false);
