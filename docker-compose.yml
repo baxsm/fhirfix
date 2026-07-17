@@ -1,7 +1,13 @@
+# the sidecars start by default. postgres and redis are opt-in via the "local-db"
+# profile: dev normally points DATABASE_URL/REDIS_URL at the railway instances, but
+# these stay here for working offline or when railway is unavailable.
+#   docker compose up -d                        -> validator + converter only
+#   docker compose --profile local-db up -d     -> also postgres + redis
 services:
   postgres:
     image: postgres:16-alpine
     container_name: fhirfix-postgres
+    profiles: ["local-db"]
     restart: unless-stopped
     environment:
       POSTGRES_USER: fhirfix
@@ -20,6 +26,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: fhirfix-redis
+    profiles: ["local-db"]
     restart: unless-stopped
     ports:
       - "6380:6379"
