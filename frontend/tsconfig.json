@@ -21,8 +21,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@backend/app-router": ["../backend/dist-types/trpc/routers/index.d.ts"],
-      "@fhirfix/db/schema": ["../db/schema/index.ts"]
+      "@backend/app-router": ["./src/shared/backend/trpc/routers/index.d.ts"]
     }
   },
   "include": [

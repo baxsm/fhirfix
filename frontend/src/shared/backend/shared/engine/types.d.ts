@@ -1,0 +1,72 @@
+export type FhirVersion = "R4" | "R4B" | "R5";
+export type InputType = "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
+export type Severity = "error" | "warning" | "info";
+export type FindingCategory = "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
+export type FixConfidence = "auto" | "one_click" | "manual";
+export type FixStatus = "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
+export interface OperationOutcomeIssue {
+    severity: Severity;
+    code: string;
+    details?: {
+        text?: string;
+    };
+    diagnostics?: string;
+    expression?: string[];
+    location?: string[];
+    extension?: Array<{
+        url: string;
+        valueString?: string;
+        valueCode?: string;
+        valueInteger?: number;
+    }>;
+}
+export interface OperationOutcome {
+    resourceType: "OperationOutcome";
+    issue?: OperationOutcomeIssue[];
+}
+export interface EngineFinding {
+    severity: Severity;
+    category: FindingCategory;
+    ruleSource: string;
+    specCitation: string;
+    resourceType?: string;
+    fhirpath?: string;
+    rawValidatorMessage: string;
+    plainMessage: string;
+    suggestedFix: string;
+    fixConfidence: FixConfidence;
+    fixStatus: FixStatus;
+    dedupFingerprint: string;
+    occurrenceCount: number;
+    rank: number;
+}
+export interface RegistryMapping {
+    type: "authority_to_system" | "code_to_code" | "facility_to_org" | "custom";
+    sourceValue: string;
+    targetValue: string;
+    targetSystem: string | null;
+    status: "active" | "suggested" | "deprecated";
+}
+export interface MappingSuggestion {
+    type: RegistryMapping["type"];
+    sourceValue: string;
+    targetValue: string;
+    targetSystem: string | null;
+    confidence: number;
+    reason: string;
+}
+export interface RemediationResult {
+    inputType: InputType;
+    fhirVersion: FhirVersion;
+    profilesApplied: string[];
+    resourceCount: number;
+    conformanceScoreBefore: number;
+    conformanceScoreAfter: number;
+    autoFixApplied: boolean;
+    findings: EngineFinding[];
+    findingsTotal: number;
+    findingsAutoFixable: number;
+    suggestions: MappingSuggestion[];
+    correctedResource: unknown;
+    reVerifiedClean: boolean;
+}

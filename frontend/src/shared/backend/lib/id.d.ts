@@ -1,0 +1,22 @@
+export declare const idPrefix: {
+    readonly workspaceSettings: "wss";
+    readonly run: "run";
+    readonly finding: "fnd";
+    readonly mapping: "map";
+    readonly apiKey: "key";
+    readonly ledger: "led";
+    readonly invoice: "inv";
+    readonly packet: "pkt";
+    readonly evidence: "evd";
+    readonly scheduledCheck: "sch";
+    readonly driftAlert: "drf";
+    readonly webhook: "whk";
+    readonly reportShare: "shr";
+    readonly storedObject: "obj";
+    readonly apiRequestLog: "areq";
+    readonly notification: "ntf";
+    readonly audit: "aud";
+};
+type IdKind = keyof typeof idPrefix;
+export declare function createId(kind: IdKind): string;
+export {};

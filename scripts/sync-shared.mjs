@@ -13,6 +13,7 @@
 // copy per project fixes both.
 
 import { cpSync, mkdirSync, rmSync, existsSync, readdirSync, statSync, readFileSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -55,6 +56,30 @@ function copyDir(from, to, include) {
   }
 }
 
+// the frontend needs the backend's AppRouter type for its trpc client. unlike db/
+// and engine/ this is not source we can copy - tsc emits it from the backend's
+// router. so emit first, then vendor the .d.ts tree into frontend/src/shared/backend.
+// without this the frontend cannot build on its own: a deployed service clones only
+// its own folder, so "../backend/dist-types" does not exist.
+function vendorRouterTypes() {
+  const emitted = join(root, "backend", "dist-types");
+  // bun ships as a real bun.exe on windows (unlike npm/pnpm, which are .cmd shims
+  // and would need shell:true). so no shell here, which also keeps the args escaped.
+  execFileSync("bun", ["run", "build:types"], {
+    cwd: join(root, "backend"),
+    stdio: "inherit",
+  });
+  if (!existsSync(emitted)) throw new Error(`router types not emitted: ${emitted}`);
+
+  const dst = join(root, "frontend", "src", "shared", "backend");
+  rmSync(dst, { recursive: true, force: true });
+  copyDir(emitted, dst, (name) => name.endsWith(".d.ts"));
+  writeFileSync(
+    join(root, "frontend", "src", "shared", "README.md"),
+    "# Generated - do not edit\n\nThe backend's emitted AppRouter types, copied by `scripts/sync-shared.mjs`.\nEdit the router at `backend/src/trpc/routers/`, then run `node scripts/sync-shared.mjs` (predev/prebuild run it automatically).\n",
+  );
+}
+
 let count = 0;
 for (const { project, shared } of targets) {
   const sharedRoot = join(root, project, "src", "shared");
@@ -72,4 +97,8 @@ for (const { project, shared } of targets) {
   );
 }
 
-console.log(`sync-shared: vendored ${count} shared package(s) into ${targets.length} project(s).`);
+vendorRouterTypes();
+
+console.log(
+  `sync-shared: vendored ${count} shared package(s) into ${targets.length} project(s), plus router types into frontend.`,
+);
