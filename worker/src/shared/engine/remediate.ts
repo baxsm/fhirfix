@@ -42,13 +42,18 @@ export function collectResources(parsed: unknown): unknown[] {
 
 // conformance score 0-1000. starts at 1000, each error costs more than each warning,
 // weighted by occurrence. floored at 0. a clean resource scores 1000.
-export function scoreFrom(findings: EngineFinding[]): number {
+// the penalty budget scales with resourceCount so a 14-resource bundle is not
+// scored against the same 1000 points as a single resource. without this a
+// realistic hl7v2 message floors at 0 before and after fixing, and the report
+// shows no improvement for real work.
+export function scoreFrom(findings: EngineFinding[], resourceCount = 1): number {
   let penalty = 0;
   for (const f of findings) {
     const per = f.severity === "error" ? 120 : f.severity === "warning" ? 30 : 5;
     penalty += per * Math.min(f.occurrenceCount, 20);
   }
-  return Math.max(0, 1000 - penalty);
+  const scale = Math.max(1, resourceCount);
+  return Math.max(0, Math.round(1000 - penalty / scale));
 }
 
 export async function validateAll(
@@ -139,7 +144,7 @@ export async function runRemediation(
 
   // score-before counts the validator findings plus the placeholder defects the
   // proactive pass will fix, so the after-score reflects the placeholder repair too.
-  const scoreBefore = scoreFrom([...naiveFindings, ...proactiveApplied]);
+  const scoreBefore = scoreFrom([...naiveFindings, ...proactiveApplied], resources.length);
 
   let autoFixApplied = proactiveApplied.length > 0;
   for (const finding of naiveFindings) {
@@ -189,7 +194,7 @@ export async function runRemediation(
       f.rank = rankScore(f.severity, f.fixConfidence, f.occurrenceCount);
     }
     finalFindings.sort((a, b) => b.rank - a.rank);
-    scoreAfter = scoreFrom(finalFindings);
+    scoreAfter = scoreFrom(finalFindings, resources.length);
     reVerifiedClean = finalFindings.filter((f) => f.severity === "error").length === 0;
   } else {
     reVerifiedClean = naiveFindings.filter((f) => f.severity === "error").length === 0;

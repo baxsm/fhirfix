@@ -13,7 +13,7 @@ export interface EngineDeps {
     converter: ConverterClient;
 }
 export declare function collectResources(parsed: unknown): unknown[];
-export declare function scoreFrom(findings: EngineFinding[]): number;
+export declare function scoreFrom(findings: EngineFinding[], resourceCount?: number): number;
 export declare function validateAll(deps: EngineDeps, resources: unknown[], explicitProfiles: string[] | undefined): Promise<{
     outcome: OperationOutcome;
     profilesApplied: string[];

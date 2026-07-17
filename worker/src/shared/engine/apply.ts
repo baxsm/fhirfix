@@ -78,7 +78,7 @@ export async function applyFixes(input: ApplyFixInput, deps: EngineDeps): Promis
   return {
     correctedResource: corrected,
     findings: finalFindings,
-    conformanceScoreAfter: scoreFrom(finalFindings),
+    conformanceScoreAfter: scoreFrom(finalFindings, resources.length),
     appliedFingerprints: applied,
     skippedFingerprints: skipped,
     reVerifiedClean: finalFindings.filter((f) => f.severity === "error").length === 0,
@@ -126,8 +126,9 @@ interface OpenRouterMessage {
 // kept if re-validation shows the resource is no worse. real API call, no mock.
 export async function fixWithAi(input: AiFixInput, deps: EngineDeps): Promise<AiFixResult> {
   const parsed = JSON.parse(input.corrected);
-  const before = await validateAll(deps, collectResources(parsed), input.profiles);
-  const beforeScore = scoreFrom(normalizeOutcome(before.outcome));
+  const beforeResources = collectResources(parsed);
+  const before = await validateAll(deps, beforeResources, input.profiles);
+  const beforeScore = scoreFrom(normalizeOutcome(before.outcome), beforeResources.length);
 
   const system: OpenRouterMessage = {
     role: "system",
@@ -204,9 +205,11 @@ export async function fixWithAi(input: AiFixInput, deps: EngineDeps): Promise<Ai
   for (const resource of collectResources(candidate)) {
     if (setAtPath(resource, patch.path, patch.value)) break;
   }
-  const afterOutcome = await validateAll(deps, collectResources(candidate), input.profiles);
+  const candidateResources = collectResources(candidate);
+  const afterOutcome = await validateAll(deps, candidateResources, input.profiles);
   const afterFindings = normalizeOutcome(afterOutcome.outcome);
-  const afterScore = scoreFrom(afterFindings);
+  // same scale as beforeScore or the "never makes things worse" check is meaningless.
+  const afterScore = scoreFrom(afterFindings, candidateResources.length);
 
   if (afterScore < beforeScore) {
     // the patch made it worse; discard, report the original.
