@@ -3,7 +3,7 @@ import { detectInput } from "./detect";
 import { deriveFix, type FixContext, remapPlaceholderSystems } from "./fixes";
 import { fingerprint } from "./fingerprint";
 import { normalizeOutcome, rankScore } from "./normalize";
-import { profileFor } from "./profiles";
+import { profileFor, profilesForResource } from "./profiles";
 import type {
   EngineFinding,
   MappingSuggestion,
@@ -65,9 +65,12 @@ export async function validateAll(
   const profilesApplied = new Set<string>();
   for (const resource of resources) {
     const rt = (resource as { resourceType?: string }).resourceType ?? "";
+    // an explicit list covers the whole bundle, so narrow it to this resource's
+    // type. passing all of them to every resource makes the validator report a
+    // bogus type mismatch per resource (see profilesForResource).
     const profiles =
       explicitProfiles && explicitProfiles.length > 0
-        ? explicitProfiles
+        ? profilesForResource(rt, explicitProfiles)
         : [profileFor(rt)].filter((p): p is string => Boolean(p));
     for (const p of profiles) profilesApplied.add(p);
     const oo = await deps.validator.validate(resource, profiles);

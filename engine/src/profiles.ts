@@ -28,3 +28,23 @@ export function profileFor(resourceType: string): string | undefined {
 export function allDefaultProfiles(): string[] {
   return Object.values(RESOURCE_TO_USCORE);
 }
+
+// keep only the profiles that belong to this resourceType. a caller-supplied list
+// covers a whole bundle, so handing every profile to every resource makes the
+// validator report a type mismatch ("profile type was 'Organization' ... found
+// 'Location'") for each resource the profile was never meant for. an unknown
+// profile is kept: it may be a custom IG this map does not know about, and only
+// the resource it targets should be affected.
+export function profilesForResource(resourceType: string, candidates: string[]): string[] {
+  const own = RESOURCE_TO_USCORE[resourceType];
+  const knownOther = new Set(
+    Object.entries(RESOURCE_TO_USCORE)
+      .filter(([rt]) => rt !== resourceType)
+      .map(([, canonical]) => canonical),
+  );
+  return candidates.filter((c) => {
+    const base = c.split("|")[0] ?? c;
+    if (base === own) return true;
+    return !knownOther.has(base);
+  });
+}

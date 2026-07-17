@@ -92,7 +92,7 @@ export declare const apiKey: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "api_key";
             dataType: "string";
             columnType: "PgText";
-            data: "live" | "test";
+            data: "test" | "live";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -192,7 +192,7 @@ export declare const apiKey: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type ApiKey = typeof apiKey.$inferSelect;
 export type NewApiKey = typeof apiKey.$inferInsert;

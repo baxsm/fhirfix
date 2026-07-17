@@ -41,7 +41,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "api_key" | "scheduled" | "system" | "user";
+            data: "user" | "api_key" | "scheduled" | "system";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -75,7 +75,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "api" | "ci" | "scheduled" | "ui";
+            data: "scheduled" | "ui" | "api" | "ci";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -92,7 +92,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
+            data: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -198,7 +198,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "completed" | "failed" | "queued" | "running";
+            data: "queued" | "running" | "completed" | "failed";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -483,7 +483,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "finding";
@@ -545,7 +545,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "error" | "info" | "warning";
+            data: "error" | "warning" | "info";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -562,7 +562,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
+            data: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -698,7 +698,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "auto" | "manual" | "one_click";
+            data: "auto" | "one_click" | "manual";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -715,7 +715,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
+            data: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -813,7 +813,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const reportShare: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "report_share";
@@ -973,7 +973,7 @@ export declare const reportShare: import("drizzle-orm/pg-core").PgTableWithColum
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type Run = typeof run.$inferSelect;
 export type NewRun = typeof run.$inferInsert;
