@@ -1,3 +1,4 @@
+import type { Db } from "./client";
 export interface BlobStore {
     put(key: string, content: string, contentType: string): Promise<{
         sha256: string;
@@ -5,4 +6,4 @@ export interface BlobStore {
     }>;
     get(key: string): Promise<string>;
 }
-export declare function createBlobStore(rootDir: string): BlobStore;
+export declare function createBlobStore(db: Db): BlobStore;

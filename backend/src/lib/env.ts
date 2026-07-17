@@ -35,8 +35,6 @@ const baseEnv = createEnv({
     CONVERTER_URL: z.url().default("http://localhost:8081"),
     // default IG pool: US Core 6.1.0.
     US_CORE_VERSION: z.string().default("6.1.0"),
-    // local blob store root for phase-2 artifacts (input/corrected).
-    BLOB_STORE_DIR: z.string().default(".data/blobs"),
 
     // phase-4 billing (Polar). empty token => checkout is unavailable and returns
     // a clean "billing not configured" error instead of throwing at construction.

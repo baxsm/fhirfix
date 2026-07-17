@@ -100,16 +100,23 @@ export async function persistCompletedRun(
     correctedJson,
     "application/json",
   );
-  await db.insert(schema.storedObject).values({
-    key: correctedKey,
-    workspaceId,
-    bucket: "local",
-    kind: "corrected",
-    sizeBytes,
-    contentType: "application/json",
-    sha256,
-    uploadState: "stored",
-  });
+  // blobStore.put created the row with the bytes; merge the metadata onto it.
+  await db
+    .insert(schema.storedObject)
+    .values({
+      key: correctedKey,
+      workspaceId,
+      bucket: "local",
+      kind: "corrected",
+      sizeBytes,
+      contentType: "application/json",
+      sha256,
+      uploadState: "stored",
+    })
+    .onConflictDoUpdate({
+      target: schema.storedObject.key,
+      set: { bucket: "local", kind: "corrected", sizeBytes, sha256, uploadState: "stored" },
+    });
 
   await writeFindings(db, runId, workspaceId, result);
 

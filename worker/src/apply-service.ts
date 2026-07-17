@@ -102,14 +102,11 @@ async function writeCorrected(
   const key = blobKey(workspaceId, runId, "corrected");
   const json = JSON.stringify(correctedResource, null, 2);
   const { sha256, sizeBytes } = await blobStore.put(key, json, "application/json");
-  // corrected key is stable per run; upsert the tracking row.
-  const existing = await db
-    .select({ key: schema.storedObject.key })
-    .from(schema.storedObject)
-    .where(eq(schema.storedObject.key, key))
-    .limit(1);
-  if (existing.length === 0) {
-    await db.insert(schema.storedObject).values({
+  // corrected key is stable per run, and blobStore.put has already created the row
+  // with the bytes, so merge the metadata onto whichever row is there.
+  await db
+    .insert(schema.storedObject)
+    .values({
       key,
       workspaceId,
       bucket: "local",
@@ -118,13 +115,11 @@ async function writeCorrected(
       contentType: "application/json",
       sha256,
       uploadState: "stored",
+    })
+    .onConflictDoUpdate({
+      target: schema.storedObject.key,
+      set: { bucket: "local", kind: "corrected", sizeBytes, sha256, uploadState: "stored" },
     });
-  } else {
-    await db
-      .update(schema.storedObject)
-      .set({ sizeBytes, sha256 })
-      .where(eq(schema.storedObject.key, key));
-  }
   return key;
 }
 

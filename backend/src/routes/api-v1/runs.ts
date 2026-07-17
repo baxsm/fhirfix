@@ -38,17 +38,24 @@ export async function batchController(c: Context<ApiV1Env>) {
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
   const { sha256, sizeBytes } = await blobStore.put(inputKey, input, "application/json");
-  await db.insert(schema.storedObject).values({
-    key: inputKey,
-    workspaceId,
-    bucket: "local",
-    kind: "input",
-    sizeBytes,
-    contentType: "application/json",
-    sha256,
-    containsPhi: false,
-    uploadState: "stored",
-  });
+  // blobStore.put created the row with the bytes; merge the metadata onto it.
+  await db
+    .insert(schema.storedObject)
+    .values({
+      key: inputKey,
+      workspaceId,
+      bucket: "local",
+      kind: "input",
+      sizeBytes,
+      contentType: "application/json",
+      sha256,
+      containsPhi: false,
+      uploadState: "stored",
+    })
+    .onConflictDoUpdate({
+      target: schema.storedObject.key,
+      set: { bucket: "local", kind: "input", sizeBytes, sha256, uploadState: "stored" },
+    });
   await db.insert(schema.run).values({
     id: runId,
     workspaceId,

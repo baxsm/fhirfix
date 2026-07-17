@@ -16,7 +16,6 @@ export declare const env: {
     VALIDATOR_MAX_INFLIGHT: string;
     CONVERTER_URL: string;
     US_CORE_VERSION: string;
-    BLOB_STORE_DIR: string;
     POLAR_ACCESS_TOKEN: string;
     POLAR_WEBHOOK_SECRET: string;
     POLAR_MODE: "production" | "sandbox";

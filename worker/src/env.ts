@@ -16,7 +16,6 @@ const base = createEnv({
     VALIDATOR_MAX_INFLIGHT: portSchema.default("4"),
     CONVERTER_URL: z.url().default("http://localhost:8081"),
     US_CORE_VERSION: z.string().default("6.1.0"),
-    BLOB_STORE_DIR: z.string().default(".data/blobs"),
     WORKER_CONCURRENCY: portSchema.default("4"),
 
     // "Fix with AI" hand-off. prose/patch only, subordinate to the deterministic

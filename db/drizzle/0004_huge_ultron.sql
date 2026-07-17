@@ -1,0 +1,1 @@
+ALTER TABLE "stored_object" ADD COLUMN "content" text;

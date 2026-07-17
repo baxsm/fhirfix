@@ -32,17 +32,24 @@ export const runRouter = router({
 
     const { sha256, sizeBytes } = await blobStore.put(key, input.content, "application/json");
 
-    await ctx.db.insert(schema.storedObject).values({
-      key,
-      workspaceId: ctx.workspaceId,
-      bucket: "local",
-      kind: "input",
-      sizeBytes,
-      contentType: "application/json",
-      sha256,
-      containsPhi: false,
-      uploadState: "stored",
-    });
+    // blobStore.put created the row with the bytes; merge the metadata onto it.
+    await ctx.db
+      .insert(schema.storedObject)
+      .values({
+        key,
+        workspaceId: ctx.workspaceId,
+        bucket: "local",
+        kind: "input",
+        sizeBytes,
+        contentType: "application/json",
+        sha256,
+        containsPhi: false,
+        uploadState: "stored",
+      })
+      .onConflictDoUpdate({
+        target: schema.storedObject.key,
+        set: { bucket: "local", kind: "input", sizeBytes, sha256, uploadState: "stored" },
+      });
 
     await ctx.db.insert(schema.run).values({
       id: runId,
@@ -332,17 +339,24 @@ export const runRouter = router({
         const key = `${ctx.workspaceId}/${input.runId}/share-${token}.json`;
         const safe = JSON.stringify(redactPhi(parsed), null, 2);
         const { sha256, sizeBytes } = await blobStore.put(key, safe, "application/json");
-        await ctx.db.insert(schema.storedObject).values({
-          key,
-          workspaceId: ctx.workspaceId,
-          bucket: "local",
-          kind: "export",
-          sizeBytes,
-          contentType: "application/json",
-          sha256,
-          containsPhi: false,
-          uploadState: "stored",
-        });
+        // blobStore.put created the row with the bytes; merge the metadata onto it.
+        await ctx.db
+          .insert(schema.storedObject)
+          .values({
+            key,
+            workspaceId: ctx.workspaceId,
+            bucket: "local",
+            kind: "export",
+            sizeBytes,
+            contentType: "application/json",
+            sha256,
+            containsPhi: false,
+            uploadState: "stored",
+          })
+          .onConflictDoUpdate({
+            target: schema.storedObject.key,
+            set: { bucket: "local", kind: "export", sizeBytes, sha256, uploadState: "stored" },
+          });
         redacted = true;
       }
 

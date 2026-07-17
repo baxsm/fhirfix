@@ -6,7 +6,7 @@ import { env } from "./env";
 export const db = createDb(env.DATABASE_URL);
 export { schema };
 
-export const blobStore = createBlobStore(env.BLOB_STORE_DIR);
+export const blobStore = createBlobStore(db);
 export function blobKey(workspaceId: string, runId: string, kind: "input" | "corrected"): string {
   return `${workspaceId}/${runId}/${kind}.json`;
 }
