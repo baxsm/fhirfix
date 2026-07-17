@@ -60,6 +60,14 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
   const { data, sources } = pivot(rows, days);
   const hasSpend = rows.length > 0;
 
+  // one unit for the whole axis, chosen from the busiest day. deciding per tick
+  // mixes "$0.12" and "4.0¢" on the same axis, which does not read as a scale.
+  const peakDay = Math.max(
+    0,
+    ...data.map((d) => sources.reduce((sum, s) => sum + (Number(d[s]) || 0), 0)),
+  );
+  const inCents = peakDay > 0 && peakDay < 0.1;
+
   const config: ChartConfig = Object.fromEntries(
     sources.map((s) => [
       s,
@@ -93,10 +101,10 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
           axisLine={false}
           width={44}
           allowDecimals
-          // show cents for small daily spend so ticks are distinct (a day of a few
-          // runs is fractions of a cent), dollars once spend is larger.
+          // cents while a day of runs is fractions of a cent, dollars once spend
+          // is larger. the unit is fixed for the axis, not per tick.
           tickFormatter={(v: number) =>
-            v > 0 && v < 0.1 ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`
+            inCents ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`
           }
           className="text-[10px]"
         />
