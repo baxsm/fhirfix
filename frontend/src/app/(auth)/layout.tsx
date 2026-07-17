@@ -2,12 +2,14 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { AuthHero } from "./auth-hero";
+import { SignedInGuard } from "./signed-in-guard";
 
 // context-rich auth shell: a living brand/explainer panel + the form on the right.
 // not a bare centered form on a gradient (ui.md).
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-svh lg:grid-cols-[3fr_2fr]">
+      <SignedInGuard />
       <AuthHero />
 
       {/* form panel. a faint emerald seam glow runs down the divider so the two
