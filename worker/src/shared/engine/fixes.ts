@@ -47,9 +47,9 @@ function lookupMapping(
   type: RegistryMapping["type"],
   sourceValue: string,
 ): RegistryMapping | undefined {
-  return ctx.mappings.find(
-    (m) => m.type === type && m.status === "active" && m.sourceValue === sourceValue,
-  );
+  // first match wins, and the loader orders source_system-scoped rows ahead of
+  // workspace-scoped ones, so the most specific mapping is the one that applies.
+  return ctx.mappings.find((m) => m.type === type && m.sourceValue === sourceValue);
 }
 
 // derive a fix for a coding-with-no-system finding on identifier.type.coding.

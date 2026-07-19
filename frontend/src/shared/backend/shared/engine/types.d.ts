@@ -45,7 +45,7 @@ export interface RegistryMapping {
     sourceValue: string;
     targetValue: string;
     targetSystem: string | null;
-    status: "active" | "suggested" | "deprecated";
+    status: "active";
 }
 export interface MappingSuggestion {
     type: RegistryMapping["type"];

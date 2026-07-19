@@ -1,11 +1,10 @@
+import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
 import { persistCompletedRun } from "@shared/db/runs";
 import {
   getEngineDeps,
   runRemediation,
   SidecarError,
   type EngineConfig,
-  type MappingSuggestion,
-  type RegistryMapping,
   type RemediationResult,
 } from "@shared/engine";
 import { and, eq } from "drizzle-orm";
@@ -42,57 +41,6 @@ export class RunFailedError extends Error {
   }
 }
 
-async function loadMappings(workspaceId: string): Promise<RegistryMapping[]> {
-  const rows = await db
-    .select({
-      type: schema.mappingRegistryEntry.type,
-      sourceValue: schema.mappingRegistryEntry.sourceValue,
-      targetValue: schema.mappingRegistryEntry.targetValue,
-      targetSystem: schema.mappingRegistryEntry.targetSystem,
-      status: schema.mappingRegistryEntry.status,
-    })
-    .from(schema.mappingRegistryEntry)
-    .where(
-      and(
-        eq(schema.mappingRegistryEntry.workspaceId, workspaceId),
-        eq(schema.mappingRegistryEntry.status, "active"),
-      ),
-    );
-  return rows;
-}
-
-// persist auto-learned suggestions, skipping ones already suggested for this
-// workspace so we don't pile up duplicates across runs.
-async function persistSuggestions(
-  workspaceId: string,
-  suggestions: MappingSuggestion[],
-): Promise<void> {
-  for (const s of suggestions) {
-    const existing = await db
-      .select({ id: schema.mappingRegistryEntry.id })
-      .from(schema.mappingRegistryEntry)
-      .where(
-        and(
-          eq(schema.mappingRegistryEntry.workspaceId, workspaceId),
-          eq(schema.mappingRegistryEntry.type, s.type),
-          eq(schema.mappingRegistryEntry.sourceValue, s.sourceValue),
-        ),
-      )
-      .limit(1);
-    if (existing.length > 0) continue;
-    await db.insert(schema.mappingRegistryEntry).values({
-      id: mappingId(),
-      workspaceId,
-      type: s.type,
-      sourceValue: s.sourceValue,
-      targetValue: s.targetValue,
-      targetSystem: s.targetSystem,
-      status: "suggested",
-      confidence: s.confidence,
-      createdBy: "system",
-    });
-  }
-}
 
 // execute one remediation job end to end. the run row is the durable source of
 // truth; on sidecar failure it ends `failed` with the upstream detail, never
@@ -125,7 +73,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     throw new RunFailedError("input blob unreadable", false);
   }
 
-  const mappings = await loadMappings(workspaceId);
+  const mappings = await loadActiveMappings(db, workspaceId);
 
   let result: RemediationResult;
   try {
@@ -145,7 +93,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
   }
 
   // worker-specific: persist auto-learned mapping suggestions for later approval.
-  await persistSuggestions(workspaceId, result.suggestions);
+  await persistSuggestions(db, workspaceId, result.suggestions, mappingId);
 
   // shared completion path (db/runs.ts): write the corrected artifact, findings,
   // complete the run row, debit credits in the locked ledger tx, and fire the

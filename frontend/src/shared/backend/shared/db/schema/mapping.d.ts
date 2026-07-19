@@ -41,7 +41,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "workspace" | "source_system";
+            data: "source_system" | "workspace";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -75,7 +75,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+            data: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -143,14 +143,14 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "suggested" | "active" | "deprecated";
+            data: "active" | "deprecated" | "rejected" | "suggested";
             driverParam: string;
             notNull: true;
             hasDefault: true;
             isPrimaryKey: false;
             isAutoincrement: false;
             hasRuntimeDefault: false;
-            enumValues: ["active", "suggested", "deprecated"];
+            enumValues: ["active", "suggested", "deprecated", "rejected"];
             baseColumn: never;
             identity: undefined;
             generated: undefined;
@@ -275,7 +275,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type MappingRegistryEntry = typeof mappingRegistryEntry.$inferSelect;
 export type NewMappingRegistryEntry = typeof mappingRegistryEntry.$inferInsert;

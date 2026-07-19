@@ -103,9 +103,7 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
           allowDecimals
           // cents while a day of runs is fractions of a cent, dollars once spend
           // is larger. the unit is fixed for the axis, not per tick.
-          tickFormatter={(v: number) =>
-            inCents ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`
-          }
+          tickFormatter={(v: number) => (inCents ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`)}
           className="text-[10px]"
         />
         <ChartTooltip

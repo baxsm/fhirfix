@@ -12,13 +12,13 @@ function findings(count: number, severity: EngineFinding["severity"]): EngineFin
     fhirpath: `Patient.field${i}`,
     rawValidatorMessage: "raw",
     plainMessage: "plain",
-    suggestedFix: null,
+    suggestedFix: "",
     fixConfidence: "manual",
-    fixStatus: "needs_review",
+    fixStatus: "manual_needed",
     dedupFingerprint: `fp-${i}`,
     occurrenceCount: 1,
     rank: 0,
-  })) as EngineFinding[];
+  }));
 }
 
 describe("scoreFrom", () => {

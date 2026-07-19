@@ -1,8 +1,8 @@
+import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
 import { persistCompletedRun } from "@shared/db/runs";
 import {
   detectInput,
   ENGINE_VERSION,
-  type RegistryMapping,
   type RemediationResult,
   runRemediation,
   SidecarError,
@@ -20,25 +20,6 @@ import type { ApiV1Env } from "./context";
 import { apiError } from "./middleware";
 
 const MAX_INPUT_BYTES = 5_000_000;
-
-// the active mapping registry for a workspace, in the engine's shape.
-async function loadMappings(workspaceId: string): Promise<RegistryMapping[]> {
-  return db
-    .select({
-      type: schema.mappingRegistryEntry.type,
-      sourceValue: schema.mappingRegistryEntry.sourceValue,
-      targetValue: schema.mappingRegistryEntry.targetValue,
-      targetSystem: schema.mappingRegistryEntry.targetSystem,
-      status: schema.mappingRegistryEntry.status,
-    })
-    .from(schema.mappingRegistryEntry)
-    .where(
-      and(
-        eq(schema.mappingRegistryEntry.workspaceId, workspaceId),
-        eq(schema.mappingRegistryEntry.status, "active"),
-      ),
-    );
-}
 
 // map an engine finding to the public REST finding shape (no db ids, no raw
 // validator echo unless the caller is authed - here they are, so raw is included).
@@ -179,7 +160,7 @@ async function runAndPersist(
       inputType,
       engineVersion: ENGINE_VERSION,
       status: "running",
-      profilesApplied: profiles ?? [],
+      profilesRequested: profiles ?? [],
       inputRef: inputKey,
       idempotencyKey: idempotencyKey ?? null,
       requestHash,
@@ -208,7 +189,7 @@ async function runAndPersist(
   c.set("runId", runId);
 
   await ensureEngineWarm();
-  const mappings = await loadMappings(workspaceId);
+  const mappings = await loadActiveMappings(db, workspaceId);
 
   let result: RemediationResult;
   try {
@@ -232,6 +213,11 @@ async function runAndPersist(
     // a parse/shape failure is the client's input problem, not ours.
     return { res: apiError(c, 422, "unprocessable", detail) };
   }
+
+  // the registry learns from this path too. it used to only learn from the async
+  // worker, so a workspace driving everything through the sync REST api never
+  // accumulated suggestions.
+  await persistSuggestions(db, workspaceId, result.suggestions, () => createId("mapping"));
 
   const correctedKey = blobKey(workspaceId, runId, "corrected");
   await persistCompletedRun(db, blobStore, { workspaceId, runId, result, correctedKey });

@@ -5,6 +5,7 @@ import {
   getEngineDeps,
   SidecarError,
 } from "@shared/engine";
+import { loadActiveMappings } from "@shared/db/mappings";
 import { and, eq } from "drizzle-orm";
 import { env } from "./env";
 import { blobKey, blobStore, db, findingId, logger, schema } from "./lib";
@@ -27,24 +28,6 @@ export interface ApplyJob {
   kind: "deterministic" | "ai";
   fingerprints: string[]; // deterministic: one or many; ai: exactly one
   profiles: string[];
-}
-
-async function loadMappings(workspaceId: string) {
-  return db
-    .select({
-      type: schema.mappingRegistryEntry.type,
-      sourceValue: schema.mappingRegistryEntry.sourceValue,
-      targetValue: schema.mappingRegistryEntry.targetValue,
-      targetSystem: schema.mappingRegistryEntry.targetSystem,
-      status: schema.mappingRegistryEntry.status,
-    })
-    .from(schema.mappingRegistryEntry)
-    .where(
-      and(
-        eq(schema.mappingRegistryEntry.workspaceId, workspaceId),
-        eq(schema.mappingRegistryEntry.status, "active"),
-      ),
-    );
 }
 
 // replace the run's findings with the post-apply set. the report always reflects
@@ -144,7 +127,7 @@ export async function executeApply(job: ApplyJob): Promise<void> {
     throw new RunFailedError(`corrected blob unreadable: ${String(err)}`, false);
   }
 
-  const mappings = await loadMappings(workspaceId);
+  const mappings = await loadActiveMappings(db, workspaceId);
 
   try {
     if (kind === "ai") {

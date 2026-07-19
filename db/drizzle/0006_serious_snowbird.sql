@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "mapping_live_unique_idx" ON "mapping_registry_entry" USING btree ("workspace_id","type","source_value","scope",coalesce("source_system", '')) WHERE "mapping_registry_entry"."superseded_by_id" is null;
