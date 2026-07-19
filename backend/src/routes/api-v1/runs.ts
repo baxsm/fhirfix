@@ -65,7 +65,7 @@ export async function batchController(c: Context<ApiV1Env>) {
     inputType,
     engineVersion: ENGINE_VERSION,
     status: "queued",
-    profilesApplied: profiles,
+    profilesRequested: profiles,
     inputRef: inputKey,
   });
   await remediationQueue.add(

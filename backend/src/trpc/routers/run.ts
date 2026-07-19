@@ -60,7 +60,7 @@ export const runRouter = router({
       inputType,
       engineVersion: ENGINE_VERSION,
       status: "queued",
-      profilesApplied: input.profiles ?? [],
+      profilesRequested: input.profiles ?? [],
       inputRef: key,
     });
 
@@ -176,7 +176,7 @@ export const runRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot apply fixes." });
       }
       const [runRow] = await ctx.db
-        .select({ status: schema.run.status, profiles: schema.run.profilesApplied })
+        .select({ status: schema.run.status, profiles: schema.run.profilesRequested })
         .from(schema.run)
         .where(and(eq(schema.run.id, input.runId), eq(schema.run.workspaceId, ctx.workspaceId)))
         .limit(1);
@@ -212,7 +212,7 @@ export const runRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot apply fixes." });
       }
       const [runRow] = await ctx.db
-        .select({ status: schema.run.status, profiles: schema.run.profilesApplied })
+        .select({ status: schema.run.status, profiles: schema.run.profilesRequested })
         .from(schema.run)
         .where(and(eq(schema.run.id, input.runId), eq(schema.run.workspaceId, ctx.workspaceId)))
         .limit(1);

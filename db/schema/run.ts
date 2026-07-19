@@ -26,6 +26,16 @@ export const run = pgTable(
       enum: ["hl7v2", "fhir_json", "fhir_xml", "ndjson", "bundle", "zip"],
     }).notNull(),
     fhirVersion: text("fhir_version", { enum: ["R4", "R4B", "R5"] }),
+    // what the caller asked for, set once at submit and never rewritten. empty
+    // means "no explicit list, derive per resource type". re-apply reads this,
+    // never profiles_applied: that one holds the engine's outcome, so feeding it
+    // back would turn an auto-derived run into an explicitly-pinned one.
+    profilesRequested: jsonb("profiles_requested")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    // what the engine actually validated against, written on completion. the
+    // union across every resource in the bundle, so it is a report field, not an input.
     profilesApplied: jsonb("profiles_applied")
       .$type<string[]>()
       .notNull()

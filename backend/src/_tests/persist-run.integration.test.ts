@@ -45,7 +45,10 @@ function fakeResult(resourceCount: number, findingCount: number): CompletedRunRe
   };
 }
 
-async function seedRun(fund: boolean): Promise<{ workspaceId: string; runId: string }> {
+async function seedRun(
+  fund: boolean,
+  profilesRequested: string[] = [],
+): Promise<{ workspaceId: string; runId: string }> {
   const workspaceId = `persist_test_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
   workspaces.push(workspaceId);
   if (fund) await grantTrialCredits(db, workspaceId, "system");
@@ -60,6 +63,7 @@ async function seedRun(fund: boolean): Promise<{ workspaceId: string; runId: str
     inputType: "fhir_json",
     engineVersion: "test",
     status: "running",
+    profilesRequested,
   });
   return { workspaceId, runId };
 }
@@ -122,6 +126,44 @@ describe("persistCompletedRun", () => {
     expect(balanceAfter).toBe(before - chargeMicro);
     // cache == ledger sum, no drift.
     expect(balanceAfter).toBe(await reconcileBalance(db, workspaceId));
+  });
+
+  // the apply path re-reads profilesRequested and hands it to the engine as an
+  // explicit override. completion must not touch that column: when it held both
+  // meanings, a run submitted with no profiles came back pinned to whatever the
+  // engine happened to derive, silently flipping the next apply to the explicit branch.
+  test("completion overwrites profilesApplied but leaves profilesRequested alone", async () => {
+    const { workspaceId, runId } = await seedRun(true);
+    const key = blobKey(workspaceId, runId, "corrected");
+    await persistCompletedRun(db, blobStore, {
+      workspaceId,
+      runId,
+      result: fakeResult(1, 0),
+      correctedKey: key,
+    });
+    const [row] = await db.select().from(schema.run).where(eq(schema.run.id, runId)).limit(1);
+    // the engine's outcome landed.
+    expect(row?.profilesApplied).toEqual([
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+    ]);
+    // but "no explicit profiles" survived, so re-apply still auto-derives.
+    expect(row?.profilesRequested).toEqual([]);
+  });
+
+  test("an explicitly requested profile list survives completion unchanged", async () => {
+    const requested = ["http://example.org/StructureDefinition/my-patient"];
+    const { workspaceId, runId } = await seedRun(true, requested);
+    const key = blobKey(workspaceId, runId, "corrected");
+    await persistCompletedRun(db, blobStore, {
+      workspaceId,
+      runId,
+      result: fakeResult(1, 0),
+      correctedKey: key,
+    });
+    const [row] = await db.select().from(schema.run).where(eq(schema.run.id, runId)).limit(1);
+    expect(row?.profilesRequested).toEqual(requested);
+    // the engine reports what it validated against, which is not what was asked for.
+    expect(row?.profilesApplied).not.toEqual(requested);
   });
 
   test("a completed run with zero findings still completes and charges", async () => {

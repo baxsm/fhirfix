@@ -1,0 +1,1 @@
+ALTER TABLE "run" ADD COLUMN "profiles_requested" jsonb DEFAULT '[]'::jsonb NOT NULL;

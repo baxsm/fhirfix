@@ -4,8 +4,10 @@ import { profileFor, profilesForResource } from "../profiles";
 const US_CORE = "http://hl7.org/fhir/us/core/StructureDefinition";
 
 // the five profiles the engine auto-picks for an HL7v2 ADT^A01 bundle. this list
-// gets written to run.profilesApplied and handed back as an explicit override on
-// the apply path, which is how every resource ended up validated against all five.
+// gets written to run.profilesApplied. it used to be handed back as an explicit
+// override on the apply path, which is how every resource ended up validated
+// against all five; re-apply now reads run.profilesRequested instead. narrowing
+// still matters for a caller who really did pin a bundle-wide list.
 const FIVE = [
   `${US_CORE}/us-core-organization`,
   `${US_CORE}/us-core-patient`,
