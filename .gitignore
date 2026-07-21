@@ -65,3 +65,9 @@ Thumbs.db
 tmp/
 temp/
 scratchpad/
+
+TODO.md
+
+# design reference assets (local only, not shipped)
+*.mp4
+finsage-ref.mp4

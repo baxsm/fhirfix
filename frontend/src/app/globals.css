@@ -58,7 +58,12 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+/* .light re-declares the light token set so a subtree can be forced light even
+   when <html> carries .dark (public marketing pages are light-only regardless of
+   the saved dashboard theme). the nested-next-themes-provider approach does not
+   work: both providers write the class on <html> and the root (dark) wins. */
+:root,
+.light {
   /* cool near-white system so surfaces separate without shadows */
   --background: oklch(0.994 0.001 250);
   --foreground: oklch(0.18 0.006 260);
@@ -214,5 +219,280 @@
     box-shadow:
       inset 0 1px 0 0 oklch(1 0 0 / 0.06),
       0 1px 2px 0 oklch(0 0 0 / 0.3);
+  }
+}
+
+/* ── marketing surface: grain + directional gradient ──────────────────────────
+   the public landing's texture. NOT used anywhere in the dark dashboard — these
+   utilities live on the light-only marketing subtree. the point is a real film
+   grain over soft, directional color blobs (a "sun-ray" wash from top-right), so
+   the gradient reads as a photographed surface, not a flat CSS band. colors are
+   the product's own semantic ones (emerald = pass, sky = interactive, a faint
+   violet) — never a random rainbow. */
+@layer components {
+  /* ── the continuous page canvas ──────────────────────────────────────────────
+     ONE background for the whole marketing page so it reads as a single surface,
+     not stitched blocks. sections sit transparent on top of this. a fixed layer
+     (covers the viewport, scrolls with content via background-attachment) carrying
+     a slow vertical flow of the semantic colors + a page-wide grain. the gradient
+     never resets at a section seam because there are no per-section gradients. */
+  .marketing-canvas {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--background);
+  }
+  .marketing-canvas::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    /* soft directional wash top-right (the sun-ray) + gentle color drift down the
+       page: emerald/sky up top, a faint violet mid-left, a warm ember low-right.
+       large, low-opacity, so it is ambient light across the whole page. */
+    background-image:
+      radial-gradient(
+        50% 40% at 88% 2%,
+        oklch(0.9 0.085 178 / 0.4) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        46% 30% at 4% 22%,
+        oklch(0.91 0.06 300 / 0.24) 0%,
+        transparent 72%
+      ),
+      radial-gradient(
+        55% 26% at 96% 52%,
+        oklch(0.9 0.05 205 / 0.22) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        60% 30% at 8% 82%,
+        oklch(0.92 0.06 70 / 0.26) 0%,
+        transparent 72%
+      );
+  }
+  .marketing-canvas::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.42;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+  }
+
+  /* fine film grain. an inline feTurbulence tile, tiled small and kept low-opacity
+     so it reads as texture, not noise. pointer-events off; sits above the gradient
+     but below content. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+    background-size: 140px 140px;
+  }
+
+  /* the hero wash: warm emerald/sky blobs concentrated top-right + a faint violet
+     pulled in from the left, all heavily soft. sits behind everything (z 0). */
+  .aurora-hero {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(
+        66% 62% at 86% 4%,
+        oklch(0.9 0.085 195 / 0.42) 0%,
+        oklch(0.92 0.06 200 / 0.2) 42%,
+        transparent 76%
+      ),
+      radial-gradient(
+        54% 56% at 68% -10%,
+        oklch(0.89 0.1 163 / 0.36) 0%,
+        oklch(0.92 0.07 168 / 0.16) 44%,
+        transparent 78%
+      ),
+      radial-gradient(
+        58% 64% at 6% 14%,
+        oklch(0.91 0.06 300 / 0.26) 0%,
+        oklch(0.94 0.04 300 / 0.12) 46%,
+        transparent 78%
+      );
+  }
+
+  /* section tints: same directional top-right sun-ray, restrained, one restrained
+     hue each so sections separate without becoming a rainbow. */
+  .aurora-section {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--background);
+    background-image: radial-gradient(
+      70% 60% at 88% 0%,
+      oklch(0.9 0.06 200 / 0.3) 0%,
+      oklch(0.93 0.04 200 / 0.14) 42%,
+      transparent 74%
+    );
+  }
+  .aurora-warm {
+    background-image: radial-gradient(
+      70% 60% at 88% 0%,
+      oklch(0.92 0.07 75 / 0.34) 0%,
+      oklch(0.94 0.05 80 / 0.16) 42%,
+      transparent 74%
+    );
+  }
+  .aurora-emerald {
+    background-image: radial-gradient(
+      70% 60% at 88% 0%,
+      oklch(0.9 0.08 163 / 0.32) 0%,
+      oklch(0.93 0.05 165 / 0.15) 42%,
+      transparent 74%
+    );
+  }
+
+  /* keeps content above the grain::after + gradient layers. */
+  .aurora-hero > *,
+  .aurora-section > *,
+  .aurora-warm > *,
+  .aurora-emerald > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* hero glyph draw-in. strokes default to fully drawn (dashoffset 0), so if the
+   animation never runs the glyph is still visible. when motion is allowed, each
+   stroke sweeps in with a slight stagger. path lengths are short, so a single
+   generous dash length covers every stroke. */
+@media (prefers-reduced-motion: no-preference) {
+  .glyph-draw path,
+  .glyph-draw circle {
+    stroke-dasharray: 300;
+    stroke-dashoffset: 300;
+    animation: glyph-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  /* stagger left -> arrow -> right so the broken side resolves into the fixed side */
+  .glyph-draw g > *:nth-child(1) { animation-delay: 0.05s; }
+  .glyph-draw g > *:nth-child(2) { animation-delay: 0.1s; }
+  .glyph-draw g > *:nth-child(3) { animation-delay: 0.14s; }
+  .glyph-draw g > *:nth-child(4) { animation-delay: 0.18s; }
+  .glyph-draw g > *:nth-child(5) { animation-delay: 0.22s; }
+  .glyph-draw g > *:nth-child(6) { animation-delay: 0.26s; }
+  .glyph-draw g > *:nth-child(7) { animation-delay: 0.3s; }
+  .glyph-draw g > *:nth-child(8) { animation-delay: 0.34s; }
+  .glyph-draw g > *:nth-child(9) { animation-delay: 0.4s; }
+  .glyph-draw g > *:nth-child(n + 10) { animation-delay: 0.46s; }
+}
+
+@keyframes glyph-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* reveal-on-scroll. resting state is VISIBLE (no .reveal => shown), so content can
+   never be stuck hidden. .reveal shifts it down + fades; .is-in (added by the
+   IntersectionObserver in motion.tsx) transitions it to rest. transform/opacity
+   only. reduced-motion shows everything immediately with no transition. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the stacked-panel handoff: a section with a rounded top + a soft top shadow that
+   sits over the preceding section, like the reference. the lift is part of the
+   reveal (handled by .reveal above when combined). purely a surface treatment;
+   safe with reduced-motion (it just looks like a rounded panel). */
+.stack-panel {
+  position: relative;
+  border-top-left-radius: 2rem;
+  border-top-right-radius: 2rem;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -24px 60px -30px oklch(0.55 0.02 260 / 0.22);
+}
+
+/* the closing CTA panel: the page's one dark surface. near-black base with an
+   emerald + sky directional wash from the top-right (same language as the light
+   aurora, inverted) so "fix" still reads. a faint grain over the top. */
+.cta-panel {
+  background-color: oklch(0.16 0.006 264);
+  background-image:
+    radial-gradient(
+      60% 80% at 82% 0%,
+      oklch(0.55 0.12 168 / 0.55) 0%,
+      oklch(0.5 0.09 200 / 0.24) 42%,
+      transparent 76%
+    ),
+    radial-gradient(
+      50% 70% at 12% 108%,
+      oklch(0.5 0.1 300 / 0.28) 0%,
+      transparent 70%
+    );
+}
+.cta-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* hero load-in. above the fold, so it must default visible; the animation only
+   plays under no-preference and ends at the visible resting state. staggered so the
+   glyph, eyebrow, headline, subcopy, and CTAs arrive in sequence. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-in {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: hero-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .hero-in-1 {
+    animation-delay: 0.06s;
+  }
+  .hero-in-2 {
+    animation-delay: 0.12s;
+  }
+  .hero-in-3 {
+    animation-delay: 0.2s;
+  }
+  .hero-in-4 {
+    animation-delay: 0.28s;
+  }
+}
+@keyframes hero-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the grain is static texture, not motion, so reduced-motion leaves it. but if a
+   user forces it off entirely via forced-colors, drop the decorative wash. */
+@media (forced-colors: active) {
+  .grain::after,
+  .aurora-hero,
+  .aurora-section,
+  .aurora-warm,
+  .aurora-emerald {
+    background-image: none;
   }
 }
