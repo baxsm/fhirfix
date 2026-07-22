@@ -13,20 +13,20 @@ const sizeClass = {
   lg: "text-lg",
 } as const;
 
-// the wordmark IS the logo. name-only, no separate glyph. "fix" carries the
-// emerald = conformant meaning (the product's promise: red broken -> green fixed).
-// rendered as live Geist Mono text so it stays crisp at every size and inherits
-// the slashed-zero/tight-tracking system the rest of the chrome uses.
+// the wordmark IS the logo. name-only "FHIRfix" set in Geist Sans, with a single
+// violet dot ("FHIRfix.") as the mark. the dot uses --brand — a hue deliberately
+// distinct from success(emerald) and interactive(blue) so it reads as brand, not a
+// status. the favicon reduces to "f.".
 export function BrandMark({ size = "sm", className }: Props) {
   return (
     <span
       className={cn(
-        "font-mono font-semibold tracking-tight text-foreground select-none",
+        "select-none font-semibold tracking-tight text-foreground",
         sizeClass[size],
         className,
       )}
     >
-      FHIR<span className="text-primary">fix</span>
+      FHIRfix<span className="text-brand">.</span>
     </span>
   );
 }

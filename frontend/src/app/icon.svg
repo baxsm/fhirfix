@@ -1,8 +1,9 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="32" height="32" rx="7" fill="#08090a"/>
-  <!-- monogram f: the emerald half of the name (fix), drawn with squared mono
-       terminals so it reads as Geist Mono, not a generic serif f. one crossbar,
-       one hooked ascender. holds shape down to 16px. -->
-  <path d="M20.5 9.2H17.6C15.9 9.2 14.8 10.3 14.8 12V22.8" stroke="#009966" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M11.5 14.6H18.3" stroke="#009966" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- monogram "f." : the brand reduced to its first letter + the violet dot. white
+       "f" with squared terminals reading as Geist, one crossbar + hooked ascender.
+       the dot is the brand accent (--brand ~ #7c5cff). holds shape down to 16px. -->
+  <path d="M19.4 9.4H16.8C15.1 9.4 14 10.5 14 12.2V22.6" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M10.9 14.7H17.4" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="22" cy="21.4" r="1.9" fill="#7c5cff"/>
 </svg>

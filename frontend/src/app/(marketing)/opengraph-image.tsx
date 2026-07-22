@@ -23,8 +23,8 @@ export default function OpengraphImage() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", fontSize: 40, fontWeight: 700 }}>
-        <span style={{ color: "#111827" }}>FHIR</span>
-        <span style={{ color: "#009966" }}>fix</span>
+        <span style={{ color: "#111827" }}>FHIRfix</span>
+        <span style={{ color: "#7c5cff" }}>.</span>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>

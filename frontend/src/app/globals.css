@@ -38,6 +38,7 @@
   --color-accent: var(--accent);
   --color-interactive: var(--interactive);
   --color-interactive-foreground: var(--interactive-foreground);
+  --color-brand: var(--brand);
   --color-info: var(--info);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
@@ -82,6 +83,10 @@
   --interactive: oklch(0.548 0.204 256);
   --interactive-foreground: oklch(0.985 0 0);
   --info: oklch(0.548 0.204 256);
+  /* brand = the wordmark accent (the violet dot in "FHIRfix."). deliberately a
+     DISTINCT hue from success(emerald)/interactive(blue) so the mark reads as brand,
+     not a status. ~#7c5cff. used only by the logo, never as chrome. */
+  --brand: oklch(0.635 0.214 285);
   --secondary: oklch(0.968 0.002 250);
   --secondary-foreground: oklch(0.24 0.006 260);
   --muted: oklch(0.968 0.002 250);
@@ -138,6 +143,8 @@
   --interactive: oklch(0.62 0.2 254);
   --interactive-foreground: oklch(1 0 0);
   --info: oklch(0.68 0.16 245);
+  /* brand accent, a touch brighter on the dark surface (~#8b6bff). */
+  --brand: oklch(0.68 0.2 285);
   --secondary: oklch(0.2162 0.004 264);
   --secondary-foreground: oklch(0.8744 0.0152 260.73);
   --muted: oklch(0.2162 0.004 264);
