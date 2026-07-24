@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { signOut } from "@/lib/auth-client";
-import { navGroups } from "./nav-items";
+import { cn } from "@/lib/utils";
+import { breadcrumbs } from "./nav-items";
 
 type Props = {
   workspace: string;
@@ -26,13 +27,7 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // derive the current section label from the nav so the topbar shows context.
-  const current = navGroups(workspace)
-    .flatMap((g) => g.items)
-    .filter((i) =>
-      i.href === `/app/${workspace}` ? pathname === i.href : pathname.startsWith(i.href),
-    )
-    .sort((a, b) => b.href.length - a.href.length)[0];
+  const trail = breadcrumbs(workspace, workspaceName, pathname);
 
   async function handleSignOut() {
     await signOut();
@@ -44,14 +39,38 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
       {/* trigger is mobile-only: on desktop the sidebar is fixed and always open,
           so there is no collapse affordance. */}
       <SidebarTrigger className="-ml-1 size-7 text-muted-foreground md:hidden" />
-      <nav className="flex min-w-0 items-center gap-1.5 text-sm">
-        <span className="truncate text-muted-foreground">{workspaceName}</span>
-        {current && (
-          <>
-            <span className="text-muted-foreground/40">/</span>
-            <span className="truncate font-medium text-foreground">{current.label}</span>
-          </>
-        )}
+      <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
+        {trail.map((crumb, i) => {
+          const isLast = i === trail.length - 1;
+          // ids are long and must not push the rest of the topbar off-screen,
+          // so only the final crumb is allowed to truncate.
+          return (
+            <span key={`${crumb.label}-${i}`} className="flex min-w-0 items-center gap-1.5">
+              {i > 0 && <span className="shrink-0 text-muted-foreground/40">/</span>}
+              {crumb.href && !isLast ? (
+                <Link
+                  href={crumb.href}
+                  className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span
+                  aria-current={isLast ? "page" : undefined}
+                  className={cn(
+                    "truncate",
+                    isLast ? "font-medium text-foreground" : "shrink-0 text-muted-foreground",
+                    // run ids and other record keys are mono everywhere else in
+                    // the app; the crumb should match.
+                    isLast && /^[a-z]+_[a-z0-9]{6,}$/i.test(crumb.label) && "font-mono text-xs",
+                  )}
+                >
+                  {crumb.label}
+                </span>
+              )}
+            </span>
+          );
+        })}
       </nav>
 
       <div className="ml-auto flex items-center gap-2">

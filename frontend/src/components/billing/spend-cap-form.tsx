@@ -57,7 +57,7 @@ export function SpendCapForm({
       description="Get alerted when purchases reach a monthly limit. This notifies you; it does not stop runs."
     >
       <form
-        className="space-y-4"
+        className="flex h-full flex-col gap-4"
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
@@ -120,7 +120,7 @@ export function SpendCapForm({
           not cut off service on its own.
         </p>
 
-        <div className="flex justify-end">
+        <div className="mt-auto flex justify-end pt-1">
           <Button type="submit" size="sm" disabled={save.isPending}>
             {save.isPending ? "Saving..." : "Save"}
           </Button>

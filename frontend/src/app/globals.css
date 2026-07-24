@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* the app is light-only and nothing sets .dark anymore, so every dark: rule is
+   inert. the variant itself stays because the generated shadcn primitives in
+   components/ui still reference it and would fail to compile without it. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -57,6 +60,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* motion ladder. short by design: quick for state flips, regular for panels,
+     slow reserved for the rare large move. ease-out on entrances so the eye can
+     predict where a thing lands; entrances that respond to a click use 0ms so
+     the user's own action is never animated into existence. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-quick: 100ms;
+  --dur-regular: 250ms;
+  --dur-slow: 350ms;
 }
 
 /* .light re-declares the light token set so a subtree can be forced light even
@@ -179,13 +192,36 @@
   --sidebar-ring: oklch(0.62 0.2 254);
 }
 
+/* elevation works in opposite directions per theme, so it cannot be one rule.
+   on a near-black canvas a lighter top edge reads as lifted; on white there is
+   nowhere lighter to go, so light uses a real (very soft) shadow instead. */
+@layer components {
+  .raised {
+    box-shadow:
+      0 1px 2px -1px oklch(0.2 0.02 260 / 0.06),
+      0 1px 3px 0 oklch(0.2 0.02 260 / 0.04);
+  }
+  .raised-strong {
+    box-shadow:
+      0 1px 2px -1px oklch(0.2 0.02 260 / 0.08),
+      0 4px 12px -2px oklch(0.2 0.02 260 / 0.07);
+  }
+  .dark .raised {
+    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.045);
+  }
+  .dark .raised-strong {
+    box-shadow:
+      inset 0 1px 0 0 oklch(1 0 0 / 0.06),
+      0 1px 2px 0 oklch(0 0 0 / 0.3);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
-    /* subtle grain-free antialiasing; data reads crisp on near-black */
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -212,22 +248,68 @@
   .tabular {
     font-variant-numeric: slashed-zero tabular-nums;
   }
+
+  /* vestibular disorders make motion genuinely harmful, so honour the OS
+     setting globally rather than per-component. transitions are collapsed to
+     ~0 instead of removed, so anything that depends on a transitionend still
+     fires. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-/* elevation is carried by hairline borders + a lighter top edge, NOT by big
-   background jumps (Linear/Vercel: adjacent surfaces differ ~1.04:1, the border
-   at ~1.3:1 does the work). this inset simulates a light source above the card
-   so panels read as lifted off the canvas. only in dark; light uses shadows. */
 @layer components {
-  .dark .raised {
-    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.045);
+  /* row/cell hover. only background-color and transform are animated - both are
+     GPU-composited. never animate width/height/top/left: they force a layout
+     recalculation of everything after them on the page. */
+  .row-interactive {
+    transition: background-color var(--dur-quick) var(--ease-out);
   }
-  .dark .raised-strong {
-    box-shadow:
-      inset 0 1px 0 0 oklch(1 0 0 / 0.06),
-      0 1px 2px 0 oklch(0 0 0 / 0.3);
+
+  /* a control that lifts slightly on hover and settles on press. the press
+     state is deliberately instant. */
+  .press {
+    transition:
+      background-color var(--dur-quick) var(--ease-out),
+      border-color var(--dur-quick) var(--ease-out),
+      transform var(--dur-quick) var(--ease-out);
+  }
+  .press:active {
+    transform: translateY(0.5px);
+  }
+
+  /* content that arrives after a fetch. fades and rises a few px so a table
+     swapping pages reads as a change, not a flicker. */
+  .enter {
+    animation: enter var(--dur-regular) var(--ease-out) both;
+  }
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* stale rows while a new page loads underneath. dims without collapsing the
+     container, which is what keeps the page height stable across a filter
+     change. */
+  .is-stale {
+    opacity: 0.55;
+    transition: opacity var(--dur-quick) var(--ease-out);
   }
 }
+
 
 /* ── marketing surface: grain + directional gradient ──────────────────────────
    the public landing's texture. NOT used anywhere in the dark dashboard — these

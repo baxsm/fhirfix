@@ -23,7 +23,8 @@ export function DashboardShell({
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
 
-  // not signed in -> sign in.
+  // proxy.ts already redirects signed-out users before this renders. this is the
+  // fallback for a session that expires while the tab is open.
   useEffect(() => {
     if (!sessionPending && !session) router.replace("/sign-in");
   }, [sessionPending, session, router]);
@@ -43,19 +44,22 @@ export function DashboardShell({
     enabled: !!active?.id,
   });
 
-  if (sessionPending || orgsQuery.isPending) {
-    return <ShellSkeleton />;
-  }
+  // the slug is in the url, so the workspace name is knowable before the query
+  // resolves. showing a readable placeholder beats a grey block that then
+  // repaints into the same layout.
+  const resolving = sessionPending || orgsQuery.isPending;
 
-  if (!session) return <ShellSkeleton />;
-
-  // signed in but the slug is not a workspace they belong to.
-  if (!active) {
+  // only decide "not your workspace" once the list actually arrived. doing this
+  // while pending would flash the not-found screen on every cold load.
+  if (!resolving && session && !active) {
     return <WorkspaceNotFound />;
   }
 
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
 
+  // the sidebar and topbar are static chrome - they never depended on the
+  // network. painting them immediately and confining the pending state to the
+  // content area is what removes the full-page skeleton -> full-page repaint.
   return (
     <SidebarProvider>
       <AppSidebar
@@ -66,36 +70,36 @@ export function DashboardShell({
       <SidebarInset className="min-w-0">
         <Topbar
           workspace={workspace}
-          workspaceName={active.name}
-          user={{ name: session.user.name, email: session.user.email }}
+          workspaceName={active?.name ?? slugToName(workspace)}
+          user={{
+            name: session?.user.name ?? "",
+            email: session?.user.email ?? "",
+          }}
         />
-        <LowBalanceBanner workspace={workspace} workspaceId={active.id} />
-        <main className="min-w-0 flex-1 p-5 sm:p-7">{children}</main>
+        {active && <LowBalanceBanner workspace={workspace} workspaceId={active.id} />}
+        <main className="min-w-0 flex-1 p-5 sm:p-7">
+          {resolving ? <ContentSkeleton /> : children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
 }
 
-function ShellSkeleton() {
+// "phase2-health" -> "Phase2 Health". only used for the split second before the
+// real workspace name arrives, so the topbar has readable text instead of a bar.
+function slugToName(slug: string) {
+  return slug
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function ContentSkeleton() {
   return (
-    <div className="flex min-h-svh">
-      <div className="hidden w-64 shrink-0 border-r p-4 lg:block">
-        <Skeleton className="h-12 w-full" />
-        <div className="mt-4 space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full" />
-          ))}
-        </div>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex h-14 items-center border-b px-4">
-          <Skeleton className="ml-auto h-8 w-28" />
-        </div>
-        <div className="space-y-4 p-6">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      </div>
+    <div className="space-y-4">
+      <Skeleton className="h-7 w-44" />
+      <Skeleton className="h-4 w-72" />
+      <Skeleton className="h-56 w-full" />
     </div>
   );
 }

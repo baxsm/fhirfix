@@ -70,7 +70,7 @@ export function AutoRechargeForm({
       description="Top up automatically when your balance runs low, so runs never stop mid-flow."
     >
       <form
-        className="space-y-4"
+        className="flex h-full flex-col gap-4"
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
@@ -137,7 +137,9 @@ export function AutoRechargeForm({
           </div>
         )}
 
-        <div className="flex justify-end">
+        {/* mt-auto pins the action to the bottom of the stretched panel, so a
+            shorter form does not leave its button floating mid-card. */}
+        <div className="mt-auto flex justify-end pt-1">
           <Button type="submit" size="sm" disabled={save.isPending}>
             {save.isPending ? "Saving..." : "Save"}
           </Button>

@@ -111,7 +111,7 @@ export function MembersSection({
               ))}
             </SelectContent>
           </Select>
-          <Button type="submit" size="sm" className="h-9" disabled={invite.isPending || !email}>
+          <Button type="submit" size="sm" disabled={invite.isPending || !email}>
             {invite.isPending ? "Sending" : "Invite"}
           </Button>
         </form>

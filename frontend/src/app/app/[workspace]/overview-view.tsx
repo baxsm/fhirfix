@@ -1,97 +1,201 @@
 "use client";
 
-import { ArrowRight, FileScan, Map, ShieldCheck, Terminal } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle, ArrowRight, FileScan, Map } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatusDot } from "@/components/ui/status";
+import { useListOrganizations } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
+import { ScoreTrend } from "./score-trend";
 
-// phase 1 overview: brand-new workspaces have no runs yet, so this renders the
-// guided first-run state (pages.md), not a symmetric card grid or fake data.
-// the runs/trend/credits data views land in phases 2-4.
+interface RunRow {
+  id: string;
+  status: "queued" | "running" | "completed" | "failed";
+  inputType: string;
+  conformanceScoreBefore: number | null;
+  conformanceScoreAfter: number | null;
+  findingsTotal: number;
+  findingsAutoFixable: number;
+  createdAt: string | Date;
+}
+
+/**
+ * the overview is a TRIAGE screen, not a stat wall.
+ *
+ * it used to be hardcoded to the phase-1 first-run state, so a workspace with
+ * 15 runs and a live balance still read "Run your first check". it now answers
+ * the two questions someone opening the app actually has: did the last thing I
+ * ran work, and is anything waiting on me.
+ */
 export function OverviewView({ workspace }: { workspace: string }) {
   const base = `/app/${workspace}`;
-  return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Get started</h1>
-        <p className="text-sm text-muted-foreground">
-          Run a conformance check to see ranked, plain-language findings and auto-fixes.
-        </p>
-      </header>
+  const { data: orgs } = useListOrganizations();
+  const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
+  const workspaceId = active?.id ?? "";
 
-      {/* primary focal action - the highest-leverage element on an empty workspace */}
-      <div className="raised relative overflow-hidden rounded-lg border bg-card">
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-interactive/[0.06] to-transparent" />
-        <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-md border bg-background">
-                <Terminal className="size-3.5 text-muted-foreground" />
-              </span>
-              <h2 className="text-sm font-semibold">Run your first check</h2>
-            </div>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Paste FHIR or HL7v2, pick profiles, and the engine detects, explains, and fixes the
-              conformance failures.
-            </p>
-            <p className="pt-1 font-mono text-[11px] text-muted-foreground/70">
-              US Core 6.1.0 · FHIR R4 · Da Vinci PAS 2.0.1 / PDex 2.0.0
-            </p>
-          </div>
-          <Button asChild size="sm" className="h-9 shrink-0">
-            <Link href={`${base}/check`}>
-              <FileScan className="size-4" />
-              New check
-            </Link>
-          </Button>
+  const trpc = useTRPC();
+  const enabled = !!workspaceId;
+
+  const runsQuery = useQuery({ ...trpc.run.list.queryOptions({ workspaceId }), enabled });
+  const trendQuery = useQuery({ ...trpc.run.trend.queryOptions({ workspaceId }), enabled });
+  const mappingsQuery = useQuery({
+    ...trpc.mappings.counts.queryOptions({ workspaceId }),
+    enabled,
+  });
+
+  const runs = useMemo(() => (runsQuery.data ?? []) as RunRow[], [runsQuery.data]);
+  const trend = trendQuery.data ?? [];
+  const pendingMappings = mappingsQuery.data?.suggested ?? 0;
+
+  const loading = !enabled || runsQuery.isPending;
+  const failedRuns = runs.filter((r) => r.status === "failed");
+  const inFlight = runs.filter((r) => r.status === "running" || r.status === "queued");
+  const latest = runs[0];
+
+  // a genuinely new workspace still gets the guided state - it is the right
+  // screen when there is nothing to triage yet.
+  if (!loading && runs.length === 0) {
+    return <FirstRun base={base} />;
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-1">
+          <h1 className="text-lg font-semibold tracking-tight">Overview</h1>
+          <p className="text-sm text-muted-foreground">
+            {loading
+              ? "Loading workspace activity."
+              : summaryLine({
+                  runs: runs.length,
+                  failed: failedRuns.length,
+                  inFlight: inFlight.length,
+                })}
+          </p>
         </div>
+        <Button asChild size="sm" className="shrink-0">
+          <Link href={`${base}/check`}>
+            <FileScan className="size-4" />
+            New check
+          </Link>
+        </Button>
       </div>
 
-      <section className="space-y-2.5">
-        <h3 className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">
-          Set up your workspace
-        </h3>
-        <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
-          <NextStep
-            index="01"
-            icon={Map}
-            title="Import your mapping registry"
-            body="Bring assigning-authority and code mappings so fixes apply automatically."
-            href={`${base}/mappings`}
-          />
-          <NextStep
-            index="02"
-            icon={ShieldCheck}
-            title="Explore the conformance packet"
-            body="Run a CMS-0057-F test kit and export attestation-ready audit evidence."
-            href={`${base}/conformance`}
-          />
-        </div>
-      </section>
+      {loading ? (
+        <OverviewSkeleton />
+      ) : (
+        <>
+          {/* anything needing a decision comes first and only exists when it is
+              real. an always-present "0 items need attention" panel is noise. */}
+          {(failedRuns.length > 0 || pendingMappings > 0) && (
+            <section className="space-y-2">
+              <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+                Needs attention
+              </h2>
+              <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+                {failedRuns.length > 0 && (
+                  <AttentionRow
+                    href={`${base}/runs`}
+                    tone="danger"
+                    icon={AlertTriangle}
+                    title={`${failedRuns.length} ${failedRuns.length === 1 ? "run" : "runs"} failed`}
+                    body="The engine could not finish these. Open the run to see why."
+                  />
+                )}
+                {pendingMappings > 0 && (
+                  <AttentionRow
+                    href={`${base}/mappings`}
+                    tone="warning"
+                    icon={Map}
+                    title={`${pendingMappings} mapping ${pendingMappings === 1 ? "suggestion" : "suggestions"} to review`}
+                    body="Approving a suggestion lets future runs auto-fix it."
+                  />
+                )}
+              </div>
+            </section>
+          )}
+
+          <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
+            <section className="min-w-0 space-y-2">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+                  Recent runs
+                </h2>
+                <Link
+                  href={`${base}/runs`}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  View all
+                </Link>
+              </div>
+              <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+                {runs.slice(0, 6).map((r) => (
+                  <RecentRun key={r.id} row={r} href={`${base}/runs/${r.id}`} />
+                ))}
+              </div>
+            </section>
+
+            <section className="min-w-0 space-y-2">
+              <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+                Conformance trend
+              </h2>
+              <ScoreTrend points={trend} latest={latest} />
+            </section>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-function NextStep({
-  index,
-  icon: Icon,
+function summaryLine({
+  runs,
+  failed,
+  inFlight,
+}: {
+  runs: number;
+  failed: number;
+  inFlight: number;
+}) {
+  if (inFlight > 0) return `${inFlight} check${inFlight === 1 ? "" : "s"} running now.`;
+  if (failed > 0) {
+    return `${failed} of your last ${runs} run${runs === 1 ? "" : "s"} failed and need a look.`;
+  }
+  return `${runs} check${runs === 1 ? "" : "s"} run in this workspace. Everything completed.`;
+}
+
+function AttentionRow({
+  href,
   title,
   body,
-  href,
+  tone,
+  icon: Icon,
 }: {
-  index: string;
-  icon: typeof Map;
+  href: string;
   title: string;
   body: string;
-  href: string;
+  tone: "danger" | "warning";
+  icon: typeof Map;
 }) {
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3.5 px-4 py-3 transition-colors hover:bg-muted/40"
+      className={cn(
+        "row-interactive group flex items-center gap-3 border-l-2 px-4 py-3",
+        tone === "danger" ? "border-l-destructive" : "border-l-warning",
+      )}
     >
-      <span className="font-mono text-xs text-muted-foreground/50">{index}</span>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background">
-        <Icon className="size-4 text-muted-foreground" />
+      <span
+        className={cn(
+          "flex size-7 shrink-0 items-center justify-center rounded-md border bg-background",
+          tone === "danger" ? "text-destructive" : "text-warning",
+        )}
+      >
+        <Icon className="size-3.5" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium leading-tight">{title}</p>
@@ -99,5 +203,99 @@ function NextStep({
       </div>
       <ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
     </Link>
+  );
+}
+
+function RecentRun({ row, href }: { row: RunRow; href: string }) {
+  const improved =
+    row.conformanceScoreBefore != null &&
+    row.conformanceScoreAfter != null &&
+    row.conformanceScoreAfter > row.conformanceScoreBefore;
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "row-interactive group flex items-center gap-3 border-l-2 px-4 py-2.5",
+        row.status === "failed" ? "border-l-destructive" : "border-l-transparent",
+      )}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-mono text-xs">{row.id}</p>
+        <p className="font-mono text-[10px] uppercase text-muted-foreground">{row.inputType}</p>
+      </div>
+      {row.status === "failed" ? (
+        <StatusDot tone="danger">failed</StatusDot>
+      ) : (
+        <span className="shrink-0 font-mono text-xs tabular-nums whitespace-nowrap">
+          {row.conformanceScoreBefore != null && row.conformanceScoreAfter != null ? (
+            <>
+              <span className="text-muted-foreground">{row.conformanceScoreBefore}</span>
+              <span className="mx-1 text-muted-foreground/50">→</span>
+              <span className={improved ? "text-primary" : "text-foreground"}>
+                {row.conformanceScoreAfter}
+              </span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function OverviewSkeleton() {
+  return (
+    <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
+      <Skeleton className="h-64 w-full rounded-lg" />
+      <Skeleton className="h-64 w-full rounded-lg" />
+    </div>
+  );
+}
+
+function FirstRun({ base }: { base: string }) {
+  return (
+    <div className="mx-auto w-full max-w-3xl space-y-5">
+      <div className="space-y-1">
+        <h1 className="text-lg font-semibold tracking-tight">Get started</h1>
+        <p className="text-sm text-muted-foreground">
+          Run a conformance check to see ranked, plain-language findings and auto-fixes.
+        </p>
+      </div>
+      <div className="raised rounded-lg border bg-card p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1.5">
+            <h2 className="text-sm font-semibold">Run your first check</h2>
+            <p className="max-w-md text-sm text-muted-foreground">
+              Paste FHIR or HL7v2 and the engine detects, explains, and fixes the conformance
+              failures.
+            </p>
+            <p className="pt-1 font-mono text-[11px] text-muted-foreground/70">
+              US Core 6.1.0 · FHIR R4 · Da Vinci PAS 2.0.1 / PDex 2.0.0
+            </p>
+          </div>
+          <Button asChild size="sm" className="shrink-0">
+            <Link href={`${base}/check`}>
+              <FileScan className="size-4" />
+              New check
+            </Link>
+          </Button>
+        </div>
+      </div>
+      <section className="space-y-2">
+        <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+          Set up your workspace
+        </h3>
+        <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+          <AttentionRow
+            href={`${base}/mappings`}
+            tone="warning"
+            icon={Map}
+            title="Import your mapping registry"
+            body="Bring assigning-authority and code mappings so fixes apply automatically."
+          />
+        </div>
+      </section>
+    </div>
   );
 }

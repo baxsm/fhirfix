@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations, useSession } from "@/lib/auth-client";
 
 // /app resolves where to send the user: sign-in if logged out, first-run
@@ -22,10 +21,8 @@ export function AppEntry() {
     router.replace(first ? `/app/${first.slug}` : "/app/new");
   }, [sessionPending, orgsPending, session, orgs, router]);
 
-  return (
-    <div className="mx-auto max-w-md space-y-4 p-10">
-      <Skeleton className="h-8 w-40" />
-      <Skeleton className="h-24 w-full" />
-    </div>
-  );
+  // this route only ever resolves and redirects. rendering skeleton "content"
+  // here made it look like a real page loading, which it never is. a bare
+  // surface reads as a transition instead of a page that failed to fill in.
+  return <div className="min-h-svh bg-background" />;
 }

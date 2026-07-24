@@ -64,4 +64,59 @@ export function navGroups(workspace: string): NavGroup[] {
   ];
 }
 
+export type Crumb = { label: string; href?: string };
+
+/**
+ * the nav item that owns a pathname. the workspace root is matched exactly so
+ * it does not swallow every child route; everything else takes the longest
+ * matching prefix.
+ */
+export function activeNavItem(workspace: string, pathname: string): NavItem | undefined {
+  const root = `/app/${workspace}`;
+  return navGroups(workspace)
+    .flatMap((g) => g.items)
+    .filter((i) => (i.href === root ? pathname === root : pathname.startsWith(i.href)))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+}
+
+/**
+ * the full trail for a pathname, not just the section.
+ *
+ * the topbar used to render exactly two crumbs from the nav match, so a run
+ * detail page could only ever say "Runs" - the crumb never changed when you
+ * drilled in, which made the whole topbar read as stale.
+ */
+export function breadcrumbs(workspace: string, workspaceName: string, pathname: string): Crumb[] {
+  const root = `/app/${workspace}`;
+  const trail: Crumb[] = [{ label: workspaceName, href: root }];
+
+  const section = activeNavItem(workspace, pathname);
+  if (!section) return trail;
+
+  const isSectionRoot = pathname === section.href;
+  trail.push({
+    label: section.label,
+    // the current page is not a link. only ancestors are.
+    href: isSectionRoot ? undefined : section.href,
+  });
+
+  if (isSectionRoot) return trail;
+
+  // whatever is left after the section is the record being viewed. ids are kept
+  // verbatim (they are the thing the user is looking at), other segments are
+  // title-cased.
+  const rest = pathname.slice(section.href.length).split("/").filter(Boolean);
+  for (let i = 0; i < rest.length; i++) {
+    const segment = rest[i];
+    if (!segment) continue;
+    const isLast = i === rest.length - 1;
+    trail.push({
+      label: decodeURIComponent(segment),
+      href: isLast ? undefined : `${section.href}/${rest.slice(0, i + 1).join("/")}`,
+    });
+  }
+
+  return trail;
+}
+
 export type { WorkspaceRole };

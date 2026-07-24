@@ -39,12 +39,29 @@ describe("CheckView (ingestion)", () => {
     routerPush.mockReset();
   });
 
-  test("renders the ingestion page with samples and a drop zone", () => {
+  test("opens in paste mode with samples", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.getByRole("heading", { name: /new check/i })).toBeInTheDocument();
     expect(screen.getByText(/US Core Patient/i)).toBeInTheDocument();
-    expect(screen.getByText(/Drop a file here/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run check/i })).toBeInTheDocument();
+    // paste and upload are mutually exclusive, so the drop zone is not present
+    // until its tab is selected.
+    expect(screen.queryByText(/Drop a file/i)).not.toBeInTheDocument();
+  });
+
+  test("switching to upload swaps the panel, not the page", () => {
+    render(<CheckView workspace="acme" />);
+    fireEvent.click(screen.getByRole("tab", { name: /upload/i }));
+    expect(screen.getByText(/Drop a file, or click to browse/i)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/Paste a FHIR resource/i)).not.toBeInTheDocument();
+    // the action stays put across modes; it belongs to the panel, not the tab.
+    expect(screen.getByRole("button", { name: /run check/i })).toBeInTheDocument();
+  });
+
+  test("marks the loaded sample as pressed", () => {
+    render(<CheckView workspace="acme" />);
+    const [first] = screen.getAllByRole("button", { pressed: true });
+    expect(first).toHaveTextContent(/US Core Patient/i);
   });
 
   test("submitting routes to the new run report", () => {

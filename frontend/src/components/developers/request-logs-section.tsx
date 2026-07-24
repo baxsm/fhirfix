@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ScrollText } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
@@ -40,11 +40,12 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
 
   const [method, setMethod] = useState<(typeof METHODS)[number]>("ALL");
   const [onlyErrors, setOnlyErrors] = useState(false);
-  // accumulated pages, keyed off the active filters. reset when filters change.
-  const [rows, setRows] = useState<LogRow[]>([]);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  // placeholderData keeps the previous page mounted while the next one loads.
+  // this is what stops the table emptying on a filter change: the old rows
+  // stay, so the container never collapses and the page height holds.
   const query = useQuery({
     ...trpc.developers.requestLogs.list.queryOptions({
       workspaceId,
@@ -54,22 +55,18 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
       limit: 25,
     }),
     enabled: !!workspaceId,
+    placeholderData: keepPreviousData,
   });
 
-  // fold each fetched page into the accumulated list. a page with an undefined
-  // cursor is the first page of a new filter set, so it replaces rather than
-  // appends.
-  useEffect(() => {
-    if (!query.data) return;
-    const page = query.data.logs as LogRow[];
-    setRows((prev) => (cursor ? [...prev, ...page] : page));
-  }, [query.data, cursor]);
+  const rows = (query.data?.logs ?? []) as LogRow[];
+  // placeholderData always reports success, so the only way to know the rows on
+  // screen belong to the previous filter is this flag.
+  const stale = query.isPlaceholderData;
 
   // changing a filter resets pagination back to the first page.
   const changeFilter = (fn: () => void) => {
     fn();
     setCursor(undefined);
-    setRows([]);
     setExpanded(null);
   };
 
@@ -79,14 +76,20 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-md border p-0.5">
+        <div
+          role="tablist"
+          aria-label="Filter by method"
+          className="inline-flex rounded-md border p-0.5"
+        >
           {METHODS.map((m) => (
             <button
               key={m}
               type="button"
+              role="tab"
+              aria-selected={method === m}
               onClick={() => changeFilter(() => setMethod(m))}
               className={cn(
-                "cursor-pointer rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                "press cursor-pointer rounded px-2.5 py-1 text-xs font-medium",
                 method === m
                   ? "bg-foreground/[0.07] text-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -120,7 +123,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         <EmptyLogs onlyErrors={onlyErrors} />
       ) : (
         <>
-          <div className="-mx-5">
+          <div className={cn("-mx-5", stale && "is-stale")}>
             <Table>
               <TableBody>
                 {rows.map((r) => (
@@ -135,16 +138,38 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
             </Table>
           </div>
 
-          {hasMore && (
-            <div className="flex justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={query.isFetching}
-                onClick={() => setCursor(nextCursor)}
-              >
-                {query.isFetching ? "Loading..." : "Load more"}
-              </Button>
+          {/* page forward/back rather than an ever-growing list. an endless
+              accumulating table is the thing that makes finding one request
+              impossible once a workspace has real traffic. */}
+          {(hasMore || cursor) && (
+            <div className="flex items-center justify-between border-t pt-3">
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {rows.length} shown
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!cursor || stale}
+                  onClick={() => {
+                    setCursor(undefined);
+                    setExpanded(null);
+                  }}
+                >
+                  Newest
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasMore || stale}
+                  onClick={() => {
+                    setCursor(nextCursor);
+                    setExpanded(null);
+                  }}
+                >
+                  Older
+                </Button>
+              </div>
             </div>
           )}
         </>

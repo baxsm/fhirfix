@@ -19,7 +19,7 @@ import {
 import { can, type WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
-import { navGroups } from "./nav-items";
+import { activeNavItem, navGroups } from "./nav-items";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 
 type Props = {
@@ -32,6 +32,9 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
   const pathname = usePathname();
   const active = workspaces.find((w) => w.slug === workspace || w.id === workspace);
   const workspaceId = active?.id ?? "";
+  // one shared matcher with the breadcrumb, so a drill-in page keeps its
+  // section highlighted and the two can never drift.
+  const activeHref = activeNavItem(workspace, pathname)?.href;
 
   return (
     <Sidebar>
@@ -55,10 +58,7 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
                     hover no longer bleeds into its neighbor. */}
                 <SidebarMenu className="gap-1">
                   {items.map((item) => {
-                    const active =
-                      item.href === `/app/${workspace}`
-                        ? pathname === item.href
-                        : pathname.startsWith(item.href);
+                    const active = activeHref === item.href;
                     return (
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton

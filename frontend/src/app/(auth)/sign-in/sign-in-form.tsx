@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth-client";
+import { authClient, signIn } from "@/lib/auth-client";
 
 const schema = z.object({
   email: z.email("Enter a valid email"),
@@ -27,6 +27,7 @@ type Values = z.infer<typeof schema>;
 
 export function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [pending, setPending] = useState(false);
   const form = useForm<Values>({
     resolver: zodResolver(schema),
@@ -46,8 +47,20 @@ export function SignInForm() {
       toast.error(error.message ?? "Could not sign in.");
       return;
     }
-    toast.success("Signed in.");
-    router.push("/app");
+    // resolve the destination here rather than bouncing through /app, which
+    // would mount a resolver that re-fetches the same org list and flashes a
+    // skeleton on the way. one navigation instead of three.
+    const next = searchParams.get("next");
+    if (next?.startsWith("/app")) {
+      router.replace(next);
+      return;
+    }
+
+    const { data: orgs } = await authClient.organization.list();
+    const slug = orgs?.[0]?.slug;
+    router.replace(slug ? `/app/${slug}` : "/app/new");
+    // pending deliberately stays true: it resets on error only, so the button
+    // cannot be submitted again while the route transition is still in flight.
   }
 
   return (

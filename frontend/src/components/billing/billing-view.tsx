@@ -104,6 +104,7 @@ export function BillingView({ workspace }: { workspace: string }) {
             icon={Wallet}
             title="Ledger"
             description="Every credit movement: grants, purchases, and per-run debits."
+            flush
           >
             <LedgerTable workspaceId={workspaceId} />
           </SettingsSection>
@@ -171,29 +172,34 @@ function BalanceHero({
           >
             ${summary.balanceDollars.toFixed(2)}
           </div>
+          {/* a runway projected off a near-zero burn rate produces numbers like
+              "11973 days", which is 32 years and reads as broken. past a
+              quarter the figure is meaningless, so say the useful thing
+              instead of printing a precise absurdity. */}
           <p className="text-xs text-muted-foreground">
             covers about{" "}
             <span className="font-mono tabular-nums text-foreground">
               {summary.resourcesRemaining.toLocaleString()}
             </span>{" "}
             more resources
-            {summary.daysRemaining != null && (
-              <>
-                {" · "}~
-                <span className="font-mono tabular-nums text-foreground">
-                  {summary.daysRemaining}
-                </span>{" "}
-                days at current pace
-              </>
-            )}
+            {summary.daysRemaining != null &&
+              (summary.daysRemaining > 90 ? (
+                <> · months of runway at this pace</>
+              ) : (
+                <>
+                  {" · "}~
+                  <span className="font-mono tabular-nums text-foreground">
+                    {summary.daysRemaining}
+                  </span>{" "}
+                  days at current pace
+                </>
+              ))}
           </p>
         </div>
 
         {canManage && (
           <div className="space-y-2">
-            <p className="text-right text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
-              Add credits
-            </p>
+            <p className="text-right text-[11px] text-muted-foreground">Add credits</p>
             <div className="flex gap-2">
               {summary.packs.map((p) => (
                 <Button
@@ -250,18 +256,17 @@ function HeroTile({
   value: string;
   hint: string;
 }) {
+  // the label leads and the number is the largest thing in the tile, because
+  // the number is what is being read. the previous version buried a 14px value
+  // beside a bordered icon chip that carried no information.
   return (
-    <div className="flex items-center gap-3 px-5 py-4">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background">
-        <Icon className="size-4 text-muted-foreground" />
-      </span>
-      <div className="min-w-0">
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-sm font-medium tabular-nums">{value}</span>
-          <span className="text-xs text-muted-foreground">{label}</span>
-        </div>
-        <p className="truncate text-[11px] text-muted-foreground/70">{hint}</p>
+    <div className="min-w-0 px-4 py-3.5">
+      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <Icon className="size-3 shrink-0" />
+        {label}
       </div>
+      <div className="mt-1 font-mono text-lg tabular-nums leading-none">{value}</div>
+      <p className="mt-1 truncate text-[11px] text-muted-foreground/70">{hint}</p>
     </div>
   );
 }

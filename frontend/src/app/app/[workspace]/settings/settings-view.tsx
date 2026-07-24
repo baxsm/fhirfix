@@ -1,11 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Bell, Palette, SlidersHorizontal, Users } from "lucide-react";
+import { Bell, SlidersHorizontal, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,12 +21,11 @@ import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { MembersSection } from "./members-section";
 
-type SectionId = "members" | "defaults" | "appearance";
+type SectionId = "members" | "defaults";
 
 const SECTIONS: { id: SectionId; label: string; icon: typeof Users; hint: string }[] = [
   { id: "members", label: "Members", icon: Users, hint: "People and roles" },
   { id: "defaults", label: "Defaults", icon: SlidersHorizontal, hint: "PHI and retention" },
-  { id: "appearance", label: "Appearance", icon: Palette, hint: "Theme for this device" },
 ];
 
 export function SettingsView({ workspace }: { workspace: string }) {
@@ -49,7 +47,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Members, roles, defaults, and appearance for{" "}
+          Members, roles, and defaults for{" "}
           <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
         </p>
       </header>
@@ -117,22 +115,9 @@ export function SettingsView({ workspace }: { workspace: string }) {
                   }}
                 />
               )}
-            </SettingsSection>
-          )}
-
-          {section === "appearance" && (
-            <SettingsSection
-              icon={Palette}
-              title="Appearance"
-              description="Theme applies to your account on this device only."
-              slim
-            >
-              <SettingRow label="Theme" hint="Switch between light, dark, or your system setting.">
-                <ThemeToggle />
-              </SettingRow>
               <SettingRow
                 label="Notifications"
-                hint="Run and alert emails arrive with your workspace defaults."
+                hint="Run and alert emails use these workspace defaults."
                 muted
               >
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
