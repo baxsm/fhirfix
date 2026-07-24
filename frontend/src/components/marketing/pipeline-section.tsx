@@ -26,7 +26,7 @@ function MonoPanel({ children, label }: { children: React.ReactNode; label: stri
         <span className="flex gap-1.5">
           <span className="size-2 rounded-full bg-destructive/60" />
           <span className="size-2 rounded-full bg-warning/60" />
-          <span className="size-2 rounded-full bg-primary/60" />
+          <span className="size-2 rounded-full bg-success/60" />
         </span>
         <span className="ml-1 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
           {label}
@@ -42,7 +42,7 @@ function MonoPanel({ children, label }: { children: React.ReactNode; label: stri
 const SEV = {
   error: "text-destructive",
   warning: "text-warning",
-  ok: "text-primary",
+  ok: "text-success",
   dim: "text-muted-foreground",
 } as const;
 
@@ -188,7 +188,7 @@ export function PipelineSection() {
       <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
         <Reveal className="mx-auto max-w-2xl text-center">
           <p className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
+            <span className="size-1.5 rounded-full bg-success" />
             The pipeline
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-[1.08]">

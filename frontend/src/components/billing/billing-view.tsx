@@ -159,7 +159,7 @@ function BalanceHero({
             <Wallet className="size-3.5" />
             Balance
             {summary.isTrial && (
-              <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+              <span className="rounded-full border border-success/30 bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">
                 trial credits
               </span>
             )}

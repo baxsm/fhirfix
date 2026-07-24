@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LowBalanceBanner } from "@/components/billing/low-balance-banner";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@/lib/permissions";
@@ -57,17 +56,21 @@ export function DashboardShell({
 
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
 
-  // the sidebar and topbar are static chrome - they never depended on the
-  // network. painting them immediately and confining the pending state to the
-  // content area is what removes the full-page skeleton -> full-page repaint.
+  // the rail is a CARD floating on the canvas: an equal gutter on all four sides
+  // and the same gutter between it and the content. that is what stops it
+  // reading as a wall bolted to the window edge.
+  //
+  // the topbar deliberately lives INSIDE the content column rather than spanning
+  // the window. a full-width bar would pin the layout back to the window edges
+  // and cancel the float.
   return (
-    <SidebarProvider>
+    <div className="app-shell flex h-svh gap-2 bg-canvas p-2 sm:gap-2.5 sm:p-2.5">
       <AppSidebar
         workspace={workspace}
         role={role}
         workspaces={orgs?.map((o) => ({ id: o.id, name: o.name, slug: o.slug })) ?? []}
       />
-      <SidebarInset className="min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Topbar
           workspace={workspace}
           workspaceName={active?.name ?? slugToName(workspace)}
@@ -77,11 +80,11 @@ export function DashboardShell({
           }}
         />
         {active && <LowBalanceBanner workspace={workspace} workspaceId={active.id} />}
-        <main className="min-w-0 flex-1 p-5 sm:p-7">
+        <main className="min-w-0 flex-1 overflow-auto px-1 pt-4 pb-8 sm:px-2">
           {resolving ? <ContentSkeleton /> : children}
         </main>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </div>
   );
 }
 

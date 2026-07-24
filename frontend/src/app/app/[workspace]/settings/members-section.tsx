@@ -96,11 +96,13 @@ export function MembersSection({
               placeholder="teammate@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-9 font-mono text-sm"
+              className="font-mono text-sm"
             />
           </div>
+          {/* all three controls on the same rung. this row previously ran an
+              h-9 input, an h-9 select and an h-7 button side by side. */}
           <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as WorkspaceRole)}>
-            <SelectTrigger className="h-9 w-32 font-mono text-xs" size="sm">
+            <SelectTrigger className="w-32 font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -111,7 +113,7 @@ export function MembersSection({
               ))}
             </SelectContent>
           </Select>
-          <Button type="submit" size="sm" disabled={invite.isPending || !email}>
+          <Button type="submit" disabled={invite.isPending || !email}>
             {invite.isPending ? "Sending" : "Invite"}
           </Button>
         </form>

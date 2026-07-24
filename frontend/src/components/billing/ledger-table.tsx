@@ -107,7 +107,7 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
                   <td
                     className={cn(
                       "px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap",
-                      isCredit ? "text-primary" : "text-foreground",
+                      isCredit ? "text-success" : "text-foreground",
                     )}
                   >
                     {isCredit ? "+" : "-"}${Math.abs(r.amountDollars).toFixed(2)}

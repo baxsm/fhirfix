@@ -114,7 +114,11 @@ export function MappingsTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex rounded-md border p-0.5">
+        <div
+          role="tablist"
+          aria-label="Filter by status"
+          className="inline-flex h-8 items-center rounded-md border p-0.5"
+        >
           {filters.map((f) => {
             const n = counts?.[f.key];
             return (
@@ -122,8 +126,13 @@ export function MappingsTable({
                 key={f.key}
                 type="button"
                 onClick={() => onStatusChange(f.key)}
+                role="tab"
+                aria-selected={status === f.key}
+                // h-7 inside an h-8 bordered group: the filter, the search input
+                // and the button now sit on one line at one height. they were
+                // three different heights in the same row.
                 className={cn(
-                  "cursor-pointer rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                  "press flex h-7 cursor-pointer items-center rounded px-2.5 text-xs font-medium",
                   status === f.key
                     ? "bg-foreground/[0.07] text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -147,7 +156,9 @@ export function MappingsTable({
             />
           </div>
           {canEdit && (
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
+            // default size (h-8), not sm (h-7): this button sits beside an
+            // h-8 Input, and sm would leave it 4px short in the same row.
+            <Button onClick={() => setCreateOpen(true)}>
               <Plus />
               Add mapping
             </Button>
@@ -300,20 +311,22 @@ function RowActions({
   onEdit: () => void;
   onHistory: () => void;
 }) {
-  // a pending suggestion is the one case worth two inline buttons: approving is
-  // the whole job on that screen, and burying it in a menu costs a click per row.
+  // a pending suggestion is the one case worth inline buttons: approving is the
+  // whole job on that screen, and burying it in a menu costs a click per row.
+  // approve carries a text label - two unlabelled glyphs side by side made the
+  // destructive action indistinguishable from the constructive one.
   if (row.status === "suggested" && canApprove) {
     return (
-      <div className="flex items-center justify-end gap-1">
+      <div className="flex items-center justify-end gap-1.5">
         <Button
-          variant="ghost"
-          size="icon-sm"
+          variant="outline"
+          size="sm"
           aria-label={`Approve mapping for ${row.sourceValue}`}
-          title="Approve"
           disabled={busy}
           onClick={onApprove}
         >
-          <Check className="text-emerald-500" />
+          <Check className="text-success" />
+          Approve
         </Button>
         <Button
           variant="ghost"

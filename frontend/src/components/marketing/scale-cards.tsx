@@ -82,7 +82,7 @@ export function ScaleCards() {
       <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
         <Reveal className="max-w-2xl">
           <p className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
+            <span className="size-1.5 rounded-full bg-success" />
             Scale &amp; integrate
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-[1.08]">

@@ -56,7 +56,7 @@ export function CodeTabs({ tabs, className }: { tabs: CodeTab[]; className?: str
           onClick={copy}
           className="flex shrink-0 cursor-pointer items-center gap-1 text-[10px] text-muted-foreground/70 transition-colors hover:text-foreground"
         >
-          {copied ? <Check className="size-2.5 text-primary" /> : <Copy className="size-2.5" />}
+          {copied ? <Check className="size-2.5 text-success" /> : <Copy className="size-2.5" />}
           {copied ? "Copied" : "Copy"}
         </button>
       </div>

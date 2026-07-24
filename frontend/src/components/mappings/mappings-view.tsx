@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Map } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
@@ -58,14 +58,11 @@ export function MappingsView({ workspace }: { workspace: string }) {
   const effectiveStatus: MappingStatus = status ?? "active";
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Mappings</h1>
-        <p className="text-sm text-muted-foreground">
-          The versioned registry of assigning-authority and code mappings that power auto-fixes in{" "}
-          <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
-        </p>
-      </header>
+    <div className="mx-auto w-full max-w-6xl space-y-5">
+      <PageHeader
+        title="Mappings"
+        description={`The versioned registry of assigning-authority and code mappings that power auto-fixes in ${active?.name ?? "this workspace"}.`}
+      />
 
       {/* isPending, not isLoading: a background refetch must not unmount the
           table, or every mutation resets the user's filter and search. */}
@@ -92,10 +89,9 @@ export function MappingsView({ workspace }: { workspace: string }) {
 
 function ViewError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="raised flex flex-col items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-16 text-center">
-      <Map className="size-8 text-muted-foreground" />
-      <h2 className="font-medium">Could not load mappings</h2>
-      <p className="text-sm text-muted-foreground">Check your connection and try again.</p>
+    <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/[0.03] px-6 py-14 text-center">
+      <h2 className="text-sm font-medium">Could not load mappings</h2>
+      <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
       <Button variant="outline" size="sm" onClick={onRetry}>
         Retry
       </Button>

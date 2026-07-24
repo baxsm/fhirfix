@@ -44,7 +44,7 @@ export function ComplianceSection() {
       <div className="mx-auto w-full max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
         <Reveal className="max-w-2xl">
           <p className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
+            <span className="size-1.5 rounded-full bg-success" />
             For regulated workloads
           </p>
           <h2 className="mt-4 text-balance text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-[1.08]">
@@ -62,7 +62,7 @@ export function ComplianceSection() {
             return (
               <Reveal key={item.title} className="flex gap-3.5" index={i % 3}>
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-card">
-                  <Icon className="size-4.5 text-primary" />
+                  <Icon className="size-4.5 text-success" />
                 </span>
                 <div className="space-y-1">
                   <h3 className="font-medium">{item.title}</h3>

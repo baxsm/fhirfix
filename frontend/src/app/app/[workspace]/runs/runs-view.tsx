@@ -83,17 +83,11 @@ export function RunsView({ workspace }: { workspace: string }) {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-5">
+      {/* no New check action here: the topbar already carries it on every
+          screen, and two identical primary buttons on one page is noise. */}
       <PageHeader
         title="Runs"
         description="Every conformance check, with findings and before/after scores."
-        actions={
-          <Button asChild size="sm">
-            <Link href={`/app/${workspace}/check`}>
-              <FileScan className="size-4" />
-              New check
-            </Link>
-          </Button>
-        }
       />
 
       {query.isError ? (
@@ -202,7 +196,7 @@ export function RunsView({ workspace }: { workspace: string }) {
                               <span className="mx-1 text-muted-foreground/50">→</span>
                               {/* emerald appears only when the score actually
                                   rose. a flat score is not a success. */}
-                              <span className={improved ? "text-primary" : "text-foreground"}>
+                              <span className={improved ? "text-success" : "text-foreground"}>
                                 {r.conformanceScoreAfter}
                               </span>
                             </span>

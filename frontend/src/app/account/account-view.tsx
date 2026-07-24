@@ -27,46 +27,66 @@ export function AccountView() {
 
   if (isPending || accountQuery.isPending) {
     return (
-      <div className="mx-auto max-w-2xl space-y-6 p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-48 w-full" />
+      <div className="min-h-svh">
+        <AccountBar />
+        <div className="mx-auto max-w-2xl space-y-5 px-4 py-6">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-48 w-full" />
+        </div>
       </div>
     );
   }
 
+  // this page is deliberately NOT inside the workspace shell: it belongs to the
+  // person, not a workspace, and a member editing their own profile should not
+  // land on workspace chrome. it still gets a real top bar so it reads as part
+  // of the product rather than a form floating on a blank page.
   return (
-    <div className="mx-auto max-w-2xl space-y-6 p-6 sm:p-10">
-      <div>
-        <Link
-          href="/app"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+    <div className="min-h-svh">
+      <AccountBar />
+      <div className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:py-8">
+        <header className="space-y-1">
+          <h1 className="text-lg font-semibold tracking-tight">Account</h1>
+          <p className="text-sm text-muted-foreground">
+            Your personal profile and password. Workspace settings live in each workspace.
+          </p>
+        </header>
+
+        <SettingsSection
+          icon={UserRound}
+          title="Profile"
+          description="Your name and the email you sign in with."
         >
-          <ArrowLeft className="size-4" />
-          Back to app
-        </Link>
-        <h1 className="text-xl font-semibold tracking-tight">Account</h1>
-        <p className="text-sm text-muted-foreground">Your personal profile and password.</p>
+          <ProfileForm
+            initialName={accountQuery.data?.name ?? ""}
+            email={accountQuery.data?.email ?? ""}
+          />
+        </SettingsSection>
+
+        <SettingsSection
+          icon={KeyRound}
+          title="Password"
+          description="Change the password used to sign in to your account."
+        >
+          <PasswordForm />
+        </SettingsSection>
       </div>
-
-      <SettingsSection
-        icon={UserRound}
-        title="Profile"
-        description="Your name and the email you sign in with."
-      >
-        <ProfileForm
-          initialName={accountQuery.data?.name ?? ""}
-          email={accountQuery.data?.email ?? ""}
-        />
-      </SettingsSection>
-
-      <SettingsSection
-        icon={KeyRound}
-        title="Password"
-        description="Change the password used to sign in to your account."
-      >
-        <PasswordForm />
-      </SettingsSection>
     </div>
+  );
+}
+
+/** minimal chrome so /account is recognisably part of the app, not a stray form. */
+function AccountBar() {
+  return (
+    <header className="sticky top-0 z-20 flex h-12 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-md">
+      <Link
+        href="/app"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Back to app
+      </Link>
+    </header>
   );
 }
 

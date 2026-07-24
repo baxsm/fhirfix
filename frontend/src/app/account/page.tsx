@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { AccountView } from "./account-view";
 
-export const metadata: Metadata = { title: "Account · FHIRfix" };
+// the root layout's title template already appends "· FHIRfix".
+export const metadata: Metadata = { title: "Account" };
 
 export default function AccountPage() {
   return <AccountView />;

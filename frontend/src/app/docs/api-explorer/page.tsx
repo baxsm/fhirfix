@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ApiExplorer } from "@/components/docs/api-explorer";
 
 export const metadata = {
-  title: "API explorer · FHIRfix",
+  title: "API explorer",
 };
 
 export default function ApiExplorerPage() {

@@ -37,7 +37,7 @@ export function SecretReveal({ value, label }: { value: string; label: string })
           onClick={copy}
           className="shrink-0 self-stretch"
         >
-          {copied ? <Check className="text-primary" /> : <Copy />}
+          {copied ? <Check className="text-success" /> : <Copy />}
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>

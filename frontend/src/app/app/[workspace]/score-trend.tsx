@@ -153,7 +153,7 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
           Last run: {latest.findingsTotal} {latest.findingsTotal === 1 ? "finding" : "findings"}
           {latest.findingsAutoFixable > 0 && (
             <>
-              , <span className="text-primary">{latest.findingsAutoFixable} auto-fixed</span>
+              , <span className="text-success">{latest.findingsAutoFixable} auto-fixed</span>
             </>
           )}
           .

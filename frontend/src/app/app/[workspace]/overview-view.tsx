@@ -231,7 +231,7 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
             <>
               <span className="text-muted-foreground">{row.conformanceScoreBefore}</span>
               <span className="mx-1 text-muted-foreground/50">→</span>
-              <span className={improved ? "text-primary" : "text-foreground"}>
+              <span className={improved ? "text-success" : "text-foreground"}>
                 {row.conformanceScoreAfter}
               </span>
             </>

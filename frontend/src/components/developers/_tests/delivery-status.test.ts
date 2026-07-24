@@ -30,20 +30,33 @@ describe("isDeliveryOk", () => {
   });
 });
 
+// a 2xx is the expected outcome of an api call, so it carries no colour at all.
+// colouring every success is what buried the one 500 in a wall of green.
 describe("statusTone", () => {
-  it("greens a 2xx", () => {
-    expect(statusTone(200)).toContain("emerald");
+  it("leaves a 2xx neutral", () => {
+    const tone = statusTone(200);
+    expect(tone).toContain("muted-foreground");
+    expect(tone).not.toContain("primary");
+    expect(tone).not.toContain("destructive");
   });
 
-  it("blues a 3xx", () => {
-    expect(statusTone(302)).toContain("sky");
+  it("marks a 3xx as info", () => {
+    expect(statusTone(302)).toContain("info");
   });
 
-  it("ambers a 4xx", () => {
-    expect(statusTone(409)).toContain("amber");
+  it("marks a 4xx as a warning", () => {
+    expect(statusTone(409)).toContain("warning");
   });
 
-  it("reds a 5xx", () => {
-    expect(statusTone(503)).toContain("red");
+  it("marks a 5xx as destructive", () => {
+    expect(statusTone(503)).toContain("destructive");
+  });
+
+  it("uses semantic tokens, never raw palette shades", () => {
+    // -400/-500 shades are dark-theme values that wash out on white, and they
+    // bypass the token system entirely.
+    for (const code of [200, 302, 409, 503]) {
+      expect(statusTone(code)).not.toMatch(/(emerald|sky|amber|red)-\d/);
+    }
   });
 });

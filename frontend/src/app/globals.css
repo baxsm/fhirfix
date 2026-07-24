@@ -41,6 +41,10 @@
   --color-accent: var(--accent);
   --color-interactive: var(--interactive);
   --color-interactive-foreground: var(--interactive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-canvas: var(--canvas);
   --color-brand: var(--brand);
   --color-info: var(--info);
   --color-muted-foreground: var(--muted-foreground);
@@ -78,58 +82,84 @@
    work: both providers write the class on <html> and the root (dark) wins. */
 :root,
 .light {
-  /* cool near-white system so surfaces separate without shadows */
-  --background: oklch(0.994 0.001 250);
-  --foreground: oklch(0.18 0.006 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.006 260);
+  /* GREYSCALE CHROME, COLOUR ONLY FOR MEANING.
+     ---------------------------------------------------------------
+     the surface roles are pure neutral and, critically, SPACED. the old set
+     had secondary/muted/accent all at 0.968 - three names, one invisible
+     value - which is why every element sank into the page. the ladder below
+     is measured off a real dashboard theme (tweakcn "Minimal Neutral"):
+
+       background 1.0    card 0.993   input 0.96
+       border/muted/accent 0.934      secondary 0.831   <- the real step
+       ring 0.63         muted-foreground 0.45          primary 0.145
+
+     because chrome carries NO hue, every saturated pixel on screen belongs to
+     a finding. that is the product's whole story (broken -> conformant), and
+     it is what stopped the ui drowning in green. */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(0.993 0 0);
+  --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.006 260);
-  /* emerald = conformant / pass / applied. RESERVED as a semantic status color,
-     not chrome. it means the product's promise (broken -> conformant); it must not
-     also carry buttons/nav/focus, or the "pass" signal drowns in green. */
-  --primary: oklch(0.596 0.145 163.225);
+  --popover-foreground: oklch(0.145 0 0);
+  /* primary = the action. near-black, 17.9:1 with white text - more than
+     three times the contrast of a blue button, and it leaves blue/green/red
+     free to mean something. */
+  --primary: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  /* blue = interactive. primary buttons, links, focus rings. the dev-tool
-     convention (Vercel/GitHub/Sentry): interactive is blue, success is green,
-     and the two never collide. */
-  --interactive: oklch(0.548 0.204 256);
+  /* success = conformant / pass / applied. the product's promise. this used to
+     be called --primary, which is why "pass" green ended up on buttons. */
+  --success: oklch(0.52 0.13 163);
+  --success-foreground: oklch(0.985 0 0);
+  /* interactive = links and focus. blue is kept ONLY for things you can follow
+     or focus, never for filled buttons. */
+  --interactive: oklch(0.52 0.19 256);
   --interactive-foreground: oklch(0.985 0 0);
-  --info: oklch(0.548 0.204 256);
-  /* brand = the wordmark accent (the violet dot in "FHIRfix."). deliberately a
-     DISTINCT hue from success(emerald)/interactive(blue) so the mark reads as brand,
-     not a status. ~#7c5cff. used only by the logo, never as chrome. */
+  --info: oklch(0.52 0.19 256);
+  /* brand = the violet dot in the wordmark. logo only, never chrome. */
   --brand: oklch(0.635 0.214 285);
-  --secondary: oklch(0.968 0.002 250);
-  --secondary-foreground: oklch(0.24 0.006 260);
-  --muted: oklch(0.968 0.002 250);
-  --muted-foreground: oklch(0.52 0.008 260);
-  --accent: oklch(0.968 0.002 250);
-  --accent-foreground: oklch(0.24 0.006 260);
-  --destructive: oklch(0.577 0.245 27.325);
-  --warning: oklch(0.769 0.188 70.08);
-  --warning-foreground: oklch(0.145 0 0);
-  --border: oklch(0.918 0.003 260);
-  --input: oklch(0.918 0.003 260);
-  --ring: oklch(0.548 0.204 256);
-  --chart-1: oklch(0.596 0.145 163.225);
-  --chart-2: oklch(0.769 0.188 70.08);
-  --chart-3: oklch(0.577 0.245 27.325);
-  --chart-4: oklch(0.439 0 0);
-  --chart-5: oklch(0.269 0 0);
-  /* emerald spend ramp (light): dashboard = full emerald, api lighter, other lightest. */
-  --chart-ui: oklch(0.596 0.145 163.225);
-  --chart-api: oklch(0.7 0.12 163.225);
-  --chart-other: oklch(0.82 0.07 163.225);
-  --radius: 0.4rem;
-  --sidebar: oklch(0.978 0.002 250);
-  --sidebar-foreground: oklch(0.3 0.008 260);
-  --sidebar-primary: oklch(0.548 0.204 256);
+  /* secondary is a REAL mid-grey fill (0.831), not a whisper. this is what
+     makes a secondary button read as a solid object without any colour. */
+  --secondary: oklch(0.831 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.934 0 0);
+  --muted-foreground: oklch(0.451 0 0);
+  --accent: oklch(0.934 0 0);
+  --accent-foreground: oklch(0.145 0 0);
+  --destructive: oklch(0.505 0.19 17);
+  --destructive-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.55 0.13 70);
+  --warning-foreground: oklch(0.985 0 0);
+  --border: oklch(0.934 0 0);
+  --input: oklch(0.96 0 0);
+  --ring: oklch(0.63 0 0);
+  /* charts are ink first: a near-black primary series with grey supporting
+     series. status colours only enter a chart when the chart is ABOUT status. */
+  --chart-1: oklch(0.145 0 0);
+  --chart-2: oklch(0.451 0 0);
+  --chart-3: oklch(0.63 0 0);
+  --chart-4: oklch(0.78 0 0);
+  --chart-5: oklch(0.88 0 0);
+  /* spend split by source: one ink ramp, not a rainbow and not all-green. */
+  --chart-ui: oklch(0.145 0 0);
+  --chart-api: oklch(0.52 0 0);
+  --chart-other: oklch(0.78 0 0);
+  /* softer than the old 0.4rem, which was a big part of the "boxed" feel. */
+  --radius: 0.75rem;
+  /* the rail is a CARD floating on the canvas, so it is the lighter surface and
+     the canvas behind it is the darker one - the inverse of a docked sidebar. */
+  --sidebar: oklch(0.993 0 0);
+  --sidebar-foreground: oklch(0.32 0 0);
+  /* active nav row = a solid dark chip, not a whisper of grey. */
+  --sidebar-primary: oklch(0.145 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.945 0.003 250);
-  --sidebar-accent-foreground: oklch(0.18 0.006 260);
-  --sidebar-border: oklch(0.918 0.003 260);
-  --sidebar-ring: oklch(0.548 0.204 256);
+  --sidebar-accent: oklch(0.951 0 0);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
+  --sidebar-border: oklch(0.934 0 0);
+  --sidebar-ring: oklch(0.63 0 0);
+  /* the canvas the rail floats on. deliberately a step BELOW the rail and the
+     cards so both read as objects resting on it. */
+  --canvas: oklch(0.968 0 0);
 }
 
 .dark {
@@ -224,6 +254,12 @@
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  /* the app shell paints the canvas, but the body behind it is white, so the
+     overscroll gutter flashed white against the grey canvas. matching them
+     keeps the surface continuous past the scroll limits. */
+  body:has(.app-shell) {
+    @apply bg-canvas;
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;

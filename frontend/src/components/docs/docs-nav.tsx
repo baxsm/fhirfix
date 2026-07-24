@@ -118,7 +118,7 @@ export function DocsNav() {
                 {/* animated active bar: slides/fades in on the active item. */}
                 <span
                   className={cn(
-                    "absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-primary transition-all duration-200",
+                    "absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-success transition-all duration-200",
                     active ? "opacity-100" : "opacity-0",
                   )}
                 />

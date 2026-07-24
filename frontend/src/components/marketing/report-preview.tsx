@@ -74,7 +74,7 @@ export function ReportPreview() {
         <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
           <Reveal className="space-y-5">
             <p className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-primary" />
+              <span className="size-1.5 rounded-full bg-success" />
               The report
             </p>
             <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-[2.5rem] sm:leading-[1.08]">
@@ -94,7 +94,7 @@ export function ReportPreview() {
                 "Before/after conformance score, 0–1000",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <Check className="mt-0.5 size-4 shrink-0 text-success" />
                   {f}
                 </li>
               ))}
@@ -112,7 +112,7 @@ export function ReportPreview() {
                   <span className="flex items-center gap-1.5 font-mono text-xs tabular-nums">
                     <span className="text-muted-foreground">640</span>
                     <ArrowRight className="size-3 text-muted-foreground/50" />
-                    <span className="font-semibold text-primary">970</span>
+                    <span className="font-semibold text-success">970</span>
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -120,8 +120,8 @@ export function ReportPreview() {
                   <Chip label="Warnings" count={3} tone="warning" />
                   <Chip label="Info" count={1} tone="info" />
                 </div>
-                <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
-                  <Check className="size-4 shrink-0 text-primary" />
+                <div className="flex items-center gap-2 rounded-md border border-success/30 bg-success/5 px-3 py-2">
+                  <Check className="size-4 shrink-0 text-success" />
                   <span className="text-sm">
                     <span className="font-medium">4 of 6 auto-fixable</span>{" "}
                     <span className="text-muted-foreground">— apply all safe fixes</span>
@@ -148,7 +148,7 @@ export function ReportPreview() {
                         </p>
                       </div>
                       {r.fixable ? (
-                        <span className="shrink-0 rounded border border-primary/30 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        <span className="shrink-0 rounded border border-success/30 bg-success/5 px-2 py-0.5 text-[10px] font-medium text-success">
                           Auto-fix
                         </span>
                       ) : (

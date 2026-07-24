@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -218,36 +219,32 @@ function EndpointRow({
   );
 }
 
-// a paused endpoint reads neutral; an enabled one reflects its last delivery
-// (green ok, red failed, blue until the first delivery).
+// a healthy endpoint is the expected state and stays neutral. only a failed
+// delivery earns colour - that is the one a reader needs to find.
 function StatusIndicator({ enabled, delivery }: { enabled: boolean; delivery: string | null }) {
-  const tone = !enabled
-    ? "bg-muted-foreground/40"
-    : delivery == null
-      ? "bg-sky-500"
+  const tone =
+    !enabled || delivery == null
+      ? "bg-muted-foreground/40"
       : isDeliveryOk(delivery)
-        ? "bg-emerald-500"
-        : "bg-red-500";
+        ? "bg-muted-foreground/40"
+        : "bg-destructive";
   return <span className={cn("inline-block size-2 shrink-0 rounded-full", tone)} />;
 }
 
 function EmptyWebhooks({ canManage, onCreate }: { canManage: boolean; onCreate: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-10 text-center">
-      <Webhook className="size-7 text-muted-foreground" />
-      <div className="space-y-1">
-        <p className="text-sm font-medium">No webhook endpoints</p>
-        <p className="max-w-sm text-xs text-muted-foreground">
-          Add an endpoint to get a signed POST when a run completes or fails, so you can react
-          without polling.
-        </p>
-      </div>
-      {canManage && (
-        <Button size="sm" onClick={onCreate}>
-          <Plus />
-          Add your first endpoint
-        </Button>
-      )}
-    </div>
+    <EmptyState
+      icon={Webhook}
+      title="No webhook endpoints"
+      body="Add an endpoint to get a signed POST when a run completes or fails, so you can react without polling."
+      action={
+        canManage ? (
+          <Button size="sm" variant="outline" onClick={onCreate}>
+            <Plus />
+            Add endpoint
+          </Button>
+        ) : undefined
+      }
+    />
   );
 }

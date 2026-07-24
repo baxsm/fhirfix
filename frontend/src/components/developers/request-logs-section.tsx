@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ScrollText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -28,11 +29,15 @@ interface LogRow {
 
 const METHODS = ["ALL", "POST", "GET"] as const;
 
+// a 2xx is the expected outcome of an api call, so it is NOT coloured. filling
+// every successful row with a green chip is what made the one 500 impossible to
+// spot. the -400 shades used before were dark-theme values anyway, which read as
+// washed-out pastel on white.
 export function statusTone(code: number): string {
-  if (code >= 500) return "border-red-500/30 bg-red-500/10 text-red-400";
-  if (code >= 400) return "border-amber-500/30 bg-amber-500/10 text-amber-400";
-  if (code >= 300) return "border-sky-500/30 bg-sky-500/10 text-sky-400";
-  return "border-emerald-500/30 bg-emerald-500/10 text-emerald-400";
+  if (code >= 500) return "border-destructive/30 bg-destructive/5 text-destructive";
+  if (code >= 400) return "border-warning/40 bg-warning/5 text-warning";
+  if (code >= 300) return "border-info/30 bg-info/5 text-info";
+  return "border-border text-muted-foreground";
 }
 
 export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
@@ -123,7 +128,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         <EmptyLogs onlyErrors={onlyErrors} />
       ) : (
         <>
-          <div className={cn("-mx-5", stale && "is-stale")}>
+          <div className={cn("-mx-4", stale && "is-stale")}>
             <Table>
               <TableBody>
                 {rows.map((r) => (
@@ -270,18 +275,14 @@ function Detail({ label, value, mono }: { label: string; value: string; mono?: b
 
 function EmptyLogs({ onlyErrors }: { onlyErrors: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-10 text-center">
-      <ScrollText className="size-7 text-muted-foreground" />
-      <div className="space-y-1">
-        <p className="text-sm font-medium">
-          {onlyErrors ? "No errors in this workspace" : "No requests yet"}
-        </p>
-        <p className="max-w-sm text-xs text-muted-foreground">
-          {onlyErrors
-            ? "Every REST call has returned a 2xx or 3xx. Turn off the filter to see all traffic."
-            : "Call the REST API with one of your keys and every request will show up here."}
-        </p>
-      </div>
-    </div>
+    <EmptyState
+      icon={ScrollText}
+      title={onlyErrors ? "No errors in this workspace" : "No requests yet"}
+      body={
+        onlyErrors
+          ? "Every REST call has returned a 2xx or 3xx. Turn off the filter to see all traffic."
+          : "Call the REST API with one of your keys and every request will show up here."
+      }
+    />
   );
 }

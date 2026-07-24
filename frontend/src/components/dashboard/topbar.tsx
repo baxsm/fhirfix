@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { breadcrumbs } from "./nav-items";
@@ -35,10 +34,10 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b bg-background/80 px-3 backdrop-blur-md sm:px-4">
-      {/* trigger is mobile-only: on desktop the sidebar is fixed and always open,
-          so there is no collapse affordance. */}
-      <SidebarTrigger className="-ml-1 size-7 text-muted-foreground md:hidden" />
+    // sits INSIDE the content column, not spanning the window, so the floating
+    // rail keeps its gutter. sticky so the breadcrumb and account menu survive a
+    // long scroll down the report.
+    <header className="sticky top-0 z-20 flex h-11 shrink-0 items-center gap-2 border-b bg-canvas/85 px-1 backdrop-blur-md sm:px-2">
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;

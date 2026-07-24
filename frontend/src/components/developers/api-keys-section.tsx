@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
 import { CreateKeyDialog } from "./create-key-dialog";
@@ -61,20 +62,27 @@ export function ApiKeysSection({
   const keys = query.data as ApiKey[];
 
   return (
-    <div className="space-y-4">
-      {canManage && (
-        <div className="flex justify-end">
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus />
-            Create key
-          </Button>
-        </div>
-      )}
-
+    <div className="space-y-3">
       {keys.length === 0 ? (
         <EmptyKeys canManage={canManage} onCreate={() => setCreateOpen(true)} />
       ) : (
-        <KeysTable keys={keys} canManage={canManage} onRevoke={(k) => setRevokeTarget(k)} />
+        <>
+          {/* the count anchors the action to the left so the button is not a
+              lone object floating in an otherwise empty band. */}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">
+              {keys.filter((k) => !k.revokedAt).length} active ·{" "}
+              {keys.filter((k) => k.revokedAt).length} revoked
+            </span>
+            {canManage && (
+              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+                <Plus />
+                Create key
+              </Button>
+            )}
+          </div>
+          <KeysTable keys={keys} canManage={canManage} onRevoke={(k) => setRevokeTarget(k)} />
+        </>
       )}
 
       <CreateKeyDialog
@@ -198,20 +206,18 @@ function KeysTable({
 
 function EmptyKeys({ canManage, onCreate }: { canManage: boolean; onCreate: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-3 py-10 text-center">
-      <KeyRound className="size-7 text-muted-foreground" />
-      <div className="space-y-1">
-        <p className="text-sm font-medium">No API keys yet</p>
-        <p className="max-w-sm text-xs text-muted-foreground">
-          Create a key to call the FHIRfix REST API from your code, CI, or the SDKs.
-        </p>
-      </div>
-      {canManage && (
-        <Button size="sm" onClick={onCreate}>
-          <Plus />
-          Create your first key
-        </Button>
-      )}
-    </div>
+    <EmptyState
+      icon={KeyRound}
+      title="No API keys yet"
+      body="Create a key to call the FHIRfix REST API from your code, CI, or the SDKs."
+      action={
+        canManage ? (
+          <Button size="sm" variant="outline" onClick={onCreate}>
+            <Plus />
+            Create key
+          </Button>
+        ) : undefined
+      }
+    />
   );
 }

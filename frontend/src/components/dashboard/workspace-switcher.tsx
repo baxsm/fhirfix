@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 type Props = {
   current: string;
@@ -25,28 +24,30 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
+      <div>
+        <div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent"
+              {/* a plain button: the shadcn SidebarMenuButton needed a
+                  SidebarProvider context that the floating rail no longer has. */}
+              <button
+                type="button"
                 aria-label="Switch workspace"
+                className="press flex w-full cursor-pointer items-center gap-2 rounded-lg bg-muted/60 px-2 py-1.5 text-left hover:bg-muted data-[state=open]:bg-muted"
               >
-                <span className="flex size-6 items-center justify-center rounded-sm bg-foreground/10 font-mono text-xs text-foreground">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-[11px] text-primary-foreground">
                   {(active?.name ?? "?").slice(0, 1).toUpperCase()}
                 </span>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate text-sm font-medium">
+                <div className="grid min-w-0 flex-1 leading-tight">
+                  <span className="truncate text-[13px] font-medium">
                     {active?.name ?? "Select workspace"}
                   </span>
-                  <span className="truncate font-mono text-xs text-muted-foreground">
+                  <span className="truncate font-mono text-[10px] text-muted-foreground">
                     {active?.slug ?? ""}
                   </span>
                 </div>
-                <ChevronsUpDown className="ml-auto size-4 opacity-60" />
-              </SidebarMenuButton>
+                <ChevronsUpDown className="ml-auto size-3.5 shrink-0 opacity-50" />
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
               {workspaces.map((w) => (
@@ -70,8 +71,8 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </SidebarMenuItem>
-      </SidebarMenu>
+        </div>
+      </div>
 
       <CreateWorkspaceDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
