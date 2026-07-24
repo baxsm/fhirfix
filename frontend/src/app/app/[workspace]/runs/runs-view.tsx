@@ -156,7 +156,7 @@ export function RunsView({ workspace }: { workspace: string }) {
                           }
                         }}
                         className={cn(
-                          "row-interactive group cursor-pointer",
+                          "row-interactive row-rail group cursor-pointer",
                           // a failed row already carries a destructive rail, so
                           // has-rail suppresses the hover rail rather than
                           // stacking two 2px bars on top of each other.

@@ -23,6 +23,14 @@ interface LatestRun {
 const MAX_SCORE = 1000;
 const W = 320;
 const H = 96;
+// the endpoint dot is drawn at the last x, so without an inset half of it falls
+// outside the viewBox and gets clipped flat against the card edge. padding the
+// svg's css box does not help: preserveAspectRatio="none" stretches the viewBox
+// to whatever box it is given, so the inset has to live in the coordinate space.
+const PAD_X = 5;
+const PAD_Y = 6;
+const PLOT_W = W - PAD_X * 2;
+const PLOT_H = H - PAD_Y * 2;
 
 /**
  * conformance score over time.
@@ -46,14 +54,14 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
     );
   }
 
-  const step = W / (scored.length - 1);
-  const y = (v: number) => H - (v / MAX_SCORE) * H;
-  const coords = scored.map((p, i) => ({ x: i * step, y: y(p.after), v: p.after }));
+  const step = PLOT_W / (scored.length - 1);
+  const y = (v: number) => PAD_Y + PLOT_H - (v / MAX_SCORE) * PLOT_H;
+  const coords = scored.map((p, i) => ({ x: PAD_X + i * step, y: y(p.after), v: p.after }));
 
   const line = coords
     .map((c, i) => `${i === 0 ? "M" : "L"}${c.x.toFixed(1)},${c.y.toFixed(1)}`)
     .join(" ");
-  const area = `${line} L${W},${H} L0,${H} Z`;
+  const area = `${line} L${W - PAD_X},${H} L${PAD_X},${H} Z`;
 
   const last = coords[coords.length - 1];
   const current = latest?.conformanceScoreAfter ?? last?.v ?? 0;
@@ -71,21 +79,38 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
   })();
 
   return (
-    <div className="raised flex h-full flex-col gap-3 rounded-lg border bg-card p-4">
-      <div className="flex items-baseline justify-between gap-3">
-        <div className="flex items-baseline gap-2">
-          <span className="font-mono text-2xl tabular-nums leading-none">{current}</span>
-          <span className="text-xs text-muted-foreground">/ {MAX_SCORE}</span>
-        </div>
-        <span className="font-mono text-xs tabular-nums text-muted-foreground">
+    <div className="raised flex flex-col rounded-lg border bg-card">
+      {/* the title lives INSIDE the card, matching the runs panel beside it.
+          previously both headers floated above their cards, which left the two
+          columns reading as different kinds of object. */}
+      <div className="flex items-baseline justify-between gap-3 border-b px-4 py-2.5">
+        <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+          Conformance trend
+        </h3>
+        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
           median {median} · {scored.length} runs
         </span>
       </div>
 
+      {/* the score gets its own band with real clearance below it. sharing a
+          band with the plot meant the trend line ran level with the digits. */}
+      <div className="flex items-baseline gap-2 px-4 pt-3 pb-4">
+        <span className="font-mono text-2xl tabular-nums leading-none">{current}</span>
+        <span className="text-xs text-muted-foreground">/ {MAX_SCORE}</span>
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground/70">
+          latest of {scored.length}
+        </span>
+      </div>
+
+      {/* a FIXED height. flex-1 let this balloon to 340px and swallow the whole
+          viewport; a sparkline's job is to be glanceable, not to fill whatever
+          space exists. no css padding here - the inset lives in the viewBox
+          (PAD_X/PAD_Y), because preserveAspectRatio="none" would just stretch
+          the plot back over any padding applied to the box. */}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="none"
-        className="h-24 w-full"
+        className="mt-1 h-20 w-full"
         role="img"
         aria-label={`Conformance score trend across ${scored.length} runs, currently ${current} out of ${MAX_SCORE}`}
       >
@@ -102,9 +127,9 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
         {/* two references: the top of the budget, and the median. the median is
             the line the eye should compare each run against. */}
         <line
-          x1="0"
+          x1={PAD_X}
           y1={y(MAX_SCORE)}
-          x2={W}
+          x2={W - PAD_X}
           y2={y(MAX_SCORE)}
           stroke="var(--border)"
           strokeWidth="1"
@@ -112,9 +137,9 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
           vectorEffect="non-scaling-stroke"
         />
         <line
-          x1="0"
+          x1={PAD_X}
           y1={y(median)}
-          x2={W}
+          x2={W - PAD_X}
           y2={y(median)}
           stroke="var(--primary)"
           strokeWidth="1"
@@ -134,22 +159,31 @@ export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: 
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
-        {/* the endpoint is emphasised: it is the number the header states. */}
+        {/* the endpoint is emphasised: it is the number the header states.
+            a dot cannot survive preserveAspectRatio="none" (the viewBox is
+            stretched ~3x horizontally, so a circle renders as a flat lozenge),
+            so it is drawn as a zero-length round-capped line instead: a stroke
+            linecap is applied in device space and stays perfectly round at any
+            scale. */}
         {last && (
-          <circle
-            cx={last.x}
-            cy={last.y}
-            r="3"
-            fill="var(--foreground)"
-            stroke="var(--card)"
-            strokeWidth="2"
+          <line
+            x1={last.x}
+            y1={last.y}
+            x2={last.x}
+            y2={last.y}
+            stroke="var(--foreground)"
+            strokeWidth="6"
+            strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           />
         )}
       </svg>
 
       {latest && (
-        <p className="border-t pt-2.5 text-xs text-muted-foreground">
+        // the card lost its padding when the header moved inside it, so this
+        // footer has to carry its own - it was sitting flush against the left
+        // edge with a full-bleed rule above it.
+        <p className="mt-3 border-t px-4 py-2.5 text-xs text-muted-foreground">
           Last run: {latest.findingsTotal} {latest.findingsTotal === 1 ? "finding" : "findings"}
           {latest.findingsAutoFixable > 0 && (
             <>

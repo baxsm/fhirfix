@@ -321,18 +321,76 @@
       box-shadow var(--dur-quick) var(--ease-out),
       color var(--dur-quick) var(--ease-out);
   }
-  /* the rail is painted on the row's FIRST CELL, not the row itself. a <tr> in a
-     border-collapse table does not reliably paint its own box-shadow, and
-     applying one shifted the whole row by a column. targeting the cell keeps the
-     effect purely visual with no geometry involvement. */
-  .row-interactive:hover > :first-child,
-  .row-interactive:focus-visible > :first-child {
-    box-shadow: inset 2px 0 0 0 var(--foreground);
+  /* row-interactive is ONLY the transition. it is used on full-bleed table rows,
+     on flex list rows, and on small rounded sidebar pills - so it must not paint
+     anything itself. attaching a rail here put a stray line through the sidebar
+     pills and across the run id text. */
+
+  /* opt in to the rail, and only on a full-bleed row where a left edge exists to
+     draw against.
+
+     the rail is a ::after with its own radius rather than an inset box-shadow.
+     a square 2px shadow ran straight past the card's rounded corner and got
+     clipped flat by overflow-hidden, so the first and last rows looked sawn off.
+     a rounded bar inset from the row edge never reaches the corner at all.
+
+     a <tr> cannot carry the pseudo-element (a row is not a containing block, and
+     a shadow on it shifts the whole row by a column), so table rows put it on
+     the first cell, which spans the row's full height anyway. */
+  .row-rail {
+    position: relative;
+  }
+  .row-rail::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 3px;
+    inset-block: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--foreground);
+    opacity: 0;
+    transform: scaleY(0.4);
+    transition:
+      opacity var(--dur-quick) var(--ease-out),
+      transform var(--dur-quick) var(--ease-out);
+    pointer-events: none;
+  }
+  .row-rail:hover::after,
+  .row-rail:focus-visible::after {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  /* table rows: the cell carries it, since a tr cannot. */
+  tr.row-rail::after {
+    content: none;
+  }
+  tr.row-rail > :first-child {
+    position: relative;
+  }
+  tr.row-rail > :first-child::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 3px;
+    inset-block: 4px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--foreground);
+    opacity: 0;
+    transform: scaleY(0.4);
+    transition:
+      opacity var(--dur-quick) var(--ease-out),
+      transform var(--dur-quick) var(--ease-out);
+    pointer-events: none;
+  }
+  tr.row-rail:hover > :first-child::after,
+  tr.row-rail:focus-visible > :first-child::after {
+    opacity: 1;
+    transform: scaleY(1);
   }
   /* a row that already owns a severity rail keeps it - do not draw two. */
-  .row-interactive.has-rail:hover > :first-child,
-  .row-interactive.has-rail:focus-visible > :first-child {
-    box-shadow: none;
+  .row-rail.has-rail::after,
+  tr.row-rail.has-rail > :first-child::after {
+    content: none;
   }
 
   /* trailing chevrons/actions that only matter once you are on the row. they
