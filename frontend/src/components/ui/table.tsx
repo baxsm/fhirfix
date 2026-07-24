@@ -57,7 +57,10 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        // hover is a real step (accent, 93.4%) not a half-opacity whisper, and
+        // keyboard focus gets the same treatment plus an inset ring so tabbing
+        // through a table is as legible as mousing through it.
+        "border-b transition-colors outline-none hover:bg-accent focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset has-aria-expanded:bg-accent data-[state=selected]:bg-accent",
         className
       )}
       {...props}

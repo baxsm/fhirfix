@@ -127,7 +127,7 @@ export function RunsView({ workspace }: { workspace: string }) {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[36%]">Run</TableHead>
+                    <TableHead>Run</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Findings</TableHead>
                     <TableHead className="text-right">Score</TableHead>
@@ -156,10 +156,13 @@ export function RunsView({ workspace }: { workspace: string }) {
                           }
                         }}
                         className={cn(
-                          "row-interactive group cursor-pointer border-l-2",
+                          "row-interactive group cursor-pointer",
+                          // a failed row already carries a destructive rail, so
+                          // has-rail suppresses the hover rail rather than
+                          // stacking two 2px bars on top of each other.
                           r.status === "failed"
-                            ? "border-l-destructive bg-destructive/[0.025]"
-                            : "border-l-transparent",
+                            ? "has-rail border-l-2 border-l-destructive bg-destructive/[0.025]"
+                            : "",
                         )}
                       >
                         <TableCell>
@@ -208,7 +211,10 @@ export function RunsView({ workspace }: { workspace: string }) {
                           {fmtDate(r.createdAt)}
                         </TableCell>
                         <TableCell>
-                          <ArrowRight className="size-3.5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+                          {/* the chevron is invisible until the row is hovered
+                              or focused, but it always occupies its cell, so
+                              revealing it never reflows the table. */}
+                          <ArrowRight className="row-reveal row-nudge size-3.5 text-foreground" />
                         </TableCell>
                       </TableRow>
                     );

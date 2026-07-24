@@ -77,12 +77,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
                 })}
           </p>
         </div>
-        <Button asChild size="sm" className="shrink-0">
-          <Link href={`${base}/check`}>
-            <FileScan className="size-4" />
-            New check
-          </Link>
-        </Button>
+        {/* no New check here: the topbar carries it on every screen. */}
       </div>
 
       {loading ? (
@@ -96,7 +91,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
               <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
                 Needs attention
               </h2>
-              <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+              <div className="raised enter-stagger divide-y overflow-hidden rounded-lg border bg-card">
                 {failedRuns.length > 0 && (
                   <AttentionRow
                     href={`${base}/runs`}
@@ -132,7 +127,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
                   View all
                 </Link>
               </div>
-              <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+              <div className="raised enter-stagger divide-y overflow-hidden rounded-lg border bg-card">
                 {runs.slice(0, 6).map((r) => (
                   <RecentRun key={r.id} row={r} href={`${base}/runs/${r.id}`} />
                 ))}
@@ -185,7 +180,9 @@ function AttentionRow({
     <Link
       href={href}
       className={cn(
-        "row-interactive group flex items-center gap-3 border-l-2 px-4 py-3",
+        // has-rail: the severity rail is the point of this row, so the generic
+        // hover rail must not double it up.
+        "row-interactive has-rail group flex items-center gap-3 border-l-2 px-4 py-3",
         tone === "danger" ? "border-l-destructive" : "border-l-warning",
       )}
     >
@@ -201,7 +198,7 @@ function AttentionRow({
         <p className="text-sm font-medium leading-tight">{title}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{body}</p>
       </div>
-      <ArrowRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+      <ArrowRight className="row-reveal row-nudge size-4 shrink-0 text-foreground" />
     </Link>
   );
 }
@@ -215,8 +212,8 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
     <Link
       href={href}
       className={cn(
-        "row-interactive group flex items-center gap-3 border-l-2 px-4 py-2.5",
-        row.status === "failed" ? "border-l-destructive" : "border-l-transparent",
+        "row-interactive group flex items-center gap-3 px-4 py-2.5",
+        row.status === "failed" && "has-rail border-l-2 border-l-destructive",
       )}
     >
       <div className="min-w-0 flex-1">
@@ -286,7 +283,7 @@ function FirstRun({ base }: { base: string }) {
         <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
           Set up your workspace
         </h3>
-        <div className="raised divide-y overflow-hidden rounded-lg border bg-card">
+        <div className="raised enter-stagger divide-y overflow-hidden rounded-lg border bg-card">
           <AttentionRow
             href={`${base}/mappings`}
             tone="warning"

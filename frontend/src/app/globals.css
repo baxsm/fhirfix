@@ -302,27 +302,80 @@
 }
 
 @layer components {
-  /* row/cell hover. only background-color and transform are animated - both are
-     GPU-composited. never animate width/height/top/left: they force a layout
-     recalculation of everything after them on the page. */
+  /* ── rows ─────────────────────────────────────────────────────────────────
+     a row does three things at once on hover, which is what makes it feel like
+     an object rather than a colour swap:
+       1. the surface warms,
+       2. an ink rail wipes in from the left (scaleY, not width - a width
+          animation would relayout every following row),
+       3. the row's own affordances wake up (see .row-reveal / .row-nudge).
+     the rail is a ::before so it costs no extra dom node per row. */
+  /* the rail is drawn with an inset box-shadow rather than an absolutely
+     positioned ::before. a <tr> is not a reliable containing block for absolute
+     children - doing that shifted every cell into its neighbour's column.
+     box-shadow paints inside the row's own box, costs no layout, and works
+     identically on a tr, a div or an anchor. */
   .row-interactive {
-    transition: background-color var(--dur-quick) var(--ease-out);
+    transition:
+      background-color var(--dur-quick) var(--ease-out),
+      box-shadow var(--dur-quick) var(--ease-out),
+      color var(--dur-quick) var(--ease-out);
+  }
+  /* the rail is painted on the row's FIRST CELL, not the row itself. a <tr> in a
+     border-collapse table does not reliably paint its own box-shadow, and
+     applying one shifted the whole row by a column. targeting the cell keeps the
+     effect purely visual with no geometry involvement. */
+  .row-interactive:hover > :first-child,
+  .row-interactive:focus-visible > :first-child {
+    box-shadow: inset 2px 0 0 0 var(--foreground);
+  }
+  /* a row that already owns a severity rail keeps it - do not draw two. */
+  .row-interactive.has-rail:hover > :first-child,
+  .row-interactive.has-rail:focus-visible > :first-child {
+    box-shadow: none;
   }
 
-  /* a control that lifts slightly on hover and settles on press. the press
-     state is deliberately instant. */
+  /* trailing chevrons/actions that only matter once you are on the row. they
+     stay in the layout at all times (opacity, not display) so nothing shifts. */
+  .row-reveal {
+    opacity: 0;
+    transition:
+      opacity var(--dur-quick) var(--ease-out),
+      transform var(--dur-quick) var(--ease-out);
+    transform: translateX(-2px);
+  }
+  .row-interactive:hover .row-reveal,
+  .row-interactive:focus-visible .row-reveal,
+  .row-reveal:focus-visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* a directional nudge for an arrow that means "go here". */
+  .row-interactive:hover .row-nudge {
+    transform: translateX(2px);
+  }
+  .row-nudge {
+    transition: transform var(--dur-quick) var(--ease-out);
+  }
+
+  /* ── controls ─────────────────────────────────────────────────────────────
+     press settles INTO the surface rather than lifting, which reads as a real
+     key. the press is instant; only the release is animated. */
   .press {
     transition:
       background-color var(--dur-quick) var(--ease-out),
       border-color var(--dur-quick) var(--ease-out),
+      box-shadow var(--dur-quick) var(--ease-out),
       transform var(--dur-quick) var(--ease-out);
   }
   .press:active {
-    transform: translateY(0.5px);
+    transform: translateY(0.5px) scale(0.994);
+    transition-duration: 0s;
   }
 
-  /* content that arrives after a fetch. fades and rises a few px so a table
-     swapping pages reads as a change, not a flicker. */
+  /* ── entrances ────────────────────────────────────────────────────────────
+     content arriving after a fetch fades and rises a few px so a page swap
+     reads as a change rather than a flicker. */
   .enter {
     animation: enter var(--dur-regular) var(--ease-out) both;
   }
@@ -337,12 +390,39 @@
     }
   }
 
+  /* a list whose children arrive in sequence. capped at 8 so a 50-row table
+     never takes half a second to finish appearing. */
+  .enter-stagger > * {
+    animation: enter var(--dur-regular) var(--ease-out) both;
+  }
+  .enter-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .enter-stagger > *:nth-child(2) { animation-delay: 20ms; }
+  .enter-stagger > *:nth-child(3) { animation-delay: 40ms; }
+  .enter-stagger > *:nth-child(4) { animation-delay: 60ms; }
+  .enter-stagger > *:nth-child(5) { animation-delay: 80ms; }
+  .enter-stagger > *:nth-child(6) { animation-delay: 100ms; }
+  .enter-stagger > *:nth-child(7) { animation-delay: 120ms; }
+  .enter-stagger > *:nth-child(n + 8) { animation-delay: 140ms; }
+
   /* stale rows while a new page loads underneath. dims without collapsing the
-     container, which is what keeps the page height stable across a filter
-     change. */
+     container, which keeps the page height stable across a filter change. */
   .is-stale {
     opacity: 0.55;
     transition: opacity var(--dur-quick) var(--ease-out);
+  }
+
+  /* a number that changed since the last poll. a brief ink flash, no layout
+     impact, so a live-updating balance is noticed without being distracting. */
+  .flash {
+    animation: flash var(--dur-slow) var(--ease-out);
+  }
+  @keyframes flash {
+    from {
+      background-color: var(--accent);
+    }
+    to {
+      background-color: transparent;
+    }
   }
 }
 
