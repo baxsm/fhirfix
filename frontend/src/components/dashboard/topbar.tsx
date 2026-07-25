@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
-import type { WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { breadcrumbs } from "./nav-items";
 import { UserMenu } from "./user-menu";
@@ -14,10 +13,9 @@ type Props = {
   workspace: string;
   workspaceName: string;
   user: { name: string; email: string };
-  role: WorkspaceRole;
 };
 
-export function Topbar({ workspace, workspaceName, user, role }: Props) {
+export function Topbar({ workspace, workspaceName, user }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -80,7 +78,7 @@ export function Topbar({ workspace, workspaceName, user, role }: Props) {
           </Link>
         </Button>
 
-        <UserMenu user={user} role={role} workspace={workspace} onSignOut={handleSignOut} />
+        <UserMenu user={user} workspace={workspace} onSignOut={handleSignOut} />
       </div>
     </header>
   );

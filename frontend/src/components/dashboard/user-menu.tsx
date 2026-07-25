@@ -1,67 +1,46 @@
 "use client";
 
-import { BookOpen, CreditCard, LogOut, Settings, UserRound, Users, Wallet } from "lucide-react";
+import { BookOpen, CreditCard, LogOut, Settings, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/ui/user-avatar";
-import type { WorkspaceRole } from "@/lib/permissions";
-
-const ROLE_LABEL: Record<WorkspaceRole, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  member: "Member",
-  billing: "Billing",
-  auditor: "Auditor",
-};
-
-type Row = {
-  label: string;
-  href: string;
-  icon: typeof UserRound;
-};
 
 /**
  * the account control.
  *
- * the TRIGGER is a bare circle on purpose: the topbar should not carry the
- * user's name and role permanently, that is noise on every screen. identity
- * belongs in the panel, which is where someone looks when they want it.
+ * built against shadcn's own `nav-user` block, which is the reference
+ * implementation for this component. three things there that this got wrong
+ * before:
  *
- * the PANEL carries the identity: photo, name, email and role, then the rows
- * grouped by purpose with an icon on each. grouping and icons are what make it
- * read as an account panel rather than a list of links.
+ * 1. the panel avatar is the SAME size as the trigger (h-8), not enlarged.
+ *    ours is a generated placeholder the user cannot replace, so showing it
+ *    bigger tells them nothing they did not already see.
+ * 2. the header is `px-1 py-1.5` inside the panel's own p-1 - not a 14px inset
+ *    on a tinted surface. it is a label, not a hero.
+ * 3. no role badge. checked across github, vercel, linear, figma, slack,
+ *    notion, asana, stripe, sentry, intercom and jira: none of them put role in
+ *    the personal account menu. role belongs to you-in-a-workspace, but this
+ *    menu is you-as-a-person and follows you across workspaces. it lives on the
+ *    members page instead, which is where every one of those products puts it.
  */
 export function UserMenu({
   user,
-  role,
   workspace,
   onSignOut,
 }: {
   user: { name: string; email: string };
-  role: WorkspaceRole;
   workspace: string;
   onSignOut: () => void;
 }) {
   const base = `/app/${workspace}`;
-
-  const groups: Row[][] = [
-    [
-      { label: "Account", href: "/account", icon: UserRound },
-      { label: "Workspace settings", href: `${base}/settings`, icon: Settings },
-    ],
-    [
-      { label: "Members", href: `${base}/settings`, icon: Users },
-      { label: "Billing", href: `${base}/billing`, icon: CreditCard },
-      { label: "Credits and usage", href: `${base}/billing`, icon: Wallet },
-    ],
-    [{ label: "Docs and API", href: "/docs", icon: BookOpen }],
-  ];
 
   return (
     <DropdownMenu>
@@ -75,45 +54,60 @@ export function UserMenu({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={8} className="w-[268px] p-0">
-        {/* identity header: photo, name, email, and the role badge. this is the
-            block that makes the panel feel like an account, not a link list. */}
-        <div className="flex items-center gap-3 px-3.5 py-3.5">
-          <UserAvatar name={user.name} email={user.email} size={44} />
-          <div className="min-w-0 space-y-1">
-            <p className="truncate text-sm font-semibold leading-none">{user.name}</p>
-            <p className="truncate font-mono text-[11px] leading-none text-muted-foreground">
-              {user.email}
-            </p>
-            <span className="inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none tracking-wide text-muted-foreground">
-              {ROLE_LABEL[role]}
-            </span>
-          </div>
-        </div>
-
-        {groups.map((rows, i) => (
-          <div key={rows[0]?.label ?? i}>
-            <DropdownMenuSeparator className="my-0" />
-            <div className="p-1.5">
-              {rows.map((row) => (
-                <DropdownMenuItem key={row.label} asChild className="h-9 gap-2.5 px-2.5">
-                  <Link href={row.href}>
-                    <row.icon className="size-4 text-muted-foreground" />
-                    {row.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+      <DropdownMenuContent align="end" sideOffset={6} className="min-w-56">
+        <DropdownMenuLabel className="p-0 font-normal">
+          <div className="flex items-center gap-2 px-1 py-1.5">
+            <UserAvatar name={user.name} email={user.email} size={32} />
+            <div className="grid min-w-0 flex-1 leading-tight">
+              <span className="truncate text-sm font-medium">{user.name}</span>
+              <span className="truncate font-mono text-xs text-muted-foreground">{user.email}</span>
             </div>
           </div>
-        ))}
+        </DropdownMenuLabel>
 
-        <DropdownMenuSeparator className="my-0" />
-        <div className="p-1.5">
-          <DropdownMenuItem onClick={onSignOut} className="h-9 gap-2.5 px-2.5">
-            <LogOut className="size-4 text-muted-foreground" />
-            Sign out
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href="/account">
+              <UserRound />
+              Account
+            </Link>
           </DropdownMenuItem>
-        </div>
+          <DropdownMenuItem asChild>
+            <Link href={`${base}/settings`}>
+              <Settings />
+              Workspace settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href={`${base}/settings`}>
+              <Users />
+              Members
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href={`${base}/billing`}>
+              <CreditCard />
+              Billing
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/docs">
+              <BookOpen />
+              Docs and API
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onSignOut}>
+          <LogOut />
+          Sign out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
