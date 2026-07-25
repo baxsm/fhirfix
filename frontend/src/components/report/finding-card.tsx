@@ -18,8 +18,6 @@ import { DiffView } from "./diff-view";
 import {
   type FindingRow,
   isOneClick,
-  SEVERITY_RAIL,
-  SEVERITY_TONE,
   type Severity,
   STATUS_LABEL,
   STATUS_TONE,
@@ -78,11 +76,9 @@ export function FindingCard({
   const fragment = before && after ? fragmentFor(finding.fhirpath, before, after) : null;
 
   return (
-    // a ROW in a shared panel, not a card of its own. the parent supplies the
-    // border and radius; stacking bordered cards with gaps between them is what
-    // made a long findings list read as unrelated tiles. the row draws its own
-    // bottom border (see below) rather than the parent using divide-y, so the
-    // severity rail runs unbroken instead of being cut at every boundary.
+    // a ROW in a shared panel, not a card of its own. severity is carried by the
+    // coloured icon, which is enough - it does not also need a bar down the left
+    // edge and a badge repeating the same word.
     <article
       className={cn(
         "group/finding relative transition-opacity",
@@ -90,10 +86,7 @@ export function FindingCard({
         open && "bg-muted/40",
       )}
     >
-      <div className={cn("absolute inset-y-0 left-0 w-[3px]", SEVERITY_RAIL[finding.severity])} />
-      {/* border-b lives here, inside the rail's box, so the rail runs unbroken
-          down the whole list instead of being cut by a container divider. */}
-      <div className="border-b pl-4 group-last/finding:border-b-0">
+      <div className="border-b group-last/finding:border-b-0">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -110,10 +103,10 @@ export function FindingCard({
             className={cn(
               "mt-0.5 size-4 shrink-0",
               finding.severity === "error"
-                ? "text-red-400"
+                ? "text-destructive"
                 : finding.severity === "warning"
-                  ? "text-amber-400"
-                  : "text-sky-400",
+                  ? "text-warning"
+                  : "text-info",
             )}
           />
           <div className="min-w-0 flex-1">
@@ -132,10 +125,10 @@ export function FindingCard({
               <span className="text-muted-foreground/60 capitalize">{finding.category}</span>
             </div>
           </div>
+          {/* no severity badge here: the coloured icon on the left already
+              states it, and the word appeared twice on every row. only the fix
+              STATUS gets a badge, because nothing else on the row says it. */}
           <div className="flex shrink-0 items-center gap-2">
-            <Badge variant="outline" className={cn("capitalize", SEVERITY_TONE[finding.severity])}>
-              {finding.severity}
-            </Badge>
             <Badge variant="outline" className={STATUS_TONE[finding.fixStatus]}>
               {applied && <Wrench className="mr-1 size-3" />}
               {STATUS_LABEL[finding.fixStatus]}
@@ -162,7 +155,7 @@ export function FindingCard({
               <summary className="cursor-pointer text-[11px] text-muted-foreground/70 hover:text-muted-foreground">
                 Why we flagged this
               </summary>
-              <div className="mt-2 space-y-1.5 border-l pl-3 text-[11px] text-muted-foreground/80">
+              <div className="mt-2 space-y-1.5 rounded-md bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground/80">
                 <p>
                   <span className="text-muted-foreground/60">Rule:</span>{" "}
                   <span className="font-mono">{finding.ruleSource}</span>

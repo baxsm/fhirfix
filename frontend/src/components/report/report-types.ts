@@ -31,22 +31,6 @@ export interface FindingRow {
   rank: number;
 }
 
-// left-rail severity color. color + icon + label are all applied, never color
-// alone. these use semantic tokens rather than raw palette shades - the old
-// -400/-500 values were dark-theme colours that read as washed-out pastel on a
-// near-white surface.
-export const SEVERITY_RAIL: Record<Severity, string> = {
-  error: "bg-destructive",
-  warning: "bg-warning",
-  info: "bg-info",
-};
-
-export const SEVERITY_TONE: Record<Severity, string> = {
-  error: "text-destructive border-destructive/30 bg-destructive/[0.06]",
-  warning: "text-warning border-warning/35 bg-warning/[0.06]",
-  info: "text-info border-info/30 bg-info/[0.06]",
-};
-
 // APPLIED IS NEUTRAL. it is the expected outcome of a run with auto-fix on, so
 // painting it emerald put a green badge on nearly every row and drowned out the
 // one or two findings that still need a human. colour here is reserved for the
