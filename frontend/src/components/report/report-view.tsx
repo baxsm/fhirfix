@@ -36,7 +36,6 @@ import {
   type Preset,
 } from "./facet-sidebar";
 import { FindingDetail } from "./finding-detail";
-import { FindingListRow } from "./finding-row";
 import type { FindingRow, Severity } from "./report-types";
 import { ShareDialog } from "./share-dialog";
 
@@ -152,7 +151,6 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
   const [busyFp, setBusyFp] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [applyingAll, setApplyingAll] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const setPresetAndFacets = (p: Preset) => {
     setPreset(p);
@@ -267,12 +265,6 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
   const openErrors = counts.error;
 
   const shown = filterFindings(findings, facets, preset);
-
-  // the selection is DERIVED, never stored as an object. holding the finding
-  // itself would go stale the moment a refetch replaced the array after an
-  // apply, and falling back to the first visible row means a filter change can
-  // never leave the detail pane showing something the list no longer contains.
-  const selected = shown.find((f) => f.id === selectedId) ?? shown[0] ?? null;
 
   const applyAllSafe = () => {
     const fps = [...new Set(fixableNow.map((f) => f.dedupFingerprint))];
@@ -409,11 +401,13 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
         ) : null}
       </header>
 
-      {/* body: facets · list · detail.
-          master/detail rather than expand-in-place. an expanding row hid every
-          action behind a click and pushed the rest of the page down each time
-          one opened; here the list never changes height and the selected
-          finding's actions are always on screen. */}
+      {/* body: index · findings.
+          TWO columns, not three. it was facets (200px) + list (340px) + detail
+          (flex-1), which left the diff about 200px at 1920 - a single url wrapped
+          across four lines. the list and the detail were also the same
+          information at two zoom levels, competing for the same space.
+          measured on github's own pr view at 1920: a ~256px file tree and a
+          1427px diff. the payload gets the width; navigation gets a thin rail. */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <FacetSidebar
           findings={findings}
@@ -433,41 +427,30 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
           </div>
         ) : (
           <>
-            {/* both panes size to their content up to a cap, rather than a
-                fixed height that left ~120px of dead space on a short list.
-                items-start on the row keeps them top-aligned as they differ. */}
-            <div className="raised enter-stagger max-h-[560px] w-full shrink-0 overflow-y-auto rounded-lg border bg-card lg:w-[340px]">
+            {/* the findings themselves, stacked at the full remaining width.
+                each one carries its own diff, so nothing is hidden behind a
+                selection and the diff finally has room to render a url on one
+                line. the facet rail on the left is the index. */}
+            <div className="enter-stagger min-w-0 flex-1 space-y-3">
               {shown.map((f) => (
-                <FindingListRow
+                <div
                   key={f.id}
-                  finding={f}
-                  selected={f.id === selected?.id}
-                  onSelect={() => setSelectedId(f.id)}
-                />
-              ))}
-            </div>
-
-            <div className="raised max-h-[560px] min-w-0 flex-1 overflow-hidden rounded-lg border bg-card">
-              {selected ? (
-                <FindingDetail
-                  finding={selected}
-                  before={data?.input ?? null}
-                  after={data?.corrected ?? null}
-                  busy={
-                    busyFp === selected.dedupFingerprint ||
-                    (applyingAll && selected.fixStatus === "suggested")
-                  }
-                  onApply={onApply}
-                  onFixWithAi={onAi}
-                  onDismiss={onDismiss}
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center px-6 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Select a finding to see the fix and the diff.
-                  </p>
+                  id={`finding-${f.id}`}
+                  className="raised overflow-hidden rounded-lg border bg-card"
+                >
+                  <FindingDetail
+                    finding={f}
+                    before={data?.input ?? null}
+                    after={data?.corrected ?? null}
+                    busy={
+                      busyFp === f.dedupFingerprint || (applyingAll && f.fixStatus === "suggested")
+                    }
+                    onApply={onApply}
+                    onFixWithAi={onAi}
+                    onDismiss={onDismiss}
+                  />
                 </div>
-              )}
+              ))}
             </div>
           </>
         )}
