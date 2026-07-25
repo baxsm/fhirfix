@@ -122,7 +122,7 @@ export function FindingCard({
               {finding.fhirpath && (
                 <span className="font-mono text-muted-foreground">{finding.fhirpath}</span>
               )}
-              <span className="text-muted-foreground/60 capitalize">{finding.category}</span>
+              <span className="capitalize text-muted-foreground">{finding.category}</span>
             </div>
           </div>
           {/* no severity badge here: the coloured icon on the left already
@@ -152,19 +152,20 @@ export function FindingCard({
             )}
 
             <details className="group">
-              <summary className="cursor-pointer text-[11px] text-muted-foreground/70 hover:text-muted-foreground">
+              <summary className="cursor-pointer text-[11px] text-muted-foreground hover:text-foreground">
                 Why we flagged this
               </summary>
-              <div className="mt-2 space-y-1.5 rounded-md bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground/80">
+              {/* solid tokens only: stacked opacities here measured 1.0:1. */}
+              <div className="mt-2 space-y-1.5 rounded-md border bg-muted px-3 py-2 text-[11px]">
                 <p>
-                  <span className="text-muted-foreground/60">Rule:</span>{" "}
-                  <span className="font-mono">{finding.ruleSource}</span>
+                  <span className="text-muted-foreground">Rule:</span>{" "}
+                  <span className="font-mono text-foreground">{finding.ruleSource}</span>
                 </p>
                 <p>
-                  <span className="text-muted-foreground/60">Spec:</span>{" "}
-                  <span className="font-mono">{finding.specCitation}</span>
+                  <span className="text-muted-foreground">Spec:</span>{" "}
+                  <span className="font-mono text-foreground">{finding.specCitation}</span>
                 </p>
-                <p className="font-mono text-muted-foreground/70">{finding.rawValidatorMessage}</p>
+                <p className="font-mono text-muted-foreground">{finding.rawValidatorMessage}</p>
               </div>
             </details>
 

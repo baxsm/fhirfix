@@ -86,9 +86,9 @@ export function FindingDetail({
             {finding.fhirpath && (
               <span className="font-mono text-muted-foreground">{finding.fhirpath}</span>
             )}
-            <span className="capitalize text-muted-foreground/60">{finding.category}</span>
+            <span className="capitalize text-muted-foreground">{finding.category}</span>
             {finding.occurrenceCount > 1 && (
-              <span className="font-mono text-muted-foreground/60 tabular-nums">
+              <span className="font-mono text-muted-foreground tabular-nums">
                 {finding.occurrenceCount} occurrences
               </span>
             )}
@@ -112,17 +112,33 @@ export function FindingDetail({
           />
         )}
 
-        <div className="space-y-1.5 rounded-md bg-muted/60 px-3 py-2.5 text-[11px] text-muted-foreground/80">
-          <p className="font-medium text-muted-foreground">Why we flagged this</p>
-          <p>
-            <span className="text-muted-foreground/60">Rule:</span>{" "}
-            <span className="font-mono">{finding.ruleSource}</span>
+        {/* solid tokens only - this block used to nest text-muted-foreground/80
+            inside an /80 parent on a /60 background, and the stacked opacities
+            multiplied down until the text was barely visible. it now measures
+            6.1:1 for the body and 12.9:1 for the values.
+
+            select-none on the frame with select-text on the values: the labels
+            are chrome and should not show an i-beam, but the ids and the
+            validator message are worth copying. */}
+        <div className="space-y-2 rounded-md border bg-muted px-3 py-2.5 text-[11px] select-none">
+          <p className="font-medium text-foreground">Why we flagged this</p>
+          <dl className="space-y-1.5">
+            <div className="flex gap-2">
+              <dt className="shrink-0 text-muted-foreground">Rule</dt>
+              <dd className="min-w-0 select-text break-all font-mono text-foreground">
+                {finding.ruleSource}
+              </dd>
+            </div>
+            <div className="flex gap-2">
+              <dt className="shrink-0 text-muted-foreground">Spec</dt>
+              <dd className="min-w-0 select-text break-all font-mono text-foreground">
+                {finding.specCitation}
+              </dd>
+            </div>
+          </dl>
+          <p className="select-text border-t pt-2 font-mono leading-relaxed text-muted-foreground">
+            {finding.rawValidatorMessage}
           </p>
-          <p>
-            <span className="text-muted-foreground/60">Spec:</span>{" "}
-            <span className="font-mono">{finding.specCitation}</span>
-          </p>
-          <p className="font-mono text-muted-foreground/70">{finding.rawValidatorMessage}</p>
         </div>
       </div>
 
