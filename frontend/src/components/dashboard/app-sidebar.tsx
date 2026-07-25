@@ -44,7 +44,10 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
               <p className="px-2 pb-1.5 font-mono text-[9px] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
                 {group.label}
               </p>
-              <ul className="flex flex-col gap-0.5">
+              {/* gap-1.5, not gap-0.5. at 2px an active dark chip sat flush
+                  against a hovered neighbour and the two pills read as one
+                  blob; the rows need visible air between them. */}
+              <ul className="flex flex-col gap-1.5">
                 {items.map((item) => {
                   const active = activeHref === item.href;
                   return (

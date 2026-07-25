@@ -303,94 +303,21 @@
 
 @layer components {
   /* ── rows ─────────────────────────────────────────────────────────────────
-     a row does three things at once on hover, which is what makes it feel like
-     an object rather than a colour swap:
-       1. the surface warms,
-       2. an ink rail wipes in from the left (scaleY, not width - a width
-          animation would relayout every following row),
-       3. the row's own affordances wake up (see .row-reveal / .row-nudge).
-     the rail is a ::before so it costs no extra dom node per row. */
-  /* the rail is drawn with an inset box-shadow rather than an absolutely
-     positioned ::before. a <tr> is not a reliable containing block for absolute
-     children - doing that shifted every cell into its neighbour's column.
-     box-shadow paints inside the row's own box, costs no layout, and works
-     identically on a tr, a div or an anchor. */
+     hover is JUST a background change. an earlier version wiped an ink rail in
+     from the left edge; it read as a stray line rather than a state, and it had
+     to be special-cased for table rows vs flex rows vs sidebar pills. a single
+     surface change works identically on every shape and needs no opt-in.
+
+     accent (0.934) is the token whose documented job is exactly this: "hover,
+     focus, and active surfaces". */
   .row-interactive {
     transition:
       background-color var(--dur-quick) var(--ease-out),
-      box-shadow var(--dur-quick) var(--ease-out),
       color var(--dur-quick) var(--ease-out);
   }
-  /* row-interactive is ONLY the transition. it is used on full-bleed table rows,
-     on flex list rows, and on small rounded sidebar pills - so it must not paint
-     anything itself. attaching a rail here put a stray line through the sidebar
-     pills and across the run id text. */
-
-  /* opt in to the rail, and only on a full-bleed row where a left edge exists to
-     draw against.
-
-     the rail is a ::after with its own radius rather than an inset box-shadow.
-     a square 2px shadow ran straight past the card's rounded corner and got
-     clipped flat by overflow-hidden, so the first and last rows looked sawn off.
-     a rounded bar inset from the row edge never reaches the corner at all.
-
-     a <tr> cannot carry the pseudo-element (a row is not a containing block, and
-     a shadow on it shifts the whole row by a column), so table rows put it on
-     the first cell, which spans the row's full height anyway. */
-  .row-rail {
-    position: relative;
-  }
-  .row-rail::after {
-    content: "";
-    position: absolute;
-    inset-inline-start: 3px;
-    inset-block: 4px;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--foreground);
-    opacity: 0;
-    transform: scaleY(0.4);
-    transition:
-      opacity var(--dur-quick) var(--ease-out),
-      transform var(--dur-quick) var(--ease-out);
-    pointer-events: none;
-  }
-  .row-rail:hover::after,
-  .row-rail:focus-visible::after {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  /* table rows: the cell carries it, since a tr cannot. */
-  tr.row-rail::after {
-    content: none;
-  }
-  tr.row-rail > :first-child {
-    position: relative;
-  }
-  tr.row-rail > :first-child::after {
-    content: "";
-    position: absolute;
-    inset-inline-start: 3px;
-    inset-block: 4px;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--foreground);
-    opacity: 0;
-    transform: scaleY(0.4);
-    transition:
-      opacity var(--dur-quick) var(--ease-out),
-      transform var(--dur-quick) var(--ease-out);
-    pointer-events: none;
-  }
-  tr.row-rail:hover > :first-child::after,
-  tr.row-rail:focus-visible > :first-child::after {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-  /* a row that already owns a severity rail keeps it - do not draw two. */
-  .row-rail.has-rail::after,
-  tr.row-rail.has-rail > :first-child::after {
-    content: none;
+  .row-interactive:hover,
+  .row-interactive:focus-visible {
+    background-color: var(--accent);
   }
 
   /* trailing chevrons/actions that only matter once you are on the row. they

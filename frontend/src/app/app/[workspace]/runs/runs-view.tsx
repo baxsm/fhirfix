@@ -156,13 +156,12 @@ export function RunsView({ workspace }: { workspace: string }) {
                           }
                         }}
                         className={cn(
-                          "row-interactive row-rail group cursor-pointer",
-                          // a failed row already carries a destructive rail, so
-                          // has-rail suppresses the hover rail rather than
-                          // stacking two 2px bars on top of each other.
-                          r.status === "failed"
-                            ? "has-rail border-l-2 border-l-destructive bg-destructive/[0.025]"
-                            : "",
+                          "row-interactive group cursor-pointer",
+                          // the destructive rail is a permanent severity marker,
+                          // not a hover state - it stays put while the row's
+                          // background changes underneath it.
+                          r.status === "failed" &&
+                            "border-l-2 border-l-destructive bg-destructive/[0.025]",
                         )}
                       >
                         <TableCell>

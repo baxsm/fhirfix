@@ -181,9 +181,7 @@ function AttentionRow({
     <Link
       href={href}
       className={cn(
-        // has-rail: the severity rail is the point of this row, so the generic
-        // hover rail must not double it up.
-        "row-interactive row-rail has-rail group flex items-center gap-3 border-l-2 px-4 py-3",
+        "row-interactive group flex items-center gap-3 border-l-2 px-4 py-3",
         tone === "danger" ? "border-l-destructive" : "border-l-warning",
       )}
     >
@@ -213,8 +211,8 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
     <Link
       href={href}
       className={cn(
-        "row-interactive row-rail group flex items-center gap-3 px-4 py-2.5",
-        row.status === "failed" && "has-rail border-l-2 border-l-destructive",
+        "row-interactive group flex items-center gap-3 px-4 py-2.5",
+        row.status === "failed" && "border-l-2 border-l-destructive",
       )}
     >
       <div className="min-w-0 flex-1">
