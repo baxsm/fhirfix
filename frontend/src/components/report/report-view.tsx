@@ -529,27 +529,50 @@ function InProgress({
   onCancel: () => void;
   cancelling: boolean;
 }) {
+  // measured over 196 real runs: mean 1.33s, 194 of 196 under 2s, exactly one
+  // ever past 10s. so this screen is showing for about a second in the normal
+  // case, and a full-page spinner for one second is a flash, not feedback
+  // (nn/g: under 1s needs none at all, 2-10s a modest indicator, and only past
+  // 10s progress plus a way to interrupt).
+  //
+  // so: a quiet line first, and the heavier explanation and cancel only once
+  // the wait is genuinely long enough to warrant them.
+  const slow = useElapsedPast(2000);
+  const veryLong = useElapsedPast(10000);
+
   return (
-    <div className="mx-auto max-w-lg space-y-6 py-8">
-      <div className="flex flex-col items-center gap-4 rounded-md border bg-card px-6 py-12 text-center raised">
-        <Loader2 className="size-8 animate-spin text-interactive" />
-        <div>
-          <h2 className="font-medium">
-            {status === "queued" ? "Queued" : "Validating and remediating"}
-          </h2>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">{runId}</p>
-        </div>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Converting, validating against US Core, deriving safe fixes, and re-verifying. This runs
-          against the real HAPI validator, so a cold pool can take a moment.
-        </p>
-        <Button variant="ghost" size="sm" onClick={onCancel} disabled={cancelling}>
-          {cancelling ? <Loader2 className="size-3.5 animate-spin" /> : null}
-          Cancel
-        </Button>
+    <div className="space-y-4 py-6">
+      <div className="flex items-center gap-2.5">
+        <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        <span className="text-sm">{status === "queued" ? "Queued" : "Checking this record"}</span>
+        <span className="font-mono text-xs text-muted-foreground">{runId}</span>
       </div>
+
+      {slow && (
+        <p className="max-w-prose text-sm text-muted-foreground">
+          Converting, validating against US Core, deriving safe fixes, then re-verifying. This runs
+          against the real HAPI validator, so a cold pool takes longer than usual.
+        </p>
+      )}
+
+      {veryLong && (
+        <Button variant="outline" size="sm" onClick={onCancel} disabled={cancelling}>
+          {cancelling ? <Loader2 className="size-3.5 animate-spin" /> : null}
+          Cancel this run
+        </Button>
+      )}
     </div>
   );
+}
+
+/** true once `ms` has passed since mount. */
+function useElapsedPast(ms: number) {
+  const [past, setPast] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setPast(true), ms);
+    return () => clearTimeout(t);
+  }, [ms]);
+  return past;
 }
 
 function ReportSkeleton() {

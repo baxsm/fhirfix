@@ -142,8 +142,11 @@ export function CheckView({ workspace }: { workspace: string }) {
         {/* a FIXED height, not a min-height. the textarea grows with its content,
             so a min-height alone let the paste panel outgrow the upload panel and
             the switch moved the Run button by ~320px. both modes now occupy the
-            same box and scroll internally. */}
-        <div className="h-[360px] overflow-hidden p-4">
+            same box and scroll internally.
+            sized off the viewport rather than a flat 360px: this is the editor
+            you paste a bundle into, and 360px of it on a tall screen wasted the
+            room that actually matters here. */}
+        <div className="h-[min(560px,calc(100svh-330px))] min-h-[300px] overflow-hidden p-4">
           {mode === "paste" ? (
             <div className="flex h-full flex-col gap-3">
               <Textarea
