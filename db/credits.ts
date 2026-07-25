@@ -25,6 +25,17 @@ export const PRICING = {
 
 export type CreditPack = (typeof PRICING.packs)[number];
 
+// the ONLY amounts that may ever be charged, in cents. both the purchase path
+// (checkout) and the auto-charging path (auto-recharge) validate against this, so
+// a client cannot name its own price. auto-recharge previously accepted any
+// integer >= 500 with no ceiling, which meant an arbitrary amount could be
+// scheduled to charge without a human present.
+export const PURCHASABLE_CENTS: readonly number[] = PRICING.packs.map((p) => p.cents);
+
+export function isPurchasableCents(cents: number): boolean {
+  return Number.isInteger(cents) && PURCHASABLE_CENTS.includes(cents);
+}
+
 export function microFromCents(cents: number): number {
   // cents -> micro-credits at 1:1 dollars-to-credits. $1 = 100 cents = 1_000_000 micro.
   return Math.round((cents / 100) * MICRO_PER_DOLLAR);

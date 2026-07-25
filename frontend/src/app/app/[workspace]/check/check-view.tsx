@@ -1,13 +1,12 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { FileUp, Loader2, Play, Upload, X } from "lucide-react";
+import { FileUp, Loader2, Play, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
-import { FilterPill, ModeSwitch, ModeSwitchItem } from "@/components/ui/segmented";
 import { Textarea } from "@/components/ui/textarea";
 import { useListOrganizations } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -16,13 +15,28 @@ import { SAMPLES } from "./samples";
 
 const ACCEPT = ".json,.ndjson,.hl7,.txt,application/json,text/plain";
 const MAX_BYTES = 5_000_000;
+// with content, never shorter than this - a few lines of json.
+const MIN_EDITOR_PX = 220;
+// empty, the editor is only the prompt; the sample offer sits below it in flow.
+const EMPTY_EDITOR_PX = 44;
 
-type Mode = "paste" | "upload";
+/**
+ * this page asks ONE question: what do you want checked? it used to answer that
+ * with a Paste/Upload tab pair, which was two ways of filling the same box
+ * presented as two different destinations. a textarea already accepts a dropped
+ * file, so the tabs were dividing something that was never actually divided -
+ * and the filled-black tab treatment made a mode switch look like the loudest
+ * control on the page.
+ *
+ * it also opened with a sample already pasted in and "478 characters ready"
+ * underneath, describing text the user never typed. that made the primary button
+ * permanently enabled and the empty state unreachable, so nobody ever saw what a
+ * new user sees. samples are now an offer, not a default.
+ */
 
 interface StagedFile {
   name: string;
   size: number;
-  content: string;
   status: "ready" | "rejected";
   reason?: string;
 }
@@ -35,15 +49,30 @@ export function CheckView({ workspace }: { workspace: string }) {
   const router = useRouter();
   const trpc = useTRPC();
 
-  // paste and upload are two ways to answer the same question, so they are one
-  // control with one panel. before, a squashed drop strip sat permanently above
-  // a tall textarea and neither looked like the primary path.
-  const [mode, setMode] = useState<Mode>("paste");
-  const [content, setContent] = useState(SAMPLES[0]?.content ?? "");
-  const [sampleId, setSampleId] = useState<string | null>(SAMPLES[0]?.id ?? null);
+  const [content, setContent] = useState("");
+  const [sampleId, setSampleId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [files, setFiles] = useState<StagedFile[]>([]);
+  const [file, setFile] = useState<StagedFile | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+
+  // grow to the content, up to a viewport-relative cap, then scroll inside.
+  // measured from scrollHeight after resetting to auto, so deleting shrinks it
+  // back rather than keeping the tallest height it ever reached.
+  // when empty the editor is just the prompt line - the sample offer below it
+  // carries the rest of the panel's height, so there is no dead space to fill.
+  const [editorHeight, setEditorHeight] = useState<number>(EMPTY_EDITOR_PX);
+  useLayoutEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    if (!content.trim()) {
+      setEditorHeight(EMPTY_EDITOR_PX);
+      return;
+    }
+    const cap = Math.max(MIN_EDITOR_PX, window.innerHeight - 330);
+    el.style.height = "auto";
+    setEditorHeight(Math.min(cap, Math.max(MIN_EDITOR_PX, el.scrollHeight)));
+  }, [content]);
 
   const submit = useMutation(
     trpc.run.submit.mutationOptions({
@@ -65,41 +94,37 @@ export function CheckView({ workspace }: { workspace: string }) {
     }),
   );
 
-  const readFiles = async (list: FileList | File[]) => {
-    const staged: StagedFile[] = [];
-    for (const file of Array.from(list)) {
-      if (file.size > MAX_BYTES) {
-        staged.push({
-          name: file.name,
-          size: file.size,
-          content: "",
-          status: "rejected",
-          reason: "Over 5 MB",
-        });
-        continue;
-      }
-      const text = await file.text();
-      const looksValid = /\.(json|ndjson|hl7|txt)$/i.test(file.name) || text.trim().length > 0;
-      staged.push({
-        name: file.name,
-        size: file.size,
-        content: text,
-        status: looksValid ? "ready" : "rejected",
-        reason: looksValid ? undefined : "Unrecognized format",
+  const readFile = async (incoming: File) => {
+    if (incoming.size > MAX_BYTES) {
+      setFile({
+        name: incoming.name,
+        size: incoming.size,
+        status: "rejected",
+        reason: "Over 5 MB",
       });
+      return;
     }
-    setFiles((prev) => [...prev, ...staged]);
-    const firstReady = staged.find((f) => f.status === "ready");
-    if (firstReady) {
-      setContent(firstReady.content);
-      setSampleId(null);
+    const text = await incoming.text();
+    if (!text.trim()) {
+      setFile({ name: incoming.name, size: incoming.size, status: "rejected", reason: "Empty file" });
+      return;
     }
+    setFile({ name: incoming.name, size: incoming.size, status: "ready" });
+    setContent(text);
+    setSampleId(null);
   };
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    if (e.dataTransfer.files.length > 0) void readFiles(e.dataTransfer.files);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) void readFile(dropped);
+  };
+
+  const clear = () => {
+    setContent("");
+    setFile(null);
+    setSampleId(null);
   };
 
   const run = () => {
@@ -108,6 +133,7 @@ export function CheckView({ workspace }: { workspace: string }) {
   };
 
   const charCount = content.trim().length;
+  const empty = charCount === 0;
 
   return (
     <PageContainer>
@@ -119,199 +145,169 @@ export function CheckView({ workspace }: { workspace: string }) {
         </p>
       </header>
 
-      <div className="raised overflow-hidden rounded-lg border bg-card">
-        {/* mode switch sits ON the panel it controls, so it is obvious which
-            surface it is switching. */}
-        <div className="border-b p-1.5">
-          <ModeSwitch label="Input method">
-            <ModeSwitchItem
-              active={mode === "paste"}
-              onClick={() => setMode("paste")}
-              label="Paste"
-              hint="Type or paste the record"
-            />
-            <ModeSwitchItem
-              active={mode === "upload"}
-              onClick={() => setMode("upload")}
-              label="Upload"
-              hint="Drop a .json, .ndjson or .hl7 file"
-            />
-          </ModeSwitch>
-        </div>
+      {/* one surface. the whole thing is the drop target, so a dragged file has a
+          target the size of the editor instead of a separate tab. */}
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: drag events on the
+           editor shell; the focusable control inside is the textarea. */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={(e) => {
+          // only clear when the pointer actually leaves the shell, not when it
+          // crosses onto a child element.
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
+        }}
+        onDrop={onDrop}
+        className={cn(
+          "raised relative overflow-hidden rounded-lg border bg-card transition-colors",
+          dragging && "border-interactive ring-1 ring-interactive/30",
+        )}
+      >
+        {/* the old fixed 560px existed to stop the Paste/Upload switch moving the
+            Run button by ~320px. with no switch there is nothing to hold still,
+            and a fixed height left 451px of dead panel under the sample offer
+            (measured). so it starts compact and grows with what you paste, up to
+            a viewport-relative cap after which the textarea scrolls. */}
+        <div className="relative overflow-hidden">
+          <Textarea
+            ref={editorRef}
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              setSampleId(null);
+              if (file) setFile(null);
+            }}
+            spellCheck={false}
+            aria-label="Resource content"
+            style={{ height: editorHeight }}
+            className="resize-none overflow-auto rounded-none border-0 bg-transparent p-4 font-mono text-xs shadow-none focus-visible:ring-0"
+            placeholder="Paste a FHIR resource, a bundle, or an HL7v2 message. You can also drop a file anywhere on this panel, or start from a sample:"
+          />
 
-        {/* a FIXED height, not a min-height. the textarea grows with its content,
-            so a min-height alone let the paste panel outgrow the upload panel and
-            the switch moved the Run button by ~320px. both modes now occupy the
-            same box and scroll internally.
-            sized off the viewport rather than a flat 360px: this is the editor
-            you paste a bundle into, and 360px of it on a tall screen wasted the
-            room that actually matters here. */}
-        <div className="h-[min(560px,calc(100svh-330px))] min-h-[300px] overflow-hidden p-4">
-          {mode === "paste" ? (
-            <div className="flex h-full flex-col gap-3">
-              <Textarea
-                value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
-                  setSampleId(null);
-                }}
-                spellCheck={false}
-                aria-label="Resource content"
-                className="min-h-0 flex-1 resize-none overflow-auto border-0 bg-transparent p-0 font-mono text-xs shadow-none focus-visible:ring-0"
-                placeholder="Paste a FHIR resource, a bundle, or an HL7v2 message..."
-              />
-              <div className="flex shrink-0 flex-wrap items-center gap-2 border-t pt-3">
-                <span className="text-[11px] text-muted-foreground">Start from a sample</span>
+          {/* samples are a way to START, offered when there is nothing to check,
+              rather than a default that fills the box on your behalf. each says
+              what is wrong with it, because the point of a sample is to have real
+              defects to find.
+              they sit directly under the placeholder, NOT pinned to the bottom of
+              the panel: anchored to the bottom they left a ~340px void between
+              the prompt and the only thing you could act on. the offer belongs
+              where the eye already is. */}
+          {empty && (
+            // in normal flow, NOT an absolute overlay: positioned absolutely it
+            // contributed no height, so the panel sized itself to the textarea
+            // alone and the footer sliced the cards in half.
+            <div className="px-4 pb-4">
+              <div className="flex flex-wrap gap-2">
                 {SAMPLES.map((s) => (
-                  // the selected sample was previously a 5% tint with no weight
-                  // or ink change, so the panel showed content nothing on screen
-                  // claimed responsibility for.
-                  <FilterPill
+                  <button
                     key={s.id}
-                    active={sampleId === s.id}
+                    type="button"
                     onClick={() => {
                       setContent(s.content);
                       setSampleId(s.id);
-                      setFiles([]);
+                      setFile(null);
                     }}
+                    className="press max-w-sm cursor-pointer rounded-md border bg-background px-2.5 py-1.5 text-left transition-colors hover:border-foreground/25 hover:bg-muted/50"
                   >
-                    {s.label}
-                    <span className="font-mono opacity-60">{s.kind}</span>
-                  </FilterPill>
+                    <span className="flex items-center gap-1.5 text-xs font-medium">
+                      {s.label}
+                      <span className="font-mono text-[10px] text-muted-foreground">{s.kind}</span>
+                    </span>
+                    <span className="mt-0.5 block text-[11px] text-muted-foreground">{s.hint}</span>
+                  </button>
                 ))}
               </div>
             </div>
-          ) : (
-            <div className="flex h-full flex-col gap-3">
-              <button
-                type="button"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={onDrop}
-                onClick={() => inputRef.current?.click()}
-                className={cn(
-                  "flex min-h-0 w-full flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed transition-colors",
-                  dragging
-                    ? "border-interactive bg-interactive/5"
-                    : "hover:border-foreground/25 hover:bg-muted/30",
-                )}
-              >
-                <span className="flex size-9 items-center justify-center rounded-lg border bg-background">
-                  <Upload
-                    className={cn(
-                      "size-4",
-                      dragging ? "text-interactive" : "text-muted-foreground",
-                    )}
-                  />
-                </span>
-                <span className="text-sm font-medium">
-                  {dragging ? "Drop to stage the file" : "Drop a file, or click to browse"}
-                </span>
-                {/* file types and the size limit are different facts. chaining
-                    them with dots made one run-on string where ".hl7" and
-                    "up to 5 MB" read as the same kind of thing. */}
-                <span className="text-[11px] text-muted-foreground">
-                  <span className="font-mono">.json</span>,{" "}
-                  <span className="font-mono">.ndjson</span> or{" "}
-                  <span className="font-mono">.hl7</span>, up to 5 MB
-                </span>
-              </button>
+          )}
 
-              {files.length > 0 && (
-                <ul className="max-h-24 shrink-0 space-y-1.5 overflow-y-auto border-t pt-3">
-                  {files.map((f, idx) => (
-                    <li
-                      key={`${f.name}-${idx}`}
-                      className={cn(
-                        "flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs",
-                        f.status === "rejected"
-                          ? "border-destructive/30 bg-destructive/5"
-                          : "bg-background",
-                      )}
-                    >
-                      <FileUp
-                        className={cn(
-                          "size-3.5 shrink-0",
-                          f.status === "rejected" ? "text-destructive" : "text-muted-foreground",
-                        )}
-                      />
-                      <span className="min-w-0 flex-1 truncate font-mono">{f.name}</span>
-                      <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
-                        {(f.size / 1024).toFixed(1)} KB
-                      </span>
-                      {f.status === "rejected" ? (
-                        <span className="shrink-0 text-[10px] text-destructive">{f.reason}</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setContent(f.content);
-                            setMode("paste");
-                          }}
-                          className="shrink-0 cursor-pointer text-[10px] text-interactive hover:underline"
-                        >
-                          Review
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        aria-label={`Remove ${f.name}`}
-                        onClick={() => setFiles((prev) => prev.filter((_, i) => i !== idx))}
-                        className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="size-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+          {dragging && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-interactive/5">
+              <span className="rounded-md border border-interactive bg-background px-3 py-1.5 text-xs font-medium">
+                Drop to load the file
+              </span>
             </div>
           )}
         </div>
 
-        {/* the action bar is part of the panel, not floating below it, so the
-            thing you press belongs to the thing you filled in. */}
         <div className="flex items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
-          {/* in upload mode the staged content came from the other tab, so say
-              where it is. "478 characters ready" next to an empty drop zone
-              reads like a bug. */}
-          <span className="font-mono text-[11px] text-muted-foreground">
-            {charCount === 0
-              ? "Nothing to check yet"
-              : mode === "upload"
-                ? `${charCount.toLocaleString()} characters staged in Paste`
-                : `${charCount.toLocaleString()} characters ready`}
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            disabled={!workspaceId || !content.trim() || submit.isPending}
-            onClick={run}
-          >
-            {submit.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+          <div className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
+            {file ? (
+              <>
+                <FileUp
+                  className={cn(
+                    "size-3.5 shrink-0",
+                    file.status === "rejected" ? "text-destructive" : "text-muted-foreground",
+                  )}
+                />
+                <span className="truncate font-mono">{file.name}</span>
+                {file.status === "rejected" ? (
+                  <span className="shrink-0 text-destructive">{file.reason}</span>
+                ) : (
+                  <span className="shrink-0 font-mono tabular-nums">
+                    {(file.size / 1024).toFixed(1)} KB
+                  </span>
+                )}
+                <button
+                  type="button"
+                  aria-label="Remove file"
+                  onClick={clear}
+                  className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </>
             ) : (
-              <Play className="size-4" />
+              <span className="font-mono">
+                {empty ? (
+                  "Nothing to check yet"
+                ) : (
+                  <>
+                    {charCount.toLocaleString()} characters
+                    {sampleId && " · sample"}
+                  </>
+                )}
+              </span>
             )}
-            {submit.isPending ? "Starting..." : "Run check"}
-          </Button>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPT}
+              className="hidden"
+              onChange={(e) => {
+                const picked = e.target.files?.[0];
+                if (picked) void readFile(picked);
+                e.target.value = "";
+              }}
+            />
+            <Button type="button" variant="ghost" size="sm" onClick={() => inputRef.current?.click()}>
+              Choose file
+            </Button>
+            {!empty && (
+              <Button type="button" variant="ghost" size="sm" onClick={clear}>
+                Clear
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              disabled={!workspaceId || empty || submit.isPending}
+              onClick={run}
+            >
+              {submit.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Play className="size-4" />
+              )}
+              {submit.isPending ? "Starting..." : "Run check"}
+            </Button>
+          </div>
         </div>
       </div>
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPT}
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          if (e.target.files) void readFiles(e.target.files);
-          e.target.value = "";
-        }}
-      />
 
       <p className="text-xs text-muted-foreground">
         Validated against US Core 6.1.0. Every fix is re-verified before you see it.

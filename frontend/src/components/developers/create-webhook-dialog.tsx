@@ -5,6 +5,7 @@ import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -137,11 +138,9 @@ export function CreateWebhookDialog({
                       key={ev.id}
                       className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={events.includes(ev.id)}
-                        onChange={() => toggleEvent(ev.id)}
-                        className="size-4 rounded border-input accent-[var(--interactive)]"
+                        onCheckedChange={() => toggleEvent(ev.id)}
                       />
                       <span className="font-mono text-xs">{ev.id}</span>
                       <span className="ml-auto text-right text-[11px] text-muted-foreground">

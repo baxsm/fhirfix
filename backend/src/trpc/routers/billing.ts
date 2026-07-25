@@ -1,8 +1,10 @@
 import {
   dollarsFromMicro,
   evaluateAutoRecharge,
+  isPurchasableCents,
   MICRO_PER_DOLLAR,
   PRICING,
+  PURCHASABLE_CENTS,
 } from "@shared/db/credits";
 import { ensureBillingAccount } from "@shared/db/ledger";
 import { TRPCError } from "@trpc/server";
@@ -12,7 +14,15 @@ import { hasPermission } from "@/auth/permissions";
 import { schema } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { createCheckout, isBillingConfigured, productIdForPack } from "@/lib/polar";
+import { rateLimit } from "@/lib/redis";
 import { router, workspaceProcedure } from "../trpc";
+
+// creating a checkout hits Polar's API, so it is rate limited per workspace. the
+// REST api and the public demo route already went through rateLimit(); this path
+// did not, which let an authenticated billing:manage member open unbounded
+// checkout sessions against a third party.
+const CHECKOUT_LIMIT = 10;
+const CHECKOUT_WINDOW_SECONDS = 60 * 10;
 
 // all money leaves this router as dollars; micro-credits stay server-side.
 function requireManage(role: string) {
@@ -209,6 +219,19 @@ export const billingRouter = router({
           message: "Billing is not configured yet.",
         });
       }
+      const rl = await rateLimit(
+        `checkout:${ctx.workspaceId}`,
+        CHECKOUT_LIMIT,
+        CHECKOUT_WINDOW_SECONDS,
+      );
+      if (!rl.allowed) {
+        logger.warn("billing.checkout", `rate limited ${ctx.workspaceId}`);
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many checkout attempts. Wait a few minutes and try again.",
+        });
+      }
+
       const pack = PRICING.packs.find((p) => p.id === input.packId);
       if (!pack) throw new TRPCError({ code: "BAD_REQUEST", message: "Unknown pack." });
 
@@ -241,7 +264,15 @@ export const billingRouter = router({
         workspaceId: z.string(),
         enabled: z.boolean(),
         thresholdDollars: z.number().min(0).max(10000).optional(),
-        amountCents: z.number().int().min(500).optional(),
+        // must be one of the purchasable packs. this path charges without a human
+        // present, so an unbounded amount here is worse than on checkout.
+        amountCents: z
+          .number()
+          .int()
+          .refine(isPurchasableCents, {
+            message: `Recharge amount must be one of: ${PURCHASABLE_CENTS.join(", ")} cents.`,
+          })
+          .optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

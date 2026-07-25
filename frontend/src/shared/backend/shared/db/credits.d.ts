@@ -21,6 +21,8 @@ export declare const PRICING: {
     readonly trialGrantMicro: number;
 };
 export type CreditPack = (typeof PRICING.packs)[number];
+export declare const PURCHASABLE_CENTS: readonly number[];
+export declare function isPurchasableCents(cents: number): boolean;
 export declare function microFromCents(cents: number): number;
 export declare function centsFromMicro(micro: number): number;
 export declare function dollarsFromMicro(micro: number): number;

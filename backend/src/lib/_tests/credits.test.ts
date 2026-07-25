@@ -3,11 +3,13 @@ import {
   dollarsFromMicro,
   evaluateAutoRecharge,
   formatDollars,
+  isPurchasableCents,
   MICRO_PER_DOLLAR,
   microFromCents,
   nextAlertThreshold,
   PRICING,
   priceForRun,
+  PURCHASABLE_CENTS,
 } from "@shared/db/credits";
 
 describe("credit conversions", () => {
@@ -153,5 +155,33 @@ describe("pricing config", () => {
 
   test("trial grant is $5", () => {
     expect(PRICING.trialGrantMicro).toBe(5 * MICRO_PER_DOLLAR);
+  });
+});
+
+describe("isPurchasableCents", () => {
+  test("accepts every configured pack", () => {
+    for (const p of PRICING.packs) {
+      expect(isPurchasableCents(p.cents)).toBe(true);
+    }
+  });
+
+  test("rejects amounts a client made up", () => {
+    // the old auto-recharge validator was min(500) with no ceiling, so all of
+    // these were accepted on the path that charges without a human present.
+    expect(isPurchasableCents(99_999_999)).toBe(false);
+    expect(isPurchasableCents(501)).toBe(false);
+    expect(isPurchasableCents(1_500)).toBe(false);
+  });
+
+  test("rejects zero, negative and non-integer amounts", () => {
+    expect(isPurchasableCents(0)).toBe(false);
+    expect(isPurchasableCents(-1000)).toBe(false);
+    expect(isPurchasableCents(1000.5)).toBe(false);
+  });
+
+  test("purchasable set matches the pack list exactly", () => {
+    expect([...PURCHASABLE_CENTS].sort((a, b) => a - b)).toEqual(
+      PRICING.packs.map((p) => p.cents).sort((a, b) => a - b),
+    );
   });
 });

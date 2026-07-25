@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { ChoiceChip } from "@/components/ui/segmented";
+import { PanelTab, PanelTabs } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -114,46 +114,48 @@ export function MappingsTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <fieldset
-          aria-label="Filter by status"
-          className="inline-flex h-8 items-center gap-0.5 rounded-md border p-0.5"
-        >
-          {filters.map((f) => {
-            const n = counts?.[f.key];
-            return (
-              <ChoiceChip
-                key={f.key}
-                active={status === f.key}
-                count={n || undefined}
-                onClick={() => onStatusChange(f.key)}
-              >
-                {f.label}
-              </ChoiceChip>
-            );
-          })}
-        </fieldset>
-
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2.5 size-3.5 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search source or target"
-              className="h-8 w-56 pl-8 text-xs"
-            />
-          </div>
-          {canEdit && (
-            // default size (h-8), not sm (h-7): this button sits beside an
-            // h-8 Input, and sm would leave it 4px short in the same row.
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus />
-              Add mapping
-            </Button>
-          )}
-        </div>
-      </div>
+      {/* status swaps which set of rows the table shows, and each has its own
+          count - that is a tabbed panel, not a filter, so it takes the underline
+          treatment rather than a chip in a box. search and create ride the same
+          baseline so the rule spans the full width of the table below it. */}
+      <PanelTabs
+        label="Filter by status"
+        actions={
+          <>
+            <div className="relative">
+              <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-2.5 size-3.5 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search source or target"
+                className="h-8 w-56 pl-8 text-xs"
+              />
+            </div>
+            {canEdit && (
+              // default size (h-8), not sm (h-7): this button sits beside an
+              // h-8 Input, and sm would leave it 4px short in the same row.
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus />
+                Add mapping
+              </Button>
+            )}
+          </>
+        }
+      >
+        {filters.map((f) => {
+          const n = counts?.[f.key];
+          return (
+            <PanelTab
+              key={f.key}
+              active={status === f.key}
+              count={n || undefined}
+              onClick={() => onStatusChange(f.key)}
+            >
+              {f.label}
+            </PanelTab>
+          );
+        })}
+      </PanelTabs>
 
       <div className="raised overflow-hidden rounded-md border">
         {query.isError ? (

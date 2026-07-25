@@ -5,7 +5,7 @@ import { ChevronDown, ScrollText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ChoiceChip } from "@/components/ui/segmented";
+import { ChoiceChip, ChoiceGroup, FilterPill } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -95,13 +95,12 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {/* role=group, not tablist: a segmented filter is a mode selector, and
-            primer is explicit that it must not take the tablist role (the
-            keyboard contract differs - tab moves between segments, not arrows). */}
-        <fieldset
-          aria-label="Filter by method"
-          className="inline-flex gap-0.5 rounded-md border p-0.5"
-        >
+        {/* method is one choice from a short closed set where "ALL" is itself a
+            member, so it is the real segmented-control case. role=group, not
+            tablist: primer is explicit that a segmented control must not take
+            the tablist role (the keyboard contract differs - tab moves between
+            segments, not arrows). */}
+        <ChoiceGroup label="Filter by method">
           {METHODS.map((m) => (
             <ChoiceChip
               key={m}
@@ -111,16 +110,17 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
               {m}
             </ChoiceChip>
           ))}
-        </fieldset>
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={onlyErrors}
-            onChange={(e) => changeFilter(() => setOnlyErrors(e.target.checked))}
-            className="size-3.5 rounded border-input accent-[var(--interactive)]"
-          />
+        </ChoiceGroup>
+        {/* was a native checkbox tinted with --interactive, i.e. the link blue,
+            which is the same borrowed-colour bug as the api-key dialog. errors
+            only is a filter, so it uses the filter material. */}
+        <FilterPill
+          active={onlyErrors}
+          tone="danger"
+          onClick={() => changeFilter(() => setOnlyErrors(!onlyErrors))}
+        >
           Errors only
-        </label>
+        </FilterPill>
       </div>
 
       {/* EVERY state occupies the same frame - rows, empty, error and loading.

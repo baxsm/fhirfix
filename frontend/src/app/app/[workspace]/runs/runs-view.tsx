@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Activity, ArrowRight, FileScan } from "lucide-react";
+import { Activity, ArrowRight, FileScan, Filter } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -122,10 +122,14 @@ export function RunsView({
               permanently-disabled control is noise. */}
           {failedCount > 0 && (
             <div className="flex items-center gap-2">
+              {/* the icon is what says "this narrows the list" at rest. without
+                  it the control was a bare word and a number, which reads as a
+                  label until you happen to click it. */}
               <FilterPill
                 active={failedOnly}
                 tone="danger"
                 count={failedCount}
+                icon={Filter}
                 onClick={() => {
                   setFailedOnly((v) => !v);
                   setPage(0);

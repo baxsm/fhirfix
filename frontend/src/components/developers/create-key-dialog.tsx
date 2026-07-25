@@ -5,6 +5,7 @@ import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -141,7 +142,7 @@ export function CreateKeyDialog({
 
               <div className="space-y-1.5">
                 <Label>Mode</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div role="radiogroup" aria-label="Key mode" className="grid grid-cols-2 gap-2">
                   <ModeButton
                     active={mode === "test"}
                     onClick={() => setMode("test")}
@@ -165,11 +166,9 @@ export function CreateKeyDialog({
                       key={s.id}
                       className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={scopes.includes(s.id)}
-                        onChange={() => toggleScope(s.id)}
-                        className="size-4 rounded border-input accent-[var(--interactive)]"
+                        onCheckedChange={() => toggleScope(s.id)}
                       />
                       <span className="font-mono text-xs">{s.label}</span>
                       <span className="ml-auto text-xs text-muted-foreground">{s.hint}</span>
@@ -208,14 +207,36 @@ function ModeButton({
   return (
     <button
       type="button"
+      // two mutually exclusive options with a real consequence (live charges
+      // credits) is a radio, not two independent buttons. role+aria-checked is
+      // what announces which one is armed.
+      role="radio"
+      aria-checked={active}
       onClick={onClick}
+      // selected is ink, not a blue tint. --interactive is the link colour;
+      // using it here made "test mode" look like a hyperlink and made this
+      // dialog the only blue surface in the product.
       className={cn(
-        "cursor-pointer rounded-md border px-3 py-2 text-left transition-colors",
-        active ? "border-interactive/50 bg-interactive/10" : "border-border hover:bg-muted/40",
+        "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors",
+        active
+          ? "border-foreground/25 bg-muted"
+          : "border-border hover:border-foreground/20 hover:bg-muted/40",
       )}
     >
-      <div className="text-sm font-medium">{title}</div>
-      <div className="font-mono text-[10px] text-muted-foreground">{hint}</div>
+      {/* an explicit dot, because a fill alone is ambiguous when the two options
+          sit side by side - and picking the wrong one here spends real money. */}
+      <span
+        className={cn(
+          "mt-0.5 flex size-3.5 shrink-0 items-center justify-center rounded-full border transition-colors",
+          active ? "border-primary bg-primary" : "border-input bg-background",
+        )}
+      >
+        {active && <span className="size-1.5 rounded-full bg-primary-foreground" />}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium">{title}</span>
+        <span className="block font-mono text-[10px] text-muted-foreground">{hint}</span>
+      </span>
     </button>
   );
 }

@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -162,12 +163,7 @@ export function CreateMappingDialog({
 
           <div className="space-y-2">
             <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-              <input
-                type="checkbox"
-                checked={scoped}
-                onChange={(e) => setScoped(e.target.checked)}
-                className="size-3.5 rounded border-input accent-[var(--interactive)]"
-              />
+              <Checkbox checked={scoped} onCheckedChange={(v) => setScoped(v === true)} />
               Only apply to one source system
             </label>
             {scoped && (
