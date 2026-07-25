@@ -12,7 +12,7 @@ export default async function RunsPage({ params }: { params: Promise<{ workspace
   // a single row could render, which is why pages felt slow against a 13ms api.
   const workspaceId = await resolveWorkspace(workspace);
   if (workspaceId) {
-    await prefetch(trpcServer.run.list.queryOptions({ workspaceId }));
+    prefetch(trpcServer.run.list.queryOptions({ workspaceId }));
   }
 
   return (

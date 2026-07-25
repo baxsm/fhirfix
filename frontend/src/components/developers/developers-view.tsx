@@ -14,10 +14,16 @@ import { ApiKeysSection } from "./api-keys-section";
 import { RequestLogsSection } from "./request-logs-section";
 import { WebhooksSection } from "./webhooks-section";
 
-export function DevelopersView({ workspace }: { workspace: string }) {
+export function DevelopersView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const trpc = useTRPC();
   const wsQuery = useQuery({

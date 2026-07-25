@@ -34,11 +34,19 @@ interface RunRow {
  * the two questions someone opening the app actually has: did the last thing I
  * ran work, and is anything waiting on me.
  */
-export function OverviewView({ workspace }: { workspace: string }) {
+export function OverviewView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  // resolved on the server; the client lookup is the fallback for client-side
+  // navigations, where there is no server pass.
+  workspaceId?: string;
+}) {
   const base = `/app/${workspace}`;
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const trpc = useTRPC();
   const enabled = !!workspaceId;

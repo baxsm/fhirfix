@@ -1,4 +1,6 @@
 import { DevelopersView } from "@/components/developers/developers-view";
+import { resolveWorkspace } from "@/trpc/resolve-workspace";
+import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 
 export default async function DevelopersPage({
   params,
@@ -6,5 +8,28 @@ export default async function DevelopersPage({
   params: Promise<{ workspace: string }>;
 }) {
   const { workspace } = await params;
-  return <DevelopersView workspace={workspace} />;
+  const workspaceId = await resolveWorkspace(workspace);
+
+  if (workspaceId) {
+    prefetch(trpcServer.workspace.get.queryOptions({ workspaceId }));
+    // the three sections this page is made of. their default inputs are static,
+    // so the server can start every one of them.
+    prefetch(trpcServer.developers.apiKeys.list.queryOptions({ workspaceId }));
+    prefetch(trpcServer.developers.webhooks.list.queryOptions({ workspaceId }));
+    prefetch(
+      trpcServer.developers.requestLogs.list.queryOptions({
+        workspaceId,
+        method: undefined,
+        onlyErrors: undefined,
+        cursor: undefined,
+        limit: 25,
+      }),
+    );
+  }
+
+  return (
+    <HydrateClient>
+      <DevelopersView workspace={workspace} workspaceId={workspaceId} />
+    </HydrateClient>
+  );
 }

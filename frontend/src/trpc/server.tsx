@@ -66,20 +66,23 @@ export function HydrateClient({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * run a query on the server and put the result in the request's cache, so the
- * client hydrates with it instead of fetching again.
+ * start a query on the server and let the result stream to the client.
  *
- * this AWAITS. an earlier version fired the query and returned immediately,
- * which meant `dehydrate()` ran before the data landed and the payload went out
- * empty - the client then refetched exactly as before and the whole exercise
- * did nothing. verified by watching `run.list` still appear in the browser's
- * network calls.
+ * deliberately NOT awaited, per the tRPC RSC guide: the html goes out
+ * immediately and the data follows over the RSC transport. that only works
+ * because query-client.ts extends `shouldDehydrateQuery` to include pending
+ * queries - without that the payload is empty and the client silently refetches
+ * everything, which is what happened here before the docs were read.
  *
- * awaiting costs the server a round trip it is far better placed to make than
- * the browser: it is on the same network as the backend, and it removes a
- * client waterfall rather than adding to one.
+ * await this only when the page must not render without the data.
  */
-export async function prefetch<T extends { queryKey: unknown[] }>(options: T) {
+export function prefetch<T extends { queryKey: [readonly unknown[], { type?: string }?] }>(
+  options: T,
+) {
   const queryClient: QueryClient = getServerQueryClient();
-  await queryClient.prefetchQuery(options as never);
+  if (options.queryKey[1]?.type === "infinite") {
+    void queryClient.prefetchInfiniteQuery(options as never);
+  } else {
+    void queryClient.prefetchQuery(options as never);
+  }
 }

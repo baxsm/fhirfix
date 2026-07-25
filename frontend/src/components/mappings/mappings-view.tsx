@@ -22,10 +22,16 @@ const FILTERS: { key: MappingStatus; label: string }[] = [
   { key: "rejected", label: "Rejected" },
 ];
 
-export function MappingsView({ workspace }: { workspace: string }) {
+export function MappingsView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const trpc = useTRPC();
   const wsQuery = useQuery({
