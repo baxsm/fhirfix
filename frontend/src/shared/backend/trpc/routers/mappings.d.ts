@@ -12,8 +12,8 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined | undefined;
-            userAgent?: string | null | undefined | undefined;
+            ipAddress?: string | null | undefined;
+            userAgent?: string | null | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined | undefined;
+            image?: string | null | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -34,19 +34,19 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     list: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
-            status?: "suggested" | "active" | "deprecated" | "rejected" | undefined;
-            type?: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org" | undefined;
+            status?: "active" | "deprecated" | "rejected" | "suggested" | undefined;
+            type?: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org" | undefined;
             search?: string | undefined;
         };
         output: {
             id: string;
-            scope: "workspace" | "source_system";
+            scope: "source_system" | "workspace";
             sourceSystem: string | null;
-            type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+            type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
             sourceValue: string;
             targetValue: string;
             targetSystem: string | null;
-            status: "suggested" | "active" | "deprecated" | "rejected";
+            status: "active" | "deprecated" | "rejected" | "suggested";
             confidence: number | null;
             version: number;
             supersedesId: string | null;
@@ -78,7 +78,7 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             version: number;
             targetValue: string;
             targetSystem: string | null;
-            status: "suggested" | "active" | "deprecated" | "rejected";
+            status: "active" | "deprecated" | "rejected" | "suggested";
             supersedesId: string | null;
             supersededById: string | null;
             createdBy: string;
@@ -90,12 +90,12 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             workspaceId: string;
-            type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+            scope?: "source_system" | "workspace" | undefined;
+            sourceSystem?: string | null | undefined;
+            type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
             sourceValue: string;
             targetValue: string;
             targetSystem?: string | null | undefined;
-            scope?: "workspace" | "source_system" | undefined;
-            sourceSystem?: string | null | undefined;
         };
         output: {
             id: string;
@@ -159,12 +159,12 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             workspaceId: string;
             rows: {
-                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+                scope?: "source_system" | "workspace" | undefined;
+                sourceSystem?: string | null | undefined;
+                type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
                 sourceValue: string;
                 targetValue: string;
                 targetSystem?: string | null | undefined;
-                scope?: "workspace" | "source_system" | undefined;
-                sourceSystem?: string | null | undefined;
             }[];
         };
         output: {

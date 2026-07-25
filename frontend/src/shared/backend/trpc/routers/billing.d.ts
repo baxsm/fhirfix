@@ -12,8 +12,8 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined | undefined;
-            userAgent?: string | null | undefined | undefined;
+            ipAddress?: string | null | undefined;
+            userAgent?: string | null | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined | undefined;
+            image?: string | null | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -54,8 +54,8 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
                 spentThisCycleCents: number;
             };
             packs: {
-                id: "pack_10" | "pack_25" | "pack_100";
-                label: "$10" | "$25" | "$100";
+                id: "pack_10" | "pack_100" | "pack_25";
+                label: "$10" | "$100" | "$25";
                 cents: 1000 | 2500 | 10000;
             }[];
         };
@@ -80,15 +80,15 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             offset?: number | undefined;
         };
         output: {
-            amountDollars: number;
-            balanceAfterDollars: number;
             id: string;
-            type: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
+            type: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
             amountMicro: number;
             balanceAfter: number;
             description: string;
             relatedRunId: string | null;
             createdAt: Date;
+            amountDollars: number;
+            balanceAfterDollars: number;
         }[];
         meta: object;
     }>;
