@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ScrollText } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChoiceChip } from "@/components/ui/segmented";
@@ -69,24 +69,18 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   // screen belong to the previous filter is this flag.
   const stale = query.isPlaceholderData;
 
-  // hold the height WHILE a filter change is in flight, then let it settle to
-  // whatever the new result actually needs.
+  // the list scrolls INSIDE a fixed frame rather than growing the page.
   //
-  // `keepPreviousData` alone does not prevent the collapse: changing a filter
-  // also resets the cursor, which changes the query key. and even once the new
-  // rows arrive, going from 25 matches to 2 legitimately shortens the section -
-  // the bug is the page jumping mid-interaction, not the final height. so the
-  // floor applies only during the stale window and is released after.
-  const listRef = useRef<HTMLDivElement>(null);
-  const [heldHeight, setHeldHeight] = useState<number | null>(null);
-  useEffect(() => {
-    if (stale) {
-      // entering the stale window: freeze whatever is on screen now
-      setHeldHeight((prev) => prev ?? listRef.current?.offsetHeight ?? null);
-    } else {
-      setHeldHeight(null);
-    }
-  }, [stale]);
+  // an earlier attempt held the height only while the query was in flight,
+  // which did nothing: the data is cached, so `isPlaceholderData` is never true
+  // long enough to matter. measured, POST still collapsed the page by 389px.
+  //
+  // the collapse is not a loading artifact - it is the row count genuinely
+  // changing (21 -> 11 -> 10). a section that pages at 25 must occupy the same
+  // space whatever the current filter matches, or every filter click reflows
+  // everything below it and the control you just clicked moves under the
+  // pointer. 15 rows of frame, the rest scrolls.
+  const FRAME_HEIGHT = 15 * 39;
 
   // changing a filter resets pagination back to the first page.
   const changeFilter = (fn: () => void) => {
@@ -129,23 +123,36 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         </label>
       </div>
 
+      {/* EVERY state occupies the same frame - rows, empty, error and loading.
+          framing only the populated list still let "Errors only" (which has no
+          matches) collapse the section by 506px, because the empty state
+          rendered outside the frame. */}
       {query.isPending && rows.length === 0 ? (
-        <Skeleton className="h-40 w-full" />
+        <div style={{ height: FRAME_HEIGHT }}>
+          <Skeleton className="h-full w-full" />
+        </div>
       ) : query.isError && rows.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-10 text-center">
+        <div
+          className="flex flex-col items-center justify-center gap-2 text-center"
+          style={{ height: FRAME_HEIGHT }}
+        >
           <p className="text-sm text-muted-foreground">Could not load request logs.</p>
           <Button variant="outline" size="sm" onClick={() => query.refetch()}>
             Retry
           </Button>
         </div>
       ) : rows.length === 0 ? (
-        <EmptyLogs onlyErrors={onlyErrors} />
+        <div className="flex items-center" style={{ height: FRAME_HEIGHT }}>
+          <EmptyLogs onlyErrors={onlyErrors} />
+        </div>
       ) : (
         <>
           <div
-            ref={listRef}
-            className={cn("-mx-4", stale && "is-stale")}
-            style={heldHeight ? { minHeight: heldHeight } : undefined}
+            className={cn("-mx-4 overflow-y-auto", stale && "is-stale")}
+            // a FIXED height, not just a cap. capping alone still let a filter
+            // with fewer rows shrink the frame (measured: POST still jumped
+            // 159px). the frame is the same size whatever is in it.
+            style={{ height: FRAME_HEIGHT }}
           >
             <Table>
               <TableBody>

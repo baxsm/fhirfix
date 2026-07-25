@@ -93,7 +93,10 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
               const isCredit = r.amountDollars >= 0;
               const type = r.type as LedgerType;
               return (
-                <tr key={r.id} className="row-interactive border-b last:border-0 hover:bg-accent">
+                // no hover: a ledger row is a record, not a control. nothing
+                // happens when you click it, so lighting it up on hover
+                // promises an interaction that does not exist.
+                <tr key={r.id} className="border-b last:border-0">
                   <td className="px-4 py-2.5">
                     <div className="flex min-w-0 flex-col">
                       <span className="font-medium">{TYPE_LABEL[type]}</span>
