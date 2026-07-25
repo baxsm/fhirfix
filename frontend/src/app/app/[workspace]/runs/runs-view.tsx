@@ -59,10 +59,19 @@ function fmtDate(d: string | Date): string {
   });
 }
 
-export function RunsView({ workspace }: { workspace: string }) {
+export function RunsView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  // resolved on the server so the first render already knows which workspace
+  // it is looking at. the client lookup below is only a fallback for client
+  // navigations, where there is no server pass.
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const router = useRouter();
   const trpc = useTRPC();
