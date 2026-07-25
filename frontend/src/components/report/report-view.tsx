@@ -35,7 +35,8 @@ import {
   filterFindings,
   type Preset,
 } from "./facet-sidebar";
-import { FindingCard } from "./finding-card";
+import { FindingDetail } from "./finding-detail";
+import { FindingListRow } from "./finding-row";
 import type { FindingRow, Severity } from "./report-types";
 import { ShareDialog } from "./share-dialog";
 
@@ -151,6 +152,7 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
   const [busyFp, setBusyFp] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [applyingAll, setApplyingAll] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const setPresetAndFacets = (p: Preset) => {
     setPreset(p);
@@ -265,6 +267,12 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
   const openErrors = counts.error;
 
   const shown = filterFindings(findings, facets, preset);
+
+  // the selection is DERIVED, never stored as an object. holding the finding
+  // itself would go stale the moment a refetch replaced the array after an
+  // apply, and falling back to the first visible row means a filter change can
+  // never leave the detail pane showing something the list no longer contains.
+  const selected = shown.find((f) => f.id === selectedId) ?? shown[0] ?? null;
 
   const applyAllSafe = () => {
     const fps = [...new Set(fixableNow.map((f) => f.dedupFingerprint))];
@@ -401,8 +409,12 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
         ) : null}
       </header>
 
-      {/* body: facets + list */}
-      <div className="flex flex-col gap-6 lg:flex-row">
+      {/* body: facets · list · detail.
+          master/detail rather than expand-in-place. an expanding row hid every
+          action behind a click and pushed the rest of the page down each time
+          one opened; here the list never changes height and the selected
+          finding's actions are always on screen. */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <FacetSidebar
           findings={findings}
           facets={facets}
@@ -411,33 +423,54 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
           onFacets={setFacets}
         />
 
-        <div className="min-w-0 flex-1">
-          {allClear ? (
+        {allClear ? (
+          <div className="min-w-0 flex-1">
             <AllClear resourceCount={run.resourceCount} />
-          ) : shown.length === 0 ? (
+          </div>
+        ) : shown.length === 0 ? (
+          <div className="min-w-0 flex-1">
             <FilteredZero onClear={() => setPresetAndFacets("all")} />
-          ) : (
-            // ONE panel with divided rows, not a stack of floating cards. the
-            // gaps between separate cards were the main source of the "boxed"
-            // feel, and they made a long finding list read as unrelated tiles.
-            <div className="raised enter-stagger overflow-hidden rounded-lg border bg-card">
+          </div>
+        ) : (
+          <>
+            {/* both panes size to their content up to a cap, rather than a
+                fixed height that left ~120px of dead space on a short list.
+                items-start on the row keeps them top-aligned as they differ. */}
+            <div className="raised enter-stagger max-h-[560px] w-full shrink-0 overflow-y-auto rounded-lg border bg-card lg:w-[340px]">
               {shown.map((f) => (
-                <FindingCard
+                <FindingListRow
                   key={f.id}
                   finding={f}
+                  selected={f.id === selected?.id}
+                  onSelect={() => setSelectedId(f.id)}
+                />
+              ))}
+            </div>
+
+            <div className="raised max-h-[560px] min-w-0 flex-1 overflow-hidden rounded-lg border bg-card">
+              {selected ? (
+                <FindingDetail
+                  finding={selected}
                   before={data?.input ?? null}
                   after={data?.corrected ?? null}
                   busy={
-                    busyFp === f.dedupFingerprint || (applyingAll && f.fixStatus === "suggested")
+                    busyFp === selected.dedupFingerprint ||
+                    (applyingAll && selected.fixStatus === "suggested")
                   }
                   onApply={onApply}
                   onFixWithAi={onAi}
                   onDismiss={onDismiss}
                 />
-              ))}
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Select a finding to see the fix and the diff.
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <ShareDialog
