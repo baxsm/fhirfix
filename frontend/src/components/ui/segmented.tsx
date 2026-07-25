@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
  * different controls (carbon: a switcher "toggles between formats of the same
  * content" and sits lower in the hierarchy than tabs; primer: a segmented
  * control is a mode selector, NOT a tablist, and must not take that aria role).
+ * they differ in SHAPE and aria, never in what "selected" looks like - see
+ * SELECTED below.
  */
 
 /**
@@ -33,8 +35,8 @@ import { cn } from "@/lib/utils";
  * the sidebar is the most-seen selected state in the product, so it is the one
  * the rest follows rather than the other way round.
  */
-const SELECTED = "bg-foreground text-background";
-const UNSELECTED = "text-muted-foreground hover:bg-muted hover:text-foreground";
+const SELECTED = "bg-foreground font-medium text-background";
+const UNSELECTED = "font-medium text-muted-foreground hover:bg-muted hover:text-foreground";
 
 /**
  * choose a MODE for one surface. renders as a real tablist because it swaps the
@@ -124,12 +126,12 @@ export function FilterPill({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "press inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs transition-colors",
+        "press inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
         active
           ? tone === "danger"
-            ? "border-destructive bg-destructive text-destructive-foreground font-semibold"
-            : "border-foreground bg-foreground text-background font-semibold"
-          : "border-border font-medium text-muted-foreground hover:border-foreground/25 hover:text-foreground",
+            ? "border-destructive bg-destructive text-destructive-foreground"
+            : cn("border-transparent", SELECTED)
+          : "border-border text-muted-foreground hover:border-foreground/25 hover:text-foreground",
       )}
     >
       {Icon && <Icon className="size-3.5" />}
@@ -138,7 +140,7 @@ export function FilterPill({
         <span
           className={cn(
             "font-mono tabular-nums",
-            active ? "opacity-80" : "text-muted-foreground/70",
+            active ? "opacity-70" : "text-muted-foreground/70",
           )}
         >
           {count}
@@ -171,15 +173,13 @@ export function ChoiceChip({
       aria-current={active ? "true" : undefined}
       onClick={onClick}
       className={cn(
-        "press cursor-pointer rounded-md px-2.5 py-1 text-xs transition-colors",
-        active
-          ? "bg-foreground font-semibold text-background"
-          : "font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+        "press cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+        active ? SELECTED : UNSELECTED,
       )}
     >
       {children}
       {count != null && (
-        <span className={cn("ml-1.5 font-mono tabular-nums", active ? "opacity-75" : "opacity-60")}>
+        <span className={cn("ml-1.5 font-mono tabular-nums", active ? "opacity-70" : "opacity-60")}>
           {count}
         </span>
       )}
