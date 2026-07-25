@@ -231,6 +231,32 @@
       0 1px 2px -1px oklch(0.2 0.02 260 / 0.06),
       0 1px 3px 0 oklch(0.2 0.02 260 / 0.04);
   }
+
+  /* a FIELD: text inputs, selects, and anything else you type into or pick
+     from. these were `bg-transparent` with a 95.4-light border sitting on a
+     99.2-light card - no surface of their own and a border you had to hunt
+     for. a field is an object you act on, so it gets a real white surface, a
+     border dark enough to find, and a hairline lift.
+
+     one class, so an input and a select next to each other cannot drift. */
+  .field-surface {
+    background-color: var(--background);
+    border-color: oklch(0.885 0 0);
+    box-shadow:
+      0 1px 1px 0 oklch(0.2 0.02 260 / 0.04),
+      inset 0 1px 0 0 oklch(1 0 0 / 0.9);
+  }
+  .field-surface:hover:not(:disabled):not([data-disabled]) {
+    border-color: oklch(0.82 0 0);
+  }
+  .dark .field-surface {
+    background-color: oklch(0.235 0.006 264);
+    border-color: oklch(0.33 0.006 264);
+    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.04);
+  }
+  .dark .field-surface:hover:not(:disabled):not([data-disabled]) {
+    border-color: oklch(0.4 0.006 264);
+  }
   .raised-strong {
     box-shadow:
       0 1px 2px -1px oklch(0.2 0.02 260 / 0.08),
