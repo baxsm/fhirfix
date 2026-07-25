@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Default profile picture">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#eceef2"/>
+      <stop offset="1" stop-color="#dcdfe6"/>
+    </linearGradient>
+    <linearGradient id="jacket" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#4a5265"/>
+      <stop offset="1" stop-color="#3a4154"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0.35" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#c9ab93"/>
+      <stop offset="1" stop-color="#b9987e"/>
+    </linearGradient>
+    <clipPath id="frame">
+      <circle cx="80" cy="80" r="80"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="160" height="160" fill="url(#bg)"/>
+
+    <!-- torso: wide enough to read as shoulders, cropped by the frame -->
+    <path d="M80 96c-26 0-47 16-52 38-2 9-3 18-3 26h110c0-8-1-17-3-26-5-22-26-38-52-38z" fill="url(#jacket)"/>
+
+    <!-- shirt v -->
+    <path d="M69 99l11 15 11-15c-3.5-1.7-7.2-2.6-11-2.6s-7.5.9-11 2.6z" fill="#f0f1f4"/>
+    <!-- collar edges -->
+    <path d="M69 99l11 15-3.5 3-12-13z" fill="#333a4b"/>
+    <path d="M91 99L80 114l3.5 3 12-13z" fill="#333a4b"/>
+
+    <!-- neck: short. a long neck was the main thing reading as "cartoon" -->
+    <path d="M70 80h20v14c0 4-4.5 6.5-10 6.5S70 98 70 94z" fill="#b08e75"/>
+    <!-- jaw shadow on neck -->
+    <path d="M70 80h20v6c-3 4-7 6-10 6s-7-2-10-6z" fill="#9d7d66" opacity=".55"/>
+
+    <!-- ears: level with the mid-face, not above the hairline -->
+    <ellipse cx="55.5" cy="64" rx="4.2" ry="6" fill="#bb9a80"/>
+    <ellipse cx="104.5" cy="64" rx="4.2" ry="6" fill="#bb9a80"/>
+
+    <!-- head: taller than wide, human proportion -->
+    <path d="M80 26c-14.5 0-24.5 10.5-24.5 26 0 17 10.5 31 24.5 31s24.5-14 24.5-31c0-15.5-10-26-24.5-26z" fill="url(#skin)"/>
+
+    <!-- hair: short, tapered, sits ON the skull rather than as a cap -->
+    <path d="M80 22c-15 0-25.5 9-25.5 23 0 4 .4 7.4 1.2 10.4.7-6.2 1.9-10.4 3.6-12.8 2 1.6 5.4 2.6 9.6 2.6 7 0 13-1.6 18.6-4.6 3.6 2.4 7 6.4 9.4 12 .2 1 .4 2 .6 2.8.8-3 1.2-6.4 1.2-10.4C98.7 31 94 22 80 22z" fill="#3f3a37"/>
+  </g>
+</svg>

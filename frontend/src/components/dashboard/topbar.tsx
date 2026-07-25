@@ -8,7 +8,6 @@ import { signOut } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { breadcrumbs } from "./nav-items";
-import { contentInset } from "./page-container";
 import { UserMenu } from "./user-menu";
 
 type Props = {
@@ -33,14 +32,12 @@ export function Topbar({ workspace, workspaceName, user, role }: Props) {
     // sits INSIDE the content column, not spanning the window, so the floating
     // rail keeps its gutter. sticky so the breadcrumb and account menu survive a
     // long scroll down the report.
-    // h-14 so a 32px control has 12px above and below instead of 6. the inset is
-    // shared with main - see contentInset.
-    <header
-      className={cn(
-        "sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-canvas/85 backdrop-blur-md",
-        contentInset,
-      )}
-    >
+    //
+    // the bar keeps its OWN modest padding. it deliberately does not take main's
+    // wide inset: the content column is centred on big screens, but the bar's
+    // controls belong near the window edge, and pushing them inward reads as the
+    // whole chrome being centred.
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-canvas/85 px-3 backdrop-blur-md sm:px-4">
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;
@@ -83,7 +80,7 @@ export function Topbar({ workspace, workspaceName, user, role }: Props) {
           </Link>
         </Button>
 
-        <UserMenu user={user} role={role} onSignOut={handleSignOut} />
+        <UserMenu user={user} role={role} workspace={workspace} onSignOut={handleSignOut} />
       </div>
     </header>
   );
