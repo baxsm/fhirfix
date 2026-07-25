@@ -1,6 +1,6 @@
 import type { WebhookEvent } from "@shared/db/webhooks";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
 import { generateKey } from "@/lib/api-key";
@@ -289,5 +289,74 @@ export const developersRouter = router({
           : null;
         return { logs: page, nextCursor, hasMore };
       }),
+
+    // headline numbers for the logs page. these are the four questions someone
+    // opens a log viewer to answer - how much traffic, how much of it failed,
+    // how slow is it, and which endpoints carry it - computed in sql rather than
+    // derived from the 25 rows on screen (a page-local average would describe
+    // the page, not the traffic).
+    //
+    // the window WIDENS to cover the data rather than being fixed at 24h. a
+    // hardcoded window reported "0 requests, 0ms p95" directly above a list of
+    // 21 visible requests, because the traffic was 11 days old - which reads as
+    // a broken panel, not as an empty window. so: 24h when there is recent
+    // traffic, otherwise stretch to the oldest row and SAY which window is being
+    // reported, because a number without its window is not interpretable.
+    stats: workspaceProcedure.query(async ({ ctx }) => {
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const [recent] = await ctx.db
+        .select({ latest: sql<string | null>`max(${schema.apiRequestLog.createdAt})` })
+        .from(schema.apiRequestLog)
+        .where(eq(schema.apiRequestLog.workspaceId, ctx.workspaceId));
+
+      const latest = recent?.latest ? new Date(recent.latest) : null;
+      const now = Date.now();
+      // if the newest call is older than a day, widen to include it (rounded up
+      // to whole days) instead of reporting an empty 24h.
+      const spanMs =
+        latest && now - latest.getTime() > DAY_MS
+          ? Math.ceil((now - latest.getTime()) / DAY_MS) * DAY_MS
+          : DAY_MS;
+      const since = new Date(now - spanMs);
+      const scope = and(
+        eq(schema.apiRequestLog.workspaceId, ctx.workspaceId),
+        gte(schema.apiRequestLog.createdAt, since),
+      );
+
+      const [totals] = await ctx.db
+        .select({
+          total: sql<number>`count(*)`,
+          errors: sql<number>`count(*) filter (where ${schema.apiRequestLog.statusCode} >= 400)`,
+          // p95 over the window. an average hides the tail, and the tail is what
+          // a developer is chasing when they open this page.
+          p95: sql<number>`coalesce(percentile_cont(0.95) within group (order by ${schema.apiRequestLog.latencyMs}), 0)`,
+        })
+        .from(schema.apiRequestLog)
+        .where(scope);
+
+      const topPaths = await ctx.db
+        .select({
+          path: schema.apiRequestLog.path,
+          count: sql<number>`count(*)`,
+          errors: sql<number>`count(*) filter (where ${schema.apiRequestLog.statusCode} >= 400)`,
+        })
+        .from(schema.apiRequestLog)
+        .where(scope)
+        .groupBy(schema.apiRequestLog.path)
+        .orderBy(desc(sql`count(*)`))
+        .limit(5);
+
+      return {
+        windowHours: Math.round(spanMs / (60 * 60 * 1000)),
+        total: Number(totals?.total ?? 0),
+        errors: Number(totals?.errors ?? 0),
+        p95Ms: Math.round(Number(totals?.p95 ?? 0)),
+        topPaths: topPaths.map((p) => ({
+          path: p.path,
+          count: Number(p.count),
+          errors: Number(p.errors),
+        })),
+      };
+    }),
   }),
 });

@@ -1,7 +1,8 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ChevronDown, ScrollText } from "lucide-react";
+import { ArrowRight, ChevronDown, ScrollText } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -39,6 +40,80 @@ export function statusTone(code: number): string {
   if (code >= 400) return "border-warning/40 bg-warning/5 text-warning";
   if (code >= 300) return "border-info/30 bg-info/5 text-info";
   return "border-border text-muted-foreground";
+}
+
+/**
+ * the RECENT slice, for the API access overview. it takes no filters on purpose.
+ *
+ * the section used to carry the full filter set and 25 rows, which forced a
+ * fixed 585px frame: switching ALL/POST/GET genuinely changes the row count
+ * (21 -> 11 -> 10 measured), so without a frame every filter click reflowed the
+ * whole page and moved the control out from under the pointer. the frame fixed
+ * the symptom but left a section that was mostly empty whenever a filter matched
+ * little.
+ *
+ * showing a fixed small number with no filters removes the problem rather than
+ * padding around it - the height cannot change because the row count cannot
+ * change. filtering and paging live on the full page, which has the room for it.
+ */
+const RECENT_LIMIT = 8;
+
+export function RecentRequestLogs({
+  workspaceId,
+  workspace,
+}: {
+  workspaceId: string;
+  workspace: string;
+}) {
+  const trpc = useTRPC();
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const query = useQuery({
+    ...trpc.developers.requestLogs.list.queryOptions({ workspaceId, limit: RECENT_LIMIT }),
+    enabled: !!workspaceId,
+  });
+
+  const rows = (query.data?.logs ?? []) as LogRow[];
+
+  if (query.isPending) return <Skeleton className="h-[280px] w-full" />;
+  if (query.isError) {
+    return (
+      <div className="flex h-[280px] flex-col items-center justify-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">Could not load request logs.</p>
+        <Button variant="outline" size="sm" onClick={() => query.refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+  if (rows.length === 0) return <EmptyLogs onlyErrors={false} />;
+
+  return (
+    <div className="space-y-3">
+      <div className="-mx-4">
+        <Table>
+          <TableBody>
+            {rows.map((r) => (
+              <LogEntry
+                key={r.id}
+                row={r}
+                open={expanded === r.id}
+                onToggle={() => setExpanded((cur) => (cur === r.id ? null : r.id))}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/app/${workspace}/developers/logs`}>
+            View all logs
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {

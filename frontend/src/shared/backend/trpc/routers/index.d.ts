@@ -1266,6 +1266,23 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 };
                 meta: object;
             }>;
+            stats: import("@trpc/server").TRPCQueryProcedure<{
+                input: {
+                    workspaceId: string;
+                };
+                output: {
+                    windowHours: number;
+                    total: number;
+                    errors: number;
+                    p95Ms: number;
+                    topPaths: {
+                        path: string;
+                        count: number;
+                        errors: number;
+                    }[];
+                };
+                meta: object;
+            }>;
         }>>;
     }>>;
 }>>;

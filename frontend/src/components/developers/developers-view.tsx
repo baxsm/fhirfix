@@ -11,7 +11,7 @@ import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
 import { useTRPC } from "@/trpc/client";
 import { ApiKeysSection } from "./api-keys-section";
-import { RequestLogsSection } from "./request-logs-section";
+import { RecentRequestLogs } from "./request-logs-section";
 import { WebhooksSection } from "./webhooks-section";
 
 export function DevelopersView({
@@ -62,12 +62,17 @@ export function DevelopersView({
             <WebhooksSection workspaceId={workspaceId} canManage={canManage} />
           </SettingsSection>
 
+          {/* the recent slice only. the filters and paging moved to the full
+              logs page: switching ALL/POST/GET changes the row count, which
+              reflowed everything below it here. a fixed number of rows cannot
+              change height, so the problem is gone rather than frozen behind a
+              fixed-height frame. */}
           <SettingsSection
             icon={ScrollText}
-            title="Request logs"
-            description="Every REST call this workspace made, including ones that never started a run."
+            title="Recent requests"
+            description="The last few REST calls this workspace made, including ones that never started a run."
           >
-            <RequestLogsSection workspaceId={workspaceId} />
+            <RecentRequestLogs workspaceId={workspaceId} workspace={workspace} />
           </SettingsSection>
         </>
       )}
