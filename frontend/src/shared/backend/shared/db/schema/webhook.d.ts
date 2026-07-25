@@ -175,7 +175,7 @@ export declare const webhookEndpoint: import("drizzle-orm/pg-core").PgTableWithC
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type WebhookEndpoint = typeof webhookEndpoint.$inferSelect;
 export type NewWebhookEndpoint = typeof webhookEndpoint.$inferInsert;

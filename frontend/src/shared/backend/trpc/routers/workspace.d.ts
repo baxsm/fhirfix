@@ -12,8 +12,8 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -38,7 +38,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             slug: string;
             createdAt: Date;
-            logo?: string | null | undefined;
+            logo?: string | null | undefined | undefined;
             metadata?: any;
         }[];
         meta: object;
@@ -53,7 +53,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             slug: string;
             createdAt: Date;
-            logo?: string | null | undefined;
+            logo?: string | null | undefined | undefined;
             metadata?: any;
         } & {
             metadata: any;
@@ -76,7 +76,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 members: {
                     id: string;
                     organizationId: string;
-                    role: "admin" | "auditor" | "billing" | "member" | "owner";
+                    role: "member" | "billing" | "owner" | "admin" | "auditor";
                     createdAt: Date;
                     userId: string;
                     user: {
@@ -90,7 +90,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                     id: string;
                     organizationId: string;
                     email: string;
-                    role: "admin" | "auditor" | "billing" | "member" | "owner";
+                    role: "member" | "billing" | "owner" | "admin" | "auditor";
                     status: import("better-auth/plugins").InvitationStatus;
                     inviterId: string;
                     expiresAt: Date;
@@ -101,7 +101,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 name: string;
                 slug: string;
                 createdAt: Date;
-                logo?: string | null | undefined;
+                logo?: string | null | undefined | undefined;
                 metadata?: any;
             }) | null;
             settings: {
@@ -112,11 +112,11 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 redactionPolicy: "off" | "on_ingest" | "required";
                 dataRetentionDays: number;
                 baaStatus: "none" | "requested" | "signed";
-                planTier: "free" | "premium" | "team";
+                planTier: "free" | "team" | "premium";
                 createdAt: Date;
                 updatedAt: Date;
             } | null;
-            role: "admin" | "auditor" | "billing" | "member" | "owner";
+            role: "member" | "billing" | "owner" | "admin" | "auditor";
         };
         meta: object;
     }>;
@@ -136,7 +136,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             redactionPolicy: "off" | "on_ingest" | "required";
             dataRetentionDays: number;
             baaStatus: "none" | "requested" | "signed";
-            planTier: "free" | "premium" | "team";
+            planTier: "free" | "team" | "premium";
             createdAt: Date;
             updatedAt: Date;
         };
