@@ -2,7 +2,6 @@
 
 import { BookOpen, CreditCard, LogOut, Settings, UserRound, Users, Wallet } from "lucide-react";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { WorkspaceRole } from "@/lib/permissions";
 
 const ROLE_LABEL: Record<WorkspaceRole, string> = {
@@ -48,7 +48,6 @@ export function UserMenu({
   workspace: string;
   onSignOut: () => void;
 }) {
-  const initials = user.name.slice(0, 2).toUpperCase() || "??";
   const base = `/app/${workspace}`;
 
   const groups: Row[][] = [
@@ -72,12 +71,7 @@ export function UserMenu({
           aria-label="Account menu"
           className="press cursor-pointer rounded-full outline-none ring-offset-background transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-border"
         >
-          <Avatar className="size-8">
-            <AvatarImage src="/avatar-placeholder.svg" alt="" />
-            <AvatarFallback className="bg-muted font-mono text-[11px] text-muted-foreground">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar name={user.name} email={user.email} size={32} />
         </button>
       </DropdownMenuTrigger>
 
@@ -85,12 +79,7 @@ export function UserMenu({
         {/* identity header: photo, name, email, and the role badge. this is the
             block that makes the panel feel like an account, not a link list. */}
         <div className="flex items-center gap-3 px-3.5 py-3.5">
-          <Avatar className="size-11 shrink-0">
-            <AvatarImage src="/avatar-placeholder.svg" alt="" />
-            <AvatarFallback className="bg-muted font-mono text-xs text-muted-foreground">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar name={user.name} email={user.email} size={44} />
           <div className="min-w-0 space-y-1">
             <p className="truncate text-sm font-semibold leading-none">{user.name}</p>
             <p className="truncate font-mono text-[11px] leading-none text-muted-foreground">
