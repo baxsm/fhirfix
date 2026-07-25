@@ -5,31 +5,31 @@ import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
+type Row = { label: string; href: string; icon: typeof UserRound };
+
 /**
  * the account control.
  *
- * built against shadcn's own `nav-user` block, which is the reference
- * implementation for this component. three things there that this got wrong
- * before:
+ * three structural rules, each one checked rather than assumed:
  *
- * 1. the panel avatar is the SAME size as the trigger (h-8), not enlarged.
- *    ours is a generated placeholder the user cannot replace, so showing it
- *    bigger tells them nothing they did not already see.
- * 2. the header is `px-1 py-1.5` inside the panel's own p-1 - not a 14px inset
- *    on a tinted surface. it is a label, not a hero.
- * 3. no role badge. checked across github, vercel, linear, figma, slack,
- *    notion, asana, stripe, sentry, intercom and jira: none of them put role in
- *    the personal account menu. role belongs to you-in-a-workspace, but this
- *    menu is you-as-a-person and follows you across workspaces. it lives on the
- *    members page instead, which is where every one of those products puts it.
+ * 1. the panel does NOT repeat the avatar. ours is a generic icon the user
+ *    cannot replace, so showing it again - at any size - tells them nothing
+ *    they did not just click on.
+ * 2. no role badge. checked github, vercel, linear, figma, slack, notion,
+ *    asana, stripe, sentry, intercom, jira: none put role in the personal
+ *    account menu. role is you-in-a-workspace; this menu is you-as-a-person and
+ *    follows you across workspaces. it lives on the members page.
+ * 3. greyscale only. globals.css: "chrome carries NO hue, every saturated pixel
+ *    belongs to a finding", and violet is wordmark-only.
+ *
+ * the styling is ours: a flush identity block on its own surface, hairline
+ * dividers that run the full panel width, and 34px rows with a settled icon
+ * column - not the stock menu.
  */
 export function UserMenu({
   user,
@@ -42,72 +42,66 @@ export function UserMenu({
 }) {
   const base = `/app/${workspace}`;
 
+  const groups: Row[][] = [
+    [
+      { label: "Account", href: "/account", icon: UserRound },
+      { label: "Workspace settings", href: `${base}/settings`, icon: Settings },
+      { label: "Members", href: `${base}/settings`, icon: Users },
+    ],
+    [
+      { label: "Billing", href: `${base}/billing`, icon: CreditCard },
+      { label: "Docs and API", href: "/docs", icon: BookOpen },
+    ],
+  ];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           aria-label="Account menu"
-          className="press cursor-pointer rounded-full outline-none ring-offset-background transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-border"
+          className="press cursor-pointer rounded-full outline-none ring-offset-background transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-foreground/20"
         >
-          <UserAvatar name={user.name} email={user.email} size={32} />
+          <UserAvatar name={user.name} size={32} />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={6} className="min-w-56">
-        <DropdownMenuLabel className="p-0 font-normal">
-          <div className="flex items-center gap-2 px-1 py-1.5">
-            <UserAvatar name={user.name} email={user.email} size={32} />
-            <div className="grid min-w-0 flex-1 leading-tight">
-              <span className="truncate text-sm font-medium">{user.name}</span>
-              <span className="truncate font-mono text-xs text-muted-foreground">{user.email}</span>
-            </div>
+      {/* p-0 so the dividers can run edge to edge. the stock panel pads itself,
+          which leaves every rule floating with a gap at both ends. */}
+      <DropdownMenuContent align="end" sideOffset={8} className="w-[248px] overflow-hidden p-0">
+        <div className="bg-muted/50 px-3 py-2.5">
+          <p className="truncate text-[13px] font-semibold leading-tight">{user.name}</p>
+          <p className="truncate pt-0.5 font-mono text-[11px] leading-tight text-muted-foreground">
+            {user.email}
+          </p>
+        </div>
+
+        {groups.map((rows) => (
+          <div key={rows[0]?.label} className="border-t p-1">
+            {rows.map((row) => (
+              <DropdownMenuItem
+                key={row.label}
+                asChild
+                className="h-[34px] gap-2.5 rounded-md px-2 text-[13px]"
+              >
+                <Link href={row.href}>
+                  <row.icon className="size-4 text-muted-foreground/70" />
+                  {row.label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
           </div>
-        </DropdownMenuLabel>
+        ))}
 
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/account">
-              <UserRound />
-              Account
-            </Link>
+        <div className="border-t p-1">
+          <DropdownMenuItem
+            onClick={onSignOut}
+            className="h-[34px] gap-2.5 rounded-md px-2 text-[13px]"
+          >
+            <LogOut className="size-4 text-muted-foreground/70" />
+            Sign out
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={`${base}/settings`}>
-              <Settings />
-              Workspace settings
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={`${base}/settings`}>
-              <Users />
-              Members
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href={`${base}/billing`}>
-              <CreditCard />
-              Billing
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/docs">
-              <BookOpen />
-              Docs and API
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onSignOut}>
-          <LogOut />
-          Sign out
-        </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

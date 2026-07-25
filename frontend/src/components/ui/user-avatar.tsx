@@ -1,65 +1,50 @@
 "use client";
 
-import BoringAvatar from "boring-avatars";
-import { UserRound } from "lucide-react";
+import { Users2 } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 /**
- * a user's picture, or a generated stand-in when they have not uploaded one.
+ * a user's picture, or a stand-in when they have not uploaded one.
  *
- * this is built the way clerk builds theirs: a `boring-avatars` (MIT) marble
- * background - the same library clerk uses - with a silhouette composited on
- * top. the library only draws backgrounds; it has no silhouette or initials
- * option, so the foreground is lucide's `UserRound`, filled. nothing here is
- * hand-drawn.
+ * deliberately GREYSCALE. globals.css states the rule: "because chrome carries
+ * NO hue, every saturated pixel on screen belongs to a finding", and "brand =
+ * the violet dot in the wordmark. logo only, never chrome." an avatar in the
+ * topbar is chrome, so a violet one both broke the brand rule and spent a
+ * saturated pixel on something that says nothing about conformance.
  *
- * the marble is deterministic per user and renders locally, no external request.
+ * no generated marble either: it produced a different colour per user, which is
+ * the same problem multiplied across a members list.
  */
-
-// violet brand first so the mark reads as ours, with two supporting tones. the
-// palette is deliberately tight: a wide palette turns a list of members into
-// confetti.
-const PALETTE = ["#7c5cff", "#6b4de6", "#9d85ff", "#5b3fd1", "#b9a6ff"];
-
 export function UserAvatar({
   name,
-  email,
   src,
   size = 32,
   className,
 }: {
-  name: string;
-  email: string;
+  name?: string;
   src?: string | null;
   size?: number;
   className?: string;
 }) {
-  // seed on the email: stable and unique, and it does not change when someone
-  // edits their display name.
-  const seed = email || name || "user";
-
   if (src) {
     return (
       <Avatar className={cn("shrink-0", className)} style={{ width: size, height: size }}>
-        <AvatarImage src={src} alt="" />
+        <AvatarImage src={src} alt={name ? `${name}'s profile picture` : ""} />
       </Avatar>
     );
   }
 
   return (
     <span
-      className={cn("relative block shrink-0 overflow-hidden rounded-full", className)}
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground",
+        className,
+      )}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <BoringAvatar size={size} name={seed} variant="marble" colors={PALETTE} square />
-      <UserRound
-        className="absolute inset-0 m-auto text-white"
-        strokeWidth={0}
-        fill="currentColor"
-        style={{ width: size * 0.52, height: size * 0.52 }}
-      />
+      <Users2 style={{ width: size * 0.5, height: size * 0.5 }} strokeWidth={1.75} />
     </span>
   );
 }
