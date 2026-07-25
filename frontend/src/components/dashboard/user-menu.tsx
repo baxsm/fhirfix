@@ -68,13 +68,12 @@ export function UserMenu({
 
       {/* p-0 so the dividers can run edge to edge. the stock panel pads itself,
           which leaves every rule floating with a gap at both ends.
-          the ring is raised from the stock 10%: a white panel on a 96.3-light
-          canvas has almost no edge otherwise, and the corner nearest the
-          trigger simply dissolved into the page. */}
+          the ring strength now lives on the primitive - a white panel on a
+          96.3-light canvas had almost no edge at the old 10%. */}
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="w-[248px] overflow-hidden p-0 shadow-lg ring-foreground/15"
+        className="w-[248px] overflow-hidden p-0 shadow-lg"
       >
         {/* NOT a tint. muted/50 resolves to ~L96.2 and the canvas is L96.3, so
             a tinted header made the panel edge vanish against the page. the
