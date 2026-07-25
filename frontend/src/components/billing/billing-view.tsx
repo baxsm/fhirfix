@@ -13,10 +13,10 @@ import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
-import { AutoRechargeForm } from "./auto-recharge-form";
+import { AddCreditsDialog } from "./add-credits-dialog";
+import { BillingControls } from "./billing-controls";
 import { InvoicesTable } from "./invoices-table";
 import { LedgerTable } from "./ledger-table";
-import { SpendCapForm } from "./spend-cap-form";
 import { UsageChart } from "./usage-chart";
 
 const USAGE_DAYS = 30;
@@ -78,19 +78,13 @@ export function BillingView({ workspace }: { workspace: string }) {
           </SettingsSection>
 
           {canManage && (
-            <div className="grid gap-6 md:grid-cols-2">
-              <AutoRechargeForm
-                workspaceId={workspaceId}
-                autoRecharge={summary.data.autoRecharge}
-                packs={summary.data.packs}
-                onSaved={() => summary.refetch()}
-              />
-              <SpendCapForm
-                workspaceId={workspaceId}
-                spendCap={summary.data.spendCap}
-                onSaved={() => summary.refetch()}
-              />
-            </div>
+            <BillingControls
+              workspaceId={workspaceId}
+              autoRecharge={summary.data.autoRecharge}
+              spendCap={summary.data.spendCap}
+              packs={summary.data.packs}
+              onSaved={() => summary.refetch()}
+            />
           )}
 
           <SettingsSection
@@ -101,11 +95,16 @@ export function BillingView({ workspace }: { workspace: string }) {
             <InvoicesTable workspaceId={workspaceId} />
           </SettingsSection>
 
+          {/* not `flush`. flush put a full-bleed table immediately under the
+              header's border-b, so the heading sat on a rule with a second rule
+              (the table's own head) directly beneath it - two horizontal lines
+              three pixels apart with the title stranded above them. the Usage
+              card reads well because its content starts inside the padded body,
+              so the ledger does the same and the table keeps its own inset. */}
           <SettingsSection
             icon={Wallet}
             title="Ledger"
             description="Every credit movement: grants, purchases, and per-run debits."
-            flush
           >
             <LedgerTable workspaceId={workspaceId} />
           </SettingsSection>
@@ -135,22 +134,8 @@ function BalanceHero({
   canManage: boolean;
   summary: Summary;
 }) {
-  const trpc = useTRPC();
-  const [pendingPack, setPendingPack] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const low = summary.balanceDollars <= 1;
-
-  const checkout = useMutation(
-    trpc.billing.checkout.mutationOptions({
-      onSuccess: ({ url }) => {
-        // hand off to Polar's hosted checkout.
-        window.location.href = url;
-      },
-      onError: (e) => {
-        setPendingPack(null);
-        toast.error(e.message ?? "Could not start checkout.");
-      },
-    }),
-  );
 
   return (
     <section className="raised overflow-hidden rounded-xl border bg-card">
@@ -199,39 +184,14 @@ function BalanceHero({
         </div>
 
         {canManage && (
-          <div className="space-y-2">
-            {/* "Add credits" used to be a caption floating above three bare
-                amounts, so nothing on the row said which part was the button or
-                what pressing it would do. each button now states the action and
-                the amount, and the first one is the filled primary so the row
-                has one obvious action rather than three equal chips. */}
-            <div className="flex flex-wrap justify-end gap-2">
-              {summary.packs.map((p, i) => (
-                <Button
-                  key={p.id}
-                  variant={i === 0 || (low && p.id === "pack_25") ? "default" : "outline"}
-                  size="sm"
-                  disabled={checkout.isPending}
-                  onClick={() => {
-                    setPendingPack(p.id);
-                    checkout.mutate({ workspaceId, packId: p.id });
-                  }}
-                >
-                  {pendingPack === p.id && checkout.isPending ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <Plus className="size-3.5" />
-                  )}
-                  Add <span className="font-mono tabular-nums">{p.label}</span>
-                </Button>
-              ))}
-            </div>
-            {!summary.billingConfigured && (
-              <p className="max-w-[16rem] text-right text-[11px] text-muted-foreground">
-                Checkout is not connected yet. You are running on granted credits.
-              </p>
-            )}
-          </div>
+          // ONE action. three equal Add $X buttons made the most consequential
+          // row on the page read as a toolbar, and none of them said that
+          // pressing one leaves for a hosted checkout. the amounts live in the
+          // dialog, where there is room to say what each one buys.
+          <Button size="lg" onClick={() => setAddOpen(true)}>
+            <Plus className="size-4" />
+            Add credits
+          </Button>
         )}
       </div>
 
@@ -250,6 +210,14 @@ function BalanceHero({
           hint="at your current pace"
         />
       </div>
+
+      <AddCreditsDialog
+        workspaceId={workspaceId}
+        packs={summary.packs}
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        billingConfigured={summary.billingConfigured}
+      />
     </section>
   );
 }

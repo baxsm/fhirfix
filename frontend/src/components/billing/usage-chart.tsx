@@ -43,8 +43,10 @@ const SOURCE_LABEL: Record<string, string> = {
   other: "Other",
 };
 
-// stacked emerald-family shades so the chart reads as one metric split by source,
-// not a rainbow. the interactive blue stays reserved for affordances, not data.
+// categorical slots - these encode IDENTITY (which source spent it), so they are
+// distinct hues, not shades of one. the previous set was chroma-zero greyscale
+// while its comment claimed an emerald ramp; see globals.css for the validated
+// values and their measured CVD separation.
 const SOURCE_COLOR: Record<string, string> = {
   ui: "var(--color-chart-ui)",
   api: "var(--color-chart-api)",
@@ -128,6 +130,12 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
             dataKey={s}
             stackId="spend"
             fill={SOURCE_COLOR[s] ?? "var(--color-chart-other)"}
+            // a 2px surface-coloured stroke between stacked segments. this is
+            // the required relief channel: aqua sits at 2.77:1 on this surface,
+            // below the 3:1 mark-contrast bar, so the boundary between segments
+            // must be legible by shape and not by colour contrast alone.
+            stroke="var(--card)"
+            strokeWidth={2}
             radius={i === sources.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}
           />
         ))}

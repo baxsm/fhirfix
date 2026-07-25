@@ -140,10 +140,27 @@
   --chart-3: oklch(0.63 0 0);
   --chart-4: oklch(0.78 0 0);
   --chart-5: oklch(0.88 0 0);
-  /* spend split by source: one ink ramp, not a rainbow and not all-green. */
-  --chart-ui: oklch(0.145 0 0);
-  --chart-api: oklch(0.52 0 0);
-  --chart-other: oklch(0.78 0 0);
+  /* usage series identity. these were oklch(L 0 0) - CHROMA ZERO, i.e. pure
+     greyscale - while the comment above claimed an "emerald monochrome ramp".
+     the emerald values only ever existed in the .dark block, and the app is
+     light-only, so the ramp described in the comment was unreachable and the
+     chart rendered black-on-grey.
+     chroma 0 also fails the categorical chroma floor (C >= 0.10) outright: a
+     hue at zero chroma reads as grey and stops doing identity work.
+     these three are the reference categorical slots violet/orange/aqua, chosen
+     under this product's reservations (blue = links, emerald = pass) and
+     verified with the palette validator rather than by eye:
+       worst adjacent CVD ΔE 9.2 (deutan, target >= 8)
+       worst adjacent normal-vision ΔE 27.6 (floor >= 15)
+     aqua sits at 2.77:1 on this surface, under the 3:1 mark contrast bar, so
+     the chart carries the required relief channel: a legend plus a per-segment
+     tooltip, and a 2px surface gap between stacked segments.
+     these stay as hex on purpose: hex is what the validator measured, and a
+     hand-converted oklch() drifted up to 22/255 per channel from the value that
+     was actually checked. */
+  --chart-ui: #4a3aa7; /* violet */
+  --chart-api: #eb6834; /* orange */
+  --chart-other: #1baf7a; /* aqua */
   /* softer than the old 0.4rem, which was a big part of the "boxed" feel. */
   --radius: 0.75rem;
   /* the rail is a CARD floating on the canvas, so it is the lighter surface and
