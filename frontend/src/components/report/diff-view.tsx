@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ChoiceChip, ChoiceGroup } from "@/components/ui/segmented";
 import { cn } from "@/lib/utils";
 
 // a small, dependency-free before/after diff. line-level LCS with word-level
@@ -157,30 +158,20 @@ export function DiffView({
         <span className="font-mono text-[11px] text-muted-foreground">
           {changedCount} changed {changedCount === 1 ? "line" : "lines"}
         </span>
-        <div className="flex overflow-hidden rounded-md border text-[11px]">
-          <button
-            type="button"
-            onClick={() => setSplit(true)}
-            className={cn(
-              "cursor-pointer px-2 py-0.5",
-              split ? "bg-interactive/15 text-interactive" : "text-muted-foreground hover:bg-muted",
-            )}
-          >
+        {/* a content-formatting picker - the same content, rendered two ways -
+            which is the textbook segmented-control case, so it uses the shared
+            primitive. it was a hand-rolled pair tinted with --interactive, i.e.
+            the link blue used as a selected state: the same borrowed-colour bug
+            as the api-key dialog, in a component nobody thought to check
+            because the diff itself looked fine. */}
+        <ChoiceGroup label="Diff layout">
+          <ChoiceChip active={split} onClick={() => setSplit(true)}>
             Split
-          </button>
-          <button
-            type="button"
-            onClick={() => setSplit(false)}
-            className={cn(
-              "cursor-pointer border-l px-2 py-0.5",
-              !split
-                ? "bg-interactive/15 text-interactive"
-                : "text-muted-foreground hover:bg-muted",
-            )}
-          >
+          </ChoiceChip>
+          <ChoiceChip active={!split} onClick={() => setSplit(false)}>
             Unified
-          </button>
-        </div>
+          </ChoiceChip>
+        </ChoiceGroup>
       </div>
       <div className="max-h-[420px] overflow-auto">
         {split ? (

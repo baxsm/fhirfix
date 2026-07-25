@@ -147,7 +147,9 @@ export function FindingDetail({
       {showActions && (
         <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 px-4 py-3">
           {canApply && onApply && (
-            <Button size="sm" disabled={busy} onClick={() => onApply(finding)}>
+            // success = "this makes the resource conformant", same as the bulk
+            // apply on the report header. see finding-card.
+            <Button variant="success" size="sm" disabled={busy} onClick={() => onApply(finding)}>
               {busy ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : (

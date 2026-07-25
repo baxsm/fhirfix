@@ -172,7 +172,12 @@ export function FindingCard({
             {!readOnly && !applied && !dismissed && (
               <div className="flex flex-wrap items-center gap-2">
                 {canApply && onApply && (
-                  <Button size="sm" disabled={busy} onClick={() => onApply(finding)}>
+                  // success, matching "Apply all safe fixes" on the report
+                  // header: both make the resource conformant, which is the one
+                  // action the pass colour is reserved for. this was a generic
+                  // primary, so the product's core promise looked like any other
+                  // button while the bulk version two inches away was emerald.
+                  <Button variant="success" size="sm" disabled={busy} onClick={() => onApply(finding)}>
                     {busy ? (
                       <Loader2 className="size-3.5 animate-spin" />
                     ) : (
