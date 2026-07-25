@@ -41,12 +41,36 @@ function fmtDay(d: string | Date): string {
  * the interaction is the part worth writing by hand anyway - hovering anywhere
  * over the plot snaps to the nearest run and reports it.
  */
-export function ScoreTrend({ points, latest }: { points: TrendPoint[]; latest?: LatestRun }) {
+export function ScoreTrend({
+  points,
+  latest,
+  pending,
+}: {
+  points: TrendPoint[];
+  latest?: LatestRun;
+  pending?: boolean;
+}) {
   const gradientId = useId();
   const svgRef = useRef<SVGSVGElement>(null);
   const [hover, setHover] = useState<number | null>(null);
 
   const scored = points.filter((p): p is TrendPoint & { after: number } => p.after != null);
+
+  // an unresolved query has an empty array too. saying "not enough history" then
+  // is a false claim about the data - the workspace may have 14 scored runs.
+  // hold the frame until the answer is actually known.
+  if (pending) {
+    return (
+      <div className="raised rounded-lg border bg-card">
+        <div className="border-b px-4 py-2.5">
+          <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+            Conformance trend
+          </h3>
+        </div>
+        <div className="h-[152px]" />
+      </div>
+    );
+  }
 
   if (scored.length < 2) {
     return (

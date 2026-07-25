@@ -5,6 +5,7 @@ import { FileUp, Loader2, Play, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useListOrganizations } from "@/lib/auth-client";
@@ -108,7 +109,7 @@ export function CheckView({ workspace }: { workspace: string }) {
   const charCount = content.trim().length;
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-5">
+    <PageContainer width="narrow">
       <header className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">New check</h1>
         <p className="text-sm text-muted-foreground">
@@ -315,7 +316,7 @@ export function CheckView({ workspace }: { workspace: string }) {
       <p className="text-xs text-muted-foreground">
         Validated against US Core 6.1.0. Every fix is re-verified before you see it.
       </p>
-    </div>
+    </PageContainer>
   );
 }
 

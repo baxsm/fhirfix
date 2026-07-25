@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { KeyRound, ScrollText, Webhook } from "lucide-react";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
@@ -27,10 +28,10 @@ export function DevelopersView({ workspace }: { workspace: string }) {
   const canManage = can(role, "apiKey", "create");
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-5">
+    <PageContainer>
       <PageHeader
-        title="Developers"
-        description={`API keys, webhooks, and request logs for the FHIRfix REST API in ${active?.name ?? "this workspace"}.`}
+        title="API access"
+        description={`Keys, webhooks, and request logs for the FHIRfix REST API in ${active?.name ?? "this workspace"}.`}
       />
 
       {wsQuery.isError ? (
@@ -64,7 +65,7 @@ export function DevelopersView({ workspace }: { workspace: string }) {
           </SettingsSection>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,9 +59,9 @@ export function MappingsView({ workspace }: { workspace: string }) {
   const effectiveStatus: MappingStatus = status ?? "active";
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
+    <PageContainer width="wide">
       <PageHeader
-        title="Mappings"
+        title="Mapping rules"
         description={`The versioned registry of assigning-authority and code mappings that power auto-fixes in ${active?.name ?? "this workspace"}.`}
       />
 
@@ -83,7 +84,7 @@ export function MappingsView({ workspace }: { workspace: string }) {
           canDeprecate={canDeprecate}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

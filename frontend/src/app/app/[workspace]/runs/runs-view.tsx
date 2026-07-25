@@ -5,7 +5,9 @@ import { Activity, ArrowRight, FileScan } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { RefreshingNote } from "@/components/dashboard/refreshing-note";
 import { Button } from "@/components/ui/button";
 import { StatusDot, type StatusTone } from "@/components/ui/status";
 import {
@@ -17,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useListOrganizations } from "@/lib/auth-client";
+import { useDelayedFlag } from "@/lib/use-delayed-flag";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 
@@ -81,20 +84,27 @@ export function RunsView({ workspace }: { workspace: string }) {
   const runs = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
   const failedCount = all.filter((r) => r.status === "failed").length;
 
+  const settling = query.isPending || !workspaceId;
+  const loading = useDelayedFlag(settling);
+  const refreshing = !settling && query.isFetching;
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
+    <PageContainer width="wide">
       {/* no New check action here: the topbar already carries it on every
           screen, and two identical primary buttons on one page is noise. */}
-      <PageHeader
-        title="Runs"
-        description="Every conformance check, with findings and before/after scores."
-      />
+      <div className="flex items-start justify-between gap-4">
+        <PageHeader
+          title="Runs"
+          description="Every conformance check, with findings and before/after scores."
+        />
+        <RefreshingNote active={refreshing} />
+      </div>
 
       {query.isError ? (
         <ListError onRetry={() => query.refetch()} />
-      ) : query.isLoading || !workspaceId ? (
+      ) : loading ? (
         <SkeletonTable />
-      ) : all.length === 0 ? (
+      ) : settling ? null : all.length === 0 ? (
         <EmptyRuns workspace={workspace} />
       ) : (
         <div className="space-y-3">
@@ -255,7 +265,7 @@ export function RunsView({ workspace }: { workspace: string }) {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

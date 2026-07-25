@@ -4,10 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowRight, FileScan, Map } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
+import { PageContainer } from "@/components/dashboard/page-container";
+import { RefreshingNote } from "@/components/dashboard/refreshing-note";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusDot } from "@/components/ui/status";
 import { useListOrganizations } from "@/lib/auth-client";
+import { useDelayedFlag } from "@/lib/use-delayed-flag";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { ScoreTrend } from "./score-trend";
@@ -51,24 +54,33 @@ export function OverviewView({ workspace }: { workspace: string }) {
   const trend = trendQuery.data ?? [];
   const pendingMappings = mappingsQuery.data?.suggested ?? 0;
 
-  const loading = !enabled || runsQuery.isPending;
+  // isPending is "no data yet", not "a request is in flight". gating the
+  // skeleton on the delayed flag means a 13ms response never flashes grey.
+  const settling = !enabled || runsQuery.isPending;
+  const loading = useDelayedFlag(settling);
+  // data is on screen and being refreshed: annotate, never tear down.
+  const refreshing = !settling && runsQuery.isFetching;
   const failedRuns = runs.filter((r) => r.status === "failed");
   const inFlight = runs.filter((r) => r.status === "running" || r.status === "queued");
   const latest = runs[0];
 
   // a genuinely new workspace still gets the guided state - it is the right
   // screen when there is nothing to triage yet.
-  if (!loading && runs.length === 0) {
+  //
+  // gated on `settling`, NOT the delayed flag: during the delay window there is
+  // no data yet, so testing the delayed flag here would flash "run your first
+  // check" at a workspace that has 15 runs.
+  if (!settling && runs.length === 0) {
     return <FirstRun base={base} />;
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
+    <PageContainer>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
           <h1 className="text-lg font-semibold tracking-tight">Overview</h1>
           <p className="text-sm text-muted-foreground">
-            {loading
+            {settling
               ? "Loading workspace activity."
               : summaryLine({
                   runs: runs.length,
@@ -77,7 +89,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
                 })}
           </p>
         </div>
-        {/* no New check here: the topbar carries it on every screen. */}
+        <RefreshingNote active={refreshing} />
       </div>
 
       {loading ? (
@@ -119,7 +131,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
               happen to exist: two runs squashed it, twenty stretched it. a
               chart's height is its own decision, so it gets a full-width band
               that is always the same size no matter what the list does. */}
-          <ScoreTrend points={trend} latest={latest} />
+          <ScoreTrend points={trend} latest={latest} pending={trendQuery.isPending} />
 
           <section className="raised flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card">
             <div className="flex shrink-0 items-baseline justify-between gap-3 border-b px-4 py-2.5">
@@ -144,7 +156,7 @@ export function OverviewView({ workspace }: { workspace: string }) {
           </section>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -234,18 +246,36 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
   );
 }
 
+// mirrors the real layout: a full-width trend band stacked above the runs list.
+// the previous version was two side-by-side blocks, which is not what arrives -
+// the eye has to reorient when the real content replaces it.
 function OverviewSkeleton() {
   return (
-    <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
-      <Skeleton className="h-64 w-full rounded-lg" />
-      <Skeleton className="h-64 w-full rounded-lg" />
+    <div className="space-y-5">
+      <Skeleton className="h-[168px] w-full rounded-lg" />
+      <div className="raised overflow-hidden rounded-lg border bg-card">
+        <div className="border-b px-4 py-2.5">
+          <Skeleton className="h-3 w-24" />
+        </div>
+        <div className="divide-y">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between px-4 py-3">
+              <div className="space-y-1.5">
+                <Skeleton className="h-3.5 w-52" />
+                <Skeleton className="h-2.5 w-20" />
+              </div>
+              <Skeleton className="h-3.5 w-20" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
 function FirstRun({ base }: { base: string }) {
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-5">
+    <PageContainer width="narrow">
       <div className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">Get started</h1>
         <p className="text-sm text-muted-foreground">
@@ -286,6 +316,6 @@ function FirstRun({ base }: { base: string }) {
           />
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 }

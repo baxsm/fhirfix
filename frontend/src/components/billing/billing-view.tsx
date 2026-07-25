@@ -5,6 +5,7 @@ import { CreditCard, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,7 +52,7 @@ export function BillingView({ workspace }: { workspace: string }) {
   }, [params, summary]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <PageContainer>
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">Billing</h1>
         <p className="text-sm text-muted-foreground">
@@ -110,7 +111,7 @@ export function BillingView({ workspace }: { workspace: string }) {
           </SettingsSection>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

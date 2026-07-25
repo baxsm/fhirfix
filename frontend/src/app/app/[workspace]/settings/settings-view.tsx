@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Bell, SlidersHorizontal, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
   const [section, setSection] = useState<SectionId>("members");
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <PageContainer>
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
@@ -129,7 +130,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

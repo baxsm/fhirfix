@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { LowBalanceBanner } from "@/components/billing/low-balance-banner";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@/lib/permissions";
 import { useTRPC } from "@/trpc/client";
@@ -80,8 +79,16 @@ export function DashboardShell({
           }}
         />
         {active && <LowBalanceBanner workspace={workspace} workspaceId={active.id} />}
-        <main className="min-w-0 flex-1 overflow-auto px-1 pt-4 pb-8 sm:px-2">
-          {resolving ? <ContentSkeleton /> : children}
+        {/* children render immediately. the shell used to swap the whole page
+            for a skeleton whenever the workspace list was pending, so every
+            navigation blinked the entire app - including pages that already had
+            their own data. each page owns its own loading state now. */}
+        {/* the inset grows with the viewport, so a wide monitor gives space back
+            to BOTH sides instead of leaving a dead margin on the right. pages
+            cap their own width inside this, and because the inset is symmetric
+            the left edge is the same on every page. */}
+        <main className="min-w-0 flex-1 overflow-auto px-1 pt-4 pb-8 sm:px-2 xl:px-12 2xl:px-28">
+          {children}
         </main>
       </div>
     </div>
@@ -95,14 +102,4 @@ function slugToName(slug: string) {
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
-}
-
-function ContentSkeleton() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-7 w-44" />
-      <Skeleton className="h-4 w-72" />
-      <Skeleton className="h-56 w-full" />
-    </div>
-  );
 }

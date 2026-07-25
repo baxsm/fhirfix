@@ -37,15 +37,20 @@ export function navGroups(workspace: string): NavGroup[] {
     {
       label: "Govern",
       items: [
-        { label: "Mappings", href: `${base}/mappings`, icon: Map },
-        { label: "Conformance", href: `${base}/conformance`, icon: ShieldCheck },
-        { label: "Monitoring", href: `${base}/monitoring`, icon: Radar },
+        // "Mappings" alone is an internal term - it does not say what the page
+        // holds or what you do there. nn/g: avoid invented terms in nav, name
+        // the task. same for "Conformance" and "Monitoring".
+        { label: "Mapping rules", href: `${base}/mappings`, icon: Map },
+        { label: "Conformance tests", href: `${base}/conformance`, icon: ShieldCheck },
+        { label: "Scheduled checks", href: `${base}/monitoring`, icon: Radar },
       ],
     },
     {
       label: "Manage",
       items: [
-        { label: "Developers", href: `${base}/developers`, icon: KeyRound },
+        // "Developers" names an AUDIENCE, not a destination - nn/g has a
+        // dedicated article against audience-based nav. name the contents.
+        { label: "API access", href: `${base}/developers`, icon: KeyRound },
         {
           label: "Billing",
           href: `${base}/billing`,
@@ -53,7 +58,7 @@ export function navGroups(workspace: string): NavGroup[] {
           requires: { resource: "billing", action: "view" },
         },
         {
-          label: "Audit",
+          label: "Audit log",
           href: `${base}/audit`,
           icon: ScrollText,
           requires: { resource: "audit", action: "view" },
