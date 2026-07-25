@@ -31,25 +31,32 @@ export interface FindingRow {
   rank: number;
 }
 
-// left-rail severity color. color + icon + label are all applied, never color alone.
+// left-rail severity color. color + icon + label are all applied, never color
+// alone. these use semantic tokens rather than raw palette shades - the old
+// -400/-500 values were dark-theme colours that read as washed-out pastel on a
+// near-white surface.
 export const SEVERITY_RAIL: Record<Severity, string> = {
-  error: "bg-red-500",
-  warning: "bg-amber-500",
-  info: "bg-sky-500",
+  error: "bg-destructive",
+  warning: "bg-warning",
+  info: "bg-info",
 };
 
 export const SEVERITY_TONE: Record<Severity, string> = {
-  error: "text-red-400 border-red-500/30 bg-red-500/10",
-  warning: "text-amber-400 border-amber-500/30 bg-amber-500/10",
-  info: "text-sky-400 border-sky-500/30 bg-sky-500/10",
+  error: "text-destructive border-destructive/30 bg-destructive/[0.06]",
+  warning: "text-warning border-warning/35 bg-warning/[0.06]",
+  info: "text-info border-info/30 bg-info/[0.06]",
 };
 
+// APPLIED IS NEUTRAL. it is the expected outcome of a run with auto-fix on, so
+// painting it emerald put a green badge on nearly every row and drowned out the
+// one or two findings that still need a human. colour here is reserved for the
+// state that wants attention: "needs review".
 export const STATUS_TONE: Record<FixStatus, string> = {
-  applied: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  suggested: "border-sky-500/30 bg-sky-500/10 text-sky-400",
-  manual_needed: "border-muted bg-muted/40 text-muted-foreground",
-  skipped: "border-muted bg-muted/40 text-muted-foreground",
-  dismissed: "border-muted bg-muted/40 text-muted-foreground line-through",
+  applied: "border-border bg-muted text-muted-foreground",
+  suggested: "border-info/30 bg-info/[0.06] text-info",
+  manual_needed: "border-warning/35 bg-warning/[0.06] text-warning",
+  skipped: "border-border bg-muted text-muted-foreground",
+  dismissed: "border-border bg-muted text-muted-foreground line-through",
 };
 
 export const STATUS_LABEL: Record<FixStatus, string> = {

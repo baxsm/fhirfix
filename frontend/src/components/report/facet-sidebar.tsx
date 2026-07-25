@@ -104,9 +104,9 @@ export function FacetSidebar({
   };
 
   return (
-    <aside className="w-full shrink-0 space-y-5 lg:w-52">
+    <aside className="raised w-full shrink-0 space-y-4 self-start rounded-lg border bg-card p-2.5 lg:w-52">
       <div className="space-y-1">
-        <p className="px-2.5 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+        <p className="px-2.5 pb-1 font-mono text-[9px] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
           Presets
         </p>
         {PRESETS.map((p) => (
@@ -117,7 +117,7 @@ export function FacetSidebar({
       </div>
 
       <div className="space-y-1">
-        <p className="px-2.5 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+        <p className="px-2.5 pb-1 font-mono text-[9px] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
           Severity
         </p>
         {(["error", "warning", "info"] as Severity[]).map((s) => (
@@ -131,7 +131,7 @@ export function FacetSidebar({
       </div>
 
       <div className="space-y-1">
-        <p className="px-2.5 pb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground/70">
+        <p className="px-2.5 pb-1 font-mono text-[9px] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
           Filters
         </p>
         <Row

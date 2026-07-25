@@ -78,18 +78,26 @@ export function FindingCard({
   const fragment = before && after ? fragmentFor(finding.fhirpath, before, after) : null;
 
   return (
+    // a ROW in a shared panel, not a card of its own. the parent supplies the
+    // border and radius; stacking bordered cards with gaps between them is what
+    // made a long findings list read as unrelated tiles. the row draws its own
+    // bottom border (see below) rather than the parent using divide-y, so the
+    // severity rail runs unbroken instead of being cut at every boundary.
     <article
       className={cn(
-        "relative overflow-hidden rounded-md border bg-card raised transition-opacity",
-        dismissed && "opacity-60",
+        "group/finding relative transition-opacity",
+        dismissed && "opacity-55",
+        open && "bg-muted/40",
       )}
     >
       <div className={cn("absolute inset-y-0 left-0 w-[3px]", SEVERITY_RAIL[finding.severity])} />
-      <div className="pl-4">
+      {/* border-b lives here, inside the rail's box, so the rail runs unbroken
+          down the whole list instead of being cut by a container divider. */}
+      <div className="border-b pl-4 group-last/finding:border-b-0">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left"
+          className="row-interactive flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left"
           aria-expanded={open}
         >
           <ChevronRight

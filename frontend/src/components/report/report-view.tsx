@@ -47,22 +47,22 @@ const SEVERITY_LABEL: Record<Severity, string> = {
 
 function ScoreDelta({ before, after }: { before: number | null; after: number | null }) {
   const gain = before != null && after != null ? after - before : null;
+  // the after-score is emerald ONLY when it actually rose. a flat score painted
+  // green claims an improvement that did not happen.
+  const improved = gain != null && gain > 0;
   return (
-    <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 raised">
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Before</span>
-        <span className="font-mono text-base tabular-nums text-muted-foreground">
-          {before ?? "-"}
-        </span>
-      </div>
-      <ArrowRight className="size-4 text-muted-foreground/50" />
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">After</span>
-        <span className="font-mono text-base tabular-nums text-emerald-400">{after ?? "-"}</span>
-      </div>
-      {gain != null && gain > 0 && (
-        <span className="ml-1 font-mono text-[11px] text-emerald-400 tabular-nums">+{gain}</span>
-      )}
+    <div className="flex items-baseline gap-2 whitespace-nowrap">
+      <span className="font-mono text-lg tabular-nums text-muted-foreground">{before ?? "—"}</span>
+      <ArrowRight className="size-3.5 shrink-0 self-center text-muted-foreground/40" />
+      <span
+        className={cn(
+          "font-mono text-lg tabular-nums",
+          improved ? "text-success" : "text-foreground",
+        )}
+      >
+        {after ?? "—"}
+      </span>
+      {improved && <span className="font-mono text-[11px] tabular-nums text-success">+{gain}</span>}
     </div>
   );
 }
@@ -79,25 +79,26 @@ function SeverityChip({
   active: boolean;
   onClick: () => void;
 }) {
-  const tone =
-    severity === "error"
-      ? "text-red-400"
-      : severity === "warning"
-        ? "text-amber-400"
-        : "text-sky-400";
+  // the dot carries the severity colour; the label stays ink. colouring the
+  // text too made three tinted words compete with the findings themselves.
   const dot =
-    severity === "error" ? "bg-red-500" : severity === "warning" ? "bg-amber-500" : "bg-sky-500";
+    severity === "error" ? "bg-destructive" : severity === "warning" ? "bg-warning" : "bg-info";
+  const none = count === 0;
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
+      disabled={none}
       className={cn(
-        "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1 text-[13px] transition-colors",
-        active ? "border-foreground/25 bg-foreground/[0.06]" : "hover:bg-muted",
+        "press flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-[13px]",
+        none && "cursor-default opacity-45",
+        !none && "cursor-pointer",
+        active ? "border-foreground/30 bg-accent" : !none && "hover:bg-accent",
       )}
     >
-      <span className={cn("size-1.5 rounded-full", dot)} />
-      <span className={tone}>{SEVERITY_LABEL[severity]}</span>
+      <span className={cn("size-1.5 shrink-0 rounded-full", dot, none && "opacity-40")} />
+      <span>{SEVERITY_LABEL[severity]}</span>
       <span className="font-mono tabular-nums text-muted-foreground">{count}</span>
     </button>
   );
@@ -298,17 +299,19 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
       {/* header bar */}
       <header className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="font-mono text-sm text-muted-foreground">{run.id}</h1>
-              <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+              {/* the run id is already the breadcrumb's last crumb, so it is a
+                  quiet label here rather than a second competing title. */}
+              <h1 className="truncate font-mono text-sm">{run.id}</h1>
+              <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
                 {run.inputType}
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               {run.resourceCount} {run.resourceCount === 1 ? "resource" : "resources"} scanned ·{" "}
               {findings.length} {findings.length === 1 ? "finding" : "findings"}
-              {applied > 0 && <span className="text-emerald-400"> · {applied} auto-fixed</span>}
+              {applied > 0 && <span className="text-success"> · {applied} auto-fixed</span>}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -341,7 +344,9 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        {/* filters and score share one rule-separated band instead of the score
+            floating in its own bordered card, which read as card-in-card. */}
+        <div className="flex flex-wrap items-center gap-2 border-y py-2.5">
           {(["error", "warning", "info"] as Severity[]).map((s) => (
             <SeverityChip
               key={s}
@@ -351,19 +356,22 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
               onClick={() => toggleChip(s)}
             />
           ))}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+              Score
+            </span>
             <ScoreDelta before={run.conformanceScoreBefore} after={run.conformanceScoreAfter} />
           </div>
         </div>
 
         {/* the highest-leverage line: turns a scary total into one action. */}
         {fixableNow.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3 raised">
+          <div className="raised flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success/25 bg-success/[0.04] px-4 py-3">
             <div className="flex items-center gap-2 text-sm">
-              <Wrench className="size-4 text-emerald-400" />
+              <Wrench className="size-4 shrink-0 text-success" />
               <span>
-                <span className="font-medium text-foreground">{fixableNow.length}</span> of{" "}
-                {active.length} findings are safely auto-fixable.
+                <span className="font-medium">{fixableNow.length}</span> of {active.length} findings
+                are safely auto-fixable.
               </span>
             </div>
             {/* emerald button = this action makes the resource conformant (the one
@@ -386,8 +394,8 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
           run.conformanceScoreBefore != null &&
           run.conformanceScoreAfter >= run.conformanceScoreBefore &&
           openErrors === 0 ? (
-          <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-400 raised">
-            <CheckCircle2 className="size-4" />
+          <div className="raised flex items-center gap-2 rounded-lg border border-success/25 bg-success/[0.04] px-4 py-3 text-sm">
+            <CheckCircle2 className="size-4 shrink-0 text-success" />
             Re-verified clean. No conformance errors remain.
           </div>
         ) : null}
@@ -403,24 +411,31 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
           onFacets={setFacets}
         />
 
-        <div className="min-w-0 flex-1 space-y-2">
+        <div className="min-w-0 flex-1">
           {allClear ? (
             <AllClear resourceCount={run.resourceCount} />
           ) : shown.length === 0 ? (
             <FilteredZero onClear={() => setPresetAndFacets("all")} />
           ) : (
-            shown.map((f) => (
-              <FindingCard
-                key={f.id}
-                finding={f}
-                before={data?.input ?? null}
-                after={data?.corrected ?? null}
-                busy={busyFp === f.dedupFingerprint || (applyingAll && f.fixStatus === "suggested")}
-                onApply={onApply}
-                onFixWithAi={onAi}
-                onDismiss={onDismiss}
-              />
-            ))
+            // ONE panel with divided rows, not a stack of floating cards. the
+            // gaps between separate cards were the main source of the "boxed"
+            // feel, and they made a long finding list read as unrelated tiles.
+            <div className="raised enter-stagger overflow-hidden rounded-lg border bg-card">
+              {shown.map((f) => (
+                <FindingCard
+                  key={f.id}
+                  finding={f}
+                  before={data?.input ?? null}
+                  after={data?.corrected ?? null}
+                  busy={
+                    busyFp === f.dedupFingerprint || (applyingAll && f.fixStatus === "suggested")
+                  }
+                  onApply={onApply}
+                  onFixWithAi={onAi}
+                  onDismiss={onDismiss}
+                />
+              ))}
+            </div>
           )}
         </div>
       </div>
