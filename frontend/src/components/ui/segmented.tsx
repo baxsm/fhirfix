@@ -24,6 +24,19 @@ import { cn } from "@/lib/utils";
  */
 
 /**
+ * ONE selected state for the whole app, matching the sidebar's active nav row:
+ * a solid dark chip with a weight change. this file previously held three
+ * different treatments - a white-card-on-trough tab, a filled-black pill and a
+ * filled-black chip - so two controls three inches apart on the check page
+ * disagreed about what "selected" looks like.
+ *
+ * the sidebar is the most-seen selected state in the product, so it is the one
+ * the rest follows rather than the other way round.
+ */
+const SELECTED = "bg-foreground text-background";
+const UNSELECTED = "text-muted-foreground hover:bg-muted hover:text-foreground";
+
+/**
  * choose a MODE for one surface. renders as a real tablist because it swaps the
  * panel below it.
  */
@@ -66,22 +79,20 @@ export function ModeSwitchItem({
       onClick={onClick}
       className={cn(
         "press flex-1 cursor-pointer rounded-md px-3 py-1.5 text-left transition-colors",
-        // selected: a real white card on a grey trough, plus a shadow. the
-        // trough is what makes the fill legible - a white pill on a white panel
-        // is the invisible state this replaces.
-        active ? "raised bg-card" : "hover:bg-card/50",
+        active ? SELECTED : UNSELECTED,
       )}
     >
-      <span
-        className={cn(
-          "block text-xs",
-          // weight carries the state as well as fill, so it survives greyscale
-          active ? "font-semibold text-foreground" : "font-medium text-muted-foreground",
-        )}
-      >
-        {label}
-      </span>
-      {hint && <span className="block text-[11px] text-muted-foreground/80">{hint}</span>}
+      <span className="block text-xs font-medium">{label}</span>
+      {hint && (
+        <span
+          className={cn(
+            "block text-[11px]",
+            active ? "text-background/70" : "text-muted-foreground/80",
+          )}
+        >
+          {hint}
+        </span>
+      )}
     </button>
   );
 }

@@ -35,16 +35,19 @@ export function UserAvatar({
     );
   }
 
+  // the same material as an input or a select: white surface, a border you can
+  // actually see, a hairline lift. it was a flat grey fill with no border and
+  // no shadow, which read as a hole in the topbar rather than a control.
   return (
     <span
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground",
+        "field-surface flex shrink-0 items-center justify-center rounded-full border text-muted-foreground",
         className,
       )}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <Users2 style={{ width: size * 0.5, height: size * 0.5 }} strokeWidth={1.75} />
+      <Users2 style={{ width: size * 0.46, height: size * 0.46 }} strokeWidth={1.75} />
     </span>
   );
 }

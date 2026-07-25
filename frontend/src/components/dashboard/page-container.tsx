@@ -19,12 +19,15 @@ export const contentInset = "px-1 sm:px-2 xl:px-12 2xl:px-28";
  * `max-width` varies, inside the constant inset above, so the left edge is
  * identical on every page (polaris/carbon do the same).
  */
+// the shell's symmetric inset is what balances the page. a SECOND cap on the
+// default pages fights it and dumps the leftover on one side - at 1920 a
+// 1180 cap left 112px on the left and 386px on the right. only `reading` caps,
+// because that is the one case where line length is the real constraint.
 const widths: Record<PageWidth, string> = {
   // wide tables and logs: every column the data needs
   full: "max-w-none",
-  // the default. cards, editors, anything that benefits from room but should
-  // not run the entire width of a 27" monitor
-  default: "max-w-[1180px]",
+  // the default: the inset decides the width
+  default: "max-w-none",
   // prose and single-column forms, where line length is the constraint
   reading: "max-w-[820px]",
 };

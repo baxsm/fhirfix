@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
  * content, that treatment reads as a hole - a ~250px void between two working
  * panels. this one is left-aligned, compact, and puts its action on the same
  * row, so an empty section looks deliberate rather than broken.
+ *
+ * it carries NO border. every caller renders it inside SettingsSection, which
+ * is already `rounded-lg border`, so a dashed box here drew a box inside a box.
+ * the panel is the container; this is just its contents.
  */
 export function EmptyState({
   icon: Icon,
@@ -26,7 +30,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-md border border-dashed px-4 py-4 sm:flex-row sm:items-center",
+        "flex flex-col gap-3 px-5 py-5 sm:flex-row sm:items-center",
         className,
       )}
     >

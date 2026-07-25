@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronDown, ScrollText } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ChoiceChip } from "@/components/ui/segmented";
@@ -69,6 +69,25 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   // screen belong to the previous filter is this flag.
   const stale = query.isPlaceholderData;
 
+  // hold the height WHILE a filter change is in flight, then let it settle to
+  // whatever the new result actually needs.
+  //
+  // `keepPreviousData` alone does not prevent the collapse: changing a filter
+  // also resets the cursor, which changes the query key. and even once the new
+  // rows arrive, going from 25 matches to 2 legitimately shortens the section -
+  // the bug is the page jumping mid-interaction, not the final height. so the
+  // floor applies only during the stale window and is released after.
+  const listRef = useRef<HTMLDivElement>(null);
+  const [heldHeight, setHeldHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (stale) {
+      // entering the stale window: freeze whatever is on screen now
+      setHeldHeight((prev) => prev ?? listRef.current?.offsetHeight ?? null);
+    } else {
+      setHeldHeight(null);
+    }
+  }, [stale]);
+
   // changing a filter resets pagination back to the first page.
   const changeFilter = (fn: () => void) => {
     fn();
@@ -123,7 +142,11 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         <EmptyLogs onlyErrors={onlyErrors} />
       ) : (
         <>
-          <div className={cn("-mx-4", stale && "is-stale")}>
+          <div
+            ref={listRef}
+            className={cn("-mx-4", stale && "is-stale")}
+            style={heldHeight ? { minHeight: heldHeight } : undefined}
+          >
             <Table>
               <TableBody>
                 {rows.map((r) => (

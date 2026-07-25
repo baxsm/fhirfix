@@ -135,7 +135,6 @@ export function MembersSection({
           <div className="divide-y">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 px-5 py-3">
-                <Skeleton className="size-7 rounded-full" />
                 <div className="flex-1 space-y-1.5">
                   <Skeleton className="h-3 w-32" />
                   <Skeleton className="h-2.5 w-48" />
@@ -157,9 +156,9 @@ export function MembersSection({
               const r = m.role as WorkspaceRole;
               return (
                 <li key={m.id} className="flex items-center gap-3 px-5 py-2.5">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-mono text-[11px] font-medium text-muted-foreground">
-                    {m.user.name.slice(0, 2).toUpperCase()}
-                  </span>
+                  {/* no avatar circle. there are no profile images in this
+                      product and there will not be, so a monogram in a circle
+                      is a placeholder for something that never arrives. */}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium leading-tight">{m.user.name}</p>
                     <p className="truncate font-mono text-xs leading-tight text-muted-foreground">

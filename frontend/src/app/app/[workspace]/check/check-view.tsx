@@ -207,8 +207,13 @@ export function CheckView({ workspace }: { workspace: string }) {
                 <span className="text-sm font-medium">
                   {dragging ? "Drop to stage the file" : "Drop a file, or click to browse"}
                 </span>
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  .json · .ndjson · .hl7 · up to 5 MB
+                {/* file types and the size limit are different facts. chaining
+                    them with dots made one run-on string where ".hl7" and
+                    "up to 5 MB" read as the same kind of thing. */}
+                <span className="text-[11px] text-muted-foreground">
+                  <span className="font-mono">.json</span>,{" "}
+                  <span className="font-mono">.ndjson</span> or{" "}
+                  <span className="font-mono">.hl7</span>, up to 5 MB
                 </span>
               </button>
 
