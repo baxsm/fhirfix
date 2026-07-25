@@ -5,6 +5,7 @@ import { ChevronDown, ScrollText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ChoiceChip } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -81,29 +82,23 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div
-          role="tablist"
+        {/* role=group, not tablist: a segmented filter is a mode selector, and
+            primer is explicit that it must not take the tablist role (the
+            keyboard contract differs - tab moves between segments, not arrows). */}
+        <fieldset
           aria-label="Filter by method"
-          className="inline-flex rounded-md border p-0.5"
+          className="inline-flex gap-0.5 rounded-md border p-0.5"
         >
           {METHODS.map((m) => (
-            <button
+            <ChoiceChip
               key={m}
-              type="button"
-              role="tab"
-              aria-selected={method === m}
+              active={method === m}
               onClick={() => changeFilter(() => setMethod(m))}
-              className={cn(
-                "press cursor-pointer rounded px-2.5 py-1 text-xs font-medium",
-                method === m
-                  ? "bg-foreground/[0.07] text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
             >
               {m}
-            </button>
+            </ChoiceChip>
           ))}
-        </div>
+        </fieldset>
         <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
           <input
             type="checkbox"

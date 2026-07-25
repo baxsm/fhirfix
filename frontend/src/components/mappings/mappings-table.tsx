@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { ChoiceChip } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -114,36 +115,24 @@ export function MappingsTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="tablist"
+        <fieldset
           aria-label="Filter by status"
-          className="inline-flex h-8 items-center rounded-md border p-0.5"
+          className="inline-flex h-8 items-center gap-0.5 rounded-md border p-0.5"
         >
           {filters.map((f) => {
             const n = counts?.[f.key];
             return (
-              <button
+              <ChoiceChip
                 key={f.key}
-                type="button"
+                active={status === f.key}
+                count={n || undefined}
                 onClick={() => onStatusChange(f.key)}
-                role="tab"
-                aria-selected={status === f.key}
-                // h-7 inside an h-8 bordered group: the filter, the search input
-                // and the button now sit on one line at one height. they were
-                // three different heights in the same row.
-                className={cn(
-                  "press flex h-7 cursor-pointer items-center rounded px-2.5 text-xs font-medium",
-                  status === f.key
-                    ? "bg-foreground/[0.07] text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
               >
                 {f.label}
-                {n ? <span className="ml-1.5 text-muted-foreground">{n}</span> : null}
-              </button>
+              </ChoiceChip>
             );
           })}
-        </div>
+        </fieldset>
 
         <div className="flex items-center gap-2">
           <div className="relative">

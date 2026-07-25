@@ -9,6 +9,7 @@ import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { RefreshingNote } from "@/components/dashboard/refreshing-note";
 import { Button } from "@/components/ui/button";
+import { FilterPill } from "@/components/ui/segmented";
 import { StatusDot, type StatusTone } from "@/components/ui/status";
 import {
   Table,
@@ -112,23 +113,31 @@ export function RunsView({ workspace }: { workspace: string }) {
               permanently-disabled control is noise. */}
           {failedCount > 0 && (
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                aria-pressed={failedOnly}
+              <FilterPill
+                active={failedOnly}
+                tone="danger"
+                count={failedCount}
                 onClick={() => {
                   setFailedOnly((v) => !v);
                   setPage(0);
                 }}
-                className={cn(
-                  "press cursor-pointer rounded-md border px-2.5 py-1 text-xs font-medium",
-                  failedOnly
-                    ? "border-destructive/30 bg-destructive/5 text-destructive"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
               >
                 Failed only
-                <span className="ml-1.5 font-mono tabular-nums opacity-70">{failedCount}</span>
-              </button>
+              </FilterPill>
+              {failedOnly && (
+                // an active filter means the counts on screen are a subset. say
+                // so, or a filtered count reads as a total.
+                <span className="text-xs text-muted-foreground">
+                  Showing failed runs only.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setFailedOnly(false)}
+                    className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+                  >
+                    Show all
+                  </button>
+                </span>
+              )}
             </div>
           )}
 

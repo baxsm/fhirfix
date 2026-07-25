@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
+import { FilterPill, ModeSwitch, ModeSwitchItem } from "@/components/ui/segmented";
 import { Textarea } from "@/components/ui/textarea";
 import { useListOrganizations } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -121,23 +122,21 @@ export function CheckView({ workspace }: { workspace: string }) {
       <div className="raised overflow-hidden rounded-lg border bg-card">
         {/* mode switch sits ON the panel it controls, so it is obvious which
             surface it is switching. */}
-        <div
-          role="tablist"
-          aria-label="Input method"
-          className="flex items-center gap-1 border-b bg-muted/30 p-1.5"
-        >
-          <ModeTab
-            active={mode === "paste"}
-            onClick={() => setMode("paste")}
-            label="Paste"
-            hint="Type or paste the record"
-          />
-          <ModeTab
-            active={mode === "upload"}
-            onClick={() => setMode("upload")}
-            label="Upload"
-            hint="Drop a .json, .ndjson or .hl7 file"
-          />
+        <div className="border-b p-1.5">
+          <ModeSwitch label="Input method">
+            <ModeSwitchItem
+              active={mode === "paste"}
+              onClick={() => setMode("paste")}
+              label="Paste"
+              hint="Type or paste the record"
+            />
+            <ModeSwitchItem
+              active={mode === "upload"}
+              onClick={() => setMode("upload")}
+              label="Upload"
+              hint="Drop a .json, .ndjson or .hl7 file"
+            />
+          </ModeSwitch>
         </div>
 
         {/* a FIXED height, not a min-height. the textarea grows with its content,
@@ -161,28 +160,21 @@ export function CheckView({ workspace }: { workspace: string }) {
               <div className="flex shrink-0 flex-wrap items-center gap-2 border-t pt-3">
                 <span className="text-[11px] text-muted-foreground">Start from a sample</span>
                 {SAMPLES.map((s) => (
-                  <button
+                  // the selected sample was previously a 5% tint with no weight
+                  // or ink change, so the panel showed content nothing on screen
+                  // claimed responsibility for.
+                  <FilterPill
                     key={s.id}
-                    type="button"
-                    // the selected sample was previously indistinguishable from
-                    // the unselected one, so the panel showed content nothing
-                    // on screen claimed responsibility for.
-                    aria-pressed={sampleId === s.id}
+                    active={sampleId === s.id}
                     onClick={() => {
                       setContent(s.content);
                       setSampleId(s.id);
                       setFiles([]);
                     }}
-                    className={cn(
-                      "press cursor-pointer rounded-md border px-2 py-1 text-[11px]",
-                      sampleId === s.id
-                        ? "border-interactive/40 bg-interactive/5 text-interactive"
-                        : "text-muted-foreground hover:border-foreground/25 hover:text-foreground",
-                    )}
                   >
                     {s.label}
-                    <span className="ml-1.5 font-mono opacity-60">{s.kind}</span>
-                  </button>
+                    <span className="font-mono opacity-60">{s.kind}</span>
+                  </FilterPill>
                 ))}
               </div>
             </div>
@@ -317,40 +309,5 @@ export function CheckView({ workspace }: { workspace: string }) {
         Validated against US Core 6.1.0. Every fix is re-verified before you see it.
       </p>
     </PageContainer>
-  );
-}
-
-function ModeTab({
-  active,
-  onClick,
-  label,
-  hint,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  hint: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={cn(
-        "press flex-1 cursor-pointer rounded-md px-3 py-1.5 text-left",
-        active ? "raised bg-card" : "hover:bg-card/60",
-      )}
-    >
-      <span
-        className={cn(
-          "block text-xs font-medium",
-          active ? "text-foreground" : "text-muted-foreground",
-        )}
-      >
-        {label}
-      </span>
-      <span className="block text-[11px] text-muted-foreground/80">{hint}</span>
-    </button>
   );
 }

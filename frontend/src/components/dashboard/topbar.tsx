@@ -1,29 +1,24 @@
 "use client";
 
-import { FileScan, LogOut, User } from "lucide-react";
+import { FileScan } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth-client";
+import type { WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { breadcrumbs } from "./nav-items";
 import { contentInset } from "./page-container";
+import { UserMenu } from "./user-menu";
 
 type Props = {
   workspace: string;
   workspaceName: string;
   user: { name: string; email: string };
+  role: WorkspaceRole;
 };
 
-export function Topbar({ workspace, workspaceName, user }: Props) {
+export function Topbar({ workspace, workspaceName, user, role }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -88,39 +83,7 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
           </Link>
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="rounded-full outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label="Account menu"
-            >
-              <Avatar className="size-7">
-                <AvatarFallback className="bg-muted font-mono text-[11px] text-muted-foreground">
-                  {user.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="px-2 py-1.5">
-              <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate font-mono text-xs text-muted-foreground">{user.email}</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/account">
-                <User className="size-4" />
-                Account settings
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="size-4" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <UserMenu user={user} role={role} onSignOut={handleSignOut} />
       </div>
     </header>
   );

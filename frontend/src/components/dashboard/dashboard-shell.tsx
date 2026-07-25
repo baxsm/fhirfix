@@ -79,6 +79,7 @@ export function DashboardShell({
             name: session?.user.name ?? "",
             email: session?.user.email ?? "",
           }}
+          role={role}
         />
         {active && <LowBalanceBanner workspace={workspace} workspaceId={active.id} />}
         {/* children render immediately. the shell used to swap the whole page
