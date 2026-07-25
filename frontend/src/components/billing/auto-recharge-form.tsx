@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useTRPC } from "@/trpc/client";
 
 type AutoRecharge = {
@@ -53,6 +54,22 @@ export function AutoRechargeForm({
     if (autoRecharge.amountCents != null) setAmountCents(String(autoRecharge.amountCents));
   }, [autoRecharge.enabled, autoRecharge.thresholdDollars, autoRecharge.amountCents]);
 
+  const savedThreshold =
+    autoRecharge.thresholdDollars != null ? String(autoRecharge.thresholdDollars) : "5";
+  const savedAmount =
+    autoRecharge.amountCents != null
+      ? String(autoRecharge.amountCents)
+      : String(packs[1]?.cents ?? 2500);
+  const dirty =
+    enabled !== autoRecharge.enabled ||
+    (enabled && (threshold !== savedThreshold || amountCents !== savedAmount));
+
+  const reset = () => {
+    setEnabled(autoRecharge.enabled);
+    setThreshold(savedThreshold);
+    setAmountCents(savedAmount);
+  };
+
   const save = useMutation(
     trpc.billing.setAutoRecharge.mutationOptions({
       onSuccess: () => {
@@ -82,49 +99,50 @@ export function AutoRechargeForm({
           });
         }}
       >
-        <label className="flex items-center gap-2.5 text-sm">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            className="size-4 rounded border-input accent-[var(--interactive)]"
-          />
-          <span className="font-medium">Enable auto-recharge</span>
-        </label>
+        {/* the toggle is a switch, not a checkbox gating dead fields. disabled
+            inputs that stay on screen read as broken - the user cannot tell
+            whether the value matters. off means the settings are not there. */}
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="ar-enabled" className="cursor-pointer text-sm font-medium">
+            Top up automatically
+          </Label>
+          <Switch id="ar-enabled" checked={enabled} onCheckedChange={setEnabled} />
+        </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="ar-threshold">When balance falls below</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">$</span>
-              <Input
-                id="ar-threshold"
-                type="number"
-                min={0}
-                step="1"
-                value={threshold}
-                onChange={(e) => setThreshold(e.target.value)}
-                disabled={!enabled}
-                className="tabular-nums"
-              />
+        {enabled && (
+          <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="ar-threshold">When balance falls below</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">$</span>
+                <Input
+                  id="ar-threshold"
+                  type="number"
+                  min={0}
+                  step="1"
+                  value={threshold}
+                  onChange={(e) => setThreshold(e.target.value)}
+                  className="tabular-nums"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="ar-amount">Recharge with</Label>
+              <Select value={amountCents} onValueChange={setAmountCents}>
+                <SelectTrigger id="ar-amount" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {packs.map((p) => (
+                    <SelectItem key={p.id} value={String(p.cents)}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="ar-amount">Recharge with</Label>
-            <Select value={amountCents} onValueChange={setAmountCents} disabled={!enabled}>
-              <SelectTrigger id="ar-amount">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {packs.map((p) => (
-                  <SelectItem key={p.id} value={String(p.cents)}>
-                    {p.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        )}
 
         {/* the honest gotcha: a reached spend cap silently blocks the recharge. */}
         {enabled && autoRecharge.blockedByCap && (
@@ -137,13 +155,22 @@ export function AutoRechargeForm({
           </div>
         )}
 
-        {/* mt-auto pins the action to the bottom of the stretched panel, so a
-            shorter form does not leave its button floating mid-card. */}
-        <div className="mt-auto flex justify-end pt-1">
-          <Button type="submit" size="sm" disabled={save.isPending}>
-            {save.isPending ? "Saving..." : "Save"}
-          </Button>
-        </div>
+        {/* the save row only exists when something has actually changed.
+            a permanently-pinned button meant the card grew and shrank as the
+            form did, and there was nothing to save most of the time anyway.
+            money settings still take an explicit confirm - auto-saving a
+            spend threshold on every keystroke would fire real charges. */}
+        {dirty && (
+          <div className="mt-auto flex items-center justify-end gap-3 border-t pt-3">
+            <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>
+            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+              Discard
+            </Button>
+            <Button type="submit" size="sm" disabled={save.isPending}>
+              {save.isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        )}
       </form>
     </SettingsSection>
   );

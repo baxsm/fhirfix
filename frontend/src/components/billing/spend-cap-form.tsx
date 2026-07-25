@@ -8,6 +8,7 @@ import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useTRPC } from "@/trpc/client";
 
 type SpendCap = {
@@ -34,6 +35,14 @@ export function SpendCapForm({
     setEnabled(spendCap.monthlyCents != null);
     if (spendCap.monthlyCents != null) setDollars(String(spendCap.monthlyCents / 100));
   }, [spendCap.monthlyCents]);
+
+  const savedEnabled = spendCap.monthlyCents != null;
+  const savedDollars = spendCap.monthlyCents != null ? String(spendCap.monthlyCents / 100) : "100";
+  const dirty = enabled !== savedEnabled || (enabled && dollars !== savedDollars);
+  const reset = () => {
+    setEnabled(savedEnabled);
+    setDollars(savedDollars);
+  };
 
   const save = useMutation(
     trpc.billing.setSpendCap.mutationOptions({
@@ -67,33 +76,31 @@ export function SpendCapForm({
           });
         }}
       >
-        <label className="flex items-center gap-2.5 text-sm">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            className="size-4 rounded border-input accent-[var(--interactive)]"
-          />
-          <span className="font-medium">Set a monthly cap</span>
-        </label>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="cap-amount">Cap</Label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">$</span>
-            <Input
-              id="cap-amount"
-              type="number"
-              min={0}
-              step="1"
-              value={dollars}
-              onChange={(e) => setDollars(e.target.value)}
-              disabled={!enabled}
-              className="w-32 tabular-nums"
-            />
-            <span className="text-sm text-muted-foreground">per month</span>
-          </div>
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor="cap-enabled" className="cursor-pointer text-sm font-medium">
+            Alert me at a monthly limit
+          </Label>
+          <Switch id="cap-enabled" checked={enabled} onCheckedChange={setEnabled} />
         </div>
+
+        {enabled && (
+          <div className="space-y-1.5 border-t pt-4">
+            <Label htmlFor="cap-amount">Cap</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">$</span>
+              <Input
+                id="cap-amount"
+                type="number"
+                min={0}
+                step="1"
+                value={dollars}
+                onChange={(e) => setDollars(e.target.value)}
+                className="w-32 tabular-nums"
+              />
+              <span className="text-sm text-muted-foreground">per month</span>
+            </div>
+          </div>
+        )}
 
         {enabled && capDollars > 0 && (
           <div className="space-y-1.5">
@@ -120,11 +127,17 @@ export function SpendCapForm({
           not cut off service on its own.
         </p>
 
-        <div className="mt-auto flex justify-end pt-1">
-          <Button type="submit" size="sm" disabled={save.isPending}>
-            {save.isPending ? "Saving..." : "Save"}
-          </Button>
-        </div>
+        {dirty && (
+          <div className="mt-auto flex items-center justify-end gap-3 border-t pt-3">
+            <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>
+            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+              Discard
+            </Button>
+            <Button type="submit" size="sm" disabled={save.isPending}>
+              {save.isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        )}
       </form>
     </SettingsSection>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { CreditCard, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
+import { CreditCard, Loader2, Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -200,21 +200,29 @@ function BalanceHero({
 
         {canManage && (
           <div className="space-y-2">
-            <p className="text-right text-[11px] text-muted-foreground">Add credits</p>
-            <div className="flex gap-2">
-              {summary.packs.map((p) => (
+            {/* "Add credits" used to be a caption floating above three bare
+                amounts, so nothing on the row said which part was the button or
+                what pressing it would do. each button now states the action and
+                the amount, and the first one is the filled primary so the row
+                has one obvious action rather than three equal chips. */}
+            <div className="flex flex-wrap justify-end gap-2">
+              {summary.packs.map((p, i) => (
                 <Button
                   key={p.id}
-                  variant={low && p.id === "pack_25" ? "success" : "outline"}
+                  variant={i === 0 || (low && p.id === "pack_25") ? "default" : "outline"}
                   size="sm"
                   disabled={checkout.isPending}
                   onClick={() => {
                     setPendingPack(p.id);
                     checkout.mutate({ workspaceId, packId: p.id });
                   }}
-                  className="font-mono tabular-nums"
                 >
-                  {pendingPack === p.id && checkout.isPending ? "..." : p.label}
+                  {pendingPack === p.id && checkout.isPending ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="size-3.5" />
+                  )}
+                  Add <span className="font-mono tabular-nums">{p.label}</span>
                 </Button>
               ))}
             </div>

@@ -60,7 +60,24 @@ describe("AutoRechargeForm", () => {
     expect(screen.getByText(/Runs will stop at/i)).toBeInTheDocument();
   });
 
-  it("submits the threshold and amount when enabled", () => {
+  it("offers no save until something changes", () => {
+    render(
+      <AutoRechargeForm
+        workspaceId="wsp_1"
+        autoRecharge={{
+          enabled: true,
+          thresholdDollars: 5,
+          amountCents: 2500,
+          blockedByCap: false,
+        }}
+        packs={packs}
+        onSaved={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /save/i })).not.toBeInTheDocument();
+  });
+
+  it("submits the edited threshold", () => {
     saveMutate.mockReset();
     render(
       <AutoRechargeForm
@@ -75,9 +92,30 @@ describe("AutoRechargeForm", () => {
         onSaved={vi.fn()}
       />,
     );
+    fireEvent.change(screen.getByLabelText(/when balance falls below/i), {
+      target: { value: "12" },
+    });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(saveMutate).toHaveBeenCalledWith(
-      expect.objectContaining({ workspaceId: "wsp_1", enabled: true, thresholdDollars: 5 }),
+      expect.objectContaining({ workspaceId: "wsp_1", enabled: true, thresholdDollars: 12 }),
     );
+  });
+
+  it("hides the settings entirely when switched off", () => {
+    render(
+      <AutoRechargeForm
+        workspaceId="wsp_1"
+        autoRecharge={{
+          enabled: false,
+          thresholdDollars: null,
+          amountCents: null,
+          blockedByCap: false,
+        }}
+        packs={packs}
+        onSaved={vi.fn()}
+      />,
+    );
+    // off means the fields are not there at all, rather than present-but-dead
+    expect(screen.queryByLabelText(/when balance falls below/i)).not.toBeInTheDocument();
   });
 });

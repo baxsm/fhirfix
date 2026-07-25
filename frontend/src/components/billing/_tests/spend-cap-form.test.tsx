@@ -57,9 +57,20 @@ describe("SpendCapForm", () => {
         onSaved={vi.fn()}
       />,
     );
-    // uncheck "Set a monthly cap"
-    fireEvent.click(screen.getByRole("checkbox"));
+    // switch the cap off, then confirm
+    fireEvent.click(screen.getByRole("switch"));
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
     expect(saveMutate).toHaveBeenCalledWith({ workspaceId: "wsp_1", monthlyCents: null });
+  });
+
+  it("offers no save until something changes", () => {
+    render(
+      <SpendCapForm
+        workspaceId="wsp_1"
+        spendCap={{ monthlyCents: 10000, spentThisCycleCents: 0 }}
+        onSaved={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /save/i })).not.toBeInTheDocument();
   });
 });
