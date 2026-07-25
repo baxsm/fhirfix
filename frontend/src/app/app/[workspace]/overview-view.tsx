@@ -105,32 +105,37 @@ export function OverviewView({
       ) : (
         <>
           {/* anything needing a decision comes first and only exists when it is
-              real. an always-present "0 items need attention" panel is noise. */}
+              real. an always-present "0 items need attention" panel is noise.
+
+              these are NOT another bordered card. three consecutive
+              rounded-lg-border-bg-card sections gave a two-line alert the same
+              visual weight as the chart and the run list, which is what made the
+              page read as one component pasted three times. an alert is a short,
+              urgent thing: it gets a tinted strip with a coloured left edge, so
+              it is distinguishable from the neutral panels around it at a
+              glance and does not need a card to announce itself. */}
           {(failedRuns.length > 0 || pendingMappings > 0) && (
             <section className="space-y-2">
-              <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
-                Needs attention
-              </h2>
-              <div className="raised enter-stagger divide-y overflow-hidden rounded-lg border bg-card">
-                {failedRuns.length > 0 && (
-                  <AttentionRow
-                    href={`${base}/runs`}
-                    tone="danger"
-                    icon={AlertTriangle}
-                    title={`${failedRuns.length} ${failedRuns.length === 1 ? "run" : "runs"} failed`}
-                    body="The engine could not finish these. Open the run to see why."
-                  />
-                )}
-                {pendingMappings > 0 && (
-                  <AttentionRow
-                    href={`${base}/mappings`}
-                    tone="warning"
-                    icon={Map}
-                    title={`${pendingMappings} mapping ${pendingMappings === 1 ? "suggestion" : "suggestions"} to review`}
-                    body="Approving a suggestion lets future runs auto-fix it."
-                  />
-                )}
-              </div>
+              {failedRuns.length > 0 && (
+                <AttentionRow
+                  href={`${base}/runs`}
+                  tone="danger"
+                  icon={AlertTriangle}
+                  title={`${failedRuns.length} ${failedRuns.length === 1 ? "run" : "runs"} failed`}
+                  body="The engine could not finish these. Open the run to see why."
+                  action="Review"
+                />
+              )}
+              {pendingMappings > 0 && (
+                <AttentionRow
+                  href={`${base}/mappings`}
+                  tone="warning"
+                  icon={Map}
+                  title={`${pendingMappings} mapping ${pendingMappings === 1 ? "suggestion" : "suggestions"} to review`}
+                  body="Approving a suggestion lets future runs auto-fix it."
+                  action="Review"
+                />
+              )}
             </section>
           )}
 
@@ -146,15 +151,15 @@ export function OverviewView({
               <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
                 Recent runs
               </h2>
-              {/* a real button, not bare text. it was previously indistinguishable
-                  from a caption. */}
-              <Link
-                href={`${base}/runs`}
-                className="press -my-1 flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-muted-foreground hover:border-ring hover:text-foreground"
-              >
-                View all
-                <ArrowRight className="size-3" />
-              </Link>
+              {/* the Button component, not a hand-rolled div with border and
+                  padding classes. every one-off like that is another shape the
+                  product has to teach you to recognise. */}
+              <Button variant="outline" size="xs" asChild className="-my-1">
+                <Link href={`${base}/runs`}>
+                  View all
+                  <ArrowRight className="size-3" />
+                </Link>
+              </Button>
             </div>
             <div className="enter-stagger divide-y">
               {runs.slice(0, 6).map((r) => (
@@ -184,35 +189,56 @@ function summaryLine({
   return `${runs} check${runs === 1 ? "" : "s"} run in this workspace. Everything completed.`;
 }
 
+/**
+ * an alert that links somewhere. it used to be a full-row hover target with an
+ * arrow that was invisible at rest, faded in on hover and nudged 2px sideways -
+ * three animated properties on a row whose whole job is "go to this page". the
+ * motion was standing in for an affordance rather than being one.
+ *
+ * now the destination is a plain, always-visible link at the end of the row, so
+ * you can see where it goes without hovering to find out.
+ */
 function AttentionRow({
   href,
   title,
   body,
   tone,
+  action,
   icon: Icon,
 }: {
   href: string;
   title: string;
   body: string;
   tone: "danger" | "warning";
+  action: string;
   icon: typeof Map;
 }) {
   return (
-    <Link href={href} className="row-interactive group flex items-center gap-3 px-4 py-3">
-      <span
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-md border border-l-2 py-2.5 pr-3 pl-3",
+        tone === "danger"
+          ? "border-destructive/25 border-l-destructive bg-destructive/[0.04]"
+          : "border-warning/25 border-l-warning bg-warning/[0.05]",
+      )}
+    >
+      <Icon
         className={cn(
-          "flex size-7 shrink-0 items-center justify-center rounded-md border bg-background",
+          "size-4 shrink-0",
           tone === "danger" ? "text-destructive" : "text-warning",
         )}
-      >
-        <Icon className="size-3.5" />
-      </span>
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium leading-tight">{title}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{body}</p>
       </div>
-      <ArrowRight className="row-reveal row-nudge size-4 shrink-0 text-foreground" />
-    </Link>
+      <Button variant="outline" size="xs" asChild className="shrink-0 bg-background">
+        <Link href={href}>
+          {action}
+          <ArrowRight className="size-3" />
+        </Link>
+      </Button>
+    </div>
   );
 }
 
@@ -314,15 +340,14 @@ function FirstRun({ base }: { base: string }) {
         <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
           Set up your workspace
         </h3>
-        <div className="raised enter-stagger divide-y overflow-hidden rounded-lg border bg-card">
-          <AttentionRow
-            href={`${base}/mappings`}
-            tone="warning"
-            icon={Map}
-            title="Import your mapping registry"
-            body="Bring assigning-authority and code mappings so fixes apply automatically."
-          />
-        </div>
+        <AttentionRow
+          href={`${base}/mappings`}
+          tone="warning"
+          icon={Map}
+          title="Import your mapping registry"
+          body="Bring assigning-authority and code mappings so fixes apply automatically."
+          action="Open"
+        />
       </section>
     </PageContainer>
   );
