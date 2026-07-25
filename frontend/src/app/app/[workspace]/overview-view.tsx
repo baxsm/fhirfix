@@ -275,7 +275,7 @@ function OverviewSkeleton() {
 
 function FirstRun({ base }: { base: string }) {
   return (
-    <PageContainer width="narrow">
+    <PageContainer width="reading">
       <div className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">Get started</h1>
         <p className="text-sm text-muted-foreground">

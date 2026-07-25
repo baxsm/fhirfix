@@ -59,7 +59,7 @@ export function MappingsView({ workspace }: { workspace: string }) {
   const effectiveStatus: MappingStatus = status ?? "active";
 
   return (
-    <PageContainer width="wide">
+    <PageContainer width="full">
       <PageHeader
         title="Mapping rules"
         description={`The versioned registry of assigning-authority and code mappings that power auto-fixes in ${active?.name ?? "this workspace"}.`}

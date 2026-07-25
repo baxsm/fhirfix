@@ -24,7 +24,7 @@ export function PhasePlaceholder({
   meanwhile?: { label: string; href: string; body: string };
 }) {
   return (
-    <PageContainer width="narrow">
+    <PageContainer width="reading">
       <header className="space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         <p className="text-sm text-muted-foreground">{description}</p>

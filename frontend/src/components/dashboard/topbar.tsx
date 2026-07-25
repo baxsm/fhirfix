@@ -15,6 +15,7 @@ import {
 import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { breadcrumbs } from "./nav-items";
+import { contentInset } from "./page-container";
 
 type Props = {
   workspace: string;
@@ -37,7 +38,14 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
     // sits INSIDE the content column, not spanning the window, so the floating
     // rail keeps its gutter. sticky so the breadcrumb and account menu survive a
     // long scroll down the report.
-    <header className="sticky top-0 z-20 flex h-11 shrink-0 items-center gap-2 border-b bg-canvas/85 px-1 backdrop-blur-md sm:px-2">
+    // h-14 so a 32px control has 12px above and below instead of 6. the inset is
+    // shared with main - see contentInset.
+    <header
+      className={cn(
+        "sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-canvas/85 backdrop-blur-md",
+        contentInset,
+      )}
+    >
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;

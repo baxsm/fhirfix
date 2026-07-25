@@ -1,25 +1,36 @@
-type PageWidth = "wide" | "standard" | "narrow";
+type PageWidth = "full" | "default" | "reading";
 
-// the shell varies max-width only. the left edge is a constant, so navigating
-// between a table and a form never shifts the content sideways.
-//
-// centering (mx-auto) is deliberately absent: it splits leftover space on both
-// sides, which is what moved the content 71px when going from runs to billing.
-// polaris and carbon both vary max-width inside a fixed gutter for this reason.
-// the shell's symmetric inset is what balances the page, so only `narrow` caps
-// width here. a second cap on the default pages fought the inset and left the
-// gap lopsided (64px left, 174px right at 1920).
+/**
+ * the horizontal inset of the content column.
+ *
+ * the topbar and the scrolling content BOTH use this. when only `main` had it,
+ * the breadcrumb sat 104px left of the page heading it labels.
+ */
+export const contentInset = "px-1 sm:px-2 xl:px-12 2xl:px-28";
+
+/**
+ * every dashboard page renders inside one of these. three widths, and they have
+ * to actually differ - an earlier version had two of the three set to
+ * `max-w-none`, which made the choice meaningless and left `reading` doing all
+ * the work at a width too narrow for an editor.
+ *
+ * `mx-auto` is deliberately absent: centering splits leftover space on both
+ * sides, which is what moved the content 71px between runs and billing. only
+ * `max-width` varies, inside the constant inset above, so the left edge is
+ * identical on every page (polaris/carbon do the same).
+ */
 const widths: Record<PageWidth, string> = {
-  // tables and logs
-  wide: "max-w-none",
-  // the default
-  standard: "max-w-none",
-  // forms and single-column reading, where line length actually matters
-  narrow: "max-w-[760px]",
+  // wide tables and logs: every column the data needs
+  full: "max-w-none",
+  // the default. cards, editors, anything that benefits from room but should
+  // not run the entire width of a 27" monitor
+  default: "max-w-[1180px]",
+  // prose and single-column forms, where line length is the constraint
+  reading: "max-w-[820px]",
 };
 
 export function PageContainer({
-  width = "standard",
+  width = "default",
   children,
 }: {
   width?: PageWidth;

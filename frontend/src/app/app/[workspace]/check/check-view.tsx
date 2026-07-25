@@ -109,7 +109,7 @@ export function CheckView({ workspace }: { workspace: string }) {
   const charCount = content.trim().length;
 
   return (
-    <PageContainer width="narrow">
+    <PageContainer>
       <header className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">New check</h1>
         <p className="text-sm text-muted-foreground">

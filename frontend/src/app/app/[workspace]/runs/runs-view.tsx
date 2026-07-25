@@ -89,7 +89,7 @@ export function RunsView({ workspace }: { workspace: string }) {
   const refreshing = !settling && query.isFetching;
 
   return (
-    <PageContainer width="wide">
+    <PageContainer width="full">
       {/* no New check action here: the topbar already carries it on every
           screen, and two identical primary buttons on one page is noise. */}
       <div className="flex items-start justify-between gap-4">
