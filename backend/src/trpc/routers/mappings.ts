@@ -397,6 +397,46 @@ export const mappingsRouter = router({
       return { reactivated: true };
     }),
 
+  // bulk export. deliberately returns the SAME column set importRows accepts, so
+  // an export dropped straight back into import round-trips. that means no ids,
+  // no versions and no timestamps: those belong to this workspace's chain and
+  // would be meaningless (or actively wrong) in whatever registry receives them.
+  exportRows: workspaceProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        status: z.enum(["active", "suggested", "deprecated", "rejected"]).optional(),
+        type: z.enum(MAPPING_TYPES).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const conditions = [eq(schema.mappingRegistryEntry.workspaceId, ctx.workspaceId), isLive];
+      // an export with no status defaults to active only. exporting suggestions
+      // and tombstones by default would hand someone a file that, on import,
+      // silently promotes unreviewed guesses to active mappings.
+      conditions.push(eq(schema.mappingRegistryEntry.status, input.status ?? "active"));
+      if (input.type) {
+        conditions.push(eq(schema.mappingRegistryEntry.type, input.type));
+      }
+
+      const rows = await ctx.db
+        .select({
+          type: schema.mappingRegistryEntry.type,
+          sourceValue: schema.mappingRegistryEntry.sourceValue,
+          targetValue: schema.mappingRegistryEntry.targetValue,
+          targetSystem: schema.mappingRegistryEntry.targetSystem,
+          scope: schema.mappingRegistryEntry.scope,
+          sourceSystem: schema.mappingRegistryEntry.sourceSystem,
+        })
+        .from(schema.mappingRegistryEntry)
+        .where(and(...conditions))
+        .orderBy(desc(schema.mappingRegistryEntry.createdAt))
+        .limit(5000);
+
+      logger.info("mapping.exported", `${rows.length} from ${ctx.workspaceId} by ${ctx.user.id}`);
+      return rows;
+    }),
+
   // bulk import. rows that collide with an existing live mapping are reported
   // back rather than silently skipped or silently overwritten, because either
   // one hides a mapping the caller believes they just imported.

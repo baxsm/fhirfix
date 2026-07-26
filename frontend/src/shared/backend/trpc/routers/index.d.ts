@@ -834,6 +834,22 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             };
             meta: object;
         }>;
+        exportRows: import("@trpc/server").TRPCQueryProcedure<{
+            input: {
+                workspaceId: string;
+                status?: "suggested" | "active" | "deprecated" | "rejected" | undefined;
+                type?: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org" | undefined;
+            };
+            output: {
+                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+                sourceValue: string;
+                targetValue: string;
+                targetSystem: string | null;
+                scope: "workspace" | "source_system";
+                sourceSystem: string | null;
+            }[];
+            meta: object;
+        }>;
         importRows: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 workspaceId: string;

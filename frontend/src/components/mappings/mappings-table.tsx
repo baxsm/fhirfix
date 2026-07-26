@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Check, Map, MoreHorizontal, Plus, Search, X } from "lucide-react";
+import { ArrowDownUp, Check, Map, MoreHorizontal, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,10 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { PanelTab, PanelTabs } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { CreateMappingDialog } from "./create-mapping-dialog";
 import { EditMappingDialog } from "./edit-mapping-dialog";
+import { ImportExportDialog } from "./import-export-dialog";
 import { MappingHistoryDialog } from "./mapping-history-dialog";
 import { type MappingRow, type MappingStatus, TYPE_LABELS } from "./types";
 
@@ -53,6 +53,7 @@ export function MappingsTable({
   const trpc = useTRPC();
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<MappingRow | null>(null);
   const [historyTarget, setHistoryTarget] = useState<MappingRow | null>(null);
 
@@ -131,6 +132,15 @@ export function MappingsTable({
                 className="h-8 w-56 pl-8 text-xs"
               />
             </div>
+            {/* import/export is an active-registry action: a file of pending
+                suggestions or tombstones is not a registry anyone would move
+                between workspaces, so the button is not offered on those tabs. */}
+            {canEdit && status === "active" && (
+              <Button variant="outline" onClick={() => setTransferOpen(true)}>
+                <ArrowDownUp />
+                Import / export
+              </Button>
+            )}
             {canEdit && (
               // default size (h-8), not sm (h-7): this button sits beside an
               // h-8 Input, and sm would leave it 4px short in the same row.
@@ -265,6 +275,12 @@ export function MappingsTable({
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={refresh}
+      />
+      <ImportExportDialog
+        workspaceId={workspaceId}
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        onImported={refresh}
       />
       <EditMappingDialog
         workspaceId={workspaceId}
