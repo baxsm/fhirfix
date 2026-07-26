@@ -15,6 +15,6 @@ export { fingerprint, stripIndices } from "./fingerprint";
 export { deriveFix } from "./fixes";
 export type { DerivedFix, FixContext } from "./fixes";
 export { profileFor, allDefaultProfiles } from "./profiles";
-export { SidecarError, CircuitOpenError, CircuitBreaker } from "./resilience";
+export { SidecarError, CircuitOpenError, CircuitBreaker, describeSidecarError } from "./resilience";
 export type { ResilienceOptions } from "./resilience";
 export type { RemediationResult, EngineFinding, MappingSuggestion, RegistryMapping, OperationOutcome, OperationOutcomeIssue, Severity, FindingCategory, FixConfidence, FixStatus, FhirVersion, InputType, } from "./types";

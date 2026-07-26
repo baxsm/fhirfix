@@ -1,6 +1,7 @@
 import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
 import { persistCompletedRun } from "@shared/db/runs";
 import {
+  describeSidecarError,
   getEngineDeps,
   runRemediation,
   SidecarError,
@@ -81,12 +82,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     result = await runRemediation({ raw, mappings, profiles, autoFix }, deps);
   } catch (err) {
     // sidecar unreachable / timed out / circuit open: fail cleanly, no debit.
-    const detail =
-      err instanceof SidecarError
-        ? `${err.sidecar}: ${err.message}${err.upstreamStatus ? ` (${err.upstreamStatus})` : ""}`
-        : err instanceof Error
-          ? err.message
-          : String(err);
+    const detail = err instanceof SidecarError ? describeSidecarError(err) : err instanceof Error ? err.message : String(err);
     await failRun(runId, detail, workspaceId);
     logger.error("run.execute", `${runId} failed: ${detail}`);
     // sidecar errors are retriable at the queue level; a bad-input parse is not.

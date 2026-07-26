@@ -14,6 +14,20 @@ export class SidecarError extends Error {
   }
 }
 
+// every SidecarError message already starts with the sidecar name (see the throw
+// sites below), so prefixing `sidecar` again produced "validator.validate:
+// validator.validate unreachable". the upstream body is the sidecar's own reason
+// for a 4xx/5xx and was being dropped entirely, which is the one detail worth
+// keeping when a run fails against a real service.
+export function describeSidecarError(err: SidecarError): string {
+  const status = err.upstreamStatus ? ` (${err.upstreamStatus})` : "";
+  const body = err.upstreamBody?.trim();
+  if (!body) return `${err.message}${status}`;
+  // the body can be a whole html error page; keep it useful, not enormous.
+  const trimmed = body.length > 500 ? `${body.slice(0, 500)}...` : body;
+  return `${err.message}${status}: ${trimmed}`;
+}
+
 export class CircuitOpenError extends SidecarError {
   constructor(sidecar: string) {
     super(`${sidecar} circuit is open (too many recent failures)`, sidecar);

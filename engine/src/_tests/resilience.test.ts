@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { CircuitBreaker, CircuitOpenError, resilientFetch, SidecarError } from "../resilience";
+import {
+  CircuitBreaker,
+  CircuitOpenError,
+  describeSidecarError,
+  resilientFetch,
+  SidecarError,
+} from "../resilience";
 
 const opts = {
   timeoutMs: 1000,
@@ -76,5 +82,43 @@ describe("resilientFetch", () => {
     const res = await resilientFetch("v", b, "http://x", { method: "GET" }, opts);
     expect(res.status).toBe(200);
     vi.unstubAllGlobals();
+  });
+});
+
+describe("describeSidecarError", () => {
+  // the message already carries the sidecar name, so the old caller-side
+  // `${err.sidecar}: ${err.message}` produced it twice.
+  it("does not repeat the sidecar name", () => {
+    const err = new SidecarError("validator.validate unreachable", "validator.validate");
+    expect(describeSidecarError(err)).toBe("validator.validate unreachable");
+  });
+
+  it("appends the upstream status when there is one", () => {
+    const err = new SidecarError("validator.validate returned 500", "validator.validate", 500);
+    expect(describeSidecarError(err)).toBe("validator.validate returned 500 (500)");
+  });
+
+  it("keeps the upstream body, which used to be discarded", () => {
+    const err = new SidecarError(
+      "validator.validate returned 422",
+      "validator.validate",
+      422,
+      "Unknown profile: http://example.org/StructureDefinition/nope",
+    );
+    expect(describeSidecarError(err)).toBe(
+      "validator.validate returned 422 (422): Unknown profile: http://example.org/StructureDefinition/nope",
+    );
+  });
+
+  it("truncates a huge body instead of storing a whole error page", () => {
+    const err = new SidecarError("v returned 500", "v", 500, "x".repeat(900));
+    const out = describeSidecarError(err);
+    expect(out.endsWith("...")).toBe(true);
+    expect(out.length).toBeLessThan(560);
+  });
+
+  it("ignores a blank body", () => {
+    const err = new SidecarError("v timed out after 30000ms", "v", undefined, "   ");
+    expect(describeSidecarError(err)).toBe("v timed out after 30000ms");
   });
 });

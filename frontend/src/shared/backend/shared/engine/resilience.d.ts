@@ -4,6 +4,7 @@ export declare class SidecarError extends Error {
     readonly upstreamBody?: string | undefined;
     constructor(message: string, sidecar: string, upstreamStatus?: number | undefined, upstreamBody?: string | undefined);
 }
+export declare function describeSidecarError(err: SidecarError): string;
 export declare class CircuitOpenError extends SidecarError {
     constructor(sidecar: string);
 }

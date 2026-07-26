@@ -23,7 +23,7 @@ export { deriveFix } from "./fixes";
 export type { DerivedFix, FixContext } from "./fixes";
 export { profileFor, allDefaultProfiles } from "./profiles";
 
-export { SidecarError, CircuitOpenError, CircuitBreaker } from "./resilience";
+export { SidecarError, CircuitOpenError, CircuitBreaker, describeSidecarError } from "./resilience";
 export type { ResilienceOptions } from "./resilience";
 
 export type {

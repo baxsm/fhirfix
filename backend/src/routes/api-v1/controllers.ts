@@ -1,6 +1,7 @@
 import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
 import { persistCompletedRun } from "@shared/db/runs";
 import {
+  describeSidecarError,
   detectInput,
   ENGINE_VERSION,
   type RemediationResult,
@@ -196,12 +197,7 @@ async function runAndPersist(
     result = await runRemediation({ raw: input, mappings, profiles, autoFix }, engineDeps);
   } catch (err) {
     // sidecar unreachable/timed out: mark failed, no debit, 503 with real detail.
-    const detail =
-      err instanceof SidecarError
-        ? `${err.sidecar}: ${err.message}${err.upstreamStatus ? ` (${err.upstreamStatus})` : ""}`
-        : err instanceof Error
-          ? err.message
-          : String(err);
+    const detail = err instanceof SidecarError ? describeSidecarError(err) : err instanceof Error ? err.message : String(err);
     await db
       .update(schema.run)
       .set({ status: "failed", errorMessage: detail.slice(0, 1000), completedAt: new Date() })
