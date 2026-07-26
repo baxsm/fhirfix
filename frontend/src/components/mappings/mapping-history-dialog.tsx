@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLastPresent } from "@/lib/use-last-present";
 import { useTRPC } from "@/trpc/client";
 import type { MappingRow, MappingVersion } from "./types";
 
@@ -34,9 +35,14 @@ export function MappingHistoryDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const trpc = useTRPC();
+
+  // `open` follows the live target; the query and the markup follow the held
+  // one. keyed on the live target the query would disable mid-exit and the whole
+  // version list would vanish while the dialog was still on screen.
+  const shown = useLastPresent(target);
   const query = useQuery({
-    ...trpc.mappings.history.queryOptions({ workspaceId, mappingId: target?.id ?? "" }),
-    enabled: !!target,
+    ...trpc.mappings.history.queryOptions({ workspaceId, mappingId: shown?.id ?? "" }),
+    enabled: !!shown,
   });
 
   const versions = (query.data ?? []) as MappingVersion[];
@@ -47,7 +53,7 @@ export function MappingHistoryDialog({
         <DialogHeader>
           <DialogTitle>Version history</DialogTitle>
           <DialogDescription>
-            Every version of <code className="font-mono text-xs">{target?.sourceValue}</code>. Edits
+            Every version of <code className="font-mono text-xs">{shown?.sourceValue}</code>. Edits
             supersede, never overwrite, so a run from any date still explains itself.
           </DialogDescription>
         </DialogHeader>

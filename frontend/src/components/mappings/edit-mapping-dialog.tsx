@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLastPresent } from "@/lib/use-last-present";
 import { useTRPC } from "@/trpc/client";
 import type { MappingRow } from "./types";
 
@@ -31,8 +32,14 @@ export function EditMappingDialog({
   const trpc = useTRPC();
   const [targetValue, setTargetValue] = useState("");
 
-  // the dialog is driven by a nullable target, so seed the field whenever a new
-  // row opens it rather than on mount.
+  // `open` follows the live target, but everything RENDERED reads the held one.
+  // closing nulls the target instantly while radix keeps the dialog mounted for
+  // its exit animation, so without this the fields blank out and the box
+  // collapses 31px before it fades - the content vanishing in place instead of
+  // the dialog animating away.
+  const shown = useLastPresent(target);
+
+  // seed the field whenever a new row opens it rather than on mount.
   useEffect(() => {
     if (target) setTargetValue(target.targetValue);
   }, [target]);
@@ -59,7 +66,7 @@ export function EditMappingDialog({
         <DialogHeader>
           <DialogTitle>Edit mapping</DialogTitle>
           <DialogDescription>
-            Saving creates v{(target?.version ?? 1) + 1}. The current version stays in history, so
+            Saving creates v{(shown?.version ?? 1) + 1}. The current version stays in history, so
             past reports still explain what they did.
           </DialogDescription>
         </DialogHeader>
@@ -81,7 +88,7 @@ export function EditMappingDialog({
           <div className="space-y-2">
             <Label>Source value</Label>
             <p className="rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs text-muted-foreground">
-              {target?.sourceValue}
+              {shown?.sourceValue}
             </p>
             <p className="text-xs text-muted-foreground">
               The source value cannot change. Add a separate mapping for a different one.
