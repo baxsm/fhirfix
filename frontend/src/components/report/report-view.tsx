@@ -137,11 +137,14 @@ export function ReportView({
   workspaceId,
   runId,
   workspace,
+  runMissing,
 }: {
   workspaceId: string;
   runId: string;
   // the slug, for links out of here. the id above is not routable.
   workspace?: string;
+  // the server already resolved this run and found nothing.
+  runMissing?: boolean;
 }) {
   const trpc = useTRPC();
   const client = useTRPCClient();
@@ -226,7 +229,7 @@ export function ReportView({
         icon={XCircle}
         tone="error"
         title="Could not load this report"
-        body={query.error?.message ?? "Something went wrong."}
+        body="The report could not be loaded. Check your connection and try again."
         action={
           <Button variant="outline" onClick={() => query.refetch()}>
             Retry
@@ -236,7 +239,27 @@ export function ReportView({
     );
   }
 
-  if (!run || (query.isLoading && !data)) {
+  // a run id that does not resolve used to sit on the skeleton forever: the
+  // server prefetch swallowed its own failure and dehydrated a PENDING query,
+  // so isError stayed false, data stayed undefined, and the client never
+  // refetched. the server now tells us outright, before any of that.
+  if (runMissing || (!run && !query.isPending && !query.isFetching)) {
+    return (
+      <TerminalState
+        icon={XCircle}
+        tone="error"
+        title="Run not found"
+        body="This run does not exist, or it belongs to a different workspace."
+        action={
+          <Button asChild variant="outline">
+            <Link href={workspace ? `/app/${workspace}/runs` : "/app"}>Back to all runs</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
+  if (!run) {
     return <ReportSkeleton />;
   }
 

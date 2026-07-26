@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -31,9 +32,22 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
   });
 
   if (query.isPending) return <Skeleton className="h-24 w-full" />;
+  // a failed load gets a way out, like the ledger on this same page does. a
+  // sentence with no action reads as a permanent state rather than a retryable
+  // one, and these two panels sitting side by side made the difference obvious.
   if (query.isError)
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">Could not load invoices.</p>
+      <div className="flex flex-col items-center gap-2 py-8 text-center">
+        <p className="text-sm text-muted-foreground">Could not load invoices.</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => query.refetch()}
+          disabled={query.isFetching}
+        >
+          Retry
+        </Button>
+      </div>
     );
   if (query.data.length === 0)
     return (

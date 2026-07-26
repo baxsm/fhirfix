@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,30 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
   const stats = useQuery(trpc.developers.requestLogs.stats.queryOptions({ workspaceId }));
 
   if (stats.isPending) return <Skeleton className="h-[92px] w-full rounded-lg" />;
-  if (stats.isError || !stats.data) return null;
+  // this used to `return null`, which deleted the whole strip on a failed
+  // fetch - the page then looked like it was designed without these numbers
+  // rather than like something had broken.
+  if (stats.isError || !stats.data) {
+    return (
+      <section className="raised overflow-hidden rounded-lg border bg-card">
+        <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center">
+          <TriangleAlert className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <p className="min-w-0 flex-1 text-sm text-muted-foreground">
+            Could not load request stats.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => stats.refetch()}
+            disabled={stats.isFetching}
+          >
+            Retry
+          </Button>
+        </div>
+      </section>
+    );
+  }
 
   const { total, errors, p95Ms, topPaths, windowHours } = stats.data;
   const errorRate = total > 0 ? (errors / total) * 100 : 0;

@@ -10,10 +10,13 @@ export function RunReport({
   workspace,
   workspaceId: serverWorkspaceId,
   runId,
+  runMissing,
 }: {
   workspace: string;
   workspaceId?: string;
   runId: string;
+  // the server already tried to fetch this run and could not.
+  runMissing?: boolean;
 }) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
@@ -34,7 +37,12 @@ export function RunReport({
       {/* no grey block while the workspace resolves - the server already knows
           it, and on a client navigation the org list is in cache by now. */}
       {workspaceId ? (
-        <ReportView workspaceId={workspaceId} runId={runId} workspace={workspace} />
+        <ReportView
+          workspaceId={workspaceId}
+          runId={runId}
+          workspace={workspace}
+          runMissing={runMissing}
+        />
       ) : null}
     </PageContainer>
   );
