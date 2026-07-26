@@ -92,7 +92,7 @@ export declare const notificationLog: import("drizzle-orm/pg-core").PgTableWithC
             tableName: "notification_log";
             dataType: "string";
             columnType: "PgText";
-            data: "failed" | "sent" | "bounced";
+            data: "bounced" | "failed" | "sent";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -158,7 +158,7 @@ export declare const notificationLog: import("drizzle-orm/pg-core").PgTableWithC
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type NotificationLog = typeof notificationLog.$inferSelect;
 export type NewNotificationLog = typeof notificationLog.$inferInsert;

@@ -19,7 +19,12 @@ import { Label } from "@/components/ui/label";
 import { useTRPC } from "@/trpc/client";
 import { SecretReveal } from "./secret-reveal";
 
-type WebhookEvent = "run.completed" | "run.failed" | "batch.completed" | "credits.low";
+type WebhookEvent =
+  | "run.completed"
+  | "run.failed"
+  | "batch.completed"
+  | "credits.low"
+  | "drift.detected";
 
 // the events an endpoint can subscribe to. mirrors WEBHOOK_EVENTS in the router.
 const EVENTS: { id: WebhookEvent; hint: string }[] = [
@@ -27,6 +32,7 @@ const EVENTS: { id: WebhookEvent; hint: string }[] = [
   { id: "run.failed", hint: "A run errored out" },
   { id: "batch.completed", hint: "A batch of runs finished" },
   { id: "credits.low", hint: "Balance dropped below your alert threshold" },
+  { id: "drift.detected", hint: "A scheduled check found a regression" },
 ];
 
 const DEFAULT_EVENTS: WebhookEvent[] = ["run.completed", "run.failed"];

@@ -15,7 +15,13 @@ import { router, workspaceProcedure } from "../trpc";
 const KEY_SCOPES = ["validate", "convert", "fix", "runs", "mappings"] as const;
 
 // the events a webhook endpoint can subscribe to (phase 5 subset of the enum).
-const WEBHOOK_EVENTS = ["run.completed", "run.failed", "batch.completed", "credits.low"] as const;
+const WEBHOOK_EVENTS = [
+  "run.completed",
+  "run.failed",
+  "batch.completed",
+  "credits.low",
+  "drift.detected",
+] as const;
 
 function requireKeyPermission(role: string, action: "create" | "revoke") {
   if (!hasPermission(role as never, "apiKey", action)) {

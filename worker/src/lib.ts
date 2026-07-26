@@ -15,6 +15,12 @@ const nano = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 20);
 export function findingId(): string {
   return `fnd_${nano()}`;
 }
+export function runId(): string {
+  return `run_${nano()}`;
+}
+export function driftAlertId(): string {
+  return `drf_${nano()}`;
+}
 export function mappingId(): string {
   return `map_${nano()}`;
 }

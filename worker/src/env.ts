@@ -26,6 +26,19 @@ const base = createEnv({
     // decrypts webhook signing secrets for outbound delivery. must match the
     // backend's value (which encrypts them). dev default matches backend's.
     WEBHOOK_ENCRYPTION_KEY: z.string().min(32).default("dev-webhook-enc-key-change-me-32byte!"),
+
+    // drift alert email delivery. mirrors the backend's values so a worker and a
+    // backend configured from the same env send from the same address.
+    ZEPTOMAIL_TOKEN: z.string().default(""),
+    ZEPTOMAIL_FROM_ADDRESS: z.email().default("no-reply@fhirfix.dev"),
+    ZEPTOMAIL_FROM_NAME: z.string().default("FHIRfix"),
+    EMAIL_TEST_MODE: z
+      .string()
+      .default("true")
+      .transform((v) => v === "true"),
+
+    // deep links in alert emails point back at the dashboard.
+    APP_URL: z.url().default("http://localhost:3000"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

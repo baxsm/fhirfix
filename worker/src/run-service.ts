@@ -8,6 +8,7 @@ import {
   type RemediationResult,
 } from "@shared/engine";
 import { and, eq } from "drizzle-orm";
+import { evaluateDrift } from "./drift-service";
 import { env } from "./env";
 import { blobKey, blobStore, db, logger, mappingId, schema } from "./lib";
 import { dispatchWebhook } from "./queues";
@@ -109,6 +110,12 @@ export async function executeRun(job: RemediationJob): Promise<void> {
   logger.info(
     "run.execute",
     `${runId} completed: ${result.findingsTotal} findings, score ${result.conformanceScoreBefore}->${result.conformanceScoreAfter}, charged ${chargeMicro} micro (balance ${balanceAfter})`,
+  );
+
+  // a scheduled run is compared against its check's baseline here, after the run
+  // is already durable. a delivery problem can never leave the run unscored.
+  await evaluateDrift({ runId, workspaceId }).catch((err) =>
+    logger.error("drift.evaluate", `${runId}: ${err instanceof Error ? err.message : String(err)}`),
   );
 
   // notify subscribers. enqueued (not awaited-critical) so a webhook problem never

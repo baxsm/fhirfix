@@ -4,6 +4,7 @@ import { billingRouter } from "./billing";
 import { developersRouter } from "./developers";
 import { mappingsRouter } from "./mappings";
 import { memberRouter } from "./member";
+import { monitoringRouter } from "./monitoring";
 import { runRouter } from "./run";
 import { workspaceRouter } from "./workspace";
 
@@ -16,6 +17,7 @@ export const appRouter = router({
   member: memberRouter,
   run: runRouter,
   mappings: mappingsRouter,
+  monitoring: monitoringRouter,
   billing: billingRouter,
   developers: developersRouter,
 });

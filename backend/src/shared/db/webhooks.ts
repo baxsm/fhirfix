@@ -9,13 +9,14 @@ import * as schema from "./schema/index";
 // free of the encryption key). per-attempt records reuse notification_log
 // (channel: "webhook"); the endpoint's lastDeliveryStatus holds the latest result.
 
-// the canonical event enum. phase 5 wires the run + credits subset; phase 6/7 add
-// drift.detected / conformance.completed.
+// the canonical event enum. phase 5 wired the run + credits subset; phase 6 adds
+// drift.detected. conformance.completed lands with phase 7.
 export type WebhookEvent =
   | "run.completed"
   | "run.failed"
   | "batch.completed"
-  | "credits.low";
+  | "credits.low"
+  | "drift.detected";
 
 // enabled endpoints in a workspace subscribed to a given event.
 export async function listEndpointsForEvent(db: Db, workspaceId: string, event: WebhookEvent) {

@@ -22,6 +22,7 @@
     "ioredis": "5.11.1",
     "nanoid": "6.0.0",
     "postgres": "3.4.9",
+    "zeptomail": "8.0.1",
     "zod": "4.4.3"
   },
   "devDependencies": {

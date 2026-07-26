@@ -10,6 +10,7 @@
     "./schema": "./schema/index.ts",
     "./blob": "./blob.ts",
     "./credits": "./credits.ts",
+    "./drift": "./drift.ts",
     "./ledger": "./ledger.ts",
     "./notifications": "./notifications.ts",
     "./runs": "./runs.ts",

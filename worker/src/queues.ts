@@ -8,8 +8,13 @@ const connection = { url: env.REDIS_URL };
 
 export const webhookQueue = new Queue("webhook", { connection });
 
+// the scheduler fires into its own queue, and each firing PRODUCES a remediation
+// job, so the worker needs both queues as a producer here.
+export const scheduleQueue = new Queue("schedule", { connection });
+export const remediationQueue = new Queue("remediation", { connection });
+
 export interface WebhookJob {
-  event: "run.completed" | "run.failed" | "batch.completed" | "credits.low";
+  event: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected";
   workspaceId: string;
   data: Record<string, unknown>;
 }
