@@ -157,7 +157,11 @@ export function MappingsTable({
         })}
       </PanelTabs>
 
-      <div className="raised overflow-hidden rounded-md border">
+      {/* bg-card is load-bearing: `raised` only supplies a shadow, so without a
+          surface the panel and every row measured rgba(0,0,0,0) and the canvas
+          showed straight through. the border was the only thing separating the
+          table from the page. */}
+      <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <ListError onRetry={() => query.refetch()} />
         ) : query.isPending ? (

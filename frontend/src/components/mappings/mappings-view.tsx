@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
@@ -25,9 +25,11 @@ const FILTERS: { key: MappingStatus; label: string }[] = [
 export function MappingsView({
   workspace,
   workspaceId: serverWorkspaceId,
+  initialStatus = "active",
 }: {
   workspace: string;
   workspaceId?: string;
+  initialStatus?: MappingStatus;
 }) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
@@ -49,20 +51,12 @@ export function MappingsView({
   });
   const counts = countsQuery.data;
 
-  // land on suggestions when any are pending: that is the only view with work
-  // waiting in it. otherwise the active registry is the useful default.
-  //
-  // resolved once, when counts first arrive, and never again. deriving it on
-  // every render instead means approving the last suggestion drops the count to
-  // zero and yanks the user to a different tab mid-task.
-  const [status, setStatus] = useState<MappingStatus | null>(null);
-  const [defaulted, setDefaulted] = useState(false);
-  useEffect(() => {
-    if (defaulted || !counts) return;
-    setStatus(counts.suggested > 0 ? "suggested" : "active");
-    setDefaulted(true);
-  }, [counts, defaulted]);
-  const effectiveStatus: MappingStatus = status ?? "active";
+  // the server already resolved which tab has work waiting in it (see page.tsx),
+  // so this is just state from here on. it used to start null, render "active",
+  // then flip to "suggested" in an effect once counts arrived - a visible switch
+  // on every load. it stays put afterwards: approving the last suggestion drops
+  // that count to zero, and re-deriving would yank the user away mid-task.
+  const [status, setStatus] = useState<MappingStatus>(initialStatus);
 
   return (
     <PageContainer width="full">
@@ -71,16 +65,21 @@ export function MappingsView({
         description={`The versioned registry of assigning-authority and code mappings that power auto-fixes in ${active?.name ?? "this workspace"}.`}
       />
 
-      {/* isPending, not isLoading: a background refetch must not unmount the
-          table, or every mutation resets the user's filter and search. */}
-      {wsQuery.isError ? (
+      {/* gated on workspaceId ONLY. it arrives as a prop from the server, so on
+          a normal load the table renders on the first paint with its prefetched
+          rows already in place.
+          it used to also wait on wsQuery, which supplies nothing but the ROLE -
+          and the role only decides whether a few buttons render. blocking the
+          whole table on it meant a full-height skeleton flashed over data that
+          was already in the html. */}
+      {wsQuery.isError && !workspaceId ? (
         <ViewError onRetry={() => wsQuery.refetch()} />
-      ) : wsQuery.isPending || !workspaceId ? (
+      ) : !workspaceId ? (
         <Skeleton className="h-96 w-full rounded-xl" />
       ) : (
         <MappingsTable
           workspaceId={workspaceId}
-          status={effectiveStatus}
+          status={status}
           onStatusChange={setStatus}
           filters={FILTERS}
           counts={counts}

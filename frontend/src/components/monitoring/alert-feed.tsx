@@ -53,7 +53,7 @@ export function AlertFeed({
         </FilterPill>
       </div>
 
-      <div className="raised overflow-hidden rounded-md border">
+      <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <FeedError onRetry={() => query.refetch()} />
         ) : query.isPending ? (

@@ -88,7 +88,7 @@ export function ChecksTable({
         )}
       </div>
 
-      <div className="raised overflow-hidden rounded-md border">
+      <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <ListError onRetry={() => query.refetch()} />
         ) : query.isPending ? (
