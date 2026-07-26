@@ -23,8 +23,7 @@ import { useListOrganizations } from "@/lib/auth-client";
 import { useDelayedFlag } from "@/lib/use-delayed-flag";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
-
-type Status = "queued" | "running" | "completed" | "failed";
+import { isCancelled, isRealFailure, type Status } from "./run-status";
 
 interface RunRow {
   id: string;
@@ -35,6 +34,7 @@ interface RunRow {
   findingsTotal: number;
   findingsAutoFixable: number;
   createdAt: string | Date;
+  errorMessage: string | null;
 }
 
 // completed is deliberately neutral. it is the expected outcome, so it gets no
@@ -84,15 +84,12 @@ export function RunsView({
   });
 
   const all = useMemo(() => (query.data ?? []) as RunRow[], [query.data]);
-  const filtered = useMemo(
-    () => (failedOnly ? all.filter((r) => r.status === "failed") : all),
-    [all, failedOnly],
-  );
+  const filtered = useMemo(() => (failedOnly ? all.filter(isRealFailure) : all), [all, failedOnly]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pageCount - 1);
   const runs = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
-  const failedCount = all.filter((r) => r.status === "failed").length;
+  const failedCount = all.filter(isRealFailure).length;
 
   const settling = query.isPending || !workspaceId;
   const loading = useDelayedFlag(settling);
@@ -192,7 +189,7 @@ export function RunsView({
                           // a failed row is marked by its status text and a
                           // faint tint. no coloured bar down the left edge -
                           // the status column already says "failed" in red.
-                          r.status === "failed" && "bg-destructive/[0.03]",
+                          isRealFailure(r) && "bg-destructive/[0.03]",
                         )}
                       >
                         <TableCell>
@@ -204,7 +201,11 @@ export function RunsView({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <StatusDot tone={STATUS_TONE[r.status]}>{r.status}</StatusDot>
+                          {isCancelled(r) ? (
+                            <StatusDot tone="neutral">cancelled</StatusDot>
+                          ) : (
+                            <StatusDot tone={STATUS_TONE[r.status]}>{r.status}</StatusDot>
+                          )}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs tabular-nums">
                           {r.findingsTotal === 0 ? (
