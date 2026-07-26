@@ -4,6 +4,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   CheckCircle2,
+  ChevronRight,
+  CircleSlash,
   Download,
   FileWarning,
   Loader2,
@@ -37,6 +39,7 @@ import {
 } from "./facet-sidebar";
 import { FindingDetail } from "./finding-detail";
 import type { FindingRow, Severity } from "./report-types";
+import { describeFailure } from "./run-failure";
 import { ShareDialog } from "./share-dialog";
 
 const SEVERITY_LABEL: Record<Severity, string> = {
@@ -116,6 +119,8 @@ interface RunData {
     inputType: string;
     errorMessage: string | null;
     autoFixApplied: boolean;
+    createdAt: string | Date;
+    completedAt: string | Date | null;
   };
   findings: FindingRow[];
   corrected: string | null;
@@ -128,7 +133,16 @@ interface RunData {
   } | null;
 }
 
-export function ReportView({ workspaceId, runId }: { workspaceId: string; runId: string }) {
+export function ReportView({
+  workspaceId,
+  runId,
+  workspace,
+}: {
+  workspaceId: string;
+  runId: string;
+  // the slug, for links out of here. the id above is not routable.
+  workspace?: string;
+}) {
   const trpc = useTRPC();
   const client = useTRPCClient();
 
@@ -238,19 +252,7 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
   }
 
   if (run.status === "failed") {
-    return (
-      <TerminalState
-        icon={FileWarning}
-        tone="error"
-        title="Check failed"
-        body={run.errorMessage ?? "The run did not complete."}
-        action={
-          <Button asChild variant="outline">
-            <Link href="new">Run another check</Link>
-          </Button>
-        }
-      />
-    );
+    return <FailedRun run={run} workspace={workspace} />;
   }
 
   // completed.
@@ -467,6 +469,119 @@ export function ReportView({ workspaceId, runId }: { workspaceId: string; runId:
       />
     </div>
   );
+}
+
+/**
+ * a failed run is still a run.
+ *
+ * this used to be a 364px centred card on a 1454px page carrying a raw java
+ * connection error and nothing else - no run id, no input type, no timestamp,
+ * so the one screen where you most need to know WHICH run broke was the only
+ * one that would not tell you. it kept the same header as a completed report,
+ * because the identity of the run does not depend on whether it succeeded.
+ */
+function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string }) {
+  const [showRaw, setShowRaw] = useState(false);
+  const failure = describeFailure(run.errorMessage);
+  const cancelled = failure.kind === "cancelled";
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="truncate font-mono text-sm">{run.id}</h1>
+            <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+              {run.inputType}
+            </span>
+          </div>
+          {/* deliberately NOT "0 resources scanned": a run that failed before
+              the validator ran has resourceCount 0, and reporting that as a
+              result would state something false about the file. */}
+          <p className="mt-1 text-sm text-muted-foreground">
+            Started {fmtRunTime(run.createdAt)}
+            {run.completedAt
+              ? ` · ${cancelled ? "cancelled" : "failed"} ${fmtRunTime(run.completedAt)}`
+              : null}
+          </p>
+        </div>
+        <div className="border-y py-2.5">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 text-xs",
+              cancelled ? "text-muted-foreground" : "text-destructive",
+            )}
+          >
+            <span
+              className={cn(
+                "size-1.5 rounded-full",
+                cancelled ? "bg-muted-foreground/50" : "bg-destructive",
+              )}
+            />
+            {cancelled ? "Cancelled" : "Failed"}
+          </span>
+        </div>
+      </header>
+
+      <div
+        className={cn(
+          "raised rounded-lg border px-4 py-4",
+          cancelled ? "bg-card" : "border-destructive/25 bg-destructive/[0.04]",
+        )}
+      >
+        <div className="flex gap-3">
+          {cancelled ? (
+            <CircleSlash className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <FileWarning className="mt-0.5 size-4 shrink-0 text-destructive" />
+          )}
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-sm font-medium leading-tight">{failure.title}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{failure.cause}</p>
+            {failure.next && (
+              <p className="text-sm leading-relaxed text-muted-foreground">{failure.next}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2 pl-7">
+          {workspace && (
+            <Button asChild size="sm" variant={failure.retryable ? "default" : "outline"}>
+              <Link href={`/app/${workspace}/check`}>
+                {failure.retryable ? "Run the check again" : "Start a new check"}
+              </Link>
+            </Button>
+          )}
+          {/* the raw string is never thrown away - it is the only thing that
+              identifies the fault to support. it is just not the headline. */}
+          {run.errorMessage && (
+            <Button size="sm" variant="ghost" onClick={() => setShowRaw((v) => !v)}>
+              <ChevronRight
+                className={cn("size-3.5 transition-transform", showRaw && "rotate-90")}
+              />
+              Technical details
+            </Button>
+          )}
+        </div>
+
+        {showRaw && run.errorMessage && (
+          <pre className="mt-3 ml-7 overflow-x-auto rounded-md border bg-muted/50 px-3 py-2 font-mono text-xs leading-relaxed text-muted-foreground">
+            {run.errorMessage}
+          </pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function fmtRunTime(d: string | Date): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function TerminalState({

@@ -33,7 +33,9 @@ export function RunReport({
       </Link>
       {/* no grey block while the workspace resolves - the server already knows
           it, and on a client navigation the org list is in cache by now. */}
-      {workspaceId ? <ReportView workspaceId={workspaceId} runId={runId} /> : null}
+      {workspaceId ? (
+        <ReportView workspaceId={workspaceId} runId={runId} workspace={workspace} />
+      ) : null}
     </PageContainer>
   );
 }
