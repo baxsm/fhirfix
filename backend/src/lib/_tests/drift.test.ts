@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { detectDrift, scoreToPassRate, type DriftSnapshot } from "@shared/db/drift";
+import { type DriftSnapshot, detectDrift, scoreToPassRate } from "@shared/db/drift";
 
 function snapshot(over: Partial<DriftSnapshot> = {}): DriftSnapshot {
   return {
@@ -227,7 +227,9 @@ describe("ig version change", () => {
   test("a newly added package is not a version change", () => {
     expect(
       detectDrift({
-        current: snapshot({ igVersions: { "hl7.fhir.us.core": "6.1.0", "hl7.fhir.us.davinci-pas": "2.0.1" } }),
+        current: snapshot({
+          igVersions: { "hl7.fhir.us.core": "6.1.0", "hl7.fhir.us.davinci-pas": "2.0.1" },
+        }),
         previous: snapshot({ runId: "run_prev", igVersions: { "hl7.fhir.us.core": "6.1.0" } }),
         baseline: null,
       }),

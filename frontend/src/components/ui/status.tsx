@@ -30,7 +30,11 @@ const TONE: Record<StatusTone, { dot: string; text: string; icon: LucideIcon; ri
   },
   warning: {
     dot: "bg-warning",
-    text: "text-warning-foreground",
+    // text-warning, not text-warning-foreground. the -foreground token is
+    // near-white (oklch 0.985) because it is meant to sit ON a filled warning
+    // background; as text on the near-white canvas it measured 1:1 contrast and
+    // the label was invisible. danger and info already use their base token.
+    text: "text-warning",
     icon: AlertTriangle,
     ring: "border-warning/40",
   },

@@ -1,4 +1,4 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, gte, ne } from "drizzle-orm";
 import type { Db } from "./client";
 import * as schema from "./schema/index";
 
@@ -165,6 +165,8 @@ export async function loadSnapshot(db: Db, runId: string): Promise<DriftSnapshot
   const [run] = await db
     .select({
       id: schema.run.id,
+      workspaceId: schema.run.workspaceId,
+      createdAt: schema.run.createdAt,
       conformanceScoreAfter: schema.run.conformanceScoreAfter,
       igVersions: schema.run.igVersions,
     })
@@ -179,8 +181,6 @@ export async function loadSnapshot(db: Db, runId: string): Promise<DriftSnapshot
       severity: schema.finding.severity,
       dedupFingerprint: schema.finding.dedupFingerprint,
       plainMessage: schema.finding.plainMessage,
-      category: schema.finding.category,
-      ruleSource: schema.finding.ruleSource,
     })
     .from(schema.finding)
     .where(eq(schema.finding.runId, runId));
@@ -197,11 +197,39 @@ export async function loadSnapshot(db: Db, runId: string): Promise<DriftSnapshot
     errorCount: errors.length,
     errorFingerprints: unique(errors.map((f) => f.dedupFingerprint)),
     fingerprintLabels,
-    unmappedAuthorities: unique(
-      findings.filter((f) => f.category === "terminology").map((f) => f.ruleSource),
-    ),
+    unmappedAuthorities: await loadUnmappedAuthorities(db, run.workspaceId, run.createdAt),
     igVersions: run.igVersions ?? {},
   };
+}
+
+// the authorities the engine could not map are the suggestions its auto-learn
+// loop wrote for THIS run, not a field on the findings.
+//
+// an earlier version read `ruleSource` off terminology findings, which is a
+// validator rule id ("Terminology_TX_NoValid_16"), not an authority - so it
+// named a rule as if it were a system and re-fired on every single run. the
+// suggestion rows carry the real source value and only appear once, because the
+// auto-learn loop refuses to re-suggest something already in the registry.
+async function loadUnmappedAuthorities(
+  db: Db,
+  workspaceId: string,
+  runCreatedAt: Date,
+): Promise<string[]> {
+  // suggestions written while this run was executing. the window starts slightly
+  // before the run row to absorb clock skew between the insert and the engine.
+  const since = new Date(runCreatedAt.getTime() - 5_000);
+  const rows = await db
+    .select({ sourceValue: schema.mappingRegistryEntry.sourceValue })
+    .from(schema.mappingRegistryEntry)
+    .where(
+      and(
+        eq(schema.mappingRegistryEntry.workspaceId, workspaceId),
+        eq(schema.mappingRegistryEntry.status, "suggested"),
+        eq(schema.mappingRegistryEntry.createdBy, "system"),
+        gte(schema.mappingRegistryEntry.createdAt, since),
+      ),
+    );
+  return unique(rows.map((r) => r.sourceValue));
 }
 
 // the previous completed run of the same scheduled check, excluding the run being

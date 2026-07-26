@@ -8,8 +8,8 @@ import {
   microFromCents,
   nextAlertThreshold,
   PRICING,
-  priceForRun,
   PURCHASABLE_CENTS,
+  priceForRun,
 } from "@shared/db/credits";
 
 describe("credit conversions", () => {

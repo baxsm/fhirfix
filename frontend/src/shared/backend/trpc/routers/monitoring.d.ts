@@ -12,8 +12,8 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -36,6 +36,7 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
             workspaceId: string;
         };
         output: {
+            scheduleLabel: string;
             id: string;
             name: string;
             scheduleCron: string;
@@ -53,7 +54,6 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
             lastError: string | null;
             createdAt: Date;
             channelTypes: string[];
-            scheduleLabel: string;
         }[];
         meta: object;
     }>;
@@ -84,6 +84,7 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
     updateCheck: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             workspaceId: string;
+            id: string;
             name: string;
             scheduleCron: string;
             targetType: "endpoint" | "source_url" | "upload_folder";
@@ -99,7 +100,6 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
                 target: string;
             }[] | undefined;
             enabled?: boolean | undefined;
-            id: string;
         };
         output: {
             id: string;
@@ -141,7 +141,7 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             workspaceId: string;
             scheduledCheckId?: string | undefined;
-            type?: "ig_version_change" | "new_error_class" | "pass_rate_drop" | "unmapped_authority" | undefined;
+            type?: "pass_rate_drop" | "new_error_class" | "unmapped_authority" | "ig_version_change" | undefined;
             unacknowledgedOnly?: boolean | undefined;
         };
         output: {
@@ -149,8 +149,8 @@ export declare const monitoringRouter: import("@trpc/server").TRPCBuiltRouter<{
             scheduledCheckId: string;
             checkName: string | null;
             runId: string | null;
-            type: "ig_version_change" | "new_error_class" | "pass_rate_drop" | "unmapped_authority";
-            severity: "error" | "info" | "warning";
+            type: "pass_rate_drop" | "new_error_class" | "unmapped_authority" | "ig_version_change";
+            severity: "error" | "warning" | "info";
             metricBefore: string | null;
             metricAfter: string | null;
             detail: string | null;

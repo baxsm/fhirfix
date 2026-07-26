@@ -11,6 +11,7 @@ const statement = {
   mapping: ["view", "create", "approve", "deprecate"],
   apiKey: ["view", "create", "revoke"],
   audit: ["view"],
+  monitoring: ["view", "manage"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -22,6 +23,7 @@ export const auditor = ac.newRole({
   mapping: ["view"],
   apiKey: ["view"],
   audit: ["view"],
+  monitoring: ["view"],
 });
 
 export const billing = ac.newRole({
@@ -30,6 +32,7 @@ export const billing = ac.newRole({
   run: ["create", "view"],
   mapping: ["view"],
   apiKey: ["view"],
+  monitoring: ["view"],
 });
 
 export const member = ac.newRole({
@@ -39,6 +42,7 @@ export const member = ac.newRole({
   mapping: ["view", "create", "approve", "deprecate"],
   apiKey: ["view", "create", "revoke"],
   audit: ["view"],
+  monitoring: ["view", "manage"],
 });
 
 export const admin = ac.newRole({
@@ -49,6 +53,7 @@ export const admin = ac.newRole({
   mapping: ["view", "create", "approve", "deprecate"],
   apiKey: ["view", "create", "revoke"],
   audit: ["view"],
+  monitoring: ["view", "manage"],
 });
 
 export const owner = ac.newRole({
@@ -59,6 +64,7 @@ export const owner = ac.newRole({
   mapping: ["view", "create", "approve", "deprecate"],
   apiKey: ["view", "create", "revoke"],
   audit: ["view"],
+  monitoring: ["view", "manage"],
 });
 
 export const roles = { owner, admin, member, billing, auditor };

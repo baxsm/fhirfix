@@ -1,19 +1,29 @@
-import { Radar } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { MonitoringView } from "@/components/monitoring/monitoring-view";
+import { resolveWorkspace } from "@/trpc/resolve-workspace";
+import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 
-export default async function Page({ params }: { params: Promise<{ workspace: string }> }) {
+export default async function MonitoringPage({
+  params,
+}: {
+  params: Promise<{ workspace: string }>;
+}) {
   const { workspace } = await params;
+  const workspaceId = await resolveWorkspace(workspace);
+
+  if (workspaceId) {
+    prefetch(trpcServer.workspace.get.queryOptions({ workspaceId }));
+    prefetch(trpcServer.monitoring.listChecks.queryOptions({ workspaceId }));
+    prefetch(trpcServer.monitoring.alertCounts.queryOptions({ workspaceId }));
+    // the page opens on Checks, but the alert count sits on the other tab, so
+    // the feed's default query is prefetched too and switching is instant.
+    prefetch(
+      trpcServer.monitoring.listAlerts.queryOptions({ workspaceId, unacknowledgedOnly: true }),
+    );
+  }
+
   return (
-    <PhasePlaceholder
-      title="Scheduled checks"
-      icon={Radar}
-      description="Scheduled checks and drift alerts across your endpoints and source systems."
-      whatItWillDo="Check your endpoints on a schedule and alert you when conformance drops, so a regression is caught before an audit finds it."
-      meanwhile={{
-        label: "View runs",
-        href: `/app/${workspace}/runs`,
-        body: "Every check you run is already scored and kept, so you can compare results over time.",
-      }}
-    />
+    <HydrateClient>
+      <MonitoringView workspace={workspace} workspaceId={workspaceId} />
+    </HydrateClient>
   );
 }

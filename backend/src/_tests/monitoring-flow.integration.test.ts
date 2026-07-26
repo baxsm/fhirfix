@@ -51,6 +51,9 @@ afterAll(async () => {
   for (const c of checks) {
     await scheduleQueue.removeJobScheduler(schedulerId(c.id)).catch(() => {});
   }
+  await db
+    .delete(schema.mappingRegistryEntry)
+    .where(eq(schema.mappingRegistryEntry.workspaceId, workspaceId));
   await db.delete(schema.driftAlert).where(eq(schema.driftAlert.workspaceId, workspaceId));
   await db.delete(schema.scheduledCheck).where(eq(schema.scheduledCheck.workspaceId, workspaceId));
   await db.delete(schema.finding).where(eq(schema.finding.workspaceId, workspaceId));
@@ -425,6 +428,40 @@ describe("drift detection against real data", () => {
       baseline: { minPassRate: 90 },
     });
     expect(detected).toHaveLength(0);
+  });
+
+  test("unmapped authorities come from auto-learned suggestions, not rule ids", async () => {
+    const caller = await callerFor();
+    const { id: checkId } = await caller.monitoring.createCheck({
+      workspaceId,
+      ...baseCheck,
+      name: "Authority check",
+      baselineConfig: null,
+    });
+
+    const runId = await seedRun({
+      scheduledCheckId: checkId,
+      score: 900,
+      // a terminology finding whose ruleSource is a validator rule id. an earlier
+      // version read this field and reported the rule as if it were an authority.
+      errors: [{ fingerprint: "fp_term", message: "Unknown code system." }],
+      createdAt: new Date(),
+    });
+
+    // the real authority, as the engine's auto-learn loop records it.
+    await db.insert(schema.mappingRegistryEntry).values({
+      id: createId("mapping"),
+      workspaceId,
+      type: "authority_to_system",
+      sourceValue: "DRNBR",
+      targetValue: "http://example.org/fhir/sid/mrn",
+      status: "suggested",
+      createdBy: "system",
+    });
+
+    const snapshot = await loadSnapshot(db, runId);
+    expect(snapshot?.unmappedAuthorities).toEqual(["DRNBR"]);
+    expect(snapshot?.unmappedAuthorities).not.toContain("us-core");
   });
 
   test("a run from another check is never used as the previous run", async () => {
