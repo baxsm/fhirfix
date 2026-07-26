@@ -23,8 +23,13 @@ function Checkbox({
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer size-4 shrink-0 cursor-pointer rounded-[4px] border border-input bg-background shadow-[inset_0_1px_0_0_oklch(1_0_0/0.6)] outline-none transition-colors",
-        "hover:border-foreground/30",
+        // border-foreground/25, not border-input. --input is L=95.4 and a dialog
+        // is L=99.2, so a 1px unchecked box had under 4 points of separation and
+        // was invisible - fainter than --border (L=92.3), which only draws
+        // passive dividers. a control you have to find and click cannot be
+        // quieter than a rule that separates two paragraphs.
+        "peer size-4 shrink-0 cursor-pointer rounded-[4px] border border-foreground/25 bg-background shadow-[inset_0_1px_0_0_oklch(1_0_0/0.6)] outline-none transition-colors",
+        "hover:border-foreground/50",
         "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
         "disabled:cursor-not-allowed disabled:opacity-50",
         "data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",

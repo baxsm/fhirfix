@@ -11,8 +11,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined | undefined;
-            userAgent?: string | null | undefined | undefined;
+            ipAddress?: string | null | undefined;
+            userAgent?: string | null | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -22,7 +22,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined | undefined;
+            image?: string | null | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -43,8 +43,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -54,7 +54,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -84,8 +84,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -95,7 +95,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -170,8 +170,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -181,7 +181,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -196,7 +196,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 name: string;
                 slug: string;
                 createdAt: Date;
-                logo?: string | null | undefined | undefined;
+                logo?: string | null | undefined;
                 metadata?: any;
             }[];
             meta: object;
@@ -211,7 +211,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 name: string;
                 slug: string;
                 createdAt: Date;
-                logo?: string | null | undefined | undefined;
+                logo?: string | null | undefined;
                 metadata?: any;
             } & {
                 metadata: any;
@@ -234,7 +234,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     members: {
                         id: string;
                         organizationId: string;
-                        role: "member" | "billing" | "owner" | "admin" | "auditor";
+                        role: "admin" | "auditor" | "billing" | "member" | "owner";
                         createdAt: Date;
                         userId: string;
                         user: {
@@ -248,7 +248,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                         id: string;
                         organizationId: string;
                         email: string;
-                        role: "member" | "billing" | "owner" | "admin" | "auditor";
+                        role: "admin" | "auditor" | "billing" | "member" | "owner";
                         status: import("better-auth/plugins").InvitationStatus;
                         inviterId: string;
                         expiresAt: Date;
@@ -259,7 +259,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     name: string;
                     slug: string;
                     createdAt: Date;
-                    logo?: string | null | undefined | undefined;
+                    logo?: string | null | undefined;
                     metadata?: any;
                 }) | null;
                 settings: {
@@ -270,11 +270,11 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     redactionPolicy: "off" | "on_ingest" | "required";
                     dataRetentionDays: number;
                     baaStatus: "none" | "requested" | "signed";
-                    planTier: "free" | "team" | "premium";
+                    planTier: "free" | "premium" | "team";
                     createdAt: Date;
                     updatedAt: Date;
                 } | null;
-                role: "member" | "billing" | "owner" | "admin" | "auditor";
+                role: "admin" | "auditor" | "billing" | "member" | "owner";
             };
             meta: object;
         }>;
@@ -294,7 +294,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 redactionPolicy: "off" | "on_ingest" | "required";
                 dataRetentionDays: number;
                 baaStatus: "none" | "requested" | "signed";
-                planTier: "free" | "team" | "premium";
+                planTier: "free" | "premium" | "team";
                 createdAt: Date;
                 updatedAt: Date;
             };
@@ -323,8 +323,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -334,7 +334,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -350,7 +350,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 members: ({
                     id: string;
                     organizationId: string;
-                    role: "member" | "billing" | "owner" | "admin" | "auditor";
+                    role: "admin" | "auditor" | "billing" | "member" | "owner";
                     createdAt: Date;
                     userId: string;
                     user: {
@@ -375,13 +375,13 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 email: string;
-                role?: "member" | "billing" | "owner" | "admin" | "auditor" | undefined;
+                role?: "admin" | "auditor" | "billing" | "member" | "owner" | undefined;
             };
             output: {
                 id: string;
                 organizationId: string;
                 email: string;
-                role: "member" | "billing" | "owner" | "admin" | "auditor";
+                role: "admin" | "auditor" | "billing" | "member" | "owner";
                 status: import("better-auth/plugins").InvitationStatus;
                 inviterId: string;
                 expiresAt: Date;
@@ -390,7 +390,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 organizationId: string;
                 email: string;
-                role: "member" | "billing" | "owner" | "admin" | "auditor";
+                role: "admin" | "auditor" | "billing" | "member" | "owner";
                 status: import("better-auth/plugins").InvitationStatus;
                 inviterId: string;
                 expiresAt: Date;
@@ -402,7 +402,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 memberId: string;
-                role: "member" | "billing" | "owner" | "admin" | "auditor";
+                role: "admin" | "auditor" | "billing" | "member" | "owner";
             };
             output: {
                 id: string;
@@ -428,7 +428,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 member: {
                     id: string;
                     organizationId: string;
-                    role: "member" | "billing" | "owner" | "admin" | "auditor";
+                    role: "admin" | "auditor" | "billing" | "member" | "owner";
                     createdAt: Date;
                     userId: string;
                     user: {
@@ -455,8 +455,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -466,7 +466,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -496,17 +496,17 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 run: {
                     id: string;
                     workspaceId: string;
-                    actorType: "user" | "api_key" | "scheduled" | "system";
+                    actorType: "api_key" | "scheduled" | "system" | "user";
                     actorId: string | null;
-                    source: "scheduled" | "ui" | "api" | "ci";
-                    inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
+                    source: "api" | "ci" | "scheduled" | "ui";
+                    inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
                     fhirVersion: "R4" | "R4B" | "R5" | null;
                     profilesRequested: string[];
                     profilesApplied: string[];
                     terminologyServer: string | null;
                     engineVersion: string;
                     igVersions: Record<string, string>;
-                    status: "queued" | "running" | "completed" | "failed";
+                    status: "completed" | "failed" | "queued" | "running";
                     resourceCount: number;
                     conformanceScoreBefore: number | null;
                     conformanceScoreAfter: number | null;
@@ -528,8 +528,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     id: string;
                     runId: string;
                     workspaceId: string;
-                    severity: "error" | "warning" | "info";
-                    category: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
+                    severity: "error" | "info" | "warning";
+                    category: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
                     ruleSource: string;
                     specCitation: string;
                     resourceType: string | null;
@@ -537,8 +537,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     rawValidatorMessage: string;
                     plainMessage: string;
                     suggestedFix: string;
-                    fixConfidence: "auto" | "one_click" | "manual";
-                    fixStatus: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
+                    fixConfidence: "auto" | "manual" | "one_click";
+                    fixStatus: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
                     dismissedBy: string | null;
                     dedupFingerprint: string;
                     occurrenceCount: number;
@@ -563,17 +563,17 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             output: {
                 id: string;
                 workspaceId: string;
-                actorType: "user" | "api_key" | "scheduled" | "system";
+                actorType: "api_key" | "scheduled" | "system" | "user";
                 actorId: string | null;
-                source: "scheduled" | "ui" | "api" | "ci";
-                inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
+                source: "api" | "ci" | "scheduled" | "ui";
+                inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
                 fhirVersion: "R4" | "R4B" | "R5" | null;
                 profilesRequested: string[];
                 profilesApplied: string[];
                 terminologyServer: string | null;
                 engineVersion: string;
                 igVersions: Record<string, string>;
-                status: "queued" | "running" | "completed" | "failed";
+                status: "completed" | "failed" | "queued" | "running";
                 resourceCount: number;
                 conformanceScoreBefore: number | null;
                 conformanceScoreAfter: number | null;
@@ -691,8 +691,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -702,7 +702,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -713,19 +713,19 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
         list: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 workspaceId: string;
-                status?: "suggested" | "active" | "deprecated" | "rejected" | undefined;
-                type?: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org" | undefined;
+                status?: "active" | "deprecated" | "rejected" | "suggested" | undefined;
+                type?: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org" | undefined;
                 search?: string | undefined;
             };
             output: {
                 id: string;
-                scope: "workspace" | "source_system";
+                scope: "source_system" | "workspace";
                 sourceSystem: string | null;
-                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+                type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
                 sourceValue: string;
                 targetValue: string;
                 targetSystem: string | null;
-                status: "suggested" | "active" | "deprecated" | "rejected";
+                status: "active" | "deprecated" | "rejected" | "suggested";
                 confidence: number | null;
                 version: number;
                 supersedesId: string | null;
@@ -757,7 +757,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 version: number;
                 targetValue: string;
                 targetSystem: string | null;
-                status: "suggested" | "active" | "deprecated" | "rejected";
+                status: "active" | "deprecated" | "rejected" | "suggested";
                 supersedesId: string | null;
                 supersededById: string | null;
                 createdBy: string;
@@ -769,12 +769,12 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 workspaceId: string;
-                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+                scope?: "source_system" | "workspace" | undefined;
+                sourceSystem?: string | null | undefined;
+                type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
                 sourceValue: string;
                 targetValue: string;
                 targetSystem?: string | null | undefined;
-                scope?: "workspace" | "source_system" | undefined;
-                sourceSystem?: string | null | undefined;
             };
             output: {
                 id: string;
@@ -838,12 +838,12 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 rows: {
-                    type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
+                    scope?: "source_system" | "workspace" | undefined;
+                    sourceSystem?: string | null | undefined;
+                    type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
                     sourceValue: string;
                     targetValue: string;
                     targetSystem?: string | null | undefined;
-                    scope?: "workspace" | "source_system" | undefined;
-                    sourceSystem?: string | null | undefined;
                 }[];
             };
             output: {
@@ -866,8 +866,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -877,7 +877,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -890,7 +890,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 workspaceId: string;
             };
             output: {
-                scheduleLabel: string;
                 id: string;
                 name: string;
                 scheduleCron: string;
@@ -908,6 +907,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 lastError: string | null;
                 createdAt: Date;
                 channelTypes: string[];
+                scheduleLabel: string;
             }[];
             meta: object;
         }>;
@@ -938,7 +938,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
         updateCheck: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 workspaceId: string;
-                id: string;
                 name: string;
                 scheduleCron: string;
                 targetType: "endpoint" | "source_url" | "upload_folder";
@@ -954,6 +953,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     target: string;
                 }[] | undefined;
                 enabled?: boolean | undefined;
+                id: string;
             };
             output: {
                 id: string;
@@ -995,7 +995,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 scheduledCheckId?: string | undefined;
-                type?: "pass_rate_drop" | "new_error_class" | "unmapped_authority" | "ig_version_change" | undefined;
+                type?: "ig_version_change" | "new_error_class" | "pass_rate_drop" | "unmapped_authority" | undefined;
                 unacknowledgedOnly?: boolean | undefined;
             };
             output: {
@@ -1003,8 +1003,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 scheduledCheckId: string;
                 checkName: string | null;
                 runId: string | null;
-                type: "pass_rate_drop" | "new_error_class" | "unmapped_authority" | "ig_version_change";
-                severity: "error" | "warning" | "info";
+                type: "ig_version_change" | "new_error_class" | "pass_rate_drop" | "unmapped_authority";
+                severity: "error" | "info" | "warning";
                 metricBefore: string | null;
                 metricAfter: string | null;
                 detail: string | null;
@@ -1051,8 +1051,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -1062,7 +1062,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -1093,8 +1093,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     spentThisCycleCents: number;
                 };
                 packs: {
-                    id: "pack_10" | "pack_25" | "pack_100";
-                    label: "$10" | "$25" | "$100";
+                    id: "pack_10" | "pack_100" | "pack_25";
+                    label: "$10" | "$100" | "$25";
                     cents: 1000 | 2500 | 10000;
                 }[];
             };
@@ -1119,15 +1119,15 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 offset?: number | undefined;
             };
             output: {
-                amountDollars: number;
-                balanceAfterDollars: number;
                 id: string;
-                type: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
+                type: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
                 amountMicro: number;
                 balanceAfter: number;
                 description: string;
                 relatedRunId: string | null;
                 createdAt: Date;
+                amountDollars: number;
+                balanceAfterDollars: number;
             }[];
             meta: object;
         }>;
@@ -1191,8 +1191,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -1202,7 +1202,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -1223,8 +1223,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     userId: string;
                     expiresAt: Date;
                     token: string;
-                    ipAddress?: string | null | undefined | undefined;
-                    userAgent?: string | null | undefined | undefined;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
                     activeOrganizationId?: string | null | undefined;
                 } | null;
                 user: {
@@ -1234,7 +1234,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     email: string;
                     emailVerified: boolean;
                     name: string;
-                    image?: string | null | undefined | undefined;
+                    image?: string | null | undefined;
                     notificationPrefs?: string | null | undefined;
                 } | null;
             };
@@ -1250,7 +1250,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     id: string;
                     name: string;
                     prefix: string;
-                    mode: "test" | "live";
+                    mode: "live" | "test";
                     scopes: string[];
                     createdAt: Date;
                     lastUsedAt: Date | null;
@@ -1262,13 +1262,13 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 input: {
                     workspaceId: string;
                     name: string;
-                    mode: "test" | "live";
-                    scopes?: ("validate" | "convert" | "fix" | "runs" | "mappings")[] | undefined;
+                    mode: "live" | "test";
+                    scopes?: ("convert" | "fix" | "mappings" | "runs" | "validate")[] | undefined;
                 };
                 output: {
                     id: string;
                     name: string;
-                    mode: "test" | "live";
+                    mode: "live" | "test";
                     prefix: string;
                     key: string;
                 };
@@ -1298,8 +1298,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     userId: string;
                     expiresAt: Date;
                     token: string;
-                    ipAddress?: string | null | undefined | undefined;
-                    userAgent?: string | null | undefined | undefined;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
                     activeOrganizationId?: string | null | undefined;
                 } | null;
                 user: {
@@ -1309,7 +1309,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     email: string;
                     emailVerified: boolean;
                     name: string;
-                    image?: string | null | undefined | undefined;
+                    image?: string | null | undefined;
                     notificationPrefs?: string | null | undefined;
                 } | null;
             };
@@ -1336,12 +1336,12 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 input: {
                     workspaceId: string;
                     url: string;
-                    events: ("run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected")[];
+                    events: ("batch.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed")[];
                 };
                 output: {
                     id: string;
                     url: string;
-                    events: ("run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected")[];
+                    events: ("batch.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed")[];
                     secret: string;
                 };
                 meta: object;
@@ -1380,7 +1380,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             testPing: import("@trpc/server").TRPCMutationProcedure<{
                 input: {
                     workspaceId: string;
-                    event?: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected" | undefined;
+                    event?: "batch.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed" | undefined;
                 };
                 output: {
                     dispatched: boolean;
@@ -1402,8 +1402,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     userId: string;
                     expiresAt: Date;
                     token: string;
-                    ipAddress?: string | null | undefined | undefined;
-                    userAgent?: string | null | undefined | undefined;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
                     activeOrganizationId?: string | null | undefined;
                 } | null;
                 user: {
@@ -1413,7 +1413,7 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     email: string;
                     emailVerified: boolean;
                     name: string;
-                    image?: string | null | undefined | undefined;
+                    image?: string | null | undefined;
                     notificationPrefs?: string | null | undefined;
                 } | null;
             };
