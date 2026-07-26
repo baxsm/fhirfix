@@ -729,3 +729,17 @@
     background-image: none;
   }
 }
+/* sonner ships the close button as a circle in the toast's top-left corner.
+   sonner injects its own stylesheet inline at runtime, so it lands after this
+   file and wins at equal specificity - the doubled [data-styled] outranks it
+   without needing !important. the button inherits the toast's text colour so it
+   stays legible on every richColors variant. */
+[data-sonner-toast][data-styled="true"][data-styled="true"] [data-close-button] {
+  border-radius: var(--radius);
+  opacity: 0.7;
+  transition: opacity 100ms, background-color 200ms;
+}
+[data-sonner-toast][data-styled="true"][data-styled="true"] [data-close-button]:hover {
+  opacity: 1;
+  background-color: rgb(0 0 0 / 0.06);
+}
