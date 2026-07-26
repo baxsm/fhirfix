@@ -190,7 +190,7 @@ export declare const billingAccount: import("drizzle-orm/pg-core").PgTableWithCo
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const creditLedgerEntry: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "credit_ledger_entry";
@@ -235,7 +235,7 @@ export declare const creditLedgerEntry: import("drizzle-orm/pg-core").PgTableWit
             tableName: "credit_ledger_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
+            data: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -367,7 +367,7 @@ export declare const creditLedgerEntry: import("drizzle-orm/pg-core").PgTableWit
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const invoice: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "invoice";
@@ -510,7 +510,7 @@ export declare const invoice: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type BillingAccount = typeof billingAccount.$inferSelect;
 export type NewBillingAccount = typeof billingAccount.$inferInsert;

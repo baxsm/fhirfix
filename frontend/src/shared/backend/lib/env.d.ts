@@ -1,5 +1,8 @@
 export declare const env: {
-    NODE_ENV: "development" | "production" | "test";
+    IS_PRODUCTION: boolean;
+    TRUSTED_ORIGIN_LIST: string[];
+    VALIDATOR_URL_LIST: string[];
+    NODE_ENV: "test" | "development" | "production";
     BACKEND_PORT: string;
     DATABASE_URL: string;
     REDIS_URL: string;
@@ -11,7 +14,7 @@ export declare const env: {
     ZEPTOMAIL_FROM_NAME: string;
     EMAIL_TEST_MODE: boolean;
     SENTRY_DSN: string;
-    LOG_LEVEL: "debug" | "error" | "info" | "warn";
+    LOG_LEVEL: "error" | "info" | "debug" | "warn";
     VALIDATOR_URLS: string;
     VALIDATOR_MAX_INFLIGHT: string;
     CONVERTER_URL: string;
@@ -25,7 +28,4 @@ export declare const env: {
     APP_URL: string;
     API_KEY_PEPPER: string;
     WEBHOOK_ENCRYPTION_KEY: string;
-    IS_PRODUCTION: boolean;
-    TRUSTED_ORIGIN_LIST: string[];
-    VALIDATOR_URL_LIST: string[];
 };

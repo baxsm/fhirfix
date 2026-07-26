@@ -1,9 +1,4 @@
 declare const statement: {
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -11,14 +6,14 @@ declare const statement: {
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 };
 export declare const ac: {
     newRole<const TRoleStatements extends import("better-auth/plugins").Statements>(statements: import("better-auth/plugins").RoleInput<{
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -26,12 +21,12 @@ export declare const ac: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }, TRoleStatements>): import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<TRoleStatements>, {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -39,13 +34,13 @@ export declare const ac: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
     statements: {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -53,6 +48,11 @@ export declare const ac: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     };
 };
 export declare const auditor: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
@@ -64,11 +64,6 @@ export declare const auditor: import("better-auth/plugins").Role<import("better-
     readonly audit: ["view"];
     readonly monitoring: ["view"];
 }>, {
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -76,6 +71,11 @@ export declare const auditor: import("better-auth/plugins").Role<import("better-
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 }>;
 export declare const billing: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
     readonly workspaceSettings: ["view"];
@@ -85,11 +85,6 @@ export declare const billing: import("better-auth/plugins").Role<import("better-
     readonly apiKey: ["view"];
     readonly monitoring: ["view"];
 }>, {
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -97,6 +92,11 @@ export declare const billing: import("better-auth/plugins").Role<import("better-
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 }>;
 export declare const member: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
     readonly workspaceSettings: ["view"];
@@ -107,11 +107,6 @@ export declare const member: import("better-auth/plugins").Role<import("better-a
     readonly audit: ["view"];
     readonly monitoring: ["view", "manage"];
 }>, {
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -119,26 +114,26 @@ export declare const member: import("better-auth/plugins").Role<import("better-a
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 }>;
 export declare const admin: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
+    readonly workspaceSettings: ["view", "update"];
+    readonly billing: ["view", "manage"];
+    readonly run: ["create", "view"];
+    readonly mapping: ["view", "create", "approve", "deprecate"];
+    readonly apiKey: ["view", "create", "revoke"];
+    readonly audit: ["view"];
+    readonly monitoring: ["view", "manage"];
     readonly organization: readonly ["update"];
     readonly invitation: readonly ["create", "cancel"];
     readonly member: readonly ["create", "update", "delete"];
     readonly team: readonly ["create", "update", "delete"];
     readonly ac: readonly ["create", "read", "update", "delete"];
-    readonly workspaceSettings: ["view", "update"];
-    readonly billing: ["view", "manage"];
-    readonly run: ["create", "view"];
-    readonly mapping: ["view", "create", "approve", "deprecate"];
-    readonly apiKey: ["view", "create", "revoke"];
-    readonly audit: ["view"];
-    readonly monitoring: ["view", "manage"];
 }>, {
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -146,13 +141,13 @@ export declare const admin: import("better-auth/plugins").Role<import("better-au
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 }>;
 export declare const owner: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
-    readonly organization: readonly ["update", "delete"];
-    readonly member: readonly ["create", "update", "delete"];
-    readonly invitation: readonly ["create", "cancel"];
-    readonly team: readonly ["create", "update", "delete"];
-    readonly ac: readonly ["create", "read", "update", "delete"];
     readonly workspaceSettings: ["view", "update"];
     readonly billing: ["view", "manage"];
     readonly run: ["create", "view"];
@@ -160,12 +155,12 @@ export declare const owner: import("better-auth/plugins").Role<import("better-au
     readonly apiKey: ["view", "create", "revoke"];
     readonly audit: ["view"];
     readonly monitoring: ["view", "manage"];
-}>, {
     readonly organization: readonly ["update", "delete"];
     readonly member: readonly ["create", "update", "delete"];
     readonly invitation: readonly ["create", "cancel"];
     readonly team: readonly ["create", "update", "delete"];
     readonly ac: readonly ["create", "read", "update", "delete"];
+}>, {
     readonly workspaceSettings: readonly ["view", "update"];
     readonly billing: readonly ["view", "manage"];
     readonly run: readonly ["create", "view"];
@@ -173,14 +168,14 @@ export declare const owner: import("better-auth/plugins").Role<import("better-au
     readonly apiKey: readonly ["view", "create", "revoke"];
     readonly audit: readonly ["view"];
     readonly monitoring: readonly ["view", "manage"];
+    readonly organization: readonly ["update", "delete"];
+    readonly member: readonly ["create", "update", "delete"];
+    readonly invitation: readonly ["create", "cancel"];
+    readonly team: readonly ["create", "update", "delete"];
+    readonly ac: readonly ["create", "read", "update", "delete"];
 }>;
 export declare const roles: {
     owner: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: ["view", "update"];
         readonly billing: ["view", "manage"];
         readonly run: ["create", "view"];
@@ -188,12 +183,12 @@ export declare const roles: {
         readonly apiKey: ["view", "create", "revoke"];
         readonly audit: ["view"];
         readonly monitoring: ["view", "manage"];
-    }>, {
         readonly organization: readonly ["update", "delete"];
         readonly member: readonly ["create", "update", "delete"];
         readonly invitation: readonly ["create", "cancel"];
         readonly team: readonly ["create", "update", "delete"];
         readonly ac: readonly ["create", "read", "update", "delete"];
+    }>, {
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -201,26 +196,26 @@ export declare const roles: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
     admin: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
+        readonly workspaceSettings: ["view", "update"];
+        readonly billing: ["view", "manage"];
+        readonly run: ["create", "view"];
+        readonly mapping: ["view", "create", "approve", "deprecate"];
+        readonly apiKey: ["view", "create", "revoke"];
+        readonly audit: ["view"];
+        readonly monitoring: ["view", "manage"];
         readonly organization: readonly ["update"];
         readonly invitation: readonly ["create", "cancel"];
         readonly member: readonly ["create", "update", "delete"];
         readonly team: readonly ["create", "update", "delete"];
         readonly ac: readonly ["create", "read", "update", "delete"];
-        readonly workspaceSettings: ["view", "update"];
-        readonly billing: ["view", "manage"];
-        readonly run: ["create", "view"];
-        readonly mapping: ["view", "create", "approve", "deprecate"];
-        readonly apiKey: ["view", "create", "revoke"];
-        readonly audit: ["view"];
-        readonly monitoring: ["view", "manage"];
     }>, {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -228,6 +223,11 @@ export declare const roles: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
     member: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
         readonly workspaceSettings: ["view"];
@@ -238,11 +238,6 @@ export declare const roles: {
         readonly audit: ["view"];
         readonly monitoring: ["view", "manage"];
     }>, {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -250,6 +245,11 @@ export declare const roles: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
     billing: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
         readonly workspaceSettings: ["view"];
@@ -259,11 +259,6 @@ export declare const roles: {
         readonly apiKey: ["view"];
         readonly monitoring: ["view"];
     }>, {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -271,6 +266,11 @@ export declare const roles: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
     auditor: import("better-auth/plugins").Role<import("better-auth/plugins").ExactRoleStatements<{
         readonly workspaceSettings: ["view"];
@@ -281,11 +281,6 @@ export declare const roles: {
         readonly audit: ["view"];
         readonly monitoring: ["view"];
     }>, {
-        readonly organization: readonly ["update", "delete"];
-        readonly member: readonly ["create", "update", "delete"];
-        readonly invitation: readonly ["create", "cancel"];
-        readonly team: readonly ["create", "update", "delete"];
-        readonly ac: readonly ["create", "read", "update", "delete"];
         readonly workspaceSettings: readonly ["view", "update"];
         readonly billing: readonly ["view", "manage"];
         readonly run: readonly ["create", "view"];
@@ -293,6 +288,11 @@ export declare const roles: {
         readonly apiKey: readonly ["view", "create", "revoke"];
         readonly audit: readonly ["view"];
         readonly monitoring: readonly ["view", "manage"];
+        readonly organization: readonly ["update", "delete"];
+        readonly member: readonly ["create", "update", "delete"];
+        readonly invitation: readonly ["create", "cancel"];
+        readonly team: readonly ["create", "update", "delete"];
+        readonly ac: readonly ["create", "read", "update", "delete"];
     }>;
 };
 export type WorkspaceRole = keyof typeof roles;

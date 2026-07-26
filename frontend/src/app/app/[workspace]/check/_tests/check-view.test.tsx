@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-// the ingestion page: one fixed panel that never changes shape, a permanent
-// sample row, and a submit that routes to the report.
+// the ingestion page: ONE framed editor. the header gets content in (upload,
+// load a sample), the footer acts on it (clear, run). every control is mounted
+// at all times, so using the page never changes which controls it has.
 const submitMutate = vi.fn();
 const routerPush = vi.fn();
 
@@ -35,6 +36,11 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import { CheckView } from "../check-view";
 
 const editor = () => screen.getByPlaceholderText(/Paste FHIR JSON/i);
+const controlNames = () =>
+  screen
+    .getAllByRole("button")
+    .map((b) => b.textContent?.trim())
+    .filter(Boolean);
 
 describe("CheckView (ingestion)", () => {
   beforeEach(() => {
@@ -45,57 +51,49 @@ describe("CheckView (ingestion)", () => {
   test("opens empty, not pre-filled with a sample", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.getByRole("heading", { name: /new check/i })).toBeInTheDocument();
-    // the page used to mount with SAMPLES[0] already in the editor, so the empty
-    // state was unreachable and "characters ready" described text nobody typed.
     expect(editor()).toHaveValue("");
     expect(screen.getByText(/nothing to check yet/i)).toBeInTheDocument();
   });
 
-  test("run is disabled until there is something to run", () => {
+  // run is the page's purpose, so it is always there and merely disabled. clear
+  // is conditional on there being something to clear, so it is absent - a ghost
+  // "Clear" over an empty editor is noise. it sits between the fixed status line
+  // and the fixed Run button, so arriving moves neither.
+  test("run is always present; clear only exists once there is content", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.getByRole("button", { name: /run check/i })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /^clear$/i })).not.toBeInTheDocument();
+
     fireEvent.change(editor(), { target: { value: '{"resourceType":"Patient"}' } });
     expect(screen.getByRole("button", { name: /run check/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^clear$/i })).toBeEnabled();
   });
 
-  // the regression test for the reported defect. the sample row used to render
-  // only while the editor was empty, so clicking a sample unmounted the control
-  // you just clicked and the panel resized by 413px under the pointer.
-  test("sample chips stay mounted after one is chosen", () => {
+  // the reported defect: the ways of GETTING content in must never come and go,
+  // or acting on the page changes which controls the page has.
+  test("the source controls are identical empty and filled", () => {
     render(<CheckView workspace="acme" />);
-    fireEvent.click(screen.getByRole("button", { name: /US Core Patient/i }));
-
-    expect(editor()).not.toHaveValue("");
-    expect(screen.getByRole("button", { name: /US Core Patient/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /HL7v2 ADT/i })).toBeInTheDocument();
+    const before = controlNames().filter((n) => n !== "Clear");
+    fireEvent.change(editor(), { target: { value: '{"resourceType":"Patient"}' } });
+    expect(controlNames().filter((n) => n !== "Clear")).toEqual(before);
   });
 
-  test("the chosen sample is marked, and choosing the other one swaps it", () => {
+  test("getting content in lives in the header, acting on it in the footer", () => {
     render(<CheckView workspace="acme" />);
-    const usCore = screen.getByRole("button", { name: /US Core Patient/i });
-    fireEvent.click(usCore);
-    expect(usCore).toHaveAttribute("aria-pressed", "true");
-
-    fireEvent.click(screen.getByRole("button", { name: /HL7v2 ADT/i }));
-    expect(screen.getByRole("button", { name: /US Core Patient/i })).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
-    expect(screen.getByRole("button", { name: /HL7v2 ADT/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    expect(screen.getByRole("button", { name: /upload/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /load a sample/i })).toBeInTheDocument();
   });
 
-  test("clicking the selected sample again empties the editor", () => {
+  // a sample is an action, not a mode. nothing stays selected, so nothing can
+  // contradict the editor once it is edited.
+  test("the sample menu leaves no selected state behind", () => {
     render(<CheckView workspace="acme" />);
-    fireEvent.click(screen.getByRole("button", { name: /US Core Patient/i }));
-    fireEvent.click(screen.getByRole("button", { name: /US Core Patient/i }));
-    expect(editor()).toHaveValue("");
-    expect(screen.getByText(/nothing to check yet/i)).toBeInTheDocument();
+    const trigger = screen.getByRole("button", { name: /load a sample/i });
+    expect(trigger).not.toHaveAttribute("aria-pressed");
+    expect(screen.queryByRole("button", { pressed: true })).not.toBeInTheDocument();
   });
 
-  test("paste and drop share one panel, with no mode switch", () => {
+  test("there is no mode switch on the page", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
     expect(editor()).toBeInTheDocument();
@@ -122,6 +120,20 @@ describe("CheckView (ingestion)", () => {
     fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
     expect(editor()).toHaveValue("");
     expect(screen.getByText(/nothing to check yet/i)).toBeInTheDocument();
+  });
+
+  test("tab indents instead of leaving the editor", () => {
+    render(<CheckView workspace="acme" />);
+    const box = editor();
+    fireEvent.change(box, { target: { value: "{}" } });
+    (box as HTMLTextAreaElement).setSelectionRange(1, 1);
+    fireEvent.keyDown(box, { key: "Tab" });
+    expect(box).toHaveValue("{  }");
+  });
+
+  test("the profile line holds its place when there is no problem to report", () => {
+    render(<CheckView workspace="acme" />);
+    expect(screen.getByText(/validated against US Core 6\.1\.0/i)).toBeInTheDocument();
   });
 
   test("submitting routes to the new run report", () => {
