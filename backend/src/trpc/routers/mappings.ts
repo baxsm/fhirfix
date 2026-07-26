@@ -5,6 +5,7 @@ import { hasPermission } from "@/auth/permissions";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
+import { findConflicts } from "@/lib/mapping-conflicts";
 import { router, workspaceProcedure } from "../trpc";
 
 // the mapping registry. every write is versioned: an edit supersedes the old row
@@ -94,6 +95,39 @@ export const mappingsRouter = router({
         .where(and(...conditions))
         .orderBy(desc(schema.mappingRegistryEntry.createdAt))
         .limit(500);
+    }),
+
+  // overlapping mappings: the same type and source value live at BOTH workspace
+  // scope and source-system scope. the live-unique index cannot catch this - the
+  // scope is part of its key, so both rows are legitimately unique.
+  //
+  // this is not a bug in the engine. loadActiveMappings orders source_system
+  // before workspace, so the specific one deterministically wins for that feed.
+  // it is a bug in what the user can SEE: editing the workspace mapping looks
+  // like it changed the behaviour for every feed, and for the overridden one it
+  // did nothing. that is what this surfaces.
+  conflicts: workspaceProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .query(async ({ ctx }) => {
+      const rows = await ctx.db
+        .select({
+          id: schema.mappingRegistryEntry.id,
+          scope: schema.mappingRegistryEntry.scope,
+          sourceSystem: schema.mappingRegistryEntry.sourceSystem,
+          type: schema.mappingRegistryEntry.type,
+          sourceValue: schema.mappingRegistryEntry.sourceValue,
+          targetValue: schema.mappingRegistryEntry.targetValue,
+        })
+        .from(schema.mappingRegistryEntry)
+        .where(
+          and(
+            eq(schema.mappingRegistryEntry.workspaceId, ctx.workspaceId),
+            eq(schema.mappingRegistryEntry.status, "active"),
+            isLive,
+          ),
+        );
+
+      return findConflicts(rows);
     }),
 
   // counts per status, so the ui can label its filters without pulling every row.

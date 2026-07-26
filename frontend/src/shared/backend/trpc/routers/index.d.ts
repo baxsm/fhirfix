@@ -735,6 +735,13 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             }[];
             meta: object;
         }>;
+        conflicts: import("@trpc/server").TRPCQueryProcedure<{
+            input: {
+                workspaceId: string;
+            };
+            output: import("../../lib/mapping-conflicts").MappingConflict[];
+            meta: object;
+        }>;
         counts: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 workspaceId: string;

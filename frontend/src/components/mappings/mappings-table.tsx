@@ -66,11 +66,32 @@ export function MappingsTable({
     enabled: !!workspaceId,
   });
 
+  // which active mappings shadow each other. only the active tab can show a
+  // conflict: a suggestion or a tombstone is not loaded by a run, so it cannot
+  // be overriding anything yet.
+  const conflictsQuery = useQuery({
+    ...trpc.mappings.conflicts.queryOptions({ workspaceId }),
+    enabled: !!workspaceId && status === "active",
+  });
+
+  // keyed by the id of the row that LOSES, since that is the row the flag has to
+  // appear on - the one whose target is not what a scoped run will use. a plain
+  // record, not a Map: `Map` is the lucide icon imported at the top of this file.
+  const overriddenBy: Record<string, { sourceSystem: string | null; targetValue: string }[]> = {};
+  for (const c of conflictsQuery.data ?? []) {
+    for (const loser of c.overridden) {
+      const existing = overriddenBy[loser.id] ?? [];
+      existing.push({ sourceSystem: c.winner.sourceSystem, targetValue: c.winner.targetValue });
+      overriddenBy[loser.id] = existing;
+    }
+  }
+
   // every mutation refetches both the rows and the per-status counts, because
   // approving moves a row between two filters and both labels have to follow.
   const refresh = () => {
     query.refetch();
     onCountsChange();
+    conflictsQuery.refetch();
   };
 
   const approve = useMutation(
@@ -233,6 +254,24 @@ export function MappingsTable({
                         >
                           {m.sourceSystem}
                         </span>
+                      ) : overriddenBy[m.id] ? (
+                        // the engine loads source-system rows ahead of workspace
+                        // rows and takes the first match, so this row is correct
+                        // everywhere EXCEPT the feeds listed here. saying so is
+                        // the whole point: editing this row and seeing no change
+                        // on that feed is otherwise unexplainable.
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-muted-foreground">Workspace</span>
+                          <span
+                            className="text-[11px] text-amber-600"
+                            title={overriddenBy[m.id]
+                              ?.map((w) => `${w.sourceSystem} uses ${w.targetValue}`)
+                              .join("\n")}
+                          >
+                            Overridden on{" "}
+                            {overriddenBy[m.id]?.map((w) => w.sourceSystem).join(", ")}
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-xs text-muted-foreground">Workspace</span>
                       )}
