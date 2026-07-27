@@ -1,7 +1,6 @@
 "use client";
 
-// global-error replaces the root layout when the root itself crashes, so it
-// must render its own <html>/<body>.
+// replaces the root layout when the root crashes, so it must render its own html/body
 export default function GlobalError({
   reset,
 }: {

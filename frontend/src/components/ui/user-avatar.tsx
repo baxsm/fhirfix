@@ -4,18 +4,6 @@ import { Users2 } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-/**
- * a user's picture, or a stand-in when they have not uploaded one.
- *
- * deliberately GREYSCALE. globals.css states the rule: "because chrome carries
- * NO hue, every saturated pixel on screen belongs to a finding", and "brand =
- * the violet dot in the wordmark. logo only, never chrome." an avatar in the
- * topbar is chrome, so a violet one both broke the brand rule and spent a
- * saturated pixel on something that says nothing about conformance.
- *
- * no generated marble either: it produced a different colour per user, which is
- * the same problem multiplied across a members list.
- */
 export function UserAvatar({
   name,
   src,
@@ -35,9 +23,6 @@ export function UserAvatar({
     );
   }
 
-  // the same material as an input or a select: white surface, a border you can
-  // actually see, a hairline lift. it was a flat grey fill with no border and
-  // no shadow, which read as a hole in the topbar rather than a control.
   return (
     <span
       className={cn(

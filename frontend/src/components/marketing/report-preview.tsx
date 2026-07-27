@@ -2,10 +2,6 @@ import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./motion";
 
-// what the ranked report looks like. a faithful still of the product's core screen
-// (severity chips, the "X of Y auto-fixable" line, ranked rows, before/after score)
-// per docs/ui.md — the highest-leverage screen, shown as a real artifact.
-
 const ROWS = [
   {
     sev: "error" as const,

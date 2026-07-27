@@ -3,9 +3,6 @@ import type { Finding } from "fhirfix";
 import { summarize } from "../gate.js";
 import { annotationPath, renderGithubAnnotation, renderJobSummary } from "../report.js";
 
-// the annotation format is parsed by the github runner, not by a human. a stray
-// comma, colon or newline silently breaks or truncates the annotation, so the
-// escaping is worth pinning down.
 
 function finding(over: Partial<Finding> = {}): Finding {
   return {
@@ -26,8 +23,6 @@ function finding(over: Partial<Finding> = {}): Finding {
 
 describe("annotationPath", () => {
   test("makes the path relative to GITHUB_WORKSPACE", () => {
-    // an absolute runner path does not match a file in the PR diff, so the
-    // annotation would not attach to any line.
     expect(
       annotationPath("/home/runner/work/repo/repo/out/p.json", "/home/runner/work/repo/repo"),
     ).toBe("out/p.json");

@@ -29,8 +29,6 @@ function requireKeyPermission(role: string, action: "create" | "revoke") {
   }
 }
 
-// webhook management reuses the apiKey permission (both are developer-surface
-// config a member/admin/owner manages).
 function requireWebhookPermission(role: string) {
   if (!hasPermission(role as never, "apiKey", "create")) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot manage webhooks." });
@@ -39,8 +37,6 @@ function requireWebhookPermission(role: string) {
 
 export const developersRouter = router({
   apiKeys: router({
-    // masked list: prefix + metadata only, never the hash or full key. ordered
-    // newest first, revoked keys included (shown struck-through in the ui).
     list: workspaceProcedure.query(async ({ ctx }) => {
       return ctx.db
         .select({
@@ -58,8 +54,6 @@ export const developersRouter = router({
         .orderBy(desc(schema.apiKey.createdAt));
     }),
 
-    // create a key. the full secret is returned ONCE here and never again; only
-    // the keyed hash is stored. the client must copy it now.
     create: workspaceProcedure
       .input(
         z.object({
@@ -91,8 +85,6 @@ export const developersRouter = router({
         return { id, name: input.name, mode: input.mode, prefix, key: full };
       }),
 
-    // revoke a key immediately. a revoked key fails auth at resolveApiKey. we keep
-    // the row (masked) so it stays visible in the list as revoked.
     revoke: workspaceProcedure
       .input(z.object({ workspaceId: z.string(), keyId: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -117,8 +109,6 @@ export const developersRouter = router({
   }),
 
   webhooks: router({
-    // endpoints for the workspace. the secret is never returned (it is encrypted
-    // at rest and only shown once at create/rotate).
     list: workspaceProcedure.query(async ({ ctx }) => {
       return ctx.db
         .select({
@@ -135,8 +125,6 @@ export const developersRouter = router({
         .orderBy(desc(schema.webhookEndpoint.createdAt));
     }),
 
-    // create an endpoint. the signing secret is generated + returned ONCE, stored
-    // encrypted. the url must be https in production (http allowed for local dev).
     create: workspaceProcedure
       .input(
         z.object({
@@ -161,8 +149,6 @@ export const developersRouter = router({
         return { id, url: input.url, events: input.events, secret };
       }),
 
-    // rotate the signing secret. breaks the old secret immediately, so the ui
-    // confirms it as a consequence. returns the new secret once.
     rotateSecret: workspaceProcedure
       .input(z.object({ workspaceId: z.string(), id: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -224,8 +210,6 @@ export const developersRouter = router({
         return { deleted: true };
       }),
 
-    // fire a test event at the workspace's endpoints so a developer can confirm
-    // their receiver + signature verification before relying on it.
     testPing: workspaceProcedure
       .input(z.object({ workspaceId: z.string(), event: z.enum(WEBHOOK_EVENTS).optional() }))
       .mutation(async ({ ctx, input }) => {
@@ -241,10 +225,6 @@ export const developersRouter = router({
   }),
 
   requestLogs: router({
-    // the in-dashboard REST traffic log, newest first, cursor-paginated. this is
-    // the traffic a developer debugging an integration needs - it includes calls
-    // that never made a run (401/402/422/429), not just successful runs. filters:
-    // method, statusCode, and a "onlyErrors" toggle (status >= 400).
     list: workspaceProcedure
       .input(
         z.object({
@@ -296,18 +276,6 @@ export const developersRouter = router({
         return { logs: page, nextCursor, hasMore };
       }),
 
-    // headline numbers for the logs page. these are the four questions someone
-    // opens a log viewer to answer - how much traffic, how much of it failed,
-    // how slow is it, and which endpoints carry it - computed in sql rather than
-    // derived from the 25 rows on screen (a page-local average would describe
-    // the page, not the traffic).
-    //
-    // the window WIDENS to cover the data rather than being fixed at 24h. a
-    // hardcoded window reported "0 requests, 0ms p95" directly above a list of
-    // 21 visible requests, because the traffic was 11 days old - which reads as
-    // a broken panel, not as an empty window. so: 24h when there is recent
-    // traffic, otherwise stretch to the oldest row and SAY which window is being
-    // reported, because a number without its window is not interpretable.
     stats: workspaceProcedure.query(async ({ ctx }) => {
       const DAY_MS = 24 * 60 * 60 * 1000;
       const [recent] = await ctx.db
@@ -317,8 +285,6 @@ export const developersRouter = router({
 
       const latest = recent?.latest ? new Date(recent.latest) : null;
       const now = Date.now();
-      // if the newest call is older than a day, widen to include it (rounded up
-      // to whole days) instead of reporting an empty 24h.
       const spanMs =
         latest && now - latest.getTime() > DAY_MS
           ? Math.ceil((now - latest.getTime()) / DAY_MS) * DAY_MS
@@ -333,8 +299,6 @@ export const developersRouter = router({
         .select({
           total: sql<number>`count(*)`,
           errors: sql<number>`count(*) filter (where ${schema.apiRequestLog.statusCode} >= 400)`,
-          // p95 over the window. an average hides the tail, and the tail is what
-          // a developer is chasing when they open this page.
           p95: sql<number>`coalesce(percentile_cont(0.95) within group (order by ${schema.apiRequestLog.latencyMs}), 0)`,
         })
         .from(schema.apiRequestLog)

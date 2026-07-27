@@ -4,17 +4,6 @@ import { hideDevOverlay } from "./helpers";
 // retina-crisp: capture at 2x so the asset stays sharp when scaled in the panel.
 test.use({ deviceScaleFactor: 2, viewport: { width: 1440, height: 900 } });
 
-// captures a real dark-mode remediation report as a static hero asset for the
-// auth left panel. it is a screenshot of the genuine dashboard (real engine
-// output on the golden case), NOT hand-authored HTML. this is a one-off asset
-// generator, not part of the e2e suite (hence the .capture.ts suffix, which the
-// playwright testMatch skips). re-run to refresh the asset (backend + frontend
-// running, docker up), pointing at any real completed run:
-//   cd frontend
-//   QA_RUN=/app/<workspace>/runs/<runId> \
-//     npx playwright test e2e/capture-report-hero.capture.ts --project=chromium
-// defaults target the seeded QA workspace. output: public/auth-report.png
-// (committed, referenced by auth-hero.tsx).
 test("capture report hero for auth panel", async ({ page }) => {
   const email = process.env.QA_EMAIL ?? "phase2-qa@fhirfix.local";
   const password = process.env.QA_PASSWORD ?? "phase2-qa-pass-123";
@@ -41,10 +30,6 @@ test("capture report hero for auth panel", async ({ page }) => {
   await page.waitForTimeout(450);
   await hideDevOverlay(page);
 
-  // clip from the top of the content column down to the bottom of the FIRST
-  // (expanded) finding, so the asset is the whole story in one tight frame:
-  // score lift + severity chips + facet sidebar + one before/after diff. the
-  // rest of the stacked list is cropped out (it just shrinks and repeats).
   const clip = await page.evaluate(() => {
     const article = document.querySelector("article");
     if (!article) return null;

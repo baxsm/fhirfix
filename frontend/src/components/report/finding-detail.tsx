@@ -25,8 +25,6 @@ const SEVERITY_COLOR: Record<Severity, string> = {
   info: "text-info",
 };
 
-// pull the before/after fragment for one finding out of the whole-run diff by
-// its fhirpath, so the pane shows just this finding's change when possible.
 function fragmentFor(fhirpath: string | null, before: string, after: string) {
   if (!fhirpath) return { before, after };
   const leaf = fhirpath.split(/[.[]/).filter(Boolean).pop() ?? "";
@@ -40,14 +38,6 @@ function fragmentFor(fhirpath: string | null, before: string, after: string) {
   return { before: grab(before), after: grab(after) };
 }
 
-/**
- * the selected finding, shown in a pane beside the list.
- *
- * this replaces an expand-in-place row. the point is that the actions
- * (apply / fix with ai / dismiss) are ALWAYS visible for the selected finding
- * rather than hidden behind a disclosure, and that reading one finding never
- * moves the rest of the page.
- */
 export function FindingDetail({
   finding,
   before,
@@ -147,8 +137,6 @@ export function FindingDetail({
       {showActions && (
         <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 px-4 py-3">
           {canApply && onApply && (
-            // success = "this makes the resource conformant", same as the bulk
-            // apply on the report header. see finding-card.
             <Button variant="success" size="sm" disabled={busy} onClick={() => onApply(finding)}>
               {busy ? (
                 <Loader2 className="size-3.5 animate-spin" />

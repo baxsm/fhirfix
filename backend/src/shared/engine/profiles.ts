@@ -1,6 +1,3 @@
-// map a FHIR resourceType to the US Core profile canonical it should validate
-// against. this is the default pool's IG (US Core 6.1.0). resources with no US Core
-// profile validate against the base spec (empty profile list).
 
 const US_CORE = "http://hl7.org/fhir/us/core/StructureDefinition";
 
@@ -29,12 +26,6 @@ export function allDefaultProfiles(): string[] {
   return Object.values(RESOURCE_TO_USCORE);
 }
 
-// keep only the profiles that belong to this resourceType. a caller-supplied list
-// covers a whole bundle, so handing every profile to every resource makes the
-// validator report a type mismatch ("profile type was 'Organization' ... found
-// 'Location'") for each resource the profile was never meant for. an unknown
-// profile is kept: it may be a custom IG this map does not know about, and only
-// the resource it targets should be affected.
 export function profilesForResource(resourceType: string, candidates: string[]): string[] {
   const own = RESOURCE_TO_USCORE[resourceType];
   const knownOther = new Set(

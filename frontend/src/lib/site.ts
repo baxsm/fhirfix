@@ -1,8 +1,5 @@
 import { env } from "@/lib/env";
 
-// resolved public origin for canonical URLs, sitemap, robots, and OG tags. uses
-// NEXT_PUBLIC_SITE_URL when set (production), else localhost for dev. no trailing
-// slash.
 export const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 export const site = {

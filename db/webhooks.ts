@@ -4,13 +4,7 @@ import type { Db } from "./client";
 import { recordNotification } from "./notifications";
 import * as schema from "./schema/index";
 
-// webhook signing + endpoint queries + delivery records. the secret is stored
-// encrypted; the caller decrypts it before passing it here (this package stays
-// free of the encryption key). per-attempt records reuse notification_log
-// (channel: "webhook"); the endpoint's lastDeliveryStatus holds the latest result.
 
-// the canonical event enum. phase 5 wired the run + credits subset; phase 6 adds
-// drift.detected. conformance.completed lands with phase 7.
 export type WebhookEvent =
   | "run.completed"
   | "run.failed"
@@ -37,9 +31,6 @@ export async function listEndpointsForEvent(db: Db, workspaceId: string, event: 
   return rows.filter((r) => r.events.includes(event));
 }
 
-// the signed payload body + the signature header value. the signature is
-// HMAC-SHA256 over `${timestamp}.${body}` so a receiver can reject replays; the
-// header carries both so verification needs no side channel.
 export function signPayload(
   secret: string,
   event: WebhookEvent,
@@ -54,9 +45,6 @@ export function signPayload(
   return { body, signature: `t=${timestampMs},v1=${signature}` };
 }
 
-// verify a received signature header against the raw body + secret. exported so
-// the SDKs and tests share one implementation. tolerant window guards against
-// replay while allowing clock skew.
 export function verifySignature(
   secret: string,
   header: string,

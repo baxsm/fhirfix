@@ -3,10 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HeroGlyph } from "./hero-glyph";
 
-// the hero. type-led: a mono eyebrow, one oversized display headline carrying the
-// broken -> conformant story, tight subcopy, two CTAs, and the glyph. sits on the
-// aurora-hero grain surface (applied by the section wrapper). above the fold, so it
-// loads visible and enhances with the CSS load-in (hero-in), never hidden.
 export function Hero() {
   return (
     <section className="aurora-hero grain relative overflow-hidden">

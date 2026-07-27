@@ -16,13 +16,6 @@ const SEVERITY_COLOR: Record<Severity, string> = {
   info: "text-info",
 };
 
-/**
- * one line in the findings list. deliberately NOT expandable: selecting a row
- * shows it in the detail pane instead.
- *
- * the old row expanded in place, which meant every action was hidden behind a
- * click, and opening one pushed everything below it down the page.
- */
 export function FindingListRow({
   finding,
   selected,
@@ -43,9 +36,6 @@ export function FindingListRow({
       aria-current={selected ? "true" : undefined}
       className={cn(
         "row-interactive flex w-full cursor-pointer items-start gap-2.5 border-b px-3 py-2.5 text-left last:border-b-0",
-        // the selected row is the ONE place a filled surface is warranted: it
-        // has to stay obvious while the pointer is elsewhere, which a hover-
-        // weight tint cannot do.
         selected && "bg-secondary hover:bg-secondary",
         dismissed && "opacity-55",
       )}

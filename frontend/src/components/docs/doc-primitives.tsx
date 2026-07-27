@@ -1,10 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// an endpoint reference row: prose + params on the left, a sticky code rail
-// (request + response examples) on the right. this is what fills the wide-screen
-// space - the rail sits where a generic docs page leaves a dead gap. collapses to
-// one column on smaller screens.
 export function EndpointSection({
   id,
   title,
@@ -39,9 +35,6 @@ export function EndpointSection({
   );
 }
 
-// same two-column grid as EndpointSection but for reference topics that are not
-// HTTP endpoints (idempotency, webhooks, errors) - plain title, no route pill.
-// keeps the whole page one coherent two-column reference with no dead right gap.
 export function RefSection({
   id,
   title,
@@ -69,8 +62,6 @@ export function RefSection({
   );
 }
 
-// the compact before -> after score line for a fix response rail. echoes the
-// report screen's ScoreDelta so the docs feel like this product, not a template.
 export function ScoreLift({ before, after }: { before: number; after: number }) {
   const gain = after - before;
   return (
@@ -83,8 +74,6 @@ export function ScoreLift({ before, after }: { before: number; after: number }) 
   );
 }
 
-// a route pill: colored method badge + mono path in a bordered box. the header of
-// every endpoint section.
 export function RoutePill({ method, path }: { method: "GET" | "POST"; path: string }) {
   const tone =
     method === "GET" ? "bg-emerald-500/10 text-emerald-400" : "bg-interactive/10 text-interactive";
@@ -98,11 +87,6 @@ export function RoutePill({ method, path }: { method: "GET" | "POST"; path: stri
   );
 }
 
-// a single request/response field row: name (mono) + type + optional required
-// chip + description. mirrors the stripe/resend body-parameter layout.
-//
-// set `noChip` for rows that are not request parameters (behaviors, events) -
-// "optional" is meaningless there and reads as a mistake.
 export function ParamRow({
   name,
   type,
@@ -161,8 +145,6 @@ export function StatusTable({ rows }: { rows: StatusCode[] }) {
   );
 }
 
-// a section anchor + heading. scroll-margin so the sticky header does not cover
-// the target when linked via #hash.
 export function DocSection({
   id,
   title,

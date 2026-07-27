@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 
-// public, indexable routes only. app/auth/api routes are excluded (blocked in
-// robots.ts too). static list — these are the marketing + docs surfaces.
 const ROUTES: {
   path: string;
   priority: number;

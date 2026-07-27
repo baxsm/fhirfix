@@ -7,14 +7,6 @@ import { postLedgerEntry } from "./ledger";
 import { hasNotification, recordNotification } from "./notifications";
 import * as schema from "./schema/index";
 
-// shared run-completion path used by BOTH the worker (async queue jobs) and the
-// synchronous REST controllers. it writes the corrected artifact, findings, the
-// completed run row, debits credits in the same locked ledger transaction, and
-// fires the low-balance alert. keeping it here (not in the worker) lets the
-// backend's sync validate/fix path reuse the exact same accounting.
-//
-// db is decoupled from the engine package, so the result is passed structurally
-// rather than importing the engine's RemediationResult type.
 
 const nano = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 20);
 const findingId = () => `fnd_${nano()}`;
@@ -78,10 +70,6 @@ async function writeFindings(
   );
 }
 
-// write the corrected artifact + track it, persist findings, complete the run row,
-// debit credits in the locked ledger tx, and fire the low-balance alert. returns
-// the charge and the resulting balance. a failed run never calls this, so it never
-// charges. the caller supplies the actor context (ui/user vs api/api_key).
 export async function persistCompletedRun(
   db: Db,
   blobStore: BlobStore,
@@ -154,10 +142,6 @@ export async function persistCompletedRun(
   return { chargeMicro, balanceAfter };
 }
 
-// after a debit, check whether the balance crossed a new low-balance threshold
-// (50/75/100% consumed against the last top-up baseline). fires at most once per
-// threshold per cycle: lastAlertThreshold is the cursor, a notification_log row is
-// the auditable dedup record. a top-up resets the cursor.
 export async function maybeSendLowBalanceAlert(
   db: Db,
   workspaceId: string,
@@ -246,10 +230,6 @@ async function resolveBillingEmail(
   return owner?.email ?? null;
 }
 
-// run reads for the public REST API. these live in the db package (not the backend
-// route file) so their drizzle queries resolve against one drizzle instance - the
-// backend's route graph mixes drizzle copies and makes the query builder's column
-// types collapse to `never`. the backend controllers call these thin helpers.
 
 export interface RunListFilter {
   workspaceId: string;
@@ -261,8 +241,6 @@ export interface RunListFilter {
   limit: number;
 }
 
-// a page of runs, newest first, one row past the limit so the caller can tell
-// whether another page exists.
 export function listRuns(db: Db, f: RunListFilter) {
   const conditions: SQL[] = [eq(schema.run.workspaceId, f.workspaceId)];
   if (f.status) conditions.push(eq(schema.run.status, f.status as "queued"));

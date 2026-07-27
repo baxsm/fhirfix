@@ -16,19 +16,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 
-/**
- * one "Add credits" action instead of three bare Add $10 / $25 / $100 buttons on
- * the balance row. three equal-weight buttons made the most consequential row on
- * the page look like a toolbar, and none of them said what pressing it would do
- * (it leaves for a hosted checkout).
- *
- * the amounts are FIXED and come from the server's pack list. that is a
- * deliberate product decision, not a shortcut: a prepaid balance with arbitrary
- * amounts complicates refunds and invoicing for no user benefit, which is why
- * prepaid-credit products settle on packs. the server rejects anything not in
- * PRICING.packs (isPurchasableCents) and rate limits checkout, so the ui list is
- * a convenience, never the enforcement.
- */
 export function AddCreditsDialog({
   workspaceId,
   packs,
@@ -43,8 +30,6 @@ export function AddCreditsDialog({
   billingConfigured: boolean;
 }) {
   const trpc = useTRPC();
-  // default to the middle pack rather than the cheapest: preselecting the
-  // smallest reads as a nudge to spend the least, and most top-ups are not $10.
   const [packId, setPackId] = useState(packs[1]?.id ?? packs[0]?.id ?? "");
 
   useEffect(() => {

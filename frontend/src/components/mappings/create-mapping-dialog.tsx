@@ -74,8 +74,6 @@ export function CreateMappingDialog({
     trpc.mappings.create.mutationOptions({
       onSuccess: () => {
         toast.success("Mapping added. Future runs will apply it.");
-        // close first, then refetch. the order is not load-bearing, it just
-        // keeps the dismiss from waiting on a network round trip.
         reset();
         onOpenChange(false);
         onCreated();

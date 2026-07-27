@@ -8,9 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTRPC } from "@/trpc/client";
 
-// the two account forms live here so the dialog and the /account route render
-// exactly the same controls. duplicating them would guarantee they drift.
-
 export function ProfileForm({
   initialName,
   email,

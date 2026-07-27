@@ -1,11 +1,6 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import { env } from "./env";
 
-// symmetric encryption for secrets that must be read back to use (webhook signing
-// secrets). AES-256-GCM: authenticated, so tampering is detected on decrypt. the
-// stored form is `iv:authTag:ciphertext`, all hex. the 32-byte key is derived from
-// WEBHOOK_ENCRYPTION_KEY via sha256 so any length env value yields a valid key.
-
 const ALGO = "aes-256-gcm";
 
 function key(): Buffer {
@@ -32,8 +27,6 @@ export function decryptSecret(stored: string): string {
   );
 }
 
-// a fresh webhook signing secret shown once. whsec_ prefix mirrors the industry
-// convention so it reads as a webhook secret in logs and config.
 export function generateWebhookSecret(): string {
   return `whsec_${randomBytes(24).toString("base64url")}`;
 }

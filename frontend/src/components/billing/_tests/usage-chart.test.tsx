@@ -20,8 +20,6 @@ describe("UsageChart", () => {
   });
 
   it("renders the chart surface for a known source without erroring", () => {
-    // recharts defers legend/axis text rendering in jsdom (no layout), so we assert
-    // the chart mounts for a mapped source rather than on lazily-rendered labels.
     const rows = [{ day: "2026-07-15", source: "ui", dollars: 0.05 }];
     const { container } = render(<UsageChart rows={rows} days={30} />);
     expect(container.querySelector(".recharts-responsive-container")).toBeTruthy();

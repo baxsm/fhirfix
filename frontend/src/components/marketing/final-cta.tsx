@@ -3,9 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "./motion";
 
-// the closing CTA. a dark gradient panel (the reference's dark close), re-skinned
-// with an emerald/sky wash on near-black so the "fix" promise reads. this is the
-// one dark surface on the light page — deliberate contrast before the footer.
 export function FinalCta() {
   return (
     <section className="bg-background px-5 py-16 sm:px-8 sm:py-24">

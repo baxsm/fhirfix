@@ -3,10 +3,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./motion";
 
-// the vivid color-card row (the reference's carousel), mapped to REAL Team-tier
-// capabilities. each card carries a faint line-art motif and a deep-tinted surface.
-// on mobile it scrolls horizontally in its own container (no body overflow).
-
 type Card = {
   eyebrow: string;
   title: string;

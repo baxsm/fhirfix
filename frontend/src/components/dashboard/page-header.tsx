@@ -1,13 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/**
- * every dashboard page opens with this. before, each page hand-rolled its own
- * header with slightly different sizes and spacing, which is why the app read
- * as six pages built by six people.
- *
- * actions sit on the same baseline as the title and shrink-0 so a long
- * description can never push a button off the row.
- */
 export function PageHeader({
   title,
   description,

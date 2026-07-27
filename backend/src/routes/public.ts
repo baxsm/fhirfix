@@ -8,15 +8,11 @@ import { logger } from "@/lib/logger";
 import { redactPhi } from "@/lib/phi";
 import { rateLimit, redis } from "@/lib/redis";
 
-// caps that gate the public demo on VOLUME, not correctness. the demo runs the
-// same real engine as the product; it just refuses oversized or too-frequent input.
 const DEMO_MAX_BYTES = 50_000;
 const DEMO_RATE_LIMIT = 20; // requests
 const DEMO_RATE_WINDOW = 60 * 60; // per hour, per ip
 const DEMO_CACHE_TTL = 60 * 30; // cache a precomputed result for 30 min
 
-// unauthenticated, rate-limited surfaces: the marketing playground and public
-// share links. no session, no workspace; strictly read-only or ephemeral compute.
 export const publicRoutes = new Hono();
 
 function clientIp(headerVal: string | undefined): string {
@@ -36,8 +32,6 @@ publicRoutes.get("/api/demo/samples", (c) =>
   }),
 );
 
-// run the engine on demo input. rate-limited by ip, size-capped, and result-cached
-// by content hash so the pre-filled samples return instantly and abuse is bounded.
 publicRoutes.post("/api/demo/fix", async (c) => {
   const ip = clientIp(c.req.header("x-forwarded-for") ?? c.req.header("x-real-ip"));
   const rl = await rateLimit(`demo:${ip}`, DEMO_RATE_LIMIT, DEMO_RATE_WINDOW);
@@ -75,8 +69,6 @@ publicRoutes.post("/api/demo/fix", async (c) => {
 
   try {
     await ensureEngineWarm();
-    // the demo has no workspace registry; run with the built-in seed mapping so the
-    // canonical Patient sample fully remediates.
     const result = await runRemediation(
       {
         raw: content,
@@ -104,8 +96,6 @@ publicRoutes.post("/api/demo/fix", async (c) => {
   }
 });
 
-// shape the demo result for the public client. corrected output is always
-// redacted (the demo never persists, but never echo raw identifiers either).
 function demoPayload(result: RemediationResult) {
   return {
     inputType: result.inputType,
@@ -129,8 +119,6 @@ function demoPayload(result: RemediationResult) {
   };
 }
 
-// public read-only report for a share token. distinct 410 for expired/revoked so
-// the client renders a designed state, not a raw 404.
 publicRoutes.get("/api/share/:token", async (c) => {
   const token = c.req.param("token");
   const [share] = await db
@@ -187,8 +175,6 @@ publicRoutes.get("/api/share/:token", async (c) => {
       occurrenceCount: f.occurrenceCount,
       ruleSource: f.ruleSource,
       specCitation: f.specCitation,
-      // the raw validator message can echo the offending value; keep it out of a
-      // public share. the plain message + rule id are enough for a read-only view.
       rawValidatorMessage: "",
       dedupFingerprint: f.dedupFingerprint,
       rank: f.rank,

@@ -41,8 +41,6 @@ export const workspaceRouter = router({
         workspaceId: org.id,
       });
 
-      // seed the billing account + trial credits so the aha flow works before
-      // anyone pays. the grant is a normal ledger entry (append-only truth).
       await grantTrialCredits(ctx.db, org.id, ctx.user.id);
 
       logger.info("workspace.create", `created ${org.id}`);

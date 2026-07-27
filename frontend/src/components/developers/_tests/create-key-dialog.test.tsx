@@ -2,8 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const createMutate = vi.fn();
-// the response the mocked mutation replays through onSuccess. set per test to
-// simulate the server returning the once-shown key.
 let mutationResponse: unknown = null;
 
 vi.mock("@tanstack/react-query", () => ({

@@ -3,8 +3,6 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth/auth";
 import { db, schema } from "@/lib/db";
 
-// integration: real Better Auth + real Postgres. requires docker postgres up
-// and the schema pushed. runs against EMAIL_TEST_MODE so no real email is sent.
 const testEmail = `itest-${Date.now()}@example.com`;
 const testPassword = "integration-pass-123";
 

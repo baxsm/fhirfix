@@ -3,9 +3,6 @@ import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
 
-// starter mapping registry. these are the deterministic fixes the engine derives
-// against: assigning-authority -> canonical system, and HL7 Table 0001 gender codes.
-// seeded per workspace so a fresh workspace can auto-fix common defects out of the box.
 const STARTER_MAPPINGS: Array<{
   type: "authority_to_system" | "code_to_code";
   sourceValue: string;

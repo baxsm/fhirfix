@@ -1,8 +1,6 @@
 import { createAccessControl } from "better-auth/plugins/access";
 import { adminAc, defaultStatements, ownerAc } from "better-auth/plugins/organization/access";
 
-// MUST stay in sync with backend/src/auth/permissions.ts. the client access
-// control has to match the server's for role checks to agree.
 const statement = {
   ...defaultStatements,
   workspaceSettings: ["view", "update"],
@@ -70,8 +68,6 @@ export const owner = ac.newRole({
 export const roles = { owner, admin, member, billing, auditor };
 export type WorkspaceRole = keyof typeof roles;
 
-// which nav items / actions each role can see. mirrors backend gating so the
-// UI hides what the server would reject.
 export function can(
   role: WorkspaceRole,
   resource: keyof typeof statement,

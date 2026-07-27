@@ -1,16 +1,5 @@
 import { cn } from "@/lib/utils";
 
-// the hero centerpiece. line-art of a fragmented resource (left, with red error
-// ticks) resolving into a clean, aligned resource (right, emerald, checked) — the
-// literal product promise: broken -> conformant. distinct from the wordmark, but
-// consistent with icon.svg (emerald pass color, rounded caps, thin precise strokes).
-//
-// the draw-in is CSS-only (see .glyph-draw in globals.css): strokes sweep in on
-// load, and it degrades to fully visible if animation is off or unsupported —
-// it can never get stuck invisible. reduced-motion is handled in the CSS.
-//
-// colors use theme tokens: --destructive (error), --primary (emerald pass),
-// --muted-foreground / --foreground for neutral structure + the flow arrow.
 export function HeroGlyph({ className }: { className?: string }) {
   return (
     <svg

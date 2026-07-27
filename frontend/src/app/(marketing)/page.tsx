@@ -8,8 +8,6 @@ import { ScaleCards } from "@/components/marketing/scale-cards";
 import { StandardsBar } from "@/components/marketing/standards-bar";
 import { site, siteUrl } from "@/lib/site";
 
-// structured data so search + social understand the product. SoftwareApplication
-// (the tool) nested with its publishing Organization.
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",

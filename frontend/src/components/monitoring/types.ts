@@ -55,16 +55,12 @@ export const DRIFT_LABELS: Record<DriftType, string> = {
   ig_version_change: "IG version changed",
 };
 
-// severity maps onto the app's one status vocabulary rather than inventing a
-// second colour scale for this page.
 export function severityTone(severity: DriftSeverity): StatusTone {
   if (severity === "error") return "danger";
   if (severity === "warning") return "warning";
   return "info";
 }
 
-// the presets cover what people actually schedule. a custom expression is still
-// accepted, so the picker narrows the common case without blocking the rest.
 export const CRON_PRESETS: { value: string; label: string }[] = [
   { value: "0 * * * *", label: "Every hour" },
   { value: "0 */6 * * *", label: "Every 6 hours" },

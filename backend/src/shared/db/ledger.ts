@@ -10,8 +10,6 @@ const billingId = () => `bil_${nano()}`;
 
 export type LedgerType = "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
 
-// make sure a workspace has a billing account row. idempotent: safe to call on
-// every billing read. returns the account.
 export async function ensureBillingAccount(db: Db, workspaceId: string) {
   const [existing] = await db
     .select()
@@ -34,11 +32,7 @@ export async function ensureBillingAccount(db: Db, workspaceId: string) {
   return created;
 }
 
-// post one append-only ledger entry AND update the balance cache atomically. this
-// is the single choke point for balance mutation: a SELECT ... FOR UPDATE locks
-// the billing_account row for the duration of the transaction, so two runs
-// completing at the same instant serialize here and cannot drift the cache from
-// sum(ledger). amountMicro is signed (negative for debit/expiry).
+// the only place the balance may be mutated: locks the billing_account row for the tx
 export async function postLedgerEntry(
   db: Db,
   args: {
@@ -54,8 +48,6 @@ export async function postLedgerEntry(
   },
 ): Promise<{ balanceAfter: number; entryId: string }> {
   return db.transaction(async (tx) => {
-    // ensure the row exists first, then lock it. we do this outside the lock read
-    // because the insert path is only hit once per workspace lifetime.
     await tx
       .insert(schema.billingAccount)
       .values({ id: billingId(), workspaceId: args.workspaceId })
@@ -108,8 +100,6 @@ export async function grantTrialCredits(db: Db, workspaceId: string, createdBy: 
   });
 }
 
-// re-derive the true balance from the append-only ledger. used by a reconciliation
-// check and by tests asserting the cache never drifts.
 export async function reconcileBalance(db: Db, workspaceId: string): Promise<number> {
   const rows = await db
     .select({ amount: schema.creditLedgerEntry.amountMicroCredits })

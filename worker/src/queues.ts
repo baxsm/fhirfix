@@ -1,15 +1,10 @@
 import { Queue } from "bullmq";
 import { env } from "./env";
 
-// the worker is normally a consumer, but run completion (async jobs) needs to
-// PRODUCE webhook-delivery jobs. one job per (event, workspace); the webhook
-// worker fans out to subscribed endpoints. mirrors backend/src/queues.
 const connection = { url: env.REDIS_URL };
 
 export const webhookQueue = new Queue("webhook", { connection });
 
-// the scheduler fires into its own queue, and each firing PRODUCES a remediation
-// job, so the worker needs both queues as a producer here.
 export const scheduleQueue = new Queue("schedule", { connection });
 export const remediationQueue = new Queue("remediation", { connection });
 

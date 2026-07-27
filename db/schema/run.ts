@@ -10,8 +10,6 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-// a run is one submit of a resource/bundle through detect -> convert -> validate
-// -> fix -> re-verify. the durable source of truth for a job; BullMQ is the live queue.
 export const run = pgTable(
   "run",
   {
@@ -26,16 +24,10 @@ export const run = pgTable(
       enum: ["hl7v2", "fhir_json", "fhir_xml", "ndjson", "bundle", "zip"],
     }).notNull(),
     fhirVersion: text("fhir_version", { enum: ["R4", "R4B", "R5"] }),
-    // what the caller asked for, set once at submit and never rewritten. empty
-    // means "no explicit list, derive per resource type". re-apply reads this,
-    // never profiles_applied: that one holds the engine's outcome, so feeding it
-    // back would turn an auto-derived run into an explicitly-pinned one.
     profilesRequested: jsonb("profiles_requested")
       .$type<string[]>()
       .notNull()
       .default(sql`'[]'::jsonb`),
-    // what the engine actually validated against, written on completion. the
-    // union across every resource in the bundle, so it is a report field, not an input.
     profilesApplied: jsonb("profiles_applied")
       .$type<string[]>()
       .notNull()
@@ -74,8 +66,6 @@ export const run = pgTable(
   }),
 );
 
-// one validator issue, normalized into plain language with a derived fix.
-// the same defect across many resources collapses to one row via dedup_fingerprint.
 export const finding = pgTable(
   "finding",
   {
@@ -121,9 +111,6 @@ export const finding = pgTable(
   }),
 );
 
-// a public, revocable, expiring read-only link to one run's report. never created
-// for a run whose corrected artifact still holds un-redacted PHI (see run router),
-// so an unauthenticated /share/[token] URL can never leak PHI.
 export const reportShare = pgTable(
   "report_share",
   {

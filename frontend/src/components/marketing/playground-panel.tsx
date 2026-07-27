@@ -40,9 +40,6 @@ const SEV_DOT: Record<string, string> = {
   info: "bg-sky-500",
 };
 
-// the live marketing playground: paste FHIR/HL7v2, run it through the REAL engine
-// (rate-limited public demo endpoint), see the ranked report. gated on volume, not
-// correctness, so it shows the genuine product output, never a canned mock.
 export function PlaygroundPanel({ compact = false }: { compact?: boolean }) {
   const [samples, setSamples] = useState<DemoSample[]>([]);
   const [content, setContent] = useState("");
@@ -75,8 +72,6 @@ export function PlaygroundPanel({ compact = false }: { compact?: boolean }) {
     }
   }, []);
 
-  // on mount: load the sample library and run the first one so the panel lands
-  // showing a real report, not an empty shell.
   useEffect(() => {
     let active = true;
     fetch(`${env.NEXT_PUBLIC_API_URL}/api/demo/samples`)

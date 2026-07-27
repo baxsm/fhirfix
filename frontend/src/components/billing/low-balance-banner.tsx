@@ -6,8 +6,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 
-// a slim app-wide banner when the workspace balance is low or empty. hidden on the
-// billing page itself (the balance is front and center there already).
 export function LowBalanceBanner({
   workspace,
   workspaceId,

@@ -32,11 +32,6 @@ export function EditMappingDialog({
   const trpc = useTRPC();
   const [targetValue, setTargetValue] = useState("");
 
-  // `open` follows the live target, but everything RENDERED reads the held one.
-  // closing nulls the target instantly while radix keeps the dialog mounted for
-  // its exit animation, so without this the fields blank out and the box
-  // collapses 31px before it fades - the content vanishing in place instead of
-  // the dialog animating away.
   const shown = useLastPresent(target);
 
   // seed the field whenever a new row opens it rather than on mount.
@@ -48,8 +43,6 @@ export function EditMappingDialog({
     trpc.mappings.update.mutationOptions({
       onSuccess: (res) => {
         toast.success(`Saved as v${res.version}. The previous version is kept in history.`);
-        // close first, then refetch. the order is not load-bearing, it just
-        // keeps the dismiss from waiting on a network round trip.
         onOpenChange(false);
         onSaved();
       },

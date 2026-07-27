@@ -32,9 +32,6 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
   });
 
   if (query.isPending) return <Skeleton className="h-24 w-full" />;
-  // a failed load gets a way out, like the ledger on this same page does. a
-  // sentence with no action reads as a permanent state rather than a retryable
-  // one, and these two panels sitting side by side made the difference obvious.
   if (query.isError)
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-center">

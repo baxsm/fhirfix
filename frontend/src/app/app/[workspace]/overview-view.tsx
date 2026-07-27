@@ -26,21 +26,11 @@ interface RunRow {
   createdAt: string | Date;
 }
 
-/**
- * the overview is a TRIAGE screen, not a stat wall.
- *
- * it used to be hardcoded to the phase-1 first-run state, so a workspace with
- * 15 runs and a live balance still read "Run your first check". it now answers
- * the two questions someone opening the app actually has: did the last thing I
- * ran work, and is anything waiting on me.
- */
 export function OverviewView({
   workspace,
   workspaceId: serverWorkspaceId,
 }: {
   workspace: string;
-  // resolved on the server; the client lookup is the fallback for client-side
-  // navigations, where there is no server pass.
   workspaceId?: string;
 }) {
   const base = `/app/${workspace}`;
@@ -62,8 +52,6 @@ export function OverviewView({
   const trend = trendQuery.data ?? [];
   const pendingMappings = mappingsQuery.data?.suggested ?? 0;
 
-  // isPending is "no data yet", not "a request is in flight". gating the
-  // skeleton on the delayed flag means a 13ms response never flashes grey.
   const settling = !enabled || runsQuery.isPending;
   const loading = useDelayedFlag(settling);
   // data is on screen and being refreshed: annotate, never tear down.
@@ -72,12 +60,6 @@ export function OverviewView({
   const inFlight = runs.filter((r) => r.status === "running" || r.status === "queued");
   const latest = runs[0];
 
-  // a genuinely new workspace still gets the guided state - it is the right
-  // screen when there is nothing to triage yet.
-  //
-  // gated on `settling`, NOT the delayed flag: during the delay window there is
-  // no data yet, so testing the delayed flag here would flash "run your first
-  // check" at a workspace that has 15 runs.
   if (!settling && runs.length === 0) {
     return <FirstRun base={base} />;
   }
@@ -189,15 +171,6 @@ function summaryLine({
   return `${runs} check${runs === 1 ? "" : "s"} run in this workspace. Everything completed.`;
 }
 
-/**
- * an alert that links somewhere. it used to be a full-row hover target with an
- * arrow that was invisible at rest, faded in on hover and nudged 2px sideways -
- * three animated properties on a row whose whole job is "go to this page". the
- * motion was standing in for an affordance rather than being one.
- *
- * now the destination is a plain, always-visible link at the end of the row, so
- * you can see where it goes without hovering to find out.
- */
 function AttentionRow({
   href,
   title,
@@ -223,10 +196,7 @@ function AttentionRow({
       )}
     >
       <Icon
-        className={cn(
-          "size-4 shrink-0",
-          tone === "danger" ? "text-destructive" : "text-warning",
-        )}
+        className={cn("size-4 shrink-0", tone === "danger" ? "text-destructive" : "text-warning")}
       />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium leading-tight">{title}</p>
@@ -280,9 +250,6 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
   );
 }
 
-// mirrors the real layout: a full-width trend band stacked above the runs list.
-// the previous version was two side-by-side blocks, which is not what arrives -
-// the eye has to reorient when the real content replaces it.
 function OverviewSkeleton() {
   return (
     <div className="space-y-5">

@@ -4,10 +4,6 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-// the same quiet mono panel as CodeBlock, with a language switcher. the SDK
-// sections show the same call in curl / node / python, and a reader wants their
-// own language, not three stacked blocks.
-
 export interface CodeTab {
   label: string;
   code: string;

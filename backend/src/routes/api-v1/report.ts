@@ -10,11 +10,6 @@ import {
 import type { ApiV1Env } from "./context";
 import { apiError } from "./middleware";
 
-// GET /runs/:id/report?format=json|operationoutcome|pdf - the report in a chosen
-// format, reusing the same formatters the dashboard export route uses. the run +
-// findings come from db-package helpers (getRun/getRunFindings) so their drizzle
-// queries resolve in one place - mixing drizzle copies in the route graph makes the
-// query builder's column types collapse to `never`.
 export async function getReportController(c: Context<ApiV1Env>) {
   const workspaceId = c.get("workspaceId");
   const runId = c.req.param("id") ?? "";

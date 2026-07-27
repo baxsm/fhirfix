@@ -53,11 +53,14 @@ describe("BillingControls", () => {
     rerender(
       <BillingControls
         {...defaults}
-        autoRecharge={{ ...defaults.autoRecharge, enabled: true, thresholdDollars: 5, amountCents: 2500 }}
+        autoRecharge={{
+          ...defaults.autoRecharge,
+          enabled: true,
+          thresholdDollars: 5,
+          amountCents: 2500,
+        }}
       />,
     );
-    // the disclosure must not be conditional on the toggle: a user who turns it
-    // on is exactly the person who needs to know it will not fire.
     expect(screen.getByText(/not active yet/i)).toBeInTheDocument();
   });
 
@@ -99,9 +102,7 @@ describe("BillingControls", () => {
     );
     fireEvent.click(screen.getByRole("switch", { name: /monthly spend alert/i }));
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
-    expect(saveMutate).toHaveBeenCalledWith(
-      expect.objectContaining({ monthlyCents: 10000 }),
-    );
+    expect(saveMutate).toHaveBeenCalledWith(expect.objectContaining({ monthlyCents: 10000 }));
 
     saveMutate.mockReset();
     rerender(<BillingControls {...defaults} spendCap={{ monthlyCents: 10000 }} />);

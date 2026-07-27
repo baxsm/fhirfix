@@ -11,9 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { CreateWorkspaceForm } from "./create-workspace-form";
 
-// the create-workspace modal for users who already have a workspace. triggered
-// from the workspace switcher (and anywhere else that needs it). the first-run
-// case gets the full onboarding page instead; this is the quick path.
 export function CreateWorkspaceDialog({
   trigger,
   open: controlledOpen,

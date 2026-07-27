@@ -5,24 +5,10 @@ import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import { hideDevOverlay, latestLink } from "./helpers";
 
-// the phase-5 integration seam: a key a human CREATES BY CLICKING has to work in
-// the API explorer and gate a real CLI build. the api-level tests mint keys
-// programmatically, so this path (dashboard -> explorer -> cli) is the one thing
-// they cannot cover. needs the full stack: frontend, backend, worker, pg, redis,
-// validator, converter.
-//
-// run with:
-//   EMAIL_CAPTURE_FILE=<path> npx playwright test developers-integration
 
 const CLI_BIN = resolve(process.cwd(), "../cli/dist/bin.js");
 const API_BASE = process.env.E2E_API_BASE ?? "http://localhost:3001/api/v1";
 
-// a Patient whose ONLY defect is one the engine really fixes: gender "M" (HL7
-// Table 0001 -> FHIR AdministrativeGender) via the seeded mapping registry.
-// everything else is here to satisfy the default profile, so the gate can actually
-// reach green: a Patient with no profile passed validates against us-core-patient,
-// which requires identifier (min 1), and the narrative satisfies dom-6. a thinner
-// resource trips profile errors the engine cannot auto-fix and would never pass.
 const BROKEN = {
   resourceType: "Patient",
   id: "e2e-gate",
@@ -73,10 +59,6 @@ test("create a key in the dashboard, use it in the API explorer, gate a build wi
     await page.getByRole("link", { name: "Developers" }).click();
     await expect(page.getByRole("heading", { name: "Developers" })).toBeVisible();
 
-    // the header resolving the workspace NAME (not "this workspace") is the proof
-    // that better-auth's $listOrg atom refreshed after the trpc-side create. if it
-    // regresses, every section below stays a skeleton forever. scoped to the page
-    // header: the sidebar and breadcrumb render the name from other sources.
     await expect(page.locator("header p").first()).toContainText(`E2E Dev Health ${stamp}`);
 
     // a brand-new workspace has no keys: the empty state, not the table.
@@ -123,8 +105,6 @@ test("create a key in the dashboard, use it in the API explorer, gate a build wi
     // fix --out writes the corrected resource.
     const fixedFile = join(workDir, "patient.fixed.json");
     const fix = runCli(["fix", brokenFile, "--out", fixedFile], testKey);
-    // the engine fixed everything it found, so the gate passes. this is the whole
-    // point of `fhirfix fix` in CI: it must be able to succeed.
     expect(fix.code).toBe(0);
 
     // the fix is real, not just an exit code: "M" -> "male".
@@ -147,8 +127,6 @@ test("create a key in the dashboard, use it in the API explorer, gate a build wi
   }
 });
 
-// invoke the built CLI the way CI does: a real child process, real exit code.
-// shell:false is fine here - we spawn node directly, not a .cmd shim.
 function runCli(args: string[], apiKey: string): { code: number; out: string } {
   try {
     const out = execFileSync(process.execPath, [CLI_BIN, ...args, "--base-url", API_BASE], {

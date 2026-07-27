@@ -7,8 +7,6 @@ import type { EngineDeps } from "../remediate";
 import type { RegistryMapping } from "../types";
 import { ValidatorPool } from "../validator-client";
 
-// REAL sidecars + a REAL OpenRouter call. the fixWithAi path must be exercised
-// against a live model (model ids drift; a mock would hide a dead id).
 
 const VALIDATOR_URL = process.env.VALIDATOR_URL ?? "http://localhost:4567";
 const CONVERTER_URL = process.env.CONVERTER_URL ?? "http://localhost:8081";
@@ -25,8 +23,6 @@ const MAPPINGS: RegistryMapping[] = [
   },
 ];
 
-// a Patient whose only issue is the missing v2-0203 system on the identifier type
-// coding - a single safe fix, so applyFixes has exactly one thing to apply.
 const PARTIALLY_FIXED = {
   resourceType: "Patient",
   id: "apply-case",
@@ -66,8 +62,6 @@ describe("applyFixes (real validator)", () => {
         resourceType: "Patient",
         fhirpath: "Patient.identifier[0].type.coding[0]",
       });
-      // apply-all-safe: pass every open fingerprint; the engine only applies the
-      // ones with a safe deriver. we assert at least one gets applied.
       const before = await runRemediation(
         { raw: JSON.stringify(PARTIALLY_FIXED), mappings: MAPPINGS, autoFix: false },
         deps,

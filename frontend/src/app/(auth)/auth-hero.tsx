@@ -5,8 +5,6 @@ import { usePathname } from "next/navigation";
 import { BrandMark } from "@/components/brand-mark";
 import authReport from "../../../public/auth-report.png";
 
-// per-route hero copy. sign-in reassures a returning user; sign-up frames the
-// first action so the two screens don't read as the same page twice.
 const DEFAULT_COPY = {
   title: "Every resource, checked against the spec.",
   body: "FHIRfix validates a record and everything it references, ranks what is broken, and applies the safe fixes until it re-verifies clean.",
@@ -19,11 +17,6 @@ const COPY: Record<string, { title: string; body: string }> = {
   },
 };
 
-// the auth left panel. no grid, no glow orbs, no grain, no code-window chrome —
-// those are the default AI moves. a calm deep canvas with room to breathe, and
-// the centerpiece is the product itself: a real screenshot of a remediation
-// report (a genuine engine run: 640 -> 970, the gender/date fixes shown in the
-// live before/after diff). it is our actual dashboard, not hand-drawn HTML.
 export function AuthHero() {
   const pathname = usePathname();
   const copy = COPY[pathname] ?? DEFAULT_COPY;

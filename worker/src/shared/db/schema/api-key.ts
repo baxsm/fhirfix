@@ -1,11 +1,6 @@
 import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-// a workspace's public REST API keys. the full key is shown once at creation; we
-// store hashedKey = HMAC-SHA256(pepper, fullKey). a 256-bit random key is not
-// brute-forcible, so a fast keyed hash is correct here (argon2 is for low-entropy
-// passwords) and lets auth do an O(1) indexed lookup by hash. the pepper adds
-// defense-in-depth against a db-only leak. prefix is the masked display value.
 export const apiKey = pgTable(
   "api_key",
   {

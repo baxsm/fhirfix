@@ -8,10 +8,7 @@ import { logger } from "@/lib/logger";
 import { findConflicts } from "@/lib/mapping-conflicts";
 import { router, workspaceProcedure } from "../trpc";
 
-// the mapping registry. every write is versioned: an edit supersedes the old row
-// rather than mutating it, because one mapping change silently rewrites every
-// downstream record the next run touches, and "what did this look like in March"
-// has to stay answerable.
+// every write is versioned: an edit supersedes the old row, never mutates it
 
 const MAPPING_TYPES = ["authority_to_system", "code_to_code", "facility_to_org", "custom"] as const;
 const MAPPING_SCOPES = ["workspace", "source_system"] as const;
@@ -32,9 +29,7 @@ const scopeFields = z.object({
   sourceSystem: z.string().min(1).max(200).nullable().default(null),
 });
 
-// a source_system-scoped mapping without a source system would apply to nothing,
-// and a workspace-scoped one carrying a source system is a contradiction. reject
-// both rather than silently normalizing, so the caller learns which they meant.
+// reject rather than silently normalize, so the caller learns which scope they meant
 function normalizeScope(scope: "workspace" | "source_system", sourceSystem: string | null) {
   if (scope === "source_system" && !sourceSystem) {
     throw new TRPCError({
@@ -46,9 +41,6 @@ function normalizeScope(scope: "workspace" | "source_system", sourceSystem: stri
 }
 
 export const mappingsRouter = router({
-  // the registry as it stands now. superseded rows are excluded; history is its
-  // own endpoint. ordered newest first within a status so a fresh suggestion is
-  // the first thing a reviewer sees.
   list: workspaceProcedure
     .input(
       z.object({
@@ -97,15 +89,7 @@ export const mappingsRouter = router({
         .limit(500);
     }),
 
-  // overlapping mappings: the same type and source value live at BOTH workspace
-  // scope and source-system scope. the live-unique index cannot catch this - the
-  // scope is part of its key, so both rows are legitimately unique.
-  //
-  // this is not a bug in the engine. loadActiveMappings orders source_system
-  // before workspace, so the specific one deterministically wins for that feed.
-  // it is a bug in what the user can SEE: editing the workspace mapping looks
-  // like it changed the behaviour for every feed, and for the overridden one it
-  // did nothing. that is what this surfaces.
+  // the live-unique index cannot catch these: scope is part of its key
   conflicts: workspaceProcedure
     .input(z.object({ workspaceId: z.string() }))
     .query(async ({ ctx }) => {
@@ -130,7 +114,6 @@ export const mappingsRouter = router({
       return findConflicts(rows);
     }),
 
-  // counts per status, so the ui can label its filters without pulling every row.
   counts: workspaceProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db
       .select({
@@ -148,8 +131,7 @@ export const mappingsRouter = router({
     return counts;
   }),
 
-  // the supersede chain for one mapping, oldest first. walks backwards through
-  // supersedesId from whichever version the caller happens to hold.
+  // the supersede chain for one mapping, oldest first
   history: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), mappingId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -170,8 +152,7 @@ export const mappingsRouter = router({
         .limit(1);
       if (!start) throw new TRPCError({ code: "NOT_FOUND", message: "Mapping not found." });
 
-      // every version shares the identity tuple, so selecting on it returns the
-      // whole chain without recursing row by row.
+      // every version shares the identity tuple, so this returns the chain without recursing
       return ctx.db
         .select({
           id: schema.mappingRegistryEntry.id,
@@ -200,8 +181,7 @@ export const mappingsRouter = router({
         .orderBy(schema.mappingRegistryEntry.version);
     }),
 
-  // add a mapping by hand. active immediately: a human typed it, so there is
-  // nothing to review.
+  // active immediately: a human typed it, so there is nothing to review
   create: workspaceProcedure
     .input(
       z
@@ -234,8 +214,6 @@ export const mappingsRouter = router({
           approvedBy: ctx.user.id,
         });
       } catch {
-        // the live-unique index rejected it: something already maps this source
-        // value at this scope. editing that row is the supported path.
         throw new TRPCError({
           code: "CONFLICT",
           message: "A mapping for that source value already exists. Edit it instead.",
@@ -246,9 +224,6 @@ export const mappingsRouter = router({
       return { id };
     }),
 
-  // edit a mapping by superseding it. the old row keeps its values and gains a
-  // pointer to the new one, so a report from before the change still explains
-  // itself. never an in-place update.
   update: workspaceProcedure
     .input(
       z.object({
@@ -281,9 +256,7 @@ export const mappingsRouter = router({
         }
 
         const newId = createId("mapping");
-        // point the old row at the new one first: the live-unique index only
-        // permits one unsuperseded row per identity tuple, so the insert would
-        // collide with the row it is replacing.
+        // must supersede before inserting or the live-unique index rejects the new row
         await tx
           .update(schema.mappingRegistryEntry)
           .set({ supersededById: newId })
@@ -313,8 +286,6 @@ export const mappingsRouter = router({
       });
     }),
 
-  // approve an auto-learned suggestion. this is the compounding step: from here
-  // every run auto-fixes the thing that previously needed review.
   approve: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), mappingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -341,8 +312,7 @@ export const mappingsRouter = router({
       return { approved: true };
     }),
 
-  // turn a suggestion down. kept as a tombstone rather than deleted so the
-  // auto-learn loop does not re-suggest it on the next run.
+  // kept as a tombstone, not deleted, or auto-learn re-suggests it next run
   reject: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), mappingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -369,8 +339,6 @@ export const mappingsRouter = router({
       return { rejected: true };
     }),
 
-  // retire an active mapping. future runs stop using it; the row and its history
-  // stay, and past reports still explain what they did.
   deprecate: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), mappingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -400,8 +368,6 @@ export const mappingsRouter = router({
       return { deprecated: true };
     }),
 
-  // bring a deprecated mapping back. the inverse of deprecate, so a mistake is
-  // one click to undo rather than a re-typed row with a new id.
   reactivate: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), mappingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -431,10 +397,7 @@ export const mappingsRouter = router({
       return { reactivated: true };
     }),
 
-  // bulk export. deliberately returns the SAME column set importRows accepts, so
-  // an export dropped straight back into import round-trips. that means no ids,
-  // no versions and no timestamps: those belong to this workspace's chain and
-  // would be meaningless (or actively wrong) in whatever registry receives them.
+  // must return the same column set importRows accepts, so an export round-trips
   exportRows: workspaceProcedure
     .input(
       z.object({
@@ -445,9 +408,7 @@ export const mappingsRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const conditions = [eq(schema.mappingRegistryEntry.workspaceId, ctx.workspaceId), isLive];
-      // an export with no status defaults to active only. exporting suggestions
-      // and tombstones by default would hand someone a file that, on import,
-      // silently promotes unreviewed guesses to active mappings.
+      // active only by default, or re-importing would promote unreviewed guesses
       conditions.push(eq(schema.mappingRegistryEntry.status, input.status ?? "active"));
       if (input.type) {
         conditions.push(eq(schema.mappingRegistryEntry.type, input.type));
@@ -471,9 +432,7 @@ export const mappingsRouter = router({
       return rows;
     }),
 
-  // bulk import. rows that collide with an existing live mapping are reported
-  // back rather than silently skipped or silently overwritten, because either
-  // one hides a mapping the caller believes they just imported.
+  // collisions are reported back, never silently skipped or overwritten
   importRows: workspaceProcedure
     .input(
       z.object({
@@ -501,8 +460,7 @@ export const mappingsRouter = router({
         ...normalizeScope(r.scope, r.sourceSystem),
       }));
 
-      // a duplicate inside the payload itself would pass the pre-check and then
-      // collide on insert, so collapse them first and report the loser.
+      // must collapse in-payload duplicates first: they pass the pre-check then collide on insert
       const seen = new Set<string>();
       const deduped: typeof normalized = [];
       const duplicateInFile: string[] = [];

@@ -9,37 +9,13 @@ import { cache } from "react";
 import { env } from "@/lib/env";
 import { getQueryClient } from "./query-client";
 
-/**
- * server-side tRPC, so a page can arrive with its data already in the html.
- *
- * every page in this app used to be a client component that mounted, THEN
- * fetched. that is why a report showed a full-page spinner for a run that
- * completes in 1.33s on average - the wait was not the engine, it was the
- * round trip we only started after react hydrated.
- *
- * our tRPC server is a separate backend on another origin, so this goes over
- * http (a `client`), not an in-process `router` caller. the session cookie is
- * readable here only because next.config rewrites /api/auth/* through this
- * origin, which makes it first-party - see proxy.ts.
- */
-
-// one query client per request. `cache` keys it to the react request scope, so
-// every prefetch in a single render shares a client and hydrates as one payload.
 export const getServerQueryClient = cache(getQueryClient);
 
-/**
- * the raw client, for server code that needs a value NOW rather than a set of
- * query options - resolving a slug to an id before deciding what to prefetch,
- * for instance. `trpcServer` (the options proxy) is for prefetching.
- */
 export const serverApi = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       url: `${env.NEXT_PUBLIC_API_URL}/trpc`,
       async headers() {
-        // forward the caller's cookies so the backend sees the same session it
-        // would on a client-side call. without this every prefetch is anonymous
-        // and the page hydrates empty.
         const store = await cookies();
         const header = store
           .getAll()
@@ -56,26 +32,11 @@ export const trpcServer = createTRPCOptionsProxy<AppRouter>({
   queryClient: getServerQueryClient,
 });
 
-/**
- * wrap a server component's output so whatever it prefetched is available to
- * the client components inside it without a second fetch.
- */
 export function HydrateClient({ children }: { children: React.ReactNode }) {
   const queryClient = getServerQueryClient();
   return <HydrationBoundary state={dehydrate(queryClient)}>{children}</HydrationBoundary>;
 }
 
-/**
- * start a query on the server and let the result stream to the client.
- *
- * deliberately NOT awaited, per the tRPC RSC guide: the html goes out
- * immediately and the data follows over the RSC transport. that only works
- * because query-client.ts extends `shouldDehydrateQuery` to include pending
- * queries - without that the payload is empty and the client silently refetches
- * everything, which is what happened here before the docs were read.
- *
- * await this only when the page must not render without the data.
- */
 export function prefetch<T extends { queryKey: [readonly unknown[], { type?: string }?] }>(
   options: T,
 ) {

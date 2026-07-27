@@ -12,25 +12,6 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 
 type Row = { label: string; href: string; icon: typeof UserRound };
 
-/**
- * the account control.
- *
- * three structural rules, each one checked rather than assumed:
- *
- * 1. the panel does NOT repeat the avatar. ours is a generic icon the user
- *    cannot replace, so showing it again - at any size - tells them nothing
- *    they did not just click on.
- * 2. no role badge. checked github, vercel, linear, figma, slack, notion,
- *    asana, stripe, sentry, intercom, jira: none put role in the personal
- *    account menu. role is you-in-a-workspace; this menu is you-as-a-person and
- *    follows you across workspaces. it lives on the members page.
- * 3. greyscale only. globals.css: "chrome carries NO hue, every saturated pixel
- *    belongs to a finding", and violet is wordmark-only.
- *
- * the styling is ours: a flush identity block on its own surface, hairline
- * dividers that run the full panel width, and 34px rows with a settled icon
- * column - not the stock menu.
- */
 export function UserMenu({
   user,
   workspace,

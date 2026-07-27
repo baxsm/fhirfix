@@ -10,8 +10,6 @@ import { logger } from "@/lib/logger";
 import { rateLimit } from "@/lib/redis";
 import type { ApiV1Env } from "./context";
 
-// per-key fixed-window rate limit. generous for the base tier; the ceiling exists
-// to bound abuse, not to shape normal integration traffic.
 const RATE_LIMIT = 120; // requests
 const RATE_WINDOW = 60; // per minute, per key
 
@@ -32,9 +30,6 @@ function clientIp(c: Context): string {
   return fwd?.split(",")[0]?.trim() ?? "unknown";
 }
 
-// resolveApiKey: Bearer token -> keyed-hash -> indexed lookup. sets the auth vars
-// or 401s. a revoked key (revoked_at set) never resolves. last_used_at is bumped
-// fire-and-forget so auth latency is just the indexed select.
 export const resolveApiKey: MiddlewareHandler<ApiV1Env> = async (c, next) => {
   const auth = c.req.header("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
@@ -101,8 +96,6 @@ export const enforceRateLimit: MiddlewareHandler<ApiV1Env> = async (c, next) => 
   await next();
 };
 
-// enforceCredits: floor check shared with the tRPC gate. 402 when broke and
-// auto-recharge cannot cover the next run.
 export const enforceCredits: MiddlewareHandler<ApiV1Env> = async (c, next) => {
   const account = await ensureBillingAccount(db, c.get("workspaceId"));
   if (!hasCreditFloor(account)) {
@@ -116,23 +109,12 @@ export const enforceCredits: MiddlewareHandler<ApiV1Env> = async (c, next) => {
   await next();
 };
 
-// enforceIdempotency: an Idempotency-Key header makes a state-changing call
-// replay-safe. same key + same body -> the prior run is returned by the controller
-// (via the run_idem_idx unique index at insert time). same key + DIFFERENT body ->
-// 409 immediately, because reusing a key with new input is a client bug. this
-// middleware only validates + stores the key/body-hash on the context; the
-// controller does the actual insert-or-return using the unique index.
 export const captureIdempotency: MiddlewareHandler<ApiV1Env> = async (c, next) => {
   const key = c.req.header("idempotency-key")?.trim() || null;
   c.set("idempotencyKey", key);
   await next();
 };
 
-// logApiRequest: the OUTER wrapper. runs the chain, then writes an api_request_log
-// row on EVERY exit - success and the 401/402/409/422/429 error paths alike, which
-// is exactly the traffic a developer debugging an integration needs. reads
-// c.res.status after next() (hono onError only fires on THROWN errors, not on a
-// returned c.json(.., 4xx), so a finally-style read is the reliable capture point).
 export const logApiRequest: MiddlewareHandler<ApiV1Env> = async (c, next) => {
   c.set("startedAt", Date.now());
   c.set("ip", clientIp(c));

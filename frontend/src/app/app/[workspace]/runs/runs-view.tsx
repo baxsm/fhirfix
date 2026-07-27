@@ -37,9 +37,6 @@ interface RunRow {
   errorMessage: string | null;
 }
 
-// completed is deliberately neutral. it is the expected outcome, so it gets no
-// colour; that keeps the eye free for the failed row, which is the only one
-// that needs an action.
 const STATUS_TONE: Record<Status, StatusTone> = {
   completed: "neutral",
   running: "info",
@@ -64,9 +61,6 @@ export function RunsView({
   workspaceId: serverWorkspaceId,
 }: {
   workspace: string;
-  // resolved on the server so the first render already knows which workspace
-  // it is looking at. the client lookup below is only a fallback for client
-  // navigations, where there is no server pass.
   workspaceId?: string;
 }) {
   const { data: orgs } = useListOrganizations();
@@ -135,8 +129,6 @@ export function RunsView({
                 Failed only
               </FilterPill>
               {failedOnly && (
-                // an active filter means the counts on screen are a subset. say
-                // so, or a filtered count reads as a total.
                 <span className="text-xs text-muted-foreground">
                   Showing failed runs only.{" "}
                   <button
@@ -186,9 +178,6 @@ export function RunsView({
                         }}
                         className={cn(
                           "row-interactive group cursor-pointer",
-                          // a failed row is marked by its status text and a
-                          // faint tint. no coloured bar down the left edge -
-                          // the status column already says "failed" in red.
                           isRealFailure(r) && "bg-destructive/[0.03]",
                         )}
                       >

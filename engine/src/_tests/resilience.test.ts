@@ -86,8 +86,6 @@ describe("resilientFetch", () => {
 });
 
 describe("describeSidecarError", () => {
-  // the message already carries the sidecar name, so the old caller-side
-  // `${err.sidecar}: ${err.message}` produced it twice.
   it("does not repeat the sidecar name", () => {
     const err = new SidecarError("validator.validate unreachable", "validator.validate");
     expect(describeSidecarError(err)).toBe("validator.validate unreachable");

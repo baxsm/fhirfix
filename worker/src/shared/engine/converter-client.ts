@@ -1,7 +1,5 @@
 import { CircuitBreaker, type ResilienceOptions, resilientFetch } from "./resilience";
 
-// microsoft fhir-converter client. convertToFhir turns HL7v2/C-CDA into a FHIR R4
-// bundle. same timeout/retry/breaker treatment as the validator.
 export interface ConverterOptions {
   baseUrl: string;
   apiVersion?: string;
@@ -41,8 +39,6 @@ export class ConverterClient {
     }
   }
 
-  // convert a legacy message to a FHIR R4 bundle. rootTemplate is the message type
-  // (e.g. ADT_A01 for HL7v2). returns the bundle from the result property.
   async convert(
     input: string,
     format: ConverterInputFormat,
@@ -68,9 +64,6 @@ export class ConverterClient {
   }
 }
 
-// pick the HL7v2 root template from the MSH-9 message type (e.g. ADT^A01 -> ADT_A01).
-// the microsoft converter ships 57 HL7v2 templates; fall back to ADT_A01 for
-// unknown ADT trigger events since the segment set is nearly identical.
 export function hl7RootTemplate(raw: string): string {
   const msh = raw.split(/\r?\n|\r/)[0] ?? "";
   const fields = msh.split("|");

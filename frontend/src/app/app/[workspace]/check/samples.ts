@@ -1,6 +1,3 @@
-// pre-broken samples for the harness. these are intentionally non-conformant so
-// the engine has real defects to detect and fix. no fake "already clean" data.
-
 export interface Sample {
   id: string;
   label: string;

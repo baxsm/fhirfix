@@ -1,8 +1,6 @@
 import { createAccessControl } from "better-auth/plugins/access";
 import { adminAc, defaultStatements, ownerAc } from "better-auth/plugins/organization/access";
 
-// resources + actions this product gates on. defaultStatements covers
-// organization/member/invitation; we add our own domain resources.
 const statement = {
   ...defaultStatements,
   workspaceSettings: ["view", "update"],
@@ -79,8 +77,6 @@ type Statement = typeof statement;
 type Resource = keyof Statement;
 type Action<R extends Resource> = Statement[R][number];
 
-// synchronous permission check off a role's granted statements.
-// used by the tRPC enforceRole middleware.
 export function hasPermission<R extends Resource>(
   role: WorkspaceRole,
   resource: R,

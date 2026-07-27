@@ -208,8 +208,6 @@ export function ChecksTable({
   );
 }
 
-// the last fire, and honestly when it failed. a check that has been erroring for
-// a week is exactly what this page exists to show, so the error wins the cell.
 function LastRun({ row, workspace }: { row: ScheduledCheckRow; workspace: string }) {
   if (row.lastError) {
     return (

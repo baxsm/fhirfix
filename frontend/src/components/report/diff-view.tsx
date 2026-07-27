@@ -4,11 +4,6 @@ import { useMemo, useState } from "react";
 import { ChoiceChip, ChoiceGroup } from "@/components/ui/segmented";
 import { cn } from "@/lib/utils";
 
-// a small, dependency-free before/after diff. line-level LCS with word-level
-// intra-line highlighting on changed pairs, a split/unified toggle, and collapse
-// of long unchanged runs. built for JSON/FHIR payloads; falls back to whole-line
-// highlighting when a line is too long to word-diff usefully.
-
 type Op = "same" | "add" | "del";
 interface LineRow {
   op: Op;
@@ -18,8 +13,6 @@ interface LineRow {
   rightNo: number | null;
 }
 
-// build an LCS length table for two token arrays. returns an (n+1)x(m+1) matrix
-// where lcs[i][j] is the LCS length of a[i:] and b[j:].
 function lcsTable(a: string[], b: string[]): number[][] {
   const n = a.length;
   const m = b.length;
@@ -147,8 +140,6 @@ export function DiffView({
   const [split, setSplit] = useState(true);
   const rows = useMemo(() => diffLines(before.split("\n"), after.split("\n")), [before, after]);
 
-  // collapse runs of >6 unchanged lines to keep large diffs readable, leaving 3
-  // lines of context on each side of a change.
   const collapsed = useMemo(() => collapse(rows), [rows]);
   const changedCount = rows.filter((r) => r.op !== "same").length;
 

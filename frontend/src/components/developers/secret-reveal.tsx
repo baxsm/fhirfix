@@ -4,9 +4,6 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-// a one-time secret display: the full value is shown once (on create/rotate) and
-// never again. copy-to-clipboard with a confirmed state. used for api keys and
-// webhook signing secrets.
 export function SecretReveal({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -15,10 +12,7 @@ export function SecretReveal({ value, label }: { value: string; label: string })
       await navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // clipboard can fail on http origins or denied permission; the value is
-      // still selectable in the field, so this is a soft failure.
-    }
+    } catch {}
   };
 
   return (

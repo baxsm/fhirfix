@@ -22,9 +22,6 @@ export function RunReport({
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
   const workspaceId = serverWorkspaceId || active?.id || "";
 
-  // `full` because the diff IS the product output. this page used to carry its
-  // own `mx-auto max-w-5xl`, which is why it lined up with no other screen and
-  // why the diff had ~200px in which to render a url.
   return (
     <PageContainer width="full">
       <Link

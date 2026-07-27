@@ -30,9 +30,6 @@ describe("scoreFrom", () => {
     expect(scoreFrom(findings(1, "error"), 1)).toBeLessThan(scoreFrom(findings(1, "warning"), 1));
   });
 
-  // the hl7v2 case: one ADT^A01 converts to 14 resources with 27 findings.
-  // unscaled this is 1710 penalty against a 1000 budget, so before and after
-  // both floor at 0 and the report shows no improvement for real fixes.
   it("does not floor a multi-resource bundle at 0", () => {
     const real = [...findings(10, "error"), ...findings(17, "warning")];
     expect(scoreFrom(real, 14)).toBeGreaterThan(0);

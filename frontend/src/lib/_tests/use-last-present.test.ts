@@ -2,18 +2,11 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useLastPresent } from "../use-last-present";
 
-// dialogs are driven by a nullable target and close by nulling it, but radix
-// keeps them mounted for the exit animation. this hook holds the last value
-// across that window so the box animates away still showing its content.
-
 describe("useLastPresent", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
   it("returns a new value on the very first render, not one frame later", () => {
-    // the bug this replaced: adopting the value in an effect meant the first
-    // render after opening still returned null, so the dialog painted one frame
-    // with an empty source value.
     const { result } = renderHook(({ v }) => useLastPresent(v), {
       initialProps: { v: null as { id: string } | null },
     });

@@ -207,15 +207,9 @@ function ModeButton({
   return (
     <button
       type="button"
-      // two mutually exclusive options with a real consequence (live charges
-      // credits) is a radio, not two independent buttons. role+aria-checked is
-      // what announces which one is armed.
       role="radio"
       aria-checked={active}
       onClick={onClick}
-      // selected is ink, not a blue tint. --interactive is the link colour;
-      // using it here made "test mode" look like a hyperlink and made this
-      // dialog the only blue surface in the product.
       className={cn(
         "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors",
         active

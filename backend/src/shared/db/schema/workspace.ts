@@ -1,8 +1,6 @@
 import { sql } from "drizzle-orm";
 import { integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// workspace settings extend the Better Auth organization row 1:1.
-// an organization IS a workspace in this product.
 export const workspaceSettings = pgTable("workspace_settings", {
   id: text("id").primaryKey(), // wss_...
   workspaceId: text("workspace_id").notNull().unique(), // -> organization.id

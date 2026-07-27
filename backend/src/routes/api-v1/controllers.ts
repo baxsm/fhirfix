@@ -22,8 +22,6 @@ import { apiError } from "./middleware";
 
 const MAX_INPUT_BYTES = 5_000_000;
 
-// map an engine finding to the public REST finding shape (no db ids, no raw
-// validator echo unless the caller is authed - here they are, so raw is included).
 function publicFinding(f: RemediationResult["findings"][number]) {
   return {
     severity: f.severity,
@@ -74,11 +72,6 @@ async function readBody(
   };
 }
 
-// core: create a run row (source=api), run the engine synchronously, persist the
-// completed run + debit via the shared path, and return the result. autoFix gates
-// validate (false) vs fix (true). idempotencyKey makes it replay-safe via the
-// run_idem_idx unique index: a duplicate insert returns the prior run instead of
-// re-running the engine.
 async function runAndPersist(
   c: Context<ApiV1Env>,
   autoFix: boolean,
@@ -92,8 +85,6 @@ async function runAndPersist(
   const idempotencyKey = c.get("idempotencyKey");
   const requestHash = Bun.hash(`${autoFix}:${input}`).toString(16);
 
-  // idempotency: if this key was used before, either replay (same body) or 409
-  // (different body). checked before spending anything.
   if (idempotencyKey) {
     const [prior] = await db
       .select({ id: schema.run.id, requestHash: schema.run.requestHash, status: schema.run.status })
@@ -124,8 +115,7 @@ async function runAndPersist(
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
   const { sha256, sizeBytes } = await blobStore.put(inputKey, input, "application/json");
-  // blobStore.put already created the row with the bytes, so merge the metadata
-  // onto it rather than inserting a second row for the same key.
+  // put() already created the row, so this merges metadata rather than inserting a second
   await db
     .insert(schema.storedObject)
     .values({
@@ -167,8 +157,6 @@ async function runAndPersist(
       requestHash,
     });
   } catch {
-    // a concurrent request with the same idempotency key won the unique index race.
-    // return the winner's result rather than double-charging.
     const [winner] = await db
       .select({ id: schema.run.id })
       .from(schema.run)
@@ -197,7 +185,12 @@ async function runAndPersist(
     result = await runRemediation({ raw: input, mappings, profiles, autoFix }, engineDeps);
   } catch (err) {
     // sidecar unreachable/timed out: mark failed, no debit, 503 with real detail.
-    const detail = err instanceof SidecarError ? describeSidecarError(err) : err instanceof Error ? err.message : String(err);
+    const detail =
+      err instanceof SidecarError
+        ? describeSidecarError(err)
+        : err instanceof Error
+          ? err.message
+          : String(err);
     await db
       .update(schema.run)
       .set({ status: "failed", errorMessage: detail.slice(0, 1000), completedAt: new Date() })
@@ -210,16 +203,11 @@ async function runAndPersist(
     return { res: apiError(c, 422, "unprocessable", detail) };
   }
 
-  // the registry learns from this path too. it used to only learn from the async
-  // worker, so a workspace driving everything through the sync REST api never
-  // accumulated suggestions.
   await persistSuggestions(db, workspaceId, result.suggestions, () => createId("mapping"));
 
   const correctedKey = blobKey(workspaceId, runId, "corrected");
   await persistCompletedRun(db, blobStore, { workspaceId, runId, result, correctedKey });
 
-  // notify subscribers for this synchronous run too (the worker fires the same
-  // event for async/batch runs). enqueued, never blocks the response.
   await dispatchWebhook({
     event: "run.completed",
     workspaceId,
@@ -321,8 +309,6 @@ export async function fixController(c: Context<ApiV1Env>) {
   });
 }
 
-// POST /convert - HL7v2/CCDA -> FHIR (the engine detects + converts internally),
-// applying the workspace mapping registry. optionally chains fixes.
 export async function convertController(c: Context<ApiV1Env>) {
   const { res, result, runId, redact } = await runAndPersist(c, true);
   if (res) return res;

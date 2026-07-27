@@ -1,8 +1,5 @@
 import { boolean, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// every input, corrected artifact, evidence bundle, and signed PDF is a tracked
-// object with a retention clock. run.input_ref / run.corrected_ref point at key.
-// a run is only marked completed once its artifacts reach upload_state=stored.
 export const storedObject = pgTable(
   "stored_object",
   {
@@ -15,9 +12,6 @@ export const storedObject = pgTable(
     sizeBytes: integer("size_bytes").notNull(),
     contentType: text("content_type").notNull(),
     sha256: text("sha256").notNull(),
-    // the bytes themselves. artifacts are json/text capped at 5MB by the upload
-    // guard, so they live here rather than on disk: backend and worker are
-    // separate containers with separate filesystems and cannot share a path.
     content: text("content"),
     encrypted: boolean("encrypted").notNull().default(true),
     containsPhi: boolean("contains_phi").notNull().default(false),

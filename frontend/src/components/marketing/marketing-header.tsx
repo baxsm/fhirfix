@@ -13,9 +13,6 @@ const NAV = [
   { href: "/pricing", label: "Pricing" },
 ];
 
-// shared header for every public page. transparent over the hero, then on scroll it
-// gains a solid background + hairline + blur so content never bleeds through
-// underneath. light-only (the marketing group forces light).
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);

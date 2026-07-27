@@ -1,11 +1,6 @@
-// unit tests for client behavior that real http cannot exercise on demand:
-// retry/backoff decisions, header construction, and the error mapping table.
-// the fetch injection point (options.fetch) exists for exactly this.
 
 import { describe, expect, test } from "bun:test";
 import type { ApiError, RateLimitError } from "../index.js";
-// these are all VALUE imports on purpose: the error classes are used as runtime
-// constructors in the mapping table below, not only in type positions.
 import * as sdk from "../index.js";
 import { ConnectionError, Fhirfix, FhirfixError, ServerError, TimeoutError } from "../index.js";
 
@@ -18,10 +13,6 @@ function jsonResponse(status: number, body: unknown, headers: Record<string, str
   });
 }
 
-// a fetch stub that records calls and replays a queue of responses. a Response
-// body can only be read once, so a queued Response is cloned per call - otherwise
-// the last-entry repeat (used to model "keeps failing") throws ERR_BODY_ALREADY_USED
-// and masks what the client actually did.
 function stubFetch(responses: Array<Response | (() => Response | Promise<Response>)>) {
   const calls: Array<{ url: string; init: RequestInit }> = [];
   let i = 0;
@@ -37,8 +28,6 @@ function stubFetch(responses: Array<Response | (() => Response | Promise<Respons
 
 type Stub = ReturnType<typeof stubFetch>;
 
-// read the headers of the nth recorded call. asserts the call happened first, so a
-// missing call fails as "expected a call" instead of a confusing TypeError.
 function headersOf(stub: Stub, index: number): Record<string, string> {
   const call = stub.calls[index];
   expect(call).toBeDefined();
@@ -71,8 +60,6 @@ describe("construction", () => {
   });
 
   test("throws when no base url is given", () => {
-    // there is no public host, so there is no default. a client must be told
-    // where the API is rather than silently resolving a host that does not exist.
     const saved = process.env.FHIRFIX_BASE_URL;
     delete process.env.FHIRFIX_BASE_URL;
     try {

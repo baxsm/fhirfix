@@ -1,8 +1,6 @@
 import type { OperationOutcome } from "./types";
 import { CircuitBreaker, type ResilienceOptions, resilientFetch, SidecarError } from "./resilience";
 
-// one warm HAPI validator instance. holds ~2GB of loaded IG packages, so scaling
-// the app does not scale the validator. the pool below routes across instances.
 export interface ValidatorInstance {
   baseUrl: string;
   maxInFlight: number; // per-instance concurrency cap
@@ -23,8 +21,6 @@ export interface ValidatorPoolOptions {
   pollIntervalMs?: number;
 }
 
-// a ready-gated pool. picks a ready instance with a free slot; when all are
-// saturated the caller waits in queue rather than piling onto one instance.
 export class ValidatorPool {
   private readonly states: InstanceState[];
   private readonly opts: Required<Pick<ValidatorPoolOptions, "acquireTimeoutMs" | "pollIntervalMs">>;
@@ -53,8 +49,6 @@ export class ValidatorPool {
     }));
   }
 
-  // load the required IGs into every instance and mark it ready. degrade gracefully:
-  // the pool is usable once at least one instance reports ready.
   async warmup(): Promise<{ readyCount: number }> {
     await Promise.all(
       this.states.map(async (st) => {
@@ -100,8 +94,6 @@ export class ValidatorPool {
     return this.states.filter((s) => s.ready).length;
   }
 
-  // validate one resource against one or more profiles. acquires a slot on a ready
-  // instance, waiting in queue if all are saturated.
   async validate(resource: unknown, profiles: string[]): Promise<OperationOutcome> {
     const st = await this.acquire();
     try {
@@ -144,8 +136,6 @@ export class ValidatorPool {
   }
 }
 
-// map an npm ig id to a substring that appears in its profile canonical urls,
-// used to confirm the ig actually loaded (not just that the PUT returned 200).
 function igCanonicalHint(igId: string): string {
   if (igId.startsWith("hl7.fhir.us.core")) return "/us/core/";
   if (igId.includes("davinci-pas")) return "/us/davinci-pas/";

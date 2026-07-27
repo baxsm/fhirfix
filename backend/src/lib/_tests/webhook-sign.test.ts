@@ -1,9 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { signPayload, verifySignature } from "@shared/db/webhooks";
 
-// unit: HMAC signing round-trips and rejects tampering/replay. shared by the
-// worker delivery path and the SDK verify helpers, so it must be exact.
-
 describe("webhook signature", () => {
   const secret = "whsec_test_secret";
   const now = 1_700_000_000_000;

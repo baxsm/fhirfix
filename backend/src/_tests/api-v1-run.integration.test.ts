@@ -7,10 +7,6 @@ import { DEMO_SAMPLES } from "@/lib/demo-samples";
 import { createId } from "@/lib/id";
 import { apiV1 } from "@/routes/api-v1/index";
 
-// integration: the sync REST validate/fix/convert controllers against the REAL
-// validator + converter sidecars. proves findings come back, fixes correct + debit,
-// HL7v2 converts, and idempotency replays the same run without double-charging.
-
 const workspaces: string[] = [];
 const keyIds: string[] = [];
 

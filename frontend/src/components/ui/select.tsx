@@ -70,8 +70,6 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         data-align-trigger={position === "item-aligned"}
-        // ring raised from the stock 10%: a white panel on a 96.3-light canvas
-        // has almost no edge at 10%, so the corners dissolve into the page.
         className={cn("relative z-50 max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/15 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-closed:fill-mode-forwards", position ==="popper"&&"data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className )}
         position={position}
         align={align}
@@ -81,10 +79,6 @@ function SelectContent({
         <SelectPrimitive.Viewport
           data-position={position}
           className={cn(
-            // p-1 on the VIEWPORT, not on SelectGroup. the padding used to live
-            // on the group, so a select whose items are not wrapped in one had
-            // none at all - the first and last rows sat flush against the
-            // rounded panel edge and their hover fill was clipped by the corner.
             "p-1 data-[position=popper]:h-(--radix-select-trigger-height) data-[position=popper]:w-full data-[position=popper]:min-w-(--radix-select-trigger-width)",
             position === "popper" && ""
           )}
@@ -118,11 +112,6 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
-      // the check LEADS the row rather than floating at the far right, so the
-      // selected option is marked where the eye already is. the slot is always
-      // present, so selecting does not shift the text.
-      // the selected row also stays marked when the pointer moves away - before,
-      // selection was only legible via the check, and hover was the only fill.
       className={cn(
         "relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[state=checked]:font-medium data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
         className

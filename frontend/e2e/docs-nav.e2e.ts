@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-// the docs nav has broken three separate ways, and every one of them passed
-// typecheck, lint and the unit suite. these assert the behaviors a reader
-// actually depends on: the nav tells the truth about where you are, and the page
-// does not pad itself with void to make that work.
 
 const READ_WIDTH = 1568;
 const ACTIVE_CLASS = "bg-foreground/[0.07]";
@@ -51,13 +47,8 @@ test("every nav link lands on its section and is the only active item", async ({
   }
 });
 
-// the last section can never scroll to the marker - the page ends first. without
-// a bottom clamp the tail links are permanently unreachable, which is what drove
-// the 622px of empty padding this replaced.
 test("the last section is active at the bottom of the page", async ({ page }) => {
   await page.goto("/docs", { waitUntil: "networkidle" });
-  // read the last on-page nav item rather than hardcoding a label: adding a
-  // section at the end should not break this test, only a broken clamp should.
   const last = await page.evaluate(() => {
     const links = [...document.querySelectorAll('aside a[href^="/docs#"]')];
     return links[links.length - 1]?.textContent?.trim() ?? null;
@@ -67,8 +58,6 @@ test("the last section is active at the bottom of the page", async ({ page }) =>
   expect(await activeItems(page)).toEqual([last]);
 });
 
-// a deep link must show the right nav item on arrival, without the reader having
-// to touch the wheel.
 test("a deep link shows the right nav item on arrival", async ({ page }) => {
   for (const [hash, want] of [
     ["#errors", "Errors"],
@@ -103,8 +92,6 @@ test("no dead gap on the right and no page-level horizontal scroll", async ({ pa
   expect(layout.horizontalScroll).toBe(false);
 });
 
-// the tail was 622px of nothing to force the last link to work. real api docs
-// land near 96-111px. this fails if anyone reaches for padding again.
 test("the page does not end in a void", async ({ page }) => {
   await page.goto("/docs", { waitUntil: "networkidle" });
   const tail = await page.evaluate(() => {
@@ -117,8 +104,6 @@ test("the page does not end in a void", async ({ page }) => {
   expect(tail).toBeLessThanOrEqual(160);
 });
 
-// short stub sections cannot hold the active state and read as unfinished next
-// to 400-500px endpoint sections.
 test("no reference section is a stub", async ({ page }) => {
   await page.goto("/docs", { waitUntil: "networkidle" });
   const short = await page.evaluate(() =>

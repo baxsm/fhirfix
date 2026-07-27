@@ -22,9 +22,6 @@ const submitSchema = z.object({
 const SHARE_TTL_DAYS = 30;
 
 export const runRouter = router({
-  // enqueue a validate/convert/fix job. writes the durable run row + input blob,
-  // then hands off to the worker via the remediation queue. returns the run id.
-  // creditGatedProcedure blocks a broke workspace (OUT_OF_CREDITS) before any work.
   submit: creditGatedProcedure.input(submitSchema).mutation(async ({ ctx, input }) => {
     const runId = createId("run");
     const inputType = detectInput(input.content).inputType;
@@ -79,8 +76,6 @@ export const runRouter = router({
     return { runId, status: "queued" as const };
   }),
 
-  // a run: its status + ranked findings + corrected artifact + share state.
-  // polled by the report while queued/running/applying.
   get: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), runId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -160,9 +155,6 @@ export const runRouter = router({
       .limit(60);
   }),
 
-  // apply one or more safe fixes by fingerprint. re-runs the engine on top of the
-  // current corrected artifact and re-verifies. the report polls run.get while the
-  // run is `running`. single Apply passes one fingerprint; apply-all-safe many.
   applyFix: workspaceProcedure
     .input(
       z.object({
@@ -203,8 +195,6 @@ export const runRouter = router({
       return { status: "running" as const };
     }),
 
-  // hand one finding to the AI for a proposed patch. subordinate to the
-  // deterministic path; the worker only keeps the patch if it re-verifies clean.
   fixWithAi: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), runId: z.string(), fingerprint: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -239,8 +229,6 @@ export const runRouter = router({
       return { status: "running" as const };
     }),
 
-  // mark a finding dismissed. an intentional "won't fix" that drops out of the
-  // active report but stays on record.
   dismissFinding: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), runId: z.string(), findingId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -263,8 +251,6 @@ export const runRouter = router({
       return { dismissed: true };
     }),
 
-  // cancel a queued/running run. best-effort: removes the queued job and marks the
-  // run failed with a cancelled note so it never hangs in `running`.
   cancel: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), runId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -286,9 +272,6 @@ export const runRouter = router({
       return { cancelled: true as const, status: "failed" as const };
     }),
 
-  // create a public read-only share link. BLOCKS creation for a run whose
-  // corrected artifact still holds un-redacted PHI unless the caller opts into a
-  // redacted copy, so an unauthenticated /share URL can never leak PHI.
   share: workspaceProcedure
     .input(
       z.object({
@@ -331,8 +314,6 @@ export const runRouter = router({
       }
 
       const token = createId("reportShare");
-      // when redacting, write a separate PHI-safe corrected artifact the public
-      // read path serves, so the original stays intact for the workspace.
       let redacted = false;
       if (hasPhi && input.redact && runRow.correctedRef) {
         const parsed = JSON.parse(await blobStore.get(runRow.correctedRef));

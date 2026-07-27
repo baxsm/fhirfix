@@ -86,12 +86,14 @@ describe("parseCsv", () => {
   });
 
   it("handles crlf line endings", () => {
-    const csv = "type,sourceValue,targetValue,targetSystem,scope,sourceSystem\r\ncode_to_code,A,B,,workspace,\r\n";
+    const csv =
+      "type,sourceValue,targetValue,targetSystem,scope,sourceSystem\r\ncode_to_code,A,B,,workspace,\r\n";
     expect(parseCsv(csv).rows).toHaveLength(1);
   });
 
   it("skips blank lines rather than counting them as rows", () => {
-    const csv = "type,sourceValue,targetValue,targetSystem,scope,sourceSystem\n\ncode_to_code,A,B,,workspace,\n\n";
+    const csv =
+      "type,sourceValue,targetValue,targetSystem,scope,sourceSystem\n\ncode_to_code,A,B,,workspace,\n\n";
     expect(parseCsv(csv).rows).toHaveLength(1);
   });
 
@@ -100,7 +102,8 @@ describe("parseCsv", () => {
   });
 
   it("flags an unterminated quote", () => {
-    const csv = 'type,sourceValue,targetValue,targetSystem,scope,sourceSystem\ncode_to_code,"A,B,,workspace,';
+    const csv =
+      'type,sourceValue,targetValue,targetSystem,scope,sourceSystem\ncode_to_code,"A,B,,workspace,';
     expect(parseCsv(csv).errors.some((e) => e.reason === "unterminated quote")).toBe(true);
   });
 

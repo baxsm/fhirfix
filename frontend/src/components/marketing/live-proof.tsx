@@ -2,9 +2,6 @@ import Link from "next/link";
 import { PlaygroundPanel } from "@/components/marketing/playground-panel";
 import { Reveal } from "./motion";
 
-// the anti-slop centerpiece: the REAL engine, embedded. not a screenshot, not a
-// mock — PlaygroundPanel posts to /api/demo/fix and shows the genuine ranked report
-// with a real before/after conformance score. framed as proof.
 export function LiveProof() {
   return (
     <section className="stack-panel relative overflow-hidden bg-background/70 backdrop-blur-sm">

@@ -5,9 +5,6 @@ import type { EngineDeps } from "../remediate";
 import type { RegistryMapping } from "../types";
 import { ValidatorPool } from "../validator-client";
 
-// REAL sidecars. these run against the docker-compose validator + converter.
-// no mocks: the spec requires the golden loop to reach 0 errors on the real
-// java validator, which jsdom/mocks would hide.
 
 const VALIDATOR_URL = process.env.VALIDATOR_URL ?? "http://localhost:4567";
 const CONVERTER_URL = process.env.CONVERTER_URL ?? "http://localhost:8081";
@@ -24,8 +21,6 @@ const MAPPINGS: RegistryMapping[] = [
   },
 ];
 
-// the canonical golden case: a naive US Core Patient exactly as the v2 converter
-// emits it - placeholder identifier system + type coding with no system.
 const NAIVE_PATIENT = {
   resourceType: "Patient",
   id: "golden",

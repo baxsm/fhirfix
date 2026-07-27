@@ -7,9 +7,6 @@ export const metadata = {
   title: "Pricing",
 };
 
-// tiers mirror workspace_settings.plan_tier (free | team | premium). checkout and
-// per-credit rates are configured at billing time; this page states what each tier
-// includes, not invented dollar figures.
 const TIERS = [
   {
     name: "Free",

@@ -1,19 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * the empty state for a panel that sits among populated panels.
- *
- * a full-page empty state (big centred icon, lots of vertical air) is right
- * when the empty thing IS the page. inside a section on a page that already has
- * content, that treatment reads as a hole - a ~250px void between two working
- * panels. this one is left-aligned, compact, and puts its action on the same
- * row, so an empty section looks deliberate rather than broken.
- *
- * it carries NO border. every caller renders it inside SettingsSection, which
- * is already `rounded-lg border`, so a dashed box here drew a box inside a box.
- * the panel is the container; this is just its contents.
- */
 export function EmptyState({
   icon: Icon,
   title,

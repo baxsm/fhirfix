@@ -1,7 +1,3 @@
-// the SDK error taxonomy. shape follows the convention used by the Anthropic and
-// Stripe clients: one base class, a per-status subclass so `catch (e) { if (e
-// instanceof RateLimitError) }` works without inspecting status codes, and a
-// static factory that maps a response to the right subclass.
 
 // every error the SDK throws inherits this, so one catch can cover the SDK.
 export class FhirfixError extends Error {
@@ -11,8 +7,6 @@ export class FhirfixError extends Error {
   }
 }
 
-// a non-2xx response from the API. `code` is the machine code from the error
-// envelope ({ error, message }), which is the stable thing to branch on.
 export class ApiError extends FhirfixError {
   readonly status: number;
   readonly code: string;
@@ -27,8 +21,6 @@ export class ApiError extends FhirfixError {
     this.body = body;
   }
 
-  // map a response to the specific subclass. the server always sends
-  // { error, message }; fall back to the raw text when it does not (a proxy 502).
   static from(status: number, headers: Headers, body: unknown, raw: string): ApiError {
     const envelope = (body ?? {}) as { error?: string; message?: string; retryAfter?: number };
     const code = envelope.error ?? "unknown";

@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { hideDevOverlay, latestLink } from "./helpers";
 
-// captures key screens in dark + light for visual QA. reuses one signed-in
-// workspace. artifacts land in e2e/screenshots/ (gitignored).
 test("capture shell and system pages in dark and light", async ({ page }) => {
   const stamp = Date.now();
   const email = `shot-${stamp}@example.com`;

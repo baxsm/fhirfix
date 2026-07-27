@@ -22,8 +22,6 @@ function download(filename: string, body: string, mime: string) {
   a.href = url;
   a.download = filename;
   a.click();
-  // revoking synchronously can cancel the download in some browsers; one tick
-  // is enough for the click to have been handled.
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
@@ -101,8 +99,6 @@ export function ImportExportDialog({
       try {
         const raw: unknown = JSON.parse(text);
         if (!Array.isArray(raw)) throw new Error("not an array");
-        // route json through the csv writer/parser so both formats get the same
-        // validation and the same per-row error reporting.
         setParsed(parseCsv(toCsv(raw as ExportRow[])));
       } catch {
         setParsed({ rows: [], errors: [{ line: 1, reason: "this is not a valid JSON array" }] });

@@ -166,8 +166,6 @@ describe("isPurchasableCents", () => {
   });
 
   test("rejects amounts a client made up", () => {
-    // the old auto-recharge validator was min(500) with no ceiling, so all of
-    // these were accepted on the path that charges without a human present.
     expect(isPurchasableCents(99_999_999)).toBe(false);
     expect(isPurchasableCents(501)).toBe(false);
     expect(isPurchasableCents(1_500)).toBe(false);

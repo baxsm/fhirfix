@@ -17,10 +17,6 @@ import { createCheckout, isBillingConfigured, productIdForPack } from "@/lib/pol
 import { rateLimit } from "@/lib/redis";
 import { router, workspaceProcedure } from "../trpc";
 
-// creating a checkout hits Polar's API, so it is rate limited per workspace. the
-// REST api and the public demo route already went through rateLimit(); this path
-// did not, which let an authenticated billing:manage member open unbounded
-// checkout sessions against a third party.
 const CHECKOUT_LIMIT = 10;
 const CHECKOUT_WINDOW_SECONDS = 60 * 10;
 
@@ -38,8 +34,6 @@ function cycleStart(): Date {
 }
 
 export const billingRouter = router({
-  // the wallet header: balance in dollars, burn rate, projected monthly bill, and
-  // the auto-recharge / spend-cap config + the honest cap gotcha.
   summary: workspaceProcedure.query(async ({ ctx }) => {
     const account = await ensureBillingAccount(ctx.db, ctx.workspaceId);
     const balanceMicro = account?.balanceMicroCredits ?? 0;
@@ -124,8 +118,6 @@ export const billingRouter = router({
     };
   }),
 
-  // daily spend series for the usage chart, split by run source (ui/api). drives a
-  // stacked bar chart over the last N days.
   usage: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), days: z.number().int().min(7).max(90).default(30) }))
     .query(async ({ ctx, input }) => {
@@ -207,8 +199,6 @@ export const billingRouter = router({
       .limit(100);
   }),
 
-  // start a Polar checkout for a pack. returns the hosted checkout url the client
-  // redirects to. billing:manage only.
   checkout: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), packId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -255,17 +245,12 @@ export const billingRouter = router({
       return { url: checkout.url };
     }),
 
-  // enable/disable auto-recharge. thresholdDollars is the balance to fire below;
-  // amountCents is the top-up size (a pack). validates the cap gotcha and returns
-  // whether the chosen cap would block it, so the UI can warn honestly.
   setAutoRecharge: workspaceProcedure
     .input(
       z.object({
         workspaceId: z.string(),
         enabled: z.boolean(),
         thresholdDollars: z.number().min(0).max(10000).optional(),
-        // must be one of the purchasable packs. this path charges without a human
-        // present, so an unbounded amount here is worse than on checkout.
         amountCents: z
           .number()
           .int()
@@ -301,8 +286,6 @@ export const billingRouter = router({
       return { enabled: input.enabled };
     }),
 
-  // set or clear the monthly spend cap. a cap only NOTIFIES; it does not stop runs
-  // (runs are already gated on balance). the UI copy is explicit about that.
   setSpendCap: workspaceProcedure
     .input(
       z.object({

@@ -4,9 +4,6 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-// a copyable code sample for the docs. quiet, dense, mono. not syntax-highlighted
-// (no highlighter dep); the point is copy-paste-run accuracy, and to recede so the
-// prose leads. reads calm in both themes (subtle muted panel, low-contrast text).
 export function CodeBlock({
   code,
   label,

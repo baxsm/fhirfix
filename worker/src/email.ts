@@ -4,10 +4,6 @@ import { label } from "./drift-service";
 import { env } from "./env";
 import { logger } from "./lib";
 
-// drift alert email. the worker sends its own mail rather than calling back into
-// the backend, because drift is detected here and a round trip would add a
-// failure mode without adding anything. mirrors backend/src/lib/email.ts,
-// including the test-mode behaviour that logs instead of sending.
 
 let client: SendMailClient | null = null;
 

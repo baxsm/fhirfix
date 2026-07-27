@@ -1,7 +1,3 @@
-// the public REST API's wire types. these mirror backend/src/routes/api-v1 and are
-// intentionally standalone: a published SDK cannot import the backend's @shared
-// alias, because tsconfig `paths` are not rewritten in emitted js and would break
-// every consumer.
 
 export type Severity = "error" | "warning" | "info";
 
@@ -24,8 +20,6 @@ export type RunStatus = "queued" | "running" | "completed" | "failed";
 
 export type KeyMode = "test" | "live";
 
-// a single conformance problem. the REST layer strips db ids and the raw validator
-// echo, so this is narrower than the engine's internal finding.
 export interface Finding {
   severity: Severity;
   category: FindingCategory;
@@ -48,8 +42,6 @@ export interface RunInput {
   profiles?: string[];
   // redact PHI from the corrected output.
   redact?: boolean;
-  // makes the call replay-safe. same key + same body replays the prior run,
-  // same key + different body is rejected with 409.
   idempotencyKey?: string;
 }
 

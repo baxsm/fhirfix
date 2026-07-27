@@ -2,20 +2,6 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-/**
- * a static scan, not a runtime guard.
- *
- * code-style.md asks for exactly this and says runtime nesting checks are too
- * fragile. it was never written, which is how `EmptyState` shipped with its own
- * dashed border while all four of its callers render it inside SettingsSection
- * (already `rounded-lg border`) - a box drawn inside a box on the developers
- * page.
- *
- * the rule: a component that is ALWAYS rendered inside a bordered panel must
- * not draw its own border. the panel is the container; the component is its
- * contents.
- */
-
 const SRC = join(process.cwd(), "src");
 
 function tsxFiles(dir: string, out: string[] = []): string[] {
@@ -31,7 +17,6 @@ function tsxFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** components whose every caller wraps them in a bordered panel. */
 const CONTENTS_ONLY = ["empty-state.tsx"];
 
 describe("no card in card", () => {

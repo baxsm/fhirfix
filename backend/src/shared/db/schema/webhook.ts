@@ -1,9 +1,5 @@
 import { boolean, index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// outbound webhook endpoints for a workspace. the secret is encrypted at rest
-// (AES-256-GCM) and decrypted only to sign the HMAC of an outbound delivery.
-// events is a subset of the canonical event enum. lastDeliveryStatus holds the
-// most recent attempt result; per-attempt records live in notification_log.
 export const webhookEndpoint = pgTable(
   "webhook_endpoint",
   {

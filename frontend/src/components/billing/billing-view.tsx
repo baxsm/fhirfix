@@ -1,7 +1,7 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { CreditCard, Loader2, Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { CreditCard, Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -184,10 +184,6 @@ function BalanceHero({
         </div>
 
         {canManage && (
-          // ONE action. three equal Add $X buttons made the most consequential
-          // row on the page read as a toolbar, and none of them said that
-          // pressing one leaves for a hosted checkout. the amounts live in the
-          // dialog, where there is room to say what each one buys.
           <Button size="lg" onClick={() => setAddOpen(true)}>
             <Plus className="size-4" />
             Add credits
@@ -233,9 +229,6 @@ function HeroTile({
   value: string;
   hint: string;
 }) {
-  // the label leads and the number is the largest thing in the tile, because
-  // the number is what is being read. the previous version buried a 14px value
-  // beside a bordered icon chip that carried no information.
   return (
     <div className="min-w-0 px-4 py-3.5">
       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

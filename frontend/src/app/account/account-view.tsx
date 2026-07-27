@@ -37,10 +37,6 @@ export function AccountView() {
     );
   }
 
-  // this page is deliberately NOT inside the workspace shell: it belongs to the
-  // person, not a workspace, and a member editing their own profile should not
-  // land on workspace chrome. it still gets a real top bar so it reads as part
-  // of the product rather than a form floating on a blank page.
   return (
     <div className="min-h-svh">
       <AccountBar />
@@ -75,7 +71,6 @@ export function AccountView() {
   );
 }
 
-/** minimal chrome so /account is recognisably part of the app, not a stray form. */
 function AccountBar() {
   return (
     <header className="sticky top-0 z-20 flex h-12 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-md">

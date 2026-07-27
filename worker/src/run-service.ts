@@ -30,9 +30,6 @@ export interface RemediationJob {
   autoFix: boolean;
 }
 
-// thrown so the queue marks the job failed AND the caller knows a 503 is right
-// (sidecar unreachable). the run row is set to failed with the real upstream detail
-// and NO credits are charged.
 export class RunFailedError extends Error {
   constructor(
     message: string,
@@ -44,9 +41,6 @@ export class RunFailedError extends Error {
 }
 
 
-// execute one remediation job end to end. the run row is the durable source of
-// truth; on sidecar failure it ends `failed` with the upstream detail, never
-// stuck in `running`, and no credits are charged.
 export async function executeRun(job: RemediationJob): Promise<void> {
   const { runId, workspaceId, profiles, autoFix } = job;
 
@@ -92,9 +86,6 @@ export async function executeRun(job: RemediationJob): Promise<void> {
   // worker-specific: persist auto-learned mapping suggestions for later approval.
   await persistSuggestions(db, workspaceId, result.suggestions, mappingId);
 
-  // shared completion path (db/runs.ts): write the corrected artifact, findings,
-  // complete the run row, debit credits in the locked ledger tx, and fire the
-  // low-balance alert. the sync REST validate/fix path uses the same function.
   const correctedKey = blobKey(workspaceId, runId, "corrected");
   const { chargeMicro, balanceAfter } = await persistCompletedRun(db, blobStore, {
     workspaceId,
@@ -108,14 +99,10 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     `${runId} completed: ${result.findingsTotal} findings, score ${result.conformanceScoreBefore}->${result.conformanceScoreAfter}, charged ${chargeMicro} micro (balance ${balanceAfter})`,
   );
 
-  // a scheduled run is compared against its check's baseline here, after the run
-  // is already durable. a delivery problem can never leave the run unscored.
   await evaluateDrift({ runId, workspaceId }).catch((err) =>
     logger.error("drift.evaluate", `${runId}: ${err instanceof Error ? err.message : String(err)}`),
   );
 
-  // notify subscribers. enqueued (not awaited-critical) so a webhook problem never
-  // blocks the run from being marked complete.
   await dispatchWebhook({
     event: "run.completed",
     workspaceId,

@@ -1,10 +1,3 @@
-// PHI heuristics for FHIR resources. used to (1) block/redact share links so an
-// unauthenticated /share URL never leaks patient data, and (2) redact demo inputs.
-// this is a conservative surface scan of the fields that carry direct identifiers,
-// not a full de-identification (that is the redaction-policy engine's job later).
-
-// fields that carry direct patient identifiers when they sit on a patient-context
-// resource. an Organization.name is not PHI, so this is applied per-resource-type.
 const PHI_KEYS = new Set([
   "name",
   "telecom",
@@ -25,8 +18,6 @@ interface Identifier {
   system?: unknown;
 }
 
-// walk every resource in a value (a single resource, a Bundle, or a nested tree)
-// and hand each one to `fn` along with its resourceType.
 function forEachResource(node: unknown, fn: (resource: Record<string, unknown>) => void): void {
   if (node == null || typeof node !== "object") return;
   if (Array.isArray(node)) {
@@ -78,9 +69,6 @@ export function containsPhi(resource: unknown): boolean {
   return found;
 }
 
-// return a deep clone with direct identifiers scrubbed. structure, codes, and
-// conformance-relevant fields survive so the report still makes sense; names,
-// contacts, addresses, and identifier values are replaced with a redaction marker.
 export function redactPhi(resource: unknown): unknown {
   const clone = structuredClone(resource);
   forEachResource(clone, (r) => {

@@ -1,6 +1,3 @@
-// the public playground's pre-broken sample library. each is a real,
-// non-conformant resource that the deterministic engine can meaningfully repair,
-// so the demo shows a genuine before/after (not a contrived toy).
 export interface DemoSample {
   id: string;
   label: string;

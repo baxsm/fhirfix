@@ -1,5 +1,5 @@
+import { type EngineDeps } from "./remediate";
 import type { EngineFinding, RegistryMapping } from "./types";
-import type { EngineDeps } from "./remediate";
 export interface ApplyFixInput {
     corrected: string;
     fingerprints: string[];

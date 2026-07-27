@@ -1,8 +1,5 @@
 import { jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// auditable record of every transactional send (low-balance alert, drift alert,
-// report ready, invite, packet complete). also the dedup source: a threshold
-// alert is only sent if a matching row for this cycle does not already exist.
 export const notificationLog = pgTable("notification_log", {
   id: text("id").primaryKey(), // ntf_...
   workspaceId: text("workspace_id").notNull(),

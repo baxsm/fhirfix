@@ -20,8 +20,6 @@ const engineConfig: EngineConfig = {
 
 const { deps, ensureWarm } = getEngineDeps(engineConfig);
 
-// an apply job re-runs the engine on top of a run's existing corrected artifact,
-// applying either a set of deterministic fixes (by fingerprint) or one AI patch.
 export interface ApplyJob {
   runId: string;
   workspaceId: string;
@@ -30,8 +28,6 @@ export interface ApplyJob {
   profiles: string[];
 }
 
-// replace the run's findings with the post-apply set. the report always reflects
-// the current corrected artifact, so a stale "applied" row never lingers.
 async function replaceFindings(
   runId: string,
   workspaceId: string,
@@ -85,8 +81,6 @@ async function writeCorrected(
   const key = blobKey(workspaceId, runId, "corrected");
   const json = JSON.stringify(correctedResource, null, 2);
   const { sha256, sizeBytes } = await blobStore.put(key, json, "application/json");
-  // corrected key is stable per run, and blobStore.put has already created the row
-  // with the bytes, so merge the metadata onto whichever row is there.
   await db
     .insert(schema.storedObject)
     .values({

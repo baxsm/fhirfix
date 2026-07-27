@@ -4,8 +4,6 @@ import { env } from "./env";
 // bullmq requires maxRetriesPerRequest: null on its connection.
 export const redis = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
 
-// shared, Redis-backed fixed-window rate limiter primitive.
-// used by the demo endpoint (phase 3) and the public REST API (phase 5).
 export async function rateLimit(
   key: string,
   limit: number,

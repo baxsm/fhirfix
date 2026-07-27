@@ -5,11 +5,6 @@ import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { decryptSecret, encryptSecret, generateWebhookSecret } from "@/lib/secret-crypto";
 
-// integration: the webhook delivery loop against real Postgres + a real local
-// receiver. proves an endpoint is found for its event, the secret decrypts, the
-// signed payload is accepted by the shared verifier, and a non-subscribed event
-// is skipped. this is the exact path the worker's executeWebhook runs.
-
 const workspaces: string[] = [];
 
 async function seedEndpoint(events: string[]): Promise<{ workspaceId: string; secret: string }> {

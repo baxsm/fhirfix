@@ -1,8 +1,3 @@
-// hand-written OpenAPI 3.1 spec for the public REST API. hand-written (not
-// generated) because the surface is small and stable; served at
-// /api/v1/openapi.json for SDK codegen + the docs try-it playground. keep this in
-// sync with the controllers when endpoints change.
-
 const finding = {
   type: "object",
   properties: {

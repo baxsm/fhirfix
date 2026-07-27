@@ -1,10 +1,6 @@
 import { FileCheck2, KeyRound, Lock, ScrollText, ShieldCheck, Zap } from "lucide-react";
 import { Reveal } from "./motion";
 
-// the credibility section (Medplum's lesson, our visuals). speaks the regulated
-// buyer's language: the CMS-0057-F packet, SSO, BAA + PHI controls, audit trail.
-// all real Premium-tier capabilities.
-
 const ITEMS = [
   {
     icon: FileCheck2,

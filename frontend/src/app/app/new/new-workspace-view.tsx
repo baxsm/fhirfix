@@ -5,8 +5,6 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { CreateWorkspaceForm } from "./create-workspace-form";
 
-// what a workspace actually holds, in the product's own terms. this is the
-// context a first-run user needs, not decorative filler.
 const HOLDS = [
   { icon: FileScan, label: "Runs", hint: "Every conformance check and its findings" },
   {
@@ -22,10 +20,6 @@ const HOLDS = [
   { icon: Layers, label: "Members and billing", hint: "Roles, credits, and retention policy" },
 ];
 
-// first-run onboarding. shown when the signed-in user has zero workspaces. it
-// reuses the auth split-panel identity so onboarding reads as one continuous
-// flow from sign-up - a context panel on the left, the create form on the right.
-// no floating card in the void, no dot-grid / glow-orb slop.
 export function NewWorkspaceView() {
   return (
     <div className="grid min-h-svh lg:grid-cols-[3fr_2fr]">

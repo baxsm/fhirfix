@@ -39,10 +39,6 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        // fill-mode-forwards is load-bearing. tw-animate-css resolves animate-out
-        // to `exit ... var(--tw-animation-fill-mode, none)`, and with fill-mode
-        // none the element snaps back to opacity 1 the instant the keyframe ends,
-        // so the exit never actually plays - the dialog just vanishes.
         "fixed inset-0 isolate z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs",
         "data-open:animate-in data-open:fade-in-0 data-open:duration-150 data-open:ease-out",
         "data-closed:animate-out data-closed:fade-out-0 data-closed:duration-120 data-closed:ease-in data-closed:fill-mode-forwards",
@@ -68,14 +64,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/15 outline-none sm:max-w-sm",
-          // enter is slightly slower than exit: arriving should feel settled,
-          // leaving should feel prompt. both stay under the 200ms where motion
-          // starts reading as lag.
           "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:slide-in-from-bottom-2 data-open:duration-150 data-open:ease-out",
-          // fill-mode-forwards holds the faded/scaled end state until radix
-          // unmounts. without it the exit keyframe runs and then snaps back to
-          // full opacity, which is why closing looked like the content blanked
-          // and the box collapsed instead of animating away.
           "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-closed:duration-120 data-closed:ease-in data-closed:fill-mode-forwards",
           className
         )}

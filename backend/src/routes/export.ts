@@ -10,9 +10,6 @@ import {
   toPdfReport,
 } from "@/lib/report-export";
 
-// authenticated report exports and the corrected-artifact fetch. these are REST
-// (not tRPC) because they return files/binary. session + workspace membership are
-// resolved per request off the Better Auth cookie.
 export const exportRoutes = new Hono();
 
 // resolve session -> membership for a run. returns the run bundle or a status.
@@ -89,9 +86,6 @@ exportRoutes.get("/api/runs/:runId/export/:format", async (c) => {
   return c.json({ error: "unknown_format" }, 400);
 });
 
-// GET /api/runs/:runId/corrected  -> the corrected FHIR artifact.
-// served as octet-stream with NO download-disposition so an in-app preview is not
-// grabbed by a download manager (see the download route below for the real save).
 exportRoutes.get("/api/runs/:runId/corrected", async (c) => {
   const runId = c.req.param("runId");
   const res = await authorizeRun(c.req.raw.headers, runId);

@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { hideDevOverlay, latestLink } from "./helpers";
 
-// full phase-1 flow against the real frontend + backend + postgres.
-// run with: EMAIL_CAPTURE_FILE=<path> npx playwright test
 test("sign up, verify, create workspace, reach dashboard, switch theme", async ({ page }) => {
   const stamp = Date.now();
   const email = `e2e-${stamp}@example.com`;

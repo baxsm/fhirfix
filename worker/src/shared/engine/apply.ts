@@ -1,13 +1,11 @@
+import { setAtPath } from "./fhir-path";
 import { deriveFix, type FixContext } from "./fixes";
 import { normalizeOutcome, rankScore } from "./normalize";
-import { collectResources, scoreFrom, validateAll } from "./remediate";
+import { collectResources, type EngineDeps, scoreFrom, validateAll } from "./remediate";
 import type { EngineFinding, RegistryMapping } from "./types";
-import type { EngineDeps } from "./remediate";
 
 export interface ApplyFixInput {
-  // the current corrected artifact (JSON string) to apply the fix on top of.
   corrected: string;
-  // dedup fingerprints to apply. one for a single Apply, many for apply-all-safe.
   fingerprints: string[];
   mappings: RegistryMapping[];
   profiles?: string[];
@@ -22,17 +20,13 @@ export interface ApplyFixResult {
   reVerifiedClean: boolean;
 }
 
-// apply one or more specific (already-derived) fixes on top of the current
-// corrected artifact, then re-validate. this powers one-click Apply and
-// apply-all-safe from the report: the run already ran once, the user is now
-// applying a fix the engine flagged as suggested/safe. deterministic, no LLM.
+// deterministic, no LLM. powers one-click Apply and apply-all-safe.
 export async function applyFixes(input: ApplyFixInput, deps: EngineDeps): Promise<ApplyFixResult> {
   const parsed = JSON.parse(input.corrected);
   const corrected = structuredClone(parsed);
   const resources = collectResources(corrected);
 
-  // re-validate the current corrected artifact so we know which findings still
-  // exist and can re-derive their fixes against the live resource state.
+  // re-validate first so fixes are derived against the live resource state
   const before = await validateAll(deps, resources, input.profiles);
   const openFindings = normalizeOutcome(before.outcome);
 
@@ -44,8 +38,7 @@ export async function applyFixes(input: ApplyFixInput, deps: EngineDeps): Promis
     if (!wanted.has(finding.dedupFingerprint)) continue;
     for (const resource of resources) {
       const fix = deriveFix(resource, finding, ctx);
-      // only safe fixes are applied here; an unsafe fix reaching this path is a
-      // caller bug (the UI gates them), so we skip rather than mutate.
+      // an unsafe fix reaching here is a caller bug (the UI gates them); skip, never mutate
       if (!fix || !fix.safe) continue;
       const ok = fix.apply(resource);
       if (ok) {
@@ -57,7 +50,6 @@ export async function applyFixes(input: ApplyFixInput, deps: EngineDeps): Promis
 
   const skipped = input.fingerprints.filter((fp) => !applied.includes(fp));
 
-  // re-verify the mutated resources and re-derive confidence for the report.
   const after = await validateAll(deps, resources, input.profiles);
   const finalFindings = normalizeOutcome(after.outcome);
   const ctx2: FixContext = { mappings: input.mappings, suggestions: [] };
@@ -88,8 +80,6 @@ export async function applyFixes(input: ApplyFixInput, deps: EngineDeps): Promis
 export interface AiFixInput {
   corrected: string;
   fingerprint: string;
-  // the finding the user asked AI to help with. carries the plain message +
-  // raw validator message so the model has the full context.
   finding: {
     fhirpath: string | null;
     plainMessage: string;
@@ -103,14 +93,12 @@ export interface AiFixInput {
 }
 
 export interface AiFixResult {
-  // the model's proposed patch, applied and re-verified. null when the model
-  // declined or the patch did not validate cleanly (we never silently ship a
-  // worse resource).
+  // false when the model declined or its patch scored worse than the original
   applied: boolean;
   correctedResource: unknown;
   findings: EngineFinding[];
   conformanceScoreAfter: number;
-  explanation: string; // plain-language rationale from the model, always returned
+  explanation: string;
   patchPath: string | null;
   reVerifiedClean: boolean;
 }
@@ -120,10 +108,7 @@ interface OpenRouterMessage {
   content: string;
 }
 
-// ask an LLM (OpenRouter Gemini Flash) to propose a JSON-pointer-style patch for
-// one finding the deterministic engine could not safely auto-fix. this is the
-// softer "Fix with AI" hand-off: it never claims certainty, and the patch is only
-// kept if re-validation shows the resource is no worse. real API call, no mock.
+// for findings the deterministic engine could not safely auto-fix
 export async function fixWithAi(input: AiFixInput, deps: EngineDeps): Promise<AiFixResult> {
   const parsed = JSON.parse(input.corrected);
   const beforeResources = collectResources(parsed);
@@ -198,21 +183,18 @@ export async function fixWithAi(input: AiFixInput, deps: EngineDeps): Promise<Ai
     };
   }
 
-  // apply the proposed patch on a clone, re-validate, and only keep it if the
-  // score did not regress. the model is subordinate: it never makes things worse.
+  // only keep the patch if the score did not regress
   const candidate = structuredClone(parsed);
-  const { setAtPath } = await import("./fhir-path");
   for (const resource of collectResources(candidate)) {
     if (setAtPath(resource, patch.path, patch.value)) break;
   }
   const candidateResources = collectResources(candidate);
   const afterOutcome = await validateAll(deps, candidateResources, input.profiles);
   const afterFindings = normalizeOutcome(afterOutcome.outcome);
-  // same scale as beforeScore or the "never makes things worse" check is meaningless.
+  // must use the same scale as beforeScore or the regression check is meaningless
   const afterScore = scoreFrom(afterFindings, candidateResources.length);
 
   if (afterScore < beforeScore) {
-    // the patch made it worse; discard, report the original.
     const findings = normalizeOutcome(before.outcome);
     return {
       applied: false,

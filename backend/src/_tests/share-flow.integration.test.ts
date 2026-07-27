@@ -7,9 +7,6 @@ import { createId } from "@/lib/id";
 import { appRouter } from "@/trpc/routers/index";
 import { createCallerFactory } from "@/trpc/trpc";
 
-// integration: the share router must BLOCK a public link for a run whose corrected
-// artifact still holds un-redacted PHI, and allow a redacted copy. real Postgres +
-// real Better Auth session + real blob store.
 const email = `stest-${Date.now()}@example.com`;
 const password = "share-pass-123";
 let headers: Headers;

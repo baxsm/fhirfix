@@ -6,8 +6,6 @@ import { hasPermission, type WorkspaceRole } from "@/auth/permissions";
 import { schema } from "@/lib/db";
 import type { TRPCContext } from "./context";
 
-// sentinel the frontend keys on to show the out-of-credits state instead of a
-// generic error. tRPC has no PAYMENT_REQUIRED code, so we tag the message.
 export const OUT_OF_CREDITS = "OUT_OF_CREDITS";
 
 const t = initTRPC.context<TRPCContext>().create();
@@ -24,8 +22,6 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   return next({ ctx: { ...ctx, user: ctx.user, session: ctx.session } });
 });
 
-// resolves + verifies workspace membership. the client sends `workspaceId` in
-// the input; a non-member (or bad slug) gets FORBIDDEN, not a data leak.
 export const workspaceProcedure = protectedProcedure
   .input((raw): { workspaceId: string } => {
     if (
@@ -62,10 +58,6 @@ export const workspaceProcedure = protectedProcedure
     });
   });
 
-// gate a charged action on having credits. the exact run cost is unknown until the
-// input is parsed (resource count), so this is a floor check: the balance must be
-// positive. a broke workspace whose auto-recharge cannot cover it is blocked with
-// the OUT_OF_CREDITS sentinel (the public REST surface maps this to HTTP 402).
 export const creditGatedProcedure = workspaceProcedure.use(async ({ ctx, next }) => {
   const account = await ensureBillingAccount(ctx.db, ctx.workspaceId);
   // shared floor check (db/credits.ts): balance positive, or auto-recharge covers.

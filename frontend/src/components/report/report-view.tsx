@@ -50,8 +50,6 @@ const SEVERITY_LABEL: Record<Severity, string> = {
 
 function ScoreDelta({ before, after }: { before: number | null; after: number | null }) {
   const gain = before != null && after != null ? after - before : null;
-  // the after-score is emerald ONLY when it actually rose. a flat score painted
-  // green claims an improvement that did not happen.
   const improved = gain != null && gain > 0;
   return (
     <div className="flex items-baseline gap-2 whitespace-nowrap">
@@ -82,8 +80,6 @@ function SeverityChip({
   active: boolean;
   onClick: () => void;
 }) {
-  // the dot carries the severity colour; the label stays ink. colouring the
-  // text too made three tinted words compete with the findings themselves.
   const dot =
     severity === "error" ? "bg-destructive" : severity === "warning" ? "bg-warning" : "bg-info";
   const none = count === 0;
@@ -239,10 +235,6 @@ export function ReportView({
     );
   }
 
-  // a run id that does not resolve used to sit on the skeleton forever: the
-  // server prefetch swallowed its own failure and dehydrated a PENDING query,
-  // so isError stayed false, data stayed undefined, and the client never
-  // refetched. the server now tells us outright, before any of that.
   if (runMissing || (!run && !query.isPending && !query.isFetching)) {
     return (
       <TerminalState
@@ -494,15 +486,6 @@ export function ReportView({
   );
 }
 
-/**
- * a failed run is still a run.
- *
- * this used to be a 364px centred card on a 1454px page carrying a raw java
- * connection error and nothing else - no run id, no input type, no timestamp,
- * so the one screen where you most need to know WHICH run broke was the only
- * one that would not tell you. it kept the same header as a completed report,
- * because the identity of the run does not depend on whether it succeeded.
- */
 function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string }) {
   const [showRaw, setShowRaw] = useState(false);
   const failure = describeFailure(run.errorMessage);
@@ -667,14 +650,6 @@ function InProgress({
   onCancel: () => void;
   cancelling: boolean;
 }) {
-  // measured over 196 real runs: mean 1.33s, 194 of 196 under 2s, exactly one
-  // ever past 10s. so this screen is showing for about a second in the normal
-  // case, and a full-page spinner for one second is a flash, not feedback
-  // (nn/g: under 1s needs none at all, 2-10s a modest indicator, and only past
-  // 10s progress plus a way to interrupt).
-  //
-  // so: a quiet line first, and the heavier explanation and cancel only once
-  // the wait is genuinely long enough to warrant them.
   const slow = useElapsedPast(2000);
   const veryLong = useElapsedPast(10000);
 
@@ -703,7 +678,6 @@ function InProgress({
   );
 }
 
-/** true once `ms` has passed since mount. */
 function useElapsedPast(ms: number) {
   const [past, setPast] = useState(false);
   useEffect(() => {

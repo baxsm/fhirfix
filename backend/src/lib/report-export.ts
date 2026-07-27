@@ -1,9 +1,5 @@
 import type { Finding, Run } from "@shared/db/schema";
 
-// report export formatters. pure functions so they unit-test without a db or
-// sidecar. three formats: a structured JSON report, a FHIR OperationOutcome
-// (the machine-readable conformance artifact), and a printable PDF summary.
-
 export interface ReportBundle {
   run: Pick<
     Run,
@@ -67,8 +63,6 @@ export function toJsonReport(bundle: ReportBundle): string {
   );
 }
 
-// a FHIR R4 OperationOutcome. the standard machine-readable conformance artifact;
-// what a downstream FHIR system expects. one issue per finding.
 export function toOperationOutcome(bundle: ReportBundle): string {
   const severityMap: Record<string, string> = {
     error: "error",
@@ -114,9 +108,6 @@ function wrap(text: string, max: number): string[] {
   return lines.length ? lines : [""];
 }
 
-// a minimal single-stream PDF summary. hand-built so we avoid a heavy pdf dep for
-// what is a one-page text artifact; produces a genuinely valid PDF (a viewer opens
-// it). heavy formatting (diffs) stays in the JSON/OO exports.
 export function toPdfReport(bundle: ReportBundle): Uint8Array {
   const { run, findings } = bundle;
   const lines: Array<{ text: string; size: number; gap: number }> = [];

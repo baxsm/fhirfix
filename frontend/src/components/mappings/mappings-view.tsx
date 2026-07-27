@@ -12,9 +12,6 @@ import { useTRPC } from "@/trpc/client";
 import { MappingsTable } from "./mappings-table";
 import type { MappingStatus } from "./types";
 
-// the registry is one table under a status filter rather than three separate
-// lists: the columns are identical and the whole point is that a suggestion
-// becomes an active mapping, so switching views should not reshuffle the layout.
 const FILTERS: { key: MappingStatus; label: string }[] = [
   { key: "suggested", label: "Suggestions" },
   { key: "active", label: "Active" },
@@ -51,11 +48,6 @@ export function MappingsView({
   });
   const counts = countsQuery.data;
 
-  // the server already resolved which tab has work waiting in it (see page.tsx),
-  // so this is just state from here on. it used to start null, render "active",
-  // then flip to "suggested" in an effect once counts arrived - a visible switch
-  // on every load. it stays put afterwards: approving the last suggestion drops
-  // that count to zero, and re-deriving would yank the user away mid-task.
   const [status, setStatus] = useState<MappingStatus>(initialStatus);
 
   return (

@@ -3,11 +3,6 @@ import { profileFor, profilesForResource } from "../profiles";
 
 const US_CORE = "http://hl7.org/fhir/us/core/StructureDefinition";
 
-// the five profiles the engine auto-picks for an HL7v2 ADT^A01 bundle. this list
-// gets written to run.profilesApplied. it used to be handed back as an explicit
-// override on the apply path, which is how every resource ended up validated
-// against all five; re-apply now reads run.profilesRequested instead. narrowing
-// still matters for a caller who really did pin a bundle-wide list.
 const FIVE = [
   `${US_CORE}/us-core-organization`,
   `${US_CORE}/us-core-patient`,
@@ -33,8 +28,6 @@ describe("profilesForResource", () => {
   });
 
   it("drops every profile for a type with no us core profile", () => {
-    // MessageHeader/Provenance are in the converter's output but have no us core
-    // profile, so they must validate against the base spec, not another type's.
     expect(profilesForResource("MessageHeader", FIVE)).toEqual([]);
     expect(profilesForResource("Provenance", FIVE)).toEqual([]);
   });

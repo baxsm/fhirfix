@@ -7,9 +7,6 @@ import { createId } from "@/lib/id";
 import { appRouter } from "@/trpc/routers/index";
 import { createCallerFactory } from "@/trpc/trpc";
 
-// integration: the developers tRPC surface (api keys, webhooks, request logs)
-// with a real signed-in session against real Postgres.
-
 const email = `devtest-${Date.now()}@example.com`;
 const password = "dev-flow-pass-123";
 let headers: Headers;

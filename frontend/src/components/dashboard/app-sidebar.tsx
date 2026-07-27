@@ -20,14 +20,9 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
   const pathname = usePathname();
   const active = workspaces.find((w) => w.slug === workspace || w.id === workspace);
   const workspaceId = active?.id ?? "";
-  // one shared matcher with the breadcrumb, so a drill-in page keeps its
-  // section highlighted and the two can never drift.
   const activeHref = activeNavItem(workspace, pathname)?.href;
 
   return (
-    // a self-contained floating card, not the shadcn Sidebar primitive. it owns
-    // its own surface, border and radius so it reads as an object resting on the
-    // canvas rather than a docked wall.
     <aside className="hidden w-[212px] shrink-0 flex-col overflow-hidden rounded-xl border bg-sidebar shadow-[0_1px_2px_0_oklch(0.145_0_0/0.05),0_8px_20px_-10px_oklch(0.145_0_0/0.12)] md:flex">
       <div className="p-2.5">
         <WorkspaceSwitcher current={workspace} workspaces={workspaces} />
@@ -55,8 +50,6 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
                       <Link
                         href={item.href}
                         aria-current={active ? "page" : undefined}
-                        // the active row is a SOLID dark chip. the old version was
-                        // a 7%-opacity wash that barely registered.
                         className={cn(
                           "row-interactive flex h-8 items-center gap-2.5 rounded-lg px-2 text-[13px]",
                           active
@@ -88,10 +81,6 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
   );
 }
 
-// live credits balance. a distinct inset card (one step above the sidebar surface
-// + hairline border) so it reads as a deliberate element, not rail chrome. it is
-// the only bordered thing in the borderless sidebar, so no card-in-card. the meter
-// fills against a $10 comfortable baseline and turns amber when the balance is low.
 const METER_BASELINE_DOLLARS = 10;
 function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspaceId: string }) {
   const trpc = useTRPC();
@@ -109,9 +98,6 @@ function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspace
     balance != null ? Math.max(0, Math.min(100, (balance / METER_BASELINE_DOLLARS) * 100)) : 0;
 
   return (
-    // no border or card fill here: the rail is already a card, so a bordered box
-    // inside it would be card-in-card. the top rule from the parent is the only
-    // separation it needs.
     <Link
       href={`/app/${workspace}/billing`}
       className="row-interactive -mx-1 block rounded-lg px-2 py-1.5 hover:bg-sidebar-accent"

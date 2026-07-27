@@ -6,11 +6,6 @@ import { blobKey, blobStore } from "@/lib/blob";
 import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 
-// integration: the shared run-completion path (db/runs.ts) against real Postgres +
-// the real blob store. proves the extraction from the worker persists the corrected
-// artifact, findings, the completed run row, and debits credits atomically - the
-// exact behavior the worker had, now shared with the sync REST path.
-
 const workspaces: string[] = [];
 const runIds: string[] = [];
 
@@ -128,10 +123,6 @@ describe("persistCompletedRun", () => {
     expect(balanceAfter).toBe(await reconcileBalance(db, workspaceId));
   });
 
-  // the apply path re-reads profilesRequested and hands it to the engine as an
-  // explicit override. completion must not touch that column: when it held both
-  // meanings, a run submitted with no profiles came back pinned to whatever the
-  // engine happened to derive, silently flipping the next apply to the explicit branch.
   test("completion overwrites profilesApplied but leaves profilesRequested alone", async () => {
     const { workspaceId, runId } = await seedRun(true);
     const key = blobKey(workspaceId, runId, "corrected");

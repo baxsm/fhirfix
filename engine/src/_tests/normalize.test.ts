@@ -2,10 +2,6 @@ import { describe, expect, it } from "vitest";
 import { normalizeOutcome } from "../normalize";
 import type { OperationOutcome } from "../types";
 
-// the exact message text the live HAPI validator emits for a us-core-patient with
-// no identifier and no name. captured from the real sidecar, not written by hand:
-// HAPI blames the PARENT element, so expression is ["Patient"] on both, and the
-// element actually missing appears only in details.text.
 const MIN_MSG = (element: string) =>
   `${element}: minimum required = 1, but only found 0 (from http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0)`;
 
@@ -43,8 +39,6 @@ describe("normalizeOutcome cardinality paths", () => {
       issue: [cardinalityIssue("Patient.identifier"), cardinalityIssue("Patient.name")],
     };
     const findings = normalizeOutcome(oo);
-    // same expression + same message id: these collapsed into one finding before,
-    // so a developer never learned name was missing.
     expect(findings).toHaveLength(2);
     expect(findings.map((f) => f.fhirpath).sort()).toEqual(["Patient.identifier", "Patient.name"]);
     expect(findings.every((f) => f.occurrenceCount === 1)).toBe(true);

@@ -5,8 +5,6 @@ import { db, schema } from "@/lib/db";
 import { appRouter } from "@/trpc/routers/index";
 import { createCallerFactory } from "@/trpc/trpc";
 
-// integration: exercises the tRPC workspace/member routers with a real signed-in
-// session against real Postgres + Better Auth.
 const email = `wtest-${Date.now()}@example.com`;
 const password = "workspace-pass-123";
 let headers: Headers;

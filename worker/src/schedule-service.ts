@@ -3,14 +3,6 @@ import { and, desc, eq } from "drizzle-orm";
 import { blobKey, blobStore, db, logger, runId as makeRunId, schema } from "./lib";
 import { remediationQueue } from "./queues";
 
-// executes ONE firing of a scheduled check: fetch the target, store it as the run
-// input, and enqueue a normal remediation job. from here the run is
-// indistinguishable from a UI or API run except for actorType/source, so it flows
-// through the same engine, credits and completion path.
-//
-// a fetch failure is recorded on the check row (last_error) rather than thrown
-// away, because a check that has been silently failing for a week is the exact
-// thing the monitoring page exists to surface.
 
 export interface ScheduleJob {
   scheduledCheckId: string;
@@ -18,8 +10,6 @@ export interface ScheduleJob {
 
 // how long to wait on a customer endpoint before giving up.
 const FETCH_TIMEOUT_MS = 30_000;
-// cap the fetched payload so one huge endpoint cannot exhaust worker memory.
-// matches the 5MB ceiling the tRPC submit path enforces on pasted content.
 const MAX_INPUT_BYTES = 5_000_000;
 
 export async function executeScheduledCheck(job: ScheduleJob): Promise<void> {
@@ -40,8 +30,6 @@ export async function executeScheduledCheck(job: ScheduleJob): Promise<void> {
     .limit(1);
 
   if (!check) {
-    // the check was deleted but its schedule outlived it. drop the schedule so
-    // this does not fire again.
     logger.warn("schedule.fire", `${scheduledCheckId} no longer exists, removing schedule`);
     await remediationQueue.removeJobScheduler(schedulerId(scheduledCheckId)).catch(() => {});
     return;
@@ -117,8 +105,6 @@ export async function executeScheduledCheck(job: ScheduleJob): Promise<void> {
     { removeOnComplete: 1000, removeOnFail: 1000 },
   );
 
-  // clearing last_error on success is what makes the field mean "the most recent
-  // fire failed" rather than "something failed once, ever".
   await db
     .update(schema.scheduledCheck)
     .set({ lastRunId: runId, lastRunAt: new Date(), lastError: null })
@@ -134,10 +120,6 @@ async function recordFailure(scheduledCheckId: string, detail: string): Promise<
     .where(eq(schema.scheduledCheck.id, scheduledCheckId));
 }
 
-// pull the resource to check. `endpoint` and `source_url` both resolve to an HTTP
-// GET; they differ in what the ui asks for, not in how they are fetched.
-// `upload_folder` reads the newest stored input blob in the workspace, which is
-// how a "watch what my integration uploads" check works without an ingest daemon.
 async function fetchTarget(
   workspaceId: string,
   targetType: "endpoint" | "source_url" | "upload_folder",
@@ -177,9 +159,6 @@ async function fetchTarget(
   return body;
 }
 
-// the newest stored input object in THIS workspace. the workspace filter is
-// load-bearing, not defensive: without it a check would happily read another
-// tenant's uploaded resource and score it as its own.
 async function fetchLatestUpload(workspaceId: string, prefix: string): Promise<string> {
   const [latest] = await db
     .select({ key: schema.storedObject.key })
@@ -198,8 +177,6 @@ async function fetchLatestUpload(workspaceId: string, prefix: string): Promise<s
   return blobStore.get(latest.key);
 }
 
-// the bullmq scheduler id for a check. one scheduler per check, derived rather
-// than stored, so create/update/delete all address the same key.
 export function schedulerId(scheduledCheckId: string): string {
   return `sched:${scheduledCheckId}`;
 }

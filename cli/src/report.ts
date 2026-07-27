@@ -1,11 +1,7 @@
 import type { Finding } from "fhirfix";
 import type { GateSummary } from "./gate.js";
 
-// output formats. text for a human reading CI logs, json for a script, and
-// GitHub workflow commands for inline PR annotations.
 
-// ANSI colour, but only when stdout is a real tty. CI logs and piped output get
-// plain text - escape codes in a log file are noise.
 const useColor = Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
 const paint = (code: string, text: string) => (useColor ? `[${code}m${text}[0m` : text);
 
@@ -23,16 +19,12 @@ const SEVERITY_LABEL: Record<string, (t: string) => string> = {
 
 const green = (t: string) => paint("32", t);
 
-// an applied finding was fixed in the returned artifact, so tagging it "error"
-// would read as a failure in a CI log that actually passed.
 function severityTag(finding: Finding): string {
   if (finding.fixStatus === "applied") return green("fixed".padEnd(7));
   const paintFn = SEVERITY_LABEL[finding.severity] ?? dim;
   return paintFn(finding.severity.padEnd(7));
 }
 
-// where a finding points, for the human reader. fhirpath is the precise locator;
-// resourceType is the fallback when the validator did not give a path.
 function locationOf(finding: Finding): string {
   return finding.fhirpath ?? finding.resourceType ?? "(document)";
 }
@@ -68,9 +60,6 @@ export function renderText(file: string, summary: GateSummary, findings: Finding
   return lines.join("\n");
 }
 
-// an annotation's file= must be RELATIVE to the repo root, with forward slashes.
-// an absolute runner path (or a windows C:\ path) does not match a file in the
-// diff, so the annotation silently fails to attach to the PR.
 export function annotationPath(file: string, workspace?: string): string {
   const normalized = file.replace(/\\/g, "/");
   if (!workspace) return normalized;
@@ -78,10 +67,6 @@ export function annotationPath(file: string, workspace?: string): string {
   return normalized.startsWith(root) ? normalized.slice(root.length) : normalized;
 }
 
-// GitHub Actions annotation. the workflow-command format is
-// ::error file=...,line=...,title=...::message
-// newlines inside the message must be percent-encoded or the runner truncates the
-// annotation at the first line break.
 export function renderGithubAnnotation(file: string, finding: Finding, workspace?: string): string {
   // "info" is not an annotation level; the runner's third level is "notice".
   const level = finding.severity === "info" ? "notice" : finding.severity;
@@ -95,9 +80,6 @@ export function renderGithubAnnotation(file: string, finding: Finding, workspace
   return `::${level} file=${path},title=${title}::${message}`;
 }
 
-// the runner parses these commands line-by-line, so any literal CR/LF in a value
-// ends the command early. % must be escaped first or it would double-encode the
-// escapes we add after it.
 function encodeData(value: string): string {
   return value.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
 }
@@ -131,8 +113,6 @@ export function renderSummaryLine(files: number, summary: GateSummary, failOn: s
   } at or above ${failOn}`;
 }
 
-// a job summary table for $GITHUB_STEP_SUMMARY. markdown, capped well under the
-// 1MiB per-step limit by only listing blocking findings.
 export function renderJobSummary(
   rows: Array<{ file: string; summary: GateSummary }>,
   workspace?: string,

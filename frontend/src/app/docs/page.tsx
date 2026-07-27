@@ -11,9 +11,6 @@ import {
 } from "@/components/docs/doc-primitives";
 import { env } from "@/lib/env";
 
-// the real API this deployment talks to, same var the playground fires at. every
-// curl and snippet on this page shows the host a reader can actually reach, so
-// deploying is an env change and the docs follow.
 const BASE_URL = `${env.NEXT_PUBLIC_API_URL}/api/v1`;
 
 const CURL_FIX = `curl ${BASE_URL}/fix \\
@@ -37,8 +34,6 @@ const CURL_RUNS = `curl "${BASE_URL}/runs?limit=20" \\
 const CURL_AUTH = `curl ${BASE_URL}/runs \\
   -H "Authorization: Bearer ffx_test_..."`;
 
-// the client libraries. every snippet below is the real shipped surface of
-// sdk/js and sdk/python - not illustrative pseudocode.
 const INSTALL_NODE = "npm install fhirfix";
 const INSTALL_PYTHON = "pip install fhirfix";
 const INSTALL_CLI = "npm install -g @fhirfix/cli";
@@ -584,8 +579,6 @@ export default function DocsPage() {
   );
 }
 
-// one row of the intro rail's client-libraries card: the language and the exact
-// install line, which is the only thing a reader needs off this card.
 function ClientLib({ name, install, href }: { name: string; install: string; href: string }) {
   return (
     <Link
@@ -598,8 +591,6 @@ function ClientLib({ name, install, href }: { name: string; install: string; hre
   );
 }
 
-// the shared request body for validate/fix/convert. rendered under each endpoint
-// so the params sit next to their route.
 function RequestBody() {
   return (
     <div>

@@ -4,8 +4,6 @@ import { runRemediation } from "../remediate";
 import { SidecarError } from "../resilience";
 import { ValidatorPool } from "../validator-client";
 
-// sidecar-failure behavior. a run must fail cleanly (SidecarError) when a sidecar
-// is unreachable, never hang. the worker maps this to run=failed, 503, no debit.
 
 const NAIVE = JSON.stringify({
   resourceType: "Patient",

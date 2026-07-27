@@ -1,5 +1,3 @@
-// shared engine types. these mirror the db enums in schema.md but the engine
-// stays db-agnostic so it can be unit-tested without a database.
 
 export type FhirVersion = "R4" | "R4B" | "R5";
 
@@ -54,10 +52,6 @@ export interface EngineFinding {
   rank: number;
 }
 
-// a mapping the engine reads to derive deterministic fixes. structural on
-// purpose: the engine does not depend on the db package (see db/runs.ts). status
-// is "active" because the caller only ever loads active rows - a suggested or
-// rejected mapping must never reach the fix derivation.
 export interface RegistryMapping {
   type: "authority_to_system" | "code_to_code" | "facility_to_org" | "custom";
   sourceValue: string;

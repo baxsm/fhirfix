@@ -26,15 +26,11 @@ interface Endpoint {
   url: string;
   events: string[];
   enabled: boolean;
-  // free-form status from the worker: "200 ok" on success, else an error string
-  // like "HTTP 503" or "secret decrypt failed".
   lastDeliveryStatus: string | null;
   lastDeliveryAt: string | Date | null;
   createdAt: string | Date;
 }
 
-// the worker writes "<code> ok" on a 2xx delivery and an error string otherwise.
-// treat a trailing "ok" as the only success signal.
 export function isDeliveryOk(status: string | null): boolean {
   return !!status && status.toLowerCase().endsWith("ok");
 }
@@ -219,8 +215,6 @@ function EndpointRow({
   );
 }
 
-// a healthy endpoint is the expected state and stays neutral. only a failed
-// delivery earns colour - that is the one a reader needs to find.
 function StatusIndicator({ enabled, delivery }: { enabled: boolean; delivery: string | null }) {
   const tone =
     !enabled || delivery == null

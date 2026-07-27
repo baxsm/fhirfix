@@ -3,7 +3,7 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": false },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["src/**/*.ts", "drizzle.config.ts", "!**/dist-types", "!src/shared/**"]
+    "includes": ["src/**/*.ts", "drizzle.config.ts", "!**/dist-types", "!src/shared"]
   },
   "formatter": {
     "enabled": true,

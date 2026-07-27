@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import { describeFailure } from "../run-failure";
 
 describe("describeFailure", () => {
-  // the two strings below are copied verbatim out of the runs table, not
-  // invented. if the worker changes how it builds `detail`, these break.
   it("reads a real json parse failure", () => {
     const f = describeFailure('JSON Parse error: Unexpected identifier "this"');
     expect(f.kind).toBe("input");

@@ -1,7 +1,5 @@
 import { isThreshold, type Threshold } from "./gate.js";
 
-// a hand-rolled parser. the CLI has one job and a handful of flags; a dependency
-// for that is not worth the install weight in a CI image.
 
 export type Command = "validate" | "fix" | "convert";
 

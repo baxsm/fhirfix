@@ -6,10 +6,6 @@ import * as schema from "./schema/index";
 const nano = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 20);
 const notificationId = () => `ntf_${nano()}`;
 
-// record a transactional notification. this is the auditable delivery record AND
-// the dedup source. returns false if a matching record for this dedupKey already
-// exists (so a caller does not re-send). the actual email/webhook send is the
-// caller's job; this only records intent+outcome.
 export async function recordNotification(
   db: Db,
   args: {
@@ -36,9 +32,6 @@ export async function recordNotification(
   return { id };
 }
 
-// has a notification of this type already been recorded for this workspace with
-// this dedup marker? used so a low-balance alert at a given threshold is only sent
-// once per cycle. the marker lives in metadata.dedup.
 export async function hasNotification(
   db: Db,
   args: { workspaceId: string; type: string; dedup: string },

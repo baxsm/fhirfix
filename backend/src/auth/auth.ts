@@ -56,8 +56,6 @@ export const auth = betterAuth({
     organization({
       ac,
       roles,
-      // a user's personal default workspace is created at signup by app code;
-      // here we just cap and expose invitations.
       sendInvitationEmail: async ({ email, invitation, organization: org }) => {
         const url = `${env.TRUSTED_ORIGIN_LIST[0]}/accept-invite/${invitation.id}`;
         const { subject, html, text } = magicLinkEmail(url, org.name);

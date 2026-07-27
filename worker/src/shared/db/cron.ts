@@ -1,9 +1,3 @@
-// standard 5-field cron validation (minute hour day-of-month month day-of-week).
-//
-// written here rather than pulled from a library because the only consumer is one
-// zod refinement plus a human-readable summary for the ui. bullmq bundles
-// cron-parser, but it is a transitive dependency of bullmq rather than a direct
-// one, so importing it would couple our validation to bullmq's dependency tree.
 
 interface FieldSpec {
   min: number;
@@ -68,9 +62,6 @@ export function isValidCron(expression: string): boolean {
   );
 }
 
-// a plain-language summary for the common shapes, so the form can echo back what
-// a cron string actually means. falls back to the raw expression rather than
-// guessing at an explanation it cannot give.
 export function describeCron(expression: string): string {
   const fields = expression.trim().split(/\s+/);
   if (fields.length !== 5) return expression;

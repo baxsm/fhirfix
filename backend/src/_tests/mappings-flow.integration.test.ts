@@ -7,11 +7,6 @@ import { createId } from "@/lib/id";
 import { appRouter } from "@/trpc/routers/index";
 import { createCallerFactory } from "@/trpc/trpc";
 
-// integration: the mapping registry tRPC surface against real Postgres. covers
-// the supersede chain, the approve/reject/deprecate lifecycle, and the two
-// invariants the engine depends on - superseded rows never reach a run, and a
-// source_system mapping never leaks onto another feed.
-
 const email = `maptest-${Date.now()}@example.com`;
 const password = "map-flow-pass-123";
 let headers: Headers;
@@ -42,8 +37,6 @@ beforeAll(async () => {
   const caller = await callerFor();
   const org = await caller.workspace.create({ name: "Map WS", slug: `map-ws-${Date.now()}` });
   workspaceId = org.id;
-  // a fresh workspace is seeded with starter mappings; clear them so each test
-  // controls exactly what the registry holds.
   await db
     .delete(schema.mappingRegistryEntry)
     .where(eq(schema.mappingRegistryEntry.workspaceId, workspaceId));

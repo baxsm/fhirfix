@@ -6,11 +6,10 @@ import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
 import { type ParsedOrder, parseWebhook, WebhookVerificationError } from "@/lib/polar";
 
-// Polar webhooks. the body must be read RAW (not parsed) because the signature is
-// computed over the exact bytes. we verify before trusting anything in it.
 export const polarWebhookRoutes = new Hono();
 
 polarWebhookRoutes.post("/api/polar/webhook", async (c) => {
+  // must stay raw and unparsed: the signature is computed over the exact bytes
   const rawBody = await c.req.text();
   const headers: Record<string, string> = {};
   c.req.raw.headers.forEach((value, key) => {
@@ -48,10 +47,6 @@ polarWebhookRoutes.post("/api/polar/webhook", async (c) => {
   return c.json({ ok: true, handled: true }, 202);
 });
 
-// a paid order tops up the workspace. idempotent on polar_order_id: a redelivered
-// order.paid finds the existing invoice and does nothing. exported for tests that
-// exercise the ledger/invoice logic directly (validateEvent needs a full SDK-shaped
-// Order, which the live sandbox provides).
 export async function handleOrderPaid(order: ParsedOrder): Promise<void> {
   const existing = await db
     .select({ id: schema.invoice.id })
@@ -74,9 +69,6 @@ export async function handleOrderPaid(order: ParsedOrder): Promise<void> {
     paidAt: new Date(),
   });
 
-  // top up. resetAlertThreshold clears the low-balance cursor so alerts fire again
-  // as the new balance draws down. postLedgerEntry also creates the billing account
-  // row if it does not exist, so the customer-id update below always has a row.
   await postLedgerEntry(db, {
     workspaceId: order.workspaceId,
     type: "purchase",
@@ -101,8 +93,6 @@ export async function handleOrderPaid(order: ParsedOrder): Promise<void> {
   );
 }
 
-// a refund reverses the credits. idempotent: skip if a refund ledger entry for this
-// order already exists.
 export async function handleOrderRefunded(order: ParsedOrder): Promise<void> {
   const existing = await db
     .select({ id: schema.creditLedgerEntry.id })

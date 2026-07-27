@@ -66,17 +66,11 @@ export function MappingsTable({
     enabled: !!workspaceId,
   });
 
-  // which active mappings shadow each other. only the active tab can show a
-  // conflict: a suggestion or a tombstone is not loaded by a run, so it cannot
-  // be overriding anything yet.
   const conflictsQuery = useQuery({
     ...trpc.mappings.conflicts.queryOptions({ workspaceId }),
     enabled: !!workspaceId && status === "active",
   });
 
-  // keyed by the id of the row that LOSES, since that is the row the flag has to
-  // appear on - the one whose target is not what a scoped run will use. a plain
-  // record, not a Map: `Map` is the lucide icon imported at the top of this file.
   const overriddenBy: Record<string, { sourceSystem: string | null; targetValue: string }[]> = {};
   for (const c of conflictsQuery.data ?? []) {
     for (const loser of c.overridden) {
@@ -86,8 +80,6 @@ export function MappingsTable({
     }
   }
 
-  // every mutation refetches both the rows and the per-status counts, because
-  // approving moves a row between two filters and both labels have to follow.
   const refresh = () => {
     query.refetch();
     onCountsChange();
@@ -163,8 +155,6 @@ export function MappingsTable({
               </Button>
             )}
             {canEdit && (
-              // default size (h-8), not sm (h-7): this button sits beside an
-              // h-8 Input, and sm would leave it 4px short in the same row.
               <Button onClick={() => setCreateOpen(true)}>
                 <Plus />
                 Add mapping
@@ -255,11 +245,6 @@ export function MappingsTable({
                           {m.sourceSystem}
                         </span>
                       ) : overriddenBy[m.id] ? (
-                        // the engine loads source-system rows ahead of workspace
-                        // rows and takes the first match, so this row is correct
-                        // everywhere EXCEPT the feeds listed here. saying so is
-                        // the whole point: editing this row and seeing no change
-                        // on that feed is otherwise unexplainable.
                         <div className="flex flex-col gap-0.5">
                           <span className="text-xs text-muted-foreground">Workspace</span>
                           <span
@@ -361,10 +346,6 @@ function RowActions({
   onEdit: () => void;
   onHistory: () => void;
 }) {
-  // a pending suggestion is the one case worth inline buttons: approving is the
-  // whole job on that screen, and burying it in a menu costs a click per row.
-  // approve carries a text label - two unlabelled glyphs side by side made the
-  // destructive action indistinguishable from the constructive one.
   if (row.status === "suggested" && canApprove) {
     return (
       <div className="flex items-center justify-end gap-1.5">

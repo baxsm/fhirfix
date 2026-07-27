@@ -7,10 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  // marketing-canvas paints ONE continuous background (a page-wide gradient flow
-  // + grain) behind everything, so the page reads as a single surface. `light`
-  // re-declares the light token set for this subtree, keeping the public pages
-  // light independently of the app root.
   return (
     <div className="light marketing-canvas relative flex min-h-svh flex-col text-foreground">
       <MarketingHeader />

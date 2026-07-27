@@ -2,8 +2,6 @@ import { describe, expect, test } from "bun:test";
 import type { Finding, Severity } from "fhirfix";
 import { summarize, tripsGate } from "../gate.js";
 
-// the gate rule is the whole product promise of the CLI: which findings fail a
-// build. it is pure, so it gets tested directly rather than through the network.
 
 function finding(severity: Severity, message = "problem"): Finding {
   return {
@@ -21,17 +19,11 @@ function finding(severity: Severity, message = "problem"): Finding {
   };
 }
 
-// the exact finding POST /fix returns for a gender "M" Patient once the registry
-// mapping is applied: an error, already fixed in the corrected artifact. copied
-// from a real API response (conformanceScoreAfter 1000).
 function appliedFinding(): Finding {
   return { ...finding("error"), fixStatus: "applied" };
 }
 
 describe("tripsGate", () => {
-  // fix() returns what WAS wrong alongside what remains. gating on an applied
-  // finding fails a build that fix() just made conformant, so `fhirfix fix` in CI
-  // could never pass.
   test("an applied finding never trips the gate", () => {
     expect(tripsGate(appliedFinding(), "error")).toBe(false);
     expect(tripsGate(appliedFinding(), "warning")).toBe(false);

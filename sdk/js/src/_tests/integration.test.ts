@@ -1,11 +1,3 @@
-// REAL http against a running backend. no mocks, no fixtures - this is the layer
-// that catches what unit tests cannot (wrong paths, wrong body keys, auth chain
-// changes, error-envelope drift).
-//
-// requires: a running backend + the sidecars, and a real test key.
-//   FHIRFIX_API_KEY=ffx_test_... FHIRFIX_BASE_URL=http://localhost:3001/api/v1 bun test
-// skips itself (rather than failing) when those are absent, so `bun test` stays
-// green on a machine with no stack up.
 
 import { beforeAll, describe, expect, test } from "bun:test";
 import {
@@ -19,8 +11,6 @@ import {
 const BASE_URL = process.env.FHIRFIX_BASE_URL ?? "http://localhost:3001/api/v1";
 const API_KEY = process.env.FHIRFIX_API_KEY;
 
-// a Patient with a real conformance defect: gender "M" is not a valid
-// administrative-gender code (the value set requires male/female/other/unknown).
 const BAD_PATIENT = JSON.stringify({
   resourceType: "Patient",
   id: "example",
@@ -52,8 +42,6 @@ beforeAll(async () => {
 
 const client = () => new Fhirfix({ apiKey: API_KEY ?? "unused", baseUrl: BASE_URL });
 
-// bun's test.skipIf evaluates at collection time, before beforeAll runs, so guard
-// inside each test instead.
 function requireLive(): boolean {
   if (!API_KEY || !live) return false;
   return true;

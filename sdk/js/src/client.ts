@@ -19,19 +19,12 @@ import type {
   ValidateResult,
 } from "./types.js";
 
-// no default base url on purpose: there is no public host yet, and defaulting to
-// one that does not exist would fail at request time with a DNS error instead of
-// at construction with something a caller can act on.
-// the engine runs synchronously against the validator/converter sidecars, so a
-// fix on a large bundle is slow by nature. this is well above the observed p99.
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_MAX_RETRIES = 2;
 
 export interface ClientOptions {
   // an API key: ffx_test_... or ffx_live_.... falls back to $FHIRFIX_API_KEY.
   apiKey?: string;
-  // where the API lives, e.g. http://localhost:3001/api/v1. required: falls back
-  // to $FHIRFIX_BASE_URL, and there is no built-in default.
   baseUrl?: string;
   // per-request timeout in ms.
   timeoutMs?: number;
@@ -51,8 +44,6 @@ interface RequestOptions {
   raw?: boolean;
 }
 
-// read an env var without assuming node: the SDK also runs in browsers and
-// workers, where `process` is not defined.
 function readEnv(name: string): string | undefined {
   const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
   return proc?.env?.[name];
@@ -62,8 +53,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// full-jitter backoff. the jitter matters: without it, every client that got
-// rate-limited in the same window retries in the same instant and re-triggers it.
 function backoffMs(attempt: number): number {
   const capped = Math.min(1000 * 2 ** attempt, 8000);
   return Math.random() * capped;
@@ -123,9 +112,6 @@ export class Fhirfix {
 
     let lastError: unknown;
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      // the transport try covers ONLY fetch itself. an ApiError built from a real
-      // http response must never fall into this catch, or a non-retryable 4xx
-      // would be retried anyway.
       let response: Response;
       try {
         response = await this.fetchImpl(url.toString(), {
@@ -166,8 +152,6 @@ export class Fhirfix {
       }
       const error = ApiError.from(response.status, response.headers, parsed, text);
 
-      // only 429 and 5xx are worth retrying. a 401/403/409/422 fails identically
-      // on every attempt, so retrying just wastes the caller's time and quota.
       const retryable = error instanceof RateLimitError || error instanceof ServerError;
       if (!retryable || attempt === this.maxRetries) throw error;
 
@@ -218,8 +202,6 @@ export class Fhirfix {
     });
   }
 
-  // submit a large input as one async run. returns immediately; completion arrives
-  // by run.completed webhook, or poll runs.get(runId).
   batch(input: RunInput & { autoFix?: boolean }): Promise<BatchResult> {
     return this.request<BatchResult>({
       method: "POST",
@@ -261,8 +243,6 @@ export class Fhirfix {
       return response.text();
     },
 
-    // the report as json, a FHIR OperationOutcome, or a pdf.
-    // json/operationoutcome come back as text; pdf as bytes.
     report: async (runId: string, format: ReportFormat = "json"): Promise<string> => {
       const response = await this.request<Response>({
         method: "GET",

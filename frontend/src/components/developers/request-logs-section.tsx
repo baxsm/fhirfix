@@ -31,10 +31,6 @@ interface LogRow {
 
 const METHODS = ["ALL", "POST", "GET"] as const;
 
-// a 2xx is the expected outcome of an api call, so it is NOT coloured. filling
-// every successful row with a green chip is what made the one 500 impossible to
-// spot. the -400 shades used before were dark-theme values anyway, which read as
-// washed-out pastel on white.
 export function statusTone(code: number): string {
   if (code >= 500) return "border-destructive/30 bg-destructive/5 text-destructive";
   if (code >= 400) return "border-warning/40 bg-warning/5 text-warning";
@@ -42,20 +38,6 @@ export function statusTone(code: number): string {
   return "border-border text-muted-foreground";
 }
 
-/**
- * the RECENT slice, for the API access overview. it takes no filters on purpose.
- *
- * the section used to carry the full filter set and 25 rows, which forced a
- * fixed 585px frame: switching ALL/POST/GET genuinely changes the row count
- * (21 -> 11 -> 10 measured), so without a frame every filter click reflowed the
- * whole page and moved the control out from under the pointer. the frame fixed
- * the symptom but left a section that was mostly empty whenever a filter matched
- * little.
- *
- * showing a fixed small number with no filters removes the problem rather than
- * padding around it - the height cannot change because the row count cannot
- * change. filtering and paging live on the full page, which has the room for it.
- */
 const RECENT_LIMIT = 8;
 
 export function RecentRequestLogs({
@@ -124,9 +106,6 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  // placeholderData keeps the previous page mounted while the next one loads.
-  // this is what stops the table emptying on a filter change: the old rows
-  // stay, so the container never collapses and the page height holds.
   const query = useQuery({
     ...trpc.developers.requestLogs.list.queryOptions({
       workspaceId,
@@ -140,21 +119,8 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   });
 
   const rows = (query.data?.logs ?? []) as LogRow[];
-  // placeholderData always reports success, so the only way to know the rows on
-  // screen belong to the previous filter is this flag.
   const stale = query.isPlaceholderData;
 
-  // the list scrolls INSIDE a fixed frame rather than growing the page.
-  //
-  // an earlier attempt held the height only while the query was in flight,
-  // which did nothing: the data is cached, so `isPlaceholderData` is never true
-  // long enough to matter. measured, POST still collapsed the page by 389px.
-  //
-  // the collapse is not a loading artifact - it is the row count genuinely
-  // changing (21 -> 11 -> 10). a section that pages at 25 must occupy the same
-  // space whatever the current filter matches, or every filter click reflows
-  // everything below it and the control you just clicked moves under the
-  // pointer. 15 rows of frame, the rest scrolls.
   const FRAME_HEIGHT = 15 * 39;
 
   // changing a filter resets pagination back to the first page.
@@ -224,9 +190,6 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         <>
           <div
             className={cn("-mx-4 overflow-y-auto", stale && "is-stale")}
-            // a FIXED height, not just a cap. capping alone still let a filter
-            // with fewer rows shrink the frame (measured: POST still jumped
-            // 159px). the frame is the same size whatever is in it.
             style={{ height: FRAME_HEIGHT }}
           >
             <Table>

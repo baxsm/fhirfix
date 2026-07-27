@@ -27,8 +27,6 @@ import {
   renderText,
 } from "./report.js";
 
-// replaced at build time by tsup's define, from package.json. the fallback keeps
-// `bun test`/tsx runs working, where no bundler substitution happens.
 declare const __CLI_VERSION__: string | undefined;
 const VERSION = typeof __CLI_VERSION__ === "string" ? __CLI_VERSION__ : "0.0.0-dev";
 
@@ -44,15 +42,10 @@ const defaultIo: Io = {
   env: process.env,
 };
 
-// map an SDK error to the CLI's exit contract. a build gate scripts against these,
-// so the mapping is the product surface, not an implementation detail.
 export function exitCodeFor(err: unknown): ExitCode {
   if (err instanceof AuthenticationError || err instanceof PermissionDeniedError) return EXIT.auth;
   if (err instanceof OutOfCreditsError) return EXIT.credits;
   if (err instanceof UnprocessableError || err instanceof BadRequestError) return EXIT.input;
-  // a 429 that survived the SDK's retries means the API is effectively unavailable
-  // to this caller right now. blaming the input would send someone to edit a file
-  // that is fine; unavailable tells them to retry the job.
   if (err instanceof RateLimitError) return EXIT.unavailable;
   if (err instanceof ConnectionError || err instanceof ServerError) return EXIT.unavailable;
   // any other ApiError (404, 409, unexpected 4xx) is the caller's request problem.
@@ -66,8 +59,6 @@ function messageFor(err: unknown): string {
   return String(err);
 }
 
-// the three commands return different shapes. one union keeps the field access
-// honest instead of casting to a bag of optionals.
 type CommandResult = ValidateResult | FixResult | ConvertResult;
 
 // the corrected/converted artifact, or null for validate (which changes nothing).
@@ -113,8 +104,6 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<ExitCode>
     return EXIT.auth;
   }
 
-  // there is no public host to fall back on, so a missing base url is a usage
-  // error the caller can fix, not an auth failure or a DNS error mid-run.
   const baseUrl = args.baseUrl ?? io.env.FHIRFIX_BASE_URL;
   if (!baseUrl) {
     io.err(
@@ -169,8 +158,6 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<ExitCode>
       rows.push({ file, summary });
       allFindings.push(...findings);
 
-      // write the artifact before the gate decides, so `fix --write` still
-      // produces output when findings remain (partial fixes are the normal case).
       const artifact = artifactOf(result);
       if (artifact) {
         if (args.out) await writeFile(resolve(args.out), artifact, "utf8");
@@ -196,8 +183,6 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<ExitCode>
 
       if (args.githubAnnotations) {
         for (const finding of summary.blocking) {
-          // annotations go to stdout: the runner parses the log stream. the path
-          // must be repo-relative or the annotation will not attach to the PR.
           io.out(renderGithubAnnotation(file, finding, io.env.GITHUB_WORKSPACE));
         }
       }
@@ -239,11 +224,6 @@ export async function run(argv: string[], io: Io = defaultIo): Promise<ExitCode>
   return worstExit;
 }
 
-// the binary entry. set exitCode and let node exit on its own once the event loop
-// drains. process.exit() would tear the process down while the stdout writes and
-// the $GITHUB_OUTPUT/$GITHUB_STEP_SUMMARY appends are still in flight - on windows
-// that aborts with a libuv assertion and exit 127, which in CI reads as a crash
-// rather than the gate result it actually is.
 export async function main(): Promise<void> {
   process.exitCode = await run(process.argv.slice(2));
 }

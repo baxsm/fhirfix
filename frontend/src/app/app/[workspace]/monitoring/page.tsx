@@ -14,8 +14,6 @@ export default async function MonitoringPage({
     prefetch(trpcServer.workspace.get.queryOptions({ workspaceId }));
     prefetch(trpcServer.monitoring.listChecks.queryOptions({ workspaceId }));
     prefetch(trpcServer.monitoring.alertCounts.queryOptions({ workspaceId }));
-    // the page opens on Checks, but the alert count sits on the other tab, so
-    // the feed's default query is prefetched too and switching is instant.
     prefetch(
       trpcServer.monitoring.listAlerts.queryOptions({ workspaceId, unacknowledgedOnly: true }),
     );

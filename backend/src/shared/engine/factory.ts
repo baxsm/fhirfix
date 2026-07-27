@@ -11,10 +11,6 @@ export interface EngineConfig {
 
 let cached: { deps: EngineDeps; warmed: Promise<{ readyCount: number }> } | undefined;
 
-// build (once per process) the shared validator pool + converter client and kick
-// off warmup. warmup loads US Core into every instance and ready-gates the pool.
-// callers await ensureWarm() before running the engine so a cold instance never
-// gets traffic.
 export function getEngineDeps(config: EngineConfig): {
   deps: EngineDeps;
   ensureWarm: () => Promise<{ readyCount: number }>;

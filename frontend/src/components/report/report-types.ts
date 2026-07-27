@@ -1,6 +1,3 @@
-// shared types + presentation tokens for the remediation report. kept in one
-// place so the report view, finding card, facets, and share page stay consistent.
-
 export type Severity = "error" | "warning" | "info";
 export type FixStatus = "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
 export type FixConfidence = "auto" | "one_click" | "manual";
@@ -31,10 +28,6 @@ export interface FindingRow {
   rank: number;
 }
 
-// APPLIED IS NEUTRAL. it is the expected outcome of a run with auto-fix on, so
-// painting it emerald put a green badge on nearly every row and drowned out the
-// one or two findings that still need a human. colour here is reserved for the
-// state that wants attention: "needs review".
 export const STATUS_TONE: Record<FixStatus, string> = {
   applied: "border-border bg-muted text-muted-foreground",
   suggested: "border-info/30 bg-info/[0.06] text-info",

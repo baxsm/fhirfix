@@ -1,7 +1,3 @@
-// csv for the registry export/import round trip. the column order here is the
-// contract: it matches what `mappings.importRows` accepts, so a file exported
-// from one workspace imports into another unchanged.
-
 import type { MappingType } from "./types";
 
 export interface ExportRow {
@@ -22,9 +18,6 @@ export const CSV_COLUMNS = [
   "sourceSystem",
 ] as const;
 
-// rfc4180: quote when the value contains a delimiter, a quote or a newline, and
-// escape an inner quote by doubling it. a mapping target can legitimately be a
-// url with a comma in it, so this is not theoretical.
 function escapeCell(value: string | null): string {
   const s = value ?? "";
   if (!/[",\r\n]/.test(s)) return s;
@@ -44,8 +37,6 @@ export function toJson(rows: ExportRow[]): string {
   return `${JSON.stringify(rows, null, 2)}\n`;
 }
 
-// a single csv record, honouring quoted cells that contain commas or newlines.
-// returns null when the row ends mid-quote, which means the file is malformed.
 function parseLine(text: string, start: number): { cells: string[]; next: number } | null {
   const cells: string[] = [];
   let cell = "";
@@ -102,9 +93,6 @@ export interface ParseResult {
 
 const TYPES: MappingType[] = ["authority_to_system", "code_to_code", "facility_to_org", "custom"];
 
-// parses a csv the user picked off disk. bad rows are collected rather than
-// thrown on, so the dialog can say "3 of 40 rows are unusable, here is why"
-// instead of failing the whole file on its first typo.
 export function parseCsv(text: string): ParseResult {
   const rows: ExportRow[] = [];
   const errors: ParseResult["errors"] = [];
@@ -128,9 +116,9 @@ export function parseCsv(text: string): ParseResult {
 
     if (!header) {
       header = parsed.cells.map((c) => c.trim());
-      const missing = CSV_COLUMNS.filter((c) => c !== "sourceSystem" && c !== "targetSystem").filter(
-        (c) => !header?.includes(c),
-      );
+      const missing = CSV_COLUMNS.filter(
+        (c) => c !== "sourceSystem" && c !== "targetSystem",
+      ).filter((c) => !header?.includes(c));
       if (missing.length > 0) {
         errors.push({ line: lineNo, reason: `missing column(s): ${missing.join(", ")}` });
         return { rows, errors };

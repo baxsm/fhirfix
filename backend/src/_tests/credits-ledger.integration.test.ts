@@ -4,10 +4,6 @@ import { grantTrialCredits, postLedgerEntry, reconcileBalance } from "@shared/db
 import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 
-// integration: the credit ledger + balance cache against real Postgres. proves the
-// append-only ledger reconciles to the cache and that the FOR UPDATE lock keeps
-// concurrent debits from drifting the cache (the phase-4 concurrency requirement).
-
 const workspaces: string[] = [];
 function newWorkspace(): string {
   const ws = `led_test_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
@@ -59,8 +55,6 @@ describe("credit ledger", () => {
     await grantTrialCredits(db, ws, "system");
     const unit = priceForRun({ resourceCount: 1 });
 
-    // fire all debits at once. without the FOR UPDATE lock, read-modify-write races
-    // would leave the cache higher than the true ledger sum.
     await Promise.all(
       Array.from({ length: 25 }, (_, i) =>
         postLedgerEntry(db, {

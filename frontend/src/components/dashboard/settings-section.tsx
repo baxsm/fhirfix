@@ -1,18 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/**
- * one bordered panel per section, dividers inside for grouping.
- *
- * the icon is deliberately NOT in its own bordered tile. a bordered box inside
- * a bordered card is card-in-card, and repeating that on every section header
- * is what makes a page read as assembled from a template rather than designed.
- * the icon now sits inline at text scale, in muted ink, where it labels the
- * heading instead of decorating it.
- *
- * `slim` is gone: it existed because the full header was too heavy for a short
- * section. the header is now light enough for both, so there is one shape.
- */
 export function SettingsSection({
   icon: Icon,
   title,
@@ -24,15 +12,10 @@ export function SettingsSection({
   icon: LucideIcon;
   title: string;
   description: string;
-  /** right-aligned controls belonging to the section as a whole. */
   actions?: React.ReactNode;
-  /** content owns its own padding (for tables that bleed to the panel edge). */
   flush?: boolean;
   children: React.ReactNode;
 }) {
-  // flex column + h-full: when two of these sit side by side in a grid, the
-  // shorter one is stretched to match its neighbour. without this the content
-  // stayed top-aligned and left a dead gap at the bottom of the card.
   return (
     <section className="raised flex h-full flex-col overflow-hidden rounded-lg border bg-card">
       <div className="flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3">
@@ -50,10 +33,6 @@ export function SettingsSection({
   );
 }
 
-/**
- * a labelled setting row: description left, control right. keeps a small
- * control from looking stranded in a large empty panel.
- */
 export function SettingRow({
   label,
   hint,

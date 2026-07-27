@@ -27,8 +27,6 @@ function parsePrefs(raw: unknown): NotificationPrefs {
   }
 }
 
-// account router: the signed-in user's OWN profile. never workspace-scoped,
-// reachable by any member regardless of workspace role.
 export const accountRouter = router({
   get: protectedProcedure.query(({ ctx }) => {
     const { id, name, email, image, emailVerified } = ctx.user;

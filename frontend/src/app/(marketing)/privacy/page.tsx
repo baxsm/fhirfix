@@ -2,11 +2,7 @@ export const metadata = {
   title: "Privacy Policy",
 };
 
-// TODO(gap: legal content): placeholder page. real Privacy Policy copy is not
-// written yet and must be added before launch (owned by phase 8, launch
-// readiness - see docs/phases/phase-8.md). the route exists so the auth-panel
-// and footer links resolve instead of 404ing. do NOT ship fake legal text here.
-// chrome (header/footer/light-lock) comes from src/app/(marketing)/layout.tsx.
+// TODO(gap: legal content): real Privacy Policy copy must be added before launch (phase 8)
 export default function PrivacyPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-16 sm:px-8">

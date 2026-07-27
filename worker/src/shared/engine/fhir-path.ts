@@ -1,8 +1,5 @@
-// a tiny, deliberately-limited FHIRPath walker for the subset the derivers touch:
-// dotted segments with optional [n] array indices (e.g. Patient.identifier[0].system).
-// this is NOT a full FHIRPath engine; it only resolves the concrete element paths
-// the validator emits in issue.expression, which is all the derivers need.
 
+// NOT a full FHIRPath engine: only dotted segments with optional [n] indices
 interface Step {
   key: string;
   index?: number;
@@ -20,8 +17,6 @@ function parsePath(path: string): Step[] {
     .filter((s): s is Step => s !== null);
 }
 
-// resolve the parent container and the final key/index so a deriver can read or set.
-// the first path segment is the resource type and is skipped (we already have the resource).
 export function resolveParent(
   resource: unknown,
   path: string,

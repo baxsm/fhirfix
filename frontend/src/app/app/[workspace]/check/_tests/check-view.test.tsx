@@ -1,9 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-// the ingestion page: ONE framed editor. the header gets content in (upload,
-// load a sample), the footer acts on it (clear, run). every control is mounted
-// at all times, so using the page never changes which controls it has.
 const submitMutate = vi.fn();
 const routerPush = vi.fn();
 
@@ -55,10 +52,6 @@ describe("CheckView (ingestion)", () => {
     expect(screen.getByText(/nothing to check yet/i)).toBeInTheDocument();
   });
 
-  // run is the page's purpose, so it is always there and merely disabled. clear
-  // is conditional on there being something to clear, so it is absent - a ghost
-  // "Clear" over an empty editor is noise. it sits between the fixed status line
-  // and the fixed Run button, so arriving moves neither.
   test("run is always present; clear only exists once there is content", () => {
     render(<CheckView workspace="acme" />);
     expect(screen.getByRole("button", { name: /run check/i })).toBeDisabled();
@@ -69,8 +62,6 @@ describe("CheckView (ingestion)", () => {
     expect(screen.getByRole("button", { name: /^clear$/i })).toBeEnabled();
   });
 
-  // the reported defect: the ways of GETTING content in must never come and go,
-  // or acting on the page changes which controls the page has.
   test("the source controls are identical empty and filled", () => {
     render(<CheckView workspace="acme" />);
     const before = controlNames().filter((n) => n !== "Clear");
@@ -84,8 +75,6 @@ describe("CheckView (ingestion)", () => {
     expect(screen.getByRole("button", { name: /load a sample/i })).toBeInTheDocument();
   });
 
-  // a sample is an action, not a mode. nothing stays selected, so nothing can
-  // contradict the editor once it is edited.
   test("the sample menu leaves no selected state behind", () => {
     render(<CheckView workspace="acme" />);
     const trigger = screen.getByRole("button", { name: /load a sample/i });

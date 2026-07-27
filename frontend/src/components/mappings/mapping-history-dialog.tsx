@@ -36,9 +36,6 @@ export function MappingHistoryDialog({
 }) {
   const trpc = useTRPC();
 
-  // `open` follows the live target; the query and the markup follow the held
-  // one. keyed on the live target the query would disable mid-exit and the whole
-  // version list would vanish while the dialog was still on screen.
   const shown = useLastPresent(target);
   const query = useQuery({
     ...trpc.mappings.history.queryOptions({ workspaceId, mappingId: shown?.id ?? "" }),

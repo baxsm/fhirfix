@@ -16,8 +16,6 @@ import {
 import { exitCodeFor } from "../cli.js";
 import { EXIT } from "../exit-codes.js";
 
-// a pipeline scripts against these numbers. if this mapping drifts, someone's
-// build starts passing when it should fail (or vice versa) with no other signal.
 
 const headers = new Headers();
 
@@ -80,16 +78,11 @@ describe("exitCodeFor", () => {
   });
 
   test("a rate limit that survived retries exits unavailable (5), not input", () => {
-    // the SDK already retried with backoff. reaching here means the API is
-    // effectively unavailable to this caller right now - the file is fine, so
-    // sending them to edit it (exit 6) would be a wrong diagnosis.
     const err = new RateLimitError(429, "rate_limited", "slow", headers, {}, 30);
     expect(exitCodeFor(err)).toBe(EXIT.unavailable);
   });
 
   test("an unknown non-SDK error exits unavailable (5), never 0 or 1", () => {
-    // the one rule that matters: a surprise must never look like "gate passed"
-    // or "findings found".
     const code = exitCodeFor(new Error("something odd"));
     expect(code).not.toBe(EXIT.ok);
     expect(code).not.toBe(EXIT.findings);

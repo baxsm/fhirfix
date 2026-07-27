@@ -28,9 +28,6 @@ export interface EngineDeps {
   converter: ConverterClient;
 }
 
-// pull the top-level resource(s) out of a parsed FHIR value: a single resource or
-// each entry of a bundle. returns [resource, containerPathPrefix] pairs so findings
-// can be validated per resource against the right profile.
 export function collectResources(parsed: unknown): unknown[] {
   if (!parsed || typeof parsed !== "object") return [];
   const obj = parsed as { resourceType?: string; entry?: Array<{ resource?: unknown }> };
@@ -40,12 +37,6 @@ export function collectResources(parsed: unknown): unknown[] {
   return [obj];
 }
 
-// conformance score 0-1000. starts at 1000, each error costs more than each warning,
-// weighted by occurrence. floored at 0. a clean resource scores 1000.
-// the penalty budget scales with resourceCount so a 14-resource bundle is not
-// scored against the same 1000 points as a single resource. without this a
-// realistic hl7v2 message floors at 0 before and after fixing, and the report
-// shows no improvement for real work.
 export function scoreFrom(findings: EngineFinding[], resourceCount = 1): number {
   let penalty = 0;
   for (const f of findings) {
@@ -65,9 +56,6 @@ export async function validateAll(
   const profilesApplied = new Set<string>();
   for (const resource of resources) {
     const rt = (resource as { resourceType?: string }).resourceType ?? "";
-    // an explicit list covers the whole bundle, so narrow it to this resource's
-    // type. passing all of them to every resource makes the validator report a
-    // bogus type mismatch per resource (see profilesForResource).
     const profiles =
       explicitProfiles && explicitProfiles.length > 0
         ? profilesForResource(rt, explicitProfiles)
@@ -82,8 +70,6 @@ export async function validateAll(
   };
 }
 
-// the full deterministic pipeline: detect -> convert -> validate -> normalize ->
-// derive fixes -> auto-apply safe -> re-verify -> report. no LLM in this path.
 export async function runRemediation(
   input: RemediationInput,
   deps: EngineDeps,
@@ -116,9 +102,6 @@ export async function runRemediation(
   const corrected = structuredClone(parsed);
   const correctedResources = collectResources(corrected);
 
-  // proactive pass: remap the v2 converter's placeholder identifier systems even
-  // when the validator was lenient about them. these are non-conformant by
-  // construction. record each as an applied finding so the report shows the fix.
   const proactiveApplied: EngineFinding[] = [];
   if (autoFix) {
     for (const resource of correctedResources) {
@@ -145,8 +128,6 @@ export async function runRemediation(
     }
   }
 
-  // score-before counts the validator findings plus the placeholder defects the
-  // proactive pass will fix, so the after-score reflects the placeholder repair too.
   const scoreBefore = scoreFrom([...naiveFindings, ...proactiveApplied], resources.length);
 
   let autoFixApplied = proactiveApplied.length > 0;
@@ -224,8 +205,6 @@ export async function runRemediation(
   };
 }
 
-// combine the naive findings (which show what was applied) with the remaining
-// post-fix findings, so the report shows both "fixed" rows and still-open rows.
 function mergeAppliedInto(
   naive: EngineFinding[],
   remaining: EngineFinding[],

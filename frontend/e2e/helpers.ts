@@ -3,9 +3,6 @@ import type { Page } from "@playwright/test";
 
 const CAPTURE_FILE = process.env.EMAIL_CAPTURE_FILE ?? "";
 
-// pull the MOST RECENT captured email whose subject matches (and, if given, the
-// recipient), and extract the first http link. scans newest-first so parallel or
-// sequential tests do not grab a stale token. relies on EMAIL_CAPTURE_FILE.
 export function latestLink(subjectMatch: RegExp, to?: string): string {
   if (!CAPTURE_FILE) throw new Error("EMAIL_CAPTURE_FILE not set for e2e");
   const lines = readFileSync(CAPTURE_FILE, "utf8").trim().split("\n").filter(Boolean);

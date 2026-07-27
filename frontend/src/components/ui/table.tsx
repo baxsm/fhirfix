@@ -57,13 +57,6 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        // hover is a real step (accent, 93.4%) not a half-opacity whisper, and
-        // keyboard focus gets the same treatment plus an inset ring so tabbing
-        // through a table is as legible as mousing through it.
-        //
-        // hover applies ONLY to rows that actually do something. it used to be
-        // unconditional, so a read-only ledger row lit up on hover and promised
-        // a click that was never wired to anything.
         "border-b transition-colors outline-none focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-inset has-aria-expanded:bg-accent data-[state=selected]:bg-accent",
         "[&[role=button]]:hover:bg-accent [&[tabindex]]:hover:bg-accent [&[data-interactive]]:hover:bg-accent",
         className

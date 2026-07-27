@@ -1,18 +1,6 @@
 import { test } from "@playwright/test";
 import { writeFileSync } from "node:fs";
 
-// Walks a real user goal against the live app and records what a reader would
-// actually perceive at each step. It does NOT judge and it does NOT assert a
-// design. It only records observables along the journey.
-//
-// A separate reviewer reads the trace and answers the two cognitive-walkthrough
-// questions per step:
-//   1. will the user know what to do here?
-//   2. if they do the right thing, will they know it worked?
-//
-// Goals are the only thing to update as features land. The observables are
-// properties of "a person using a page", not of any component, so a redesign
-// does not rot them.
 
 const GOAL_PATH = "/docs";
 const READ_WIDTH = 1568;
@@ -36,19 +24,12 @@ test("ux probe: read the api docs and find the error reference", async ({ page }
         return r.bottom > 0 && r.top < vh && r.height > 0;
       };
 
-      // the left rail a reader uses to jump between sections. "visible" is not
-      // enough - a rail that renders but sits above the fold is gone as far as
-      // the reader is concerned. we record its position relative to the reader.
       const allNavLinks = Array.from(document.querySelectorAll("nav a"));
       const sideNav = allNavLinks.filter((a) => a.getBoundingClientRect().left < 320);
       const navVisible = sideNav.filter(inViewport).length;
       const firstNav = sideNav[0]?.getBoundingClientRect();
-      // where the rail sits in the viewport right now. if this marches negative
-      // as the reader scrolls, the rail is leaving with the content.
       const navTopInViewport = firstNav ? Math.round(firstNav.top) : null;
 
-      // which item reads as "you are here". we don't hardcode a class - we ask
-      // which link is visually distinguished from its siblings.
       const activeLooking = sideNav
         .filter((a) => {
           const s = getComputedStyle(a);
@@ -58,9 +39,6 @@ test("ux probe: read the api docs and find the error reference", async ({ page }
         })
         .map((a) => a.textContent?.trim() ?? "");
 
-      // dead horizontal space. measure LEAF elements (real text/code the eye
-      // lands on), not layout containers - a <section> spans full width even
-      // when everything inside it is a narrow left column.
       const main = document.querySelector("main");
       let contentRight = 0;
       let mainRight = 0;

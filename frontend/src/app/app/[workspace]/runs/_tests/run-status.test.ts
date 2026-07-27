@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isCancelled, isRealFailure } from "../run-status";
 
-// `run.cancel` writes status "failed" with "Cancelled by user.", so the list
-// cannot tell the two apart from `status` alone. these pin the split that the
-// row tint, the status cell, the Failed-only filter and its count all read.
 describe("run status split", () => {
   const cancelled = { status: "failed" as const, errorMessage: "Cancelled by user." };
   const broke = {

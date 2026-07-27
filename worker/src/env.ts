@@ -18,17 +18,11 @@ const base = createEnv({
     US_CORE_VERSION: z.string().default("6.1.0"),
     WORKER_CONCURRENCY: portSchema.default("4"),
 
-    // "Fix with AI" hand-off. prose/patch only, subordinate to the deterministic
-    // engine. empty key => the AI path is unavailable and the run fails cleanly.
     OPENROUTER_API_KEY: z.string().default(""),
     OPENROUTER_MODEL: z.string().default("google/gemini-2.5-flash"),
 
-    // decrypts webhook signing secrets for outbound delivery. must match the
-    // backend's value (which encrypts them). dev default matches backend's.
     WEBHOOK_ENCRYPTION_KEY: z.string().min(32).default("dev-webhook-enc-key-change-me-32byte!"),
 
-    // drift alert email delivery. mirrors the backend's values so a worker and a
-    // backend configured from the same env send from the same address.
     ZEPTOMAIL_TOKEN: z.string().default(""),
     ZEPTOMAIL_FROM_ADDRESS: z.email().default("no-reply@fhirfix.dev"),
     ZEPTOMAIL_FROM_NAME: z.string().default("FHIRfix"),

@@ -6,10 +6,6 @@ import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { apiV1 } from "@/routes/api-v1/index";
 
-// integration: the /api/v1 middleware chain against real Postgres + Redis. proves
-// auth (401), credit gate (402), rate limit (429), and that api_request_log rows
-// are written on EVERY exit including the error paths.
-
 const workspaces: string[] = [];
 const keyIds: string[] = [];
 
@@ -48,8 +44,6 @@ async function rawLogCount(workspaceId: string): Promise<number> {
   return rows.length;
 }
 
-// request logging is fire-and-forget, so poll briefly until the expected rows land
-// (the row IS written, just not synchronously with the response).
 async function waitForLogs(workspaceId: string, atLeast: number): Promise<number> {
   for (let i = 0; i < 40; i++) {
     const n = await rawLogCount(workspaceId);

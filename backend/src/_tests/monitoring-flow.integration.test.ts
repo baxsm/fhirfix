@@ -10,10 +10,6 @@ import { scheduleQueue, schedulerId } from "@/queues/index";
 import { appRouter } from "@/trpc/routers/index";
 import { createCallerFactory } from "@/trpc/trpc";
 
-// integration: scheduled checks + drift detection against real Postgres AND real
-// Redis. the scheduler assertions matter most - a check that stores fine but
-// never registers a timer looks completely healthy in the ui and never fires.
-
 const email = `montest-${Date.now()}@example.com`;
 const password = "monitoring-flow-pass-123";
 let headers: Headers;
@@ -442,8 +438,6 @@ describe("drift detection against real data", () => {
     const runId = await seedRun({
       scheduledCheckId: checkId,
       score: 900,
-      // a terminology finding whose ruleSource is a validator rule id. an earlier
-      // version read this field and reported the rule as if it were an authority.
       errors: [{ fingerprint: "fp_term", message: "Unknown code system." }],
       createdAt: new Date(),
     });

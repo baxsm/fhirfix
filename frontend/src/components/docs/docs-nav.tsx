@@ -15,8 +15,6 @@ interface NavItem {
   method?: Method;
 }
 
-// grouped section nav, resend-style. endpoint items carry a colored method pill
-// (same vocabulary as the request-logs table) so the surface reads consistently.
 const SECTIONS: { group: string; items: NavItem[] }[] = [
   {
     group: "Get started",
@@ -142,14 +140,6 @@ export function DocsNav() {
   );
 }
 
-// tracks which section is currently in view. returns "top" when scrolled above
-// the first tracked section, else the id of the section nearest the top of the
-// viewport. uses scroll position (not just intersection ratio) so the active item
-// is stable while scrolling through tall sections.
-//
-// the bottom clamp matters: the last section can never scroll to the marker (the
-// page runs out first), so at max scroll we activate it outright. without this the
-// tail sections are permanently unreachable and the nav lies about where you are.
 function useScrollSpy(ids: string[]): string {
   const [activeId, setActiveId] = useState("top");
 
@@ -157,9 +147,6 @@ function useScrollSpy(ids: string[]): string {
     if (ids.length === 0) return;
 
     const compute = () => {
-      // sections use scroll-mt-24 (96px), so a clicked section lands with its top
-      // at exactly 96. the marker sits just past that - land ON the boundary and
-      // you are in the section, not still in the previous one.
       const marker = 100;
       if (window.scrollY < 40) {
         setActiveId("top");

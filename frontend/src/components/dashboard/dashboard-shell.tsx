@@ -23,14 +23,10 @@ export function DashboardShell({
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
 
-  // proxy.ts already redirects signed-out users before this renders. this is the
-  // fallback for a session that expires while the tab is open.
   useEffect(() => {
     if (!sessionPending && !session) router.replace("/sign-in");
   }, [sessionPending, session, router]);
 
-  // resolve the workspace list from the server (tRPC), not the Better Auth
-  // client cache, so a just-created workspace is visible without a stale race.
   const trpc = useTRPC();
   const orgsQuery = useQuery({
     ...trpc.workspace.list.queryOptions(),
@@ -44,26 +40,14 @@ export function DashboardShell({
     enabled: !!active?.id,
   });
 
-  // the slug is in the url, so the workspace name is knowable before the query
-  // resolves. showing a readable placeholder beats a grey block that then
-  // repaints into the same layout.
   const resolving = sessionPending || orgsQuery.isPending;
 
-  // only decide "not your workspace" once the list actually arrived. doing this
-  // while pending would flash the not-found screen on every cold load.
   if (!resolving && session && !active) {
     return <WorkspaceNotFound />;
   }
 
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
 
-  // the rail is a CARD floating on the canvas: an equal gutter on all four sides
-  // and the same gutter between it and the content. that is what stops it
-  // reading as a wall bolted to the window edge.
-  //
-  // the topbar deliberately lives INSIDE the content column rather than spanning
-  // the window. a full-width bar would pin the layout back to the window edges
-  // and cancel the float.
   return (
     <div className="app-shell flex h-svh gap-2 bg-canvas p-2 sm:gap-2.5 sm:p-2.5">
       <AppSidebar
@@ -93,8 +77,6 @@ export function DashboardShell({
   );
 }
 
-// "phase2-health" -> "Phase2 Health". only used for the split second before the
-// real workspace name arrives, so the topbar has readable text instead of a bar.
 function slugToName(slug: string) {
   return slug
     .split("-")

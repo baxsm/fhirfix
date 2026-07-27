@@ -1,8 +1,5 @@
 import { cn } from "@/lib/utils";
 
-// last-used freshness dot, resend-style: green if used in the last 24h, amber
-// within 30 days, neutral if older, muted-red-less if never used. this is a
-// glanceable "is this key alive" signal in the table.
 export function FreshnessDot({ lastUsedAt }: { lastUsedAt: string | Date | null }) {
   if (!lastUsedAt) {
     return <span className="inline-block size-1.5 rounded-full bg-muted-foreground/40" />;
@@ -14,8 +11,6 @@ export function FreshnessDot({ lastUsedAt }: { lastUsedAt: string | Date | null 
   return <span className={cn("inline-block size-1.5 rounded-full", tone)} />;
 }
 
-// relative "time ago" for last-used / last-delivery. keeps the table scannable
-// without a full timestamp; the exact time lives in a title attribute.
 export function timeAgo(d: string | Date | null): string {
   if (!d) return "Never";
   const ms = Date.now() - new Date(d).getTime();

@@ -1,5 +1,3 @@
-// public engine surface. deterministic FHIR conformance + remediation.
-// shared by backend (submit) and worker (execution).
 
 export { ENGINE_VERSION, runRemediation } from "./remediate";
 export type { RemediationInput, EngineDeps } from "./remediate";

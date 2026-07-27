@@ -13,9 +13,6 @@ const MAX_INPUT_BYTES = 5_000_000;
 const DEFAULT_PAGE = 25;
 const MAX_PAGE = 100;
 
-// POST /batch - submit a (potentially large) NDJSON/Bundle input as a SINGLE async
-// run. returns immediately with a queued run id; completion is delivered by webhook
-// or polled via GET /runs/:id. reuses the worker + remediationQueue.
 export async function batchController(c: Context<ApiV1Env>) {
   let body: { input?: unknown; profiles?: unknown; autoFix?: unknown };
   try {
@@ -78,8 +75,6 @@ export async function batchController(c: Context<ApiV1Env>) {
   return c.json({ runId, status: "queued" }, 202);
 }
 
-// GET /runs - cursor-paginated list with status/inputType/from/to filters. the
-// cursor is the last seen createdAt (ISO); results are newest-first.
 export async function listRunsController(c: Context<ApiV1Env>) {
   const workspaceId = c.get("workspaceId");
   const url = new URL(c.req.url);
@@ -93,8 +88,6 @@ export async function listRunsController(c: Context<ApiV1Env>) {
     Math.max(1, Number(url.searchParams.get("limit")) || DEFAULT_PAGE),
   );
 
-  // cursor walks backwards: fetch rows at/older than the cursor timestamp. combined
-  // with the newest-first order this pages through history one window at a time.
   const rows = await listRuns(db, {
     workspaceId,
     status: status ?? undefined,
@@ -154,9 +147,6 @@ export async function getRunController(c: Context<ApiV1Env>) {
   });
 }
 
-// GET /runs/:id/corrected - the corrected artifact in its original format. served
-// as octet-stream with no download-disposition (anti download-manager, mirrors the
-// dashboard export route).
 export async function getCorrectedController(c: Context<ApiV1Env>) {
   const workspaceId = c.get("workspaceId");
   const runId = c.req.param("id") ?? "";

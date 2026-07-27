@@ -1,11 +1,3 @@
-// a failed run's `errorMessage` is whatever string the worker caught - a JSON
-// parser message, a sidecar's connection error, a blob read failure. it is a
-// log line, not a sentence for the person who uploaded the file.
-//
-// this maps the raw string to what actually happened and what to do about it.
-// the raw string is never discarded; the screen still shows it verbatim under
-// a disclosure, because that is what support needs.
-
 export type FailureKind = "cancelled" | "input" | "service" | "unknown";
 
 export interface Failure {
@@ -14,8 +6,6 @@ export interface Failure {
   cause: string;
   // what the user can actually do. null when there is nothing useful to say.
   next: string | null;
-  // a run that failed because the FILE is wrong will fail again unchanged, so
-  // "run it again" is a lie. only true when a retry could plausibly succeed.
   retryable: boolean;
 }
 
@@ -35,9 +25,6 @@ export function describeFailure(raw: string | null): Failure {
     };
   }
 
-  // a cancel is a deliberate action. it is stored as `failed` because the run
-  // did not produce a report, but showing it as a failure blames the user for
-  // something they chose to do.
   if (/^cancelled by user/i.test(message)) {
     return {
       kind: "cancelled",

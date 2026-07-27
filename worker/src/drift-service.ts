@@ -13,12 +13,6 @@ import { db, driftAlertId, logger, schema } from "./lib";
 import { dispatchWebhook } from "./queues";
 import { decryptSecret } from "./secret-crypto";
 
-// evaluates a completed run that belongs to a scheduled check, writes any drift
-// alerts, and delivers them to the check's configured channels.
-//
-// called from run-service after the run is already marked complete, so a delivery
-// problem can never leave a run stuck or unscored. a run submitted from the ui or
-// the api has no scheduled check and returns immediately.
 
 const SLACK_TIMEOUT_MS = 10_000;
 
@@ -88,9 +82,6 @@ export async function evaluateDrift(args: {
   return { alerts: persisted.length };
 }
 
-// fan out to every configured channel. one channel failing never stops the
-// others, and every attempt is recorded in notification_log either way, so a
-// silently broken slack webhook is visible rather than assumed working.
 async function deliver(args: {
   workspaceId: string;
   checkName: string;
@@ -105,8 +96,6 @@ async function deliver(args: {
     try {
       target = decryptSecret(channel.target);
     } catch {
-      // a target written before encryption (or by a test) is stored plain. treat
-      // the raw value as the target rather than dropping the alert.
       target = channel.target;
     }
 
@@ -116,8 +105,6 @@ async function deliver(args: {
       } else if (channel.type === "slack") {
         await postSlack(target, checkName, alerts);
       } else {
-        // a per-check webhook target, separate from the workspace's subscribed
-        // endpoints handled by dispatchWebhook below.
         await postJson(target, { event: "drift.detected", checkName, runId, alerts });
       }
       await recordNotification(db, {
@@ -194,8 +181,6 @@ export function label(type: DetectedDrift["type"]): string {
   }
 }
 
-// a slack/webhook url carries its own secret in the path, so the audit record
-// keeps only enough to identify the destination.
 function redactTarget(target: string): string {
   if (!target.startsWith("http")) return target;
   try {

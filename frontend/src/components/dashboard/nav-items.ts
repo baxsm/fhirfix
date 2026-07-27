@@ -21,8 +21,6 @@ export type NavItem = {
 
 export type NavGroup = { label: string; items: NavItem[] };
 
-// grouped nav breaks the flat list into meaningful sections: the daily
-// remediation loop, the ongoing governance surfaces, and admin.
 export function navGroups(workspace: string): NavGroup[] {
   const base = `/app/${workspace}`;
   return [
@@ -37,9 +35,6 @@ export function navGroups(workspace: string): NavGroup[] {
     {
       label: "Govern",
       items: [
-        // "Mappings" alone is an internal term - it does not say what the page
-        // holds or what you do there. nn/g: avoid invented terms in nav, name
-        // the task. same for "Conformance" and "Monitoring".
         { label: "Mapping rules", href: `${base}/mappings`, icon: Map },
         { label: "Conformance tests", href: `${base}/conformance`, icon: ShieldCheck },
         { label: "Scheduled checks", href: `${base}/monitoring`, icon: Radar },
@@ -48,8 +43,6 @@ export function navGroups(workspace: string): NavGroup[] {
     {
       label: "Manage",
       items: [
-        // "Developers" names an AUDIENCE, not a destination - nn/g has a
-        // dedicated article against audience-based nav. name the contents.
         { label: "API access", href: `${base}/developers`, icon: KeyRound },
         {
           label: "Billing",
@@ -71,11 +64,6 @@ export function navGroups(workspace: string): NavGroup[] {
 
 export type Crumb = { label: string; href?: string };
 
-/**
- * the nav item that owns a pathname. the workspace root is matched exactly so
- * it does not swallow every child route; everything else takes the longest
- * matching prefix.
- */
 export function activeNavItem(workspace: string, pathname: string): NavItem | undefined {
   const root = `/app/${workspace}`;
   return navGroups(workspace)
@@ -84,13 +72,6 @@ export function activeNavItem(workspace: string, pathname: string): NavItem | un
     .sort((a, b) => b.href.length - a.href.length)[0];
 }
 
-/**
- * the full trail for a pathname, not just the section.
- *
- * the topbar used to render exactly two crumbs from the nav match, so a run
- * detail page could only ever say "Runs" - the crumb never changed when you
- * drilled in, which made the whole topbar read as stale.
- */
 export function breadcrumbs(workspace: string, workspaceName: string, pathname: string): Crumb[] {
   const root = `/app/${workspace}`;
   const trail: Crumb[] = [{ label: workspaceName, href: root }];
@@ -107,9 +88,6 @@ export function breadcrumbs(workspace: string, workspaceName: string, pathname: 
 
   if (isSectionRoot) return trail;
 
-  // whatever is left after the section is the record being viewed. ids are kept
-  // verbatim (they are the thing the user is looking at), other segments are
-  // title-cased.
   const rest = pathname.slice(section.href.length).split("/").filter(Boolean);
   for (let i = 0; i < rest.length; i++) {
     const segment = rest[i];

@@ -29,8 +29,6 @@ const SEVERITY_ICON: Record<Severity, typeof AlertCircle> = {
   info: Info,
 };
 
-// pull the before/after fragment for one finding out of the whole-run diff by
-// its fhirpath, so a row's expanded diff shows just its own change when possible.
 function fragmentFor(fhirpath: string | null, before: string, after: string) {
   if (!fhirpath) return { before, after };
   // the leaf element name is the most stable anchor across before/after.
@@ -76,9 +74,6 @@ export function FindingCard({
   const fragment = before && after ? fragmentFor(finding.fhirpath, before, after) : null;
 
   return (
-    // a ROW in a shared panel, not a card of its own. severity is carried by the
-    // coloured icon, which is enough - it does not also need a bar down the left
-    // edge and a badge repeating the same word.
     <article
       className={cn(
         "group/finding relative transition-opacity",
@@ -172,12 +167,12 @@ export function FindingCard({
             {!readOnly && !applied && !dismissed && (
               <div className="flex flex-wrap items-center gap-2">
                 {canApply && onApply && (
-                  // success, matching "Apply all safe fixes" on the report
-                  // header: both make the resource conformant, which is the one
-                  // action the pass colour is reserved for. this was a generic
-                  // primary, so the product's core promise looked like any other
-                  // button while the bulk version two inches away was emerald.
-                  <Button variant="success" size="sm" disabled={busy} onClick={() => onApply(finding)}>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    disabled={busy}
+                    onClick={() => onApply(finding)}
+                  >
                     {busy ? (
                       <Loader2 className="size-3.5 animate-spin" />
                     ) : (

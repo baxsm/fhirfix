@@ -1,6 +1,3 @@
-// timeout + retry-with-backoff + circuit breaker shared by both sidecar clients.
-// the phase-2 spec calls sidecar reliability the biggest operational risk, so this
-// is a real implementation, not a passthrough.
 
 export class SidecarError extends Error {
   constructor(
@@ -14,11 +11,6 @@ export class SidecarError extends Error {
   }
 }
 
-// every SidecarError message already starts with the sidecar name (see the throw
-// sites below), so prefixing `sidecar` again produced "validator.validate:
-// validator.validate unreachable". the upstream body is the sidecar's own reason
-// for a 4xx/5xx and was being dropped entirely, which is the one detail worth
-// keeping when a run fails against a real service.
 export function describeSidecarError(err: SidecarError): string {
   const status = err.upstreamStatus ? ` (${err.upstreamStatus})` : "";
   const body = err.upstreamBody?.trim();

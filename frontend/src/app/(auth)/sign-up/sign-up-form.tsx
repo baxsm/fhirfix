@@ -41,8 +41,6 @@ export function SignUpForm() {
       name: values.name,
       email: values.email,
       password: values.password,
-      // after the verify link is opened, send the user to the frontend app,
-      // not the backend origin (Better Auth defaults callbackURL to "/").
       callbackURL: `${window.location.origin}/app`,
     });
     if (error) {

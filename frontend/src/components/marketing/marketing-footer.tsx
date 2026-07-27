@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 
-// footer columns map to real routes + real capabilities. the giant wordmark at the
-// bottom is the reference's signature close, re-skinned to our emerald "fix".
 const COLUMNS: { heading: string; links: { href: string; label: string }[] }[] = [
   {
     heading: "Product",

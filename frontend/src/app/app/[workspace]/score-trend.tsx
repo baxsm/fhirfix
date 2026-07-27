@@ -17,9 +17,6 @@ interface LatestRun {
   findingsAutoFixable: number;
 }
 
-// the score is a 0-1000 budget, so the axis is fixed rather than fitted to the
-// data. a chart that rescales to its own min/max makes a 20-point wobble look
-// like a cliff.
 const MAX_SCORE = 1000;
 const H = 96;
 const PAD_X = 6;
@@ -34,13 +31,6 @@ function fmtDay(d: string | Date): string {
   });
 }
 
-/**
- * conformance score over time.
- *
- * hand-drawn svg rather than a chart library: one series, no axes, no legend.
- * the interaction is the part worth writing by hand anyway - hovering anywhere
- * over the plot snaps to the nearest run and reports it.
- */
 export function ScoreTrend({
   points,
   latest,
@@ -56,9 +46,6 @@ export function ScoreTrend({
 
   const scored = points.filter((p): p is TrendPoint & { after: number } => p.after != null);
 
-  // an unresolved query has an empty array too. saying "not enough history" then
-  // is a false claim about the data - the workspace may have 14 scored runs.
-  // hold the frame until the answer is actually known.
   if (pending) {
     return (
       <div className="raised rounded-lg border bg-card">
@@ -90,8 +77,6 @@ export function ScoreTrend({
     );
   }
 
-  // the viewBox scales with the number of points so the horizontal step stays
-  // sane whether there are 3 runs or 60.
   const W = Math.max(160, scored.length * 24);
   const plotW = W - PAD_X * 2;
   const plotH = H - PAD_Y * 2;
@@ -108,10 +93,6 @@ export function ScoreTrend({
   const last = coords[coords.length - 1];
   const current = latest?.conformanceScoreAfter ?? last?.v ?? 0;
 
-  // deliberately NOT first-vs-last. each run scores a different input, so
-  // "latest minus oldest" compares two unrelated resources and produces a
-  // number that looks like progress but measures nothing. the honest summary
-  // of a series of independent runs is its typical value.
   const median = (() => {
     const sorted = [...scored.map((p) => p.after)].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
@@ -120,8 +101,6 @@ export function ScoreTrend({
     return Math.round(value ?? 0);
   })();
 
-  // map the pointer to the nearest run rather than requiring a hit on the 3px
-  // dot itself: anywhere in the plot's vertical band selects a column.
   const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
     const svg = svgRef.current;
     if (!svg) return;

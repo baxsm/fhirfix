@@ -1,7 +1,5 @@
 import type { ApiKeyMode } from "@/lib/api-key";
 
-// the request-scoped state the api-v1 middleware chain builds up. resolveApiKey
-// sets the auth fields; controllers read them; logApiRequest reads them at the end.
 export interface ApiV1Vars {
   apiKeyId: string;
   workspaceId: string;

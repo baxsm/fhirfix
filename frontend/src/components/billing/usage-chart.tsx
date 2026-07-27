@@ -13,8 +13,6 @@ import {
 // one raw row per (day, source) from billing.usage.
 export type UsageRow = { day: string; source: string; dollars: number };
 
-// pivot the (day, source) rows into one row per day with a column per source, so
-// recharts can stack. sources are dynamic (ui / api / other), so we discover them.
 function pivot(
   rows: UsageRow[],
   days: number,
@@ -43,10 +41,6 @@ const SOURCE_LABEL: Record<string, string> = {
   other: "Other",
 };
 
-// categorical slots - these encode IDENTITY (which source spent it), so they are
-// distinct hues, not shades of one. the previous set was chroma-zero greyscale
-// while its comment claimed an emerald ramp; see globals.css for the validated
-// values and their measured CVD separation.
 const SOURCE_COLOR: Record<string, string> = {
   ui: "var(--color-chart-ui)",
   api: "var(--color-chart-api)",
@@ -62,8 +56,6 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
   const { data, sources } = pivot(rows, days);
   const hasSpend = rows.length > 0;
 
-  // one unit for the whole axis, chosen from the busiest day. deciding per tick
-  // mixes "$0.12" and "4.0¢" on the same axis, which does not read as a scale.
   const peakDay = Math.max(
     0,
     ...data.map((d) => sources.reduce((sum, s) => sum + (Number(d[s]) || 0), 0)),
@@ -103,8 +95,6 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
           axisLine={false}
           width={44}
           allowDecimals
-          // cents while a day of runs is fractions of a cent, dollars once spend
-          // is larger. the unit is fixed for the axis, not per tick.
           tickFormatter={(v: number) => (inCents ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`)}
           className="text-[10px]"
         />
@@ -130,10 +120,6 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
             dataKey={s}
             stackId="spend"
             fill={SOURCE_COLOR[s] ?? "var(--color-chart-other)"}
-            // a 2px surface-coloured stroke between stacked segments. this is
-            // the required relief channel: aqua sits at 2.77:1 on this surface,
-            // below the 3:1 mark-contrast bar, so the boundary between segments
-            // must be legible by shape and not by colour contrast alone.
             stroke="var(--card)"
             strokeWidth={2}
             radius={i === sources.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}

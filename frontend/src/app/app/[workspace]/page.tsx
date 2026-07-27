@@ -6,8 +6,6 @@ export default async function OverviewPage({ params }: { params: Promise<{ works
   const { workspace } = await params;
   const workspaceId = await resolveWorkspace(workspace);
 
-  // the three queries the overview renders from, started here so they are in
-  // flight while the html streams instead of after the client mounts.
   if (workspaceId) {
     prefetch(trpcServer.run.list.queryOptions({ workspaceId }));
     prefetch(trpcServer.run.trend.queryOptions({ workspaceId }));

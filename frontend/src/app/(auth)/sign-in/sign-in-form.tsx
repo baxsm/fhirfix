@@ -47,9 +47,6 @@ export function SignInForm() {
       toast.error(error.message ?? "Could not sign in.");
       return;
     }
-    // resolve the destination here rather than bouncing through /app, which
-    // would mount a resolver that re-fetches the same org list and flashes a
-    // skeleton on the way. one navigation instead of three.
     const next = searchParams.get("next");
     if (next?.startsWith("/app")) {
       router.replace(next);
@@ -59,8 +56,6 @@ export function SignInForm() {
     const { data: orgs } = await authClient.organization.list();
     const slug = orgs?.[0]?.slug;
     router.replace(slug ? `/app/${slug}` : "/app/new");
-    // pending deliberately stays true: it resets on error only, so the button
-    // cannot be submitted again while the route transition is still in flight.
   }
 
   return (

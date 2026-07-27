@@ -1,7 +1,3 @@
-// a stable, deterministic fingerprint so the same defect across many resources
-// collapses to one finding row with an occurrence count. we intentionally strip
-// array indices from the fhirpath (identifier[0] and identifier[3] are the same
-// defect class) and hash the rule + normalized path + resource type.
 
 import { createHash } from "node:crypto";
 

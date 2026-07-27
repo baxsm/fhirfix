@@ -36,8 +36,6 @@ const baseEnv = createEnv({
     // default IG pool: US Core 6.1.0.
     US_CORE_VERSION: z.string().default("6.1.0"),
 
-    // phase-4 billing (Polar). empty token => checkout is unavailable and returns
-    // a clean "billing not configured" error instead of throwing at construction.
     POLAR_ACCESS_TOKEN: z.string().default(""),
     POLAR_WEBHOOK_SECRET: z.string().default(""),
     POLAR_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
@@ -48,9 +46,6 @@ const baseEnv = createEnv({
     // absolute url of the frontend, used to build Polar success/return urls.
     APP_URL: z.url().default("http://localhost:3000"),
 
-    // phase-5 public REST API. pepper for the keyed api-key hash (defense in depth
-    // vs a db-only leak) and the AES key for webhook-secret encryption at rest.
-    // both default to dev-only constants; production MUST set real 32+ byte values.
     API_KEY_PEPPER: z.string().min(16).default("dev-api-key-pepper-change-in-prod"),
     WEBHOOK_ENCRYPTION_KEY: z.string().min(32).default("dev-webhook-enc-key-change-me-32byte!"),
   },

@@ -4,11 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./motion";
 
-// the pipeline, as a stepper. mirrors the reference's tabbed insight section: pill
-// tabs across the top, left copy / right visual below. each stage is a REAL step in
-// the engine (detect -> convert -> validate -> rank -> fix -> re-verify), and each
-// right-side visual is a small mono panel showing that stage's actual kind of output.
-
 type Stage = {
   id: string;
   tab: string;
@@ -17,8 +12,6 @@ type Stage = {
   visual: React.ReactNode;
 };
 
-// a mono "terminal" panel used by every stage. a fixed min-height keeps all stages
-// the same size so the section doesn't jump or leave dead space as tabs switch.
 function MonoPanel({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div className="overflow-hidden rounded-xl border bg-card shadow-[0_16px_50px_-24px_oklch(0.5_0.02_260/0.3)]">

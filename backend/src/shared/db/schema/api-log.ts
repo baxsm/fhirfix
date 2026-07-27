@@ -1,9 +1,5 @@
 import { index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// records ALL public REST traffic, including calls that never create a run
-// (401 auth failures, 402 out-of-credits, 422 malformed, 429 rate-limited) - the
-// traffic a developer debugging an integration needs. short retention, pruned by
-// a job. written on every request exit, success and error alike.
 export const apiRequestLog = pgTable(
   "api_request_log",
   {

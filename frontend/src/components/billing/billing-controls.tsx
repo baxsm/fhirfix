@@ -17,25 +17,6 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useTRPC } from "@/trpc/client";
 
-/**
- * auto-recharge and the spend cap, as a divider-separated settings list rather
- * than two bordered cards side by side.
- *
- * the cards were the problem. each held one switch in an otherwise empty panel,
- * so two-thirds of each was white space, and turning auto-recharge on grew its
- * card while the neighbour stayed short - the row visibly jumped. a settings
- * list has no box to fill, so a row that reveals two fields just gets taller
- * without anything around it changing shape.
- *
- * IMPORTANT (honesty): auto-recharge does not fire yet. evaluateAutoRecharge()
- * is only read by the summary query to compute display state - no worker, cron
- * or webhook ever acts on it, and lib/polar.ts exposes only createCheckout (a
- * hosted flow that needs a human). charging an unattended saved card is real
- * backend work that does not exist. so the row says so instead of pretending.
- * a toggle that silently does nothing on a page about money is worse than an
- * absent feature: a user turns it on and believes their runs will not stop.
- */
-
 type AutoRecharge = {
   enabled: boolean;
   thresholdDollars: number | null;
@@ -252,7 +233,8 @@ function SpendCapRow({
   }, [spendCap.monthlyCents]);
 
   const savedDollars = spendCap.monthlyCents != null ? String(spendCap.monthlyCents / 100) : "100";
-  const dirty = enabled !== (spendCap.monthlyCents != null) || (enabled && dollars !== savedDollars);
+  const dirty =
+    enabled !== (spendCap.monthlyCents != null) || (enabled && dollars !== savedDollars);
 
   const save = useMutation(
     trpc.billing.setSpendCap.mutationOptions({

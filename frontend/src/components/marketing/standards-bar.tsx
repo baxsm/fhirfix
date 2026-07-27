@@ -1,8 +1,5 @@
 import { Reveal } from "./motion";
 
-// the honest trust bar: the standards and implementation guides FHIRfix validates
-// against. NO fabricated customer logos (product-honesty rule) — for this buyer,
-// "we hold you to exactly what the payer/registry will" is the credible signal.
 const STANDARDS = [
   "US Core 6.1.0",
   "FHIR R4",

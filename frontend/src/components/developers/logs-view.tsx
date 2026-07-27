@@ -9,15 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
 import { RequestLogsSection } from "./request-logs-section";
 
-/**
- * the full log viewer. filters and paging live here rather than on the API
- * access overview, which now shows a fixed recent slice - that is what removed
- * the height jump on the overview instead of freezing it behind a fixed frame.
- *
- * the stats strip is computed in sql over a 24h window, not derived from the
- * rows on screen: a page-local average would describe the current page rather
- * than the traffic, and would change every time you paged.
- */
 export function LogsView({
   workspace,
   workspaceId,
@@ -61,9 +52,6 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
   const stats = useQuery(trpc.developers.requestLogs.stats.queryOptions({ workspaceId }));
 
   if (stats.isPending) return <Skeleton className="h-[92px] w-full rounded-lg" />;
-  // this used to `return null`, which deleted the whole strip on a failed
-  // fetch - the page then looked like it was designed without these numbers
-  // rather than like something had broken.
   if (stats.isError || !stats.data) {
     return (
       <section className="raised overflow-hidden rounded-lg border bg-card">
@@ -89,8 +77,7 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
   const { total, errors, p95Ms, topPaths, windowHours } = stats.data;
   const errorRate = total > 0 ? (errors / total) * 100 : 0;
   // "264h" is not a window a person reads. past a couple of days, say days.
-  const windowLabel =
-    windowHours <= 48 ? `${windowHours}h` : `${Math.round(windowHours / 24)}d`;
+  const windowLabel = windowHours <= 48 ? `${windowHours}h` : `${Math.round(windowHours / 24)}d`;
 
   return (
     <section className="raised overflow-hidden rounded-lg border bg-card">
@@ -146,15 +133,7 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
   );
 }
 
-function Stat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: "danger";
-}) {
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "danger" }) {
   return (
     <div className="min-w-0 px-4 py-3">
       <p className="text-[11px] text-muted-foreground">{label}</p>

@@ -3,13 +3,6 @@ import Link from "next/link";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { Button } from "@/components/ui/button";
 
-// honest placeholder for routes whose feature lands in a later phase.
-//
-// it used to say "Not built yet ... arrives in Phase 7", which tells the user
-// about our roadmap and leaves them at a dead end. helios and carbon both say a
-// feature that is unavailable needs the reason plus a way forward, never a
-// terminal message. so: name what the screen will do, and offer the thing that
-// does the closest job today.
 export function PhasePlaceholder({
   title,
   icon: Icon,

@@ -35,9 +35,6 @@ export function CreateWorkspaceForm({ onClose, autoFocus = true, layout = "page"
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
-  // stays true through the navigation that follows a successful create, so the
-  // submit button can't be double-clicked in the idle window before the route
-  // transition completes. only reset on error.
   const [navigating, setNavigating] = useState(false);
 
   const create = useMutation(
@@ -45,11 +42,7 @@ export function CreateWorkspaceForm({ onClose, autoFocus = true, layout = "page"
       onSuccess: async (org) => {
         toast.success("Workspace created");
         await queryClient.invalidateQueries({ queryKey: trpc.workspace.list.queryKey() });
-        // the org is created server-side via trpc, so better-auth's client never
-        // sees /organization/create and its $listOrg atom stays stale for the rest
-        // of the session. every view that resolves the workspace through
-        // useListOrganizations would then render its skeleton forever. flipping the
-        // signal is what better-auth's own atomListeners do on a client-side create.
+        // the org is created server-side via trpc, so better-auth's $listOrg stays stale without this
         authClient.$store.notify("$listOrg");
         onClose?.();
         router.push(`/app/${org.slug}`);

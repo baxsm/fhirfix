@@ -33,9 +33,6 @@ const alertChannel = z.object({
   target: z.string().min(1).max(500),
 });
 
-// the shape shared by create and update. cron is validated here rather than in
-// the scheduler, so a bad expression is refused at the boundary instead of
-// silently registering a timer that never fires.
 const checkFields = z.object({
   name: z.string().min(1).max(120),
   scheduleCron: z
@@ -58,8 +55,6 @@ const checkFields = z.object({
   enabled: z.boolean().default(true),
 });
 
-// an http target must actually be http. without this a check could be pointed at
-// file:// or a private scheme and the fetch failure would only surface a run later.
 function validateTarget(targetType: (typeof TARGET_TYPES)[number], targetRef: string) {
   if (targetType === "upload_folder") return;
   let url: URL;
@@ -73,9 +68,6 @@ function validateTarget(targetType: (typeof TARGET_TYPES)[number], targetRef: st
   }
 }
 
-// slack and webhook targets are secret-bearing urls, so they are encrypted at
-// rest per the schema rules. email targets go through the same path so the
-// storage shape is uniform rather than branching per channel.
 function encryptChannels(channels: Array<{ type: string; target: string }>) {
   return channels.map((c) => ({
     type: c.type as (typeof CHANNEL_TYPES)[number],
@@ -103,8 +95,6 @@ export const monitoringRouter = router({
           lastRunAt: schema.scheduledCheck.lastRunAt,
           lastError: schema.scheduledCheck.lastError,
           createdAt: schema.scheduledCheck.createdAt,
-          // channel targets are encrypted; the ui only needs to know which
-          // channels exist, never the secret url behind them.
           channelTypes: sql<
             string[]
           >`coalesce((select array_agg(c->>'type') from jsonb_array_elements(${schema.scheduledCheck.alertChannels}) c), '{}')`,
@@ -179,8 +169,6 @@ export const monitoringRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Scheduled check not found." });
       }
 
-      // the cron may have changed, so the scheduler is re-registered rather than
-      // left pointing at the old pattern.
       if (input.enabled) {
         await registerSchedule(input.id, input.scheduleCron);
       } else {
@@ -250,8 +238,6 @@ export const monitoringRouter = router({
       return { deleted: true };
     }),
 
-  // fire a check immediately, without waiting for its cron. the job is identical
-  // to a scheduled firing, so what this proves is exactly what the schedule does.
   runNow: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), id: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -282,8 +268,6 @@ export const monitoringRouter = router({
       return { queued: true };
     }),
 
-  // the drift feed. `unacknowledgedOnly` is the default view, because an
-  // acknowledged alert is history rather than something needing attention.
   listAlerts: workspaceProcedure
     .input(
       z.object({
@@ -330,8 +314,6 @@ export const monitoringRouter = router({
         .limit(200);
     }),
 
-  // counts for the header strip. one query rather than filtering the list client
-  // side, so the numbers stay right when the list is capped at 200.
   alertCounts: workspaceProcedure
     .input(z.object({ workspaceId: z.string() }))
     .query(async ({ ctx }) => {

@@ -47,14 +47,9 @@ function lookupMapping(
   type: RegistryMapping["type"],
   sourceValue: string,
 ): RegistryMapping | undefined {
-  // first match wins, and the loader orders source_system-scoped rows ahead of
-  // workspace-scoped ones, so the most specific mapping is the one that applies.
   return ctx.mappings.find((m) => m.type === type && m.sourceValue === sourceValue);
 }
 
-// derive a fix for a coding-with-no-system finding on identifier.type.coding.
-// the v2 converter emits type.coding codes (MRN, NHSNMBR) with no system; the
-// conformant system for identifier type codes is HL7 v2-0203. deterministic + safe.
 function deriveIdentifierTypeSystem(
   resource: unknown,
   finding: EngineFinding,
@@ -70,8 +65,6 @@ function deriveIdentifierTypeSystem(
   if (!known.has(coding.code)) return undefined;
   // MRN is the converter's shorthand; the real v2-0203 code is MR.
   const normalizedCode = coding.code === "MRN" ? "MR" : coding.code;
-  // v2-0203 requires the exact display string for each code, else the validator
-  // errors with "Wrong Display Name". carry the canonical display.
   const display = V2_0203_DISPLAY[normalizedCode];
   const after: { system: string; code: string; display?: string } = {
     system: V2_0203_SYSTEM,
@@ -89,10 +82,6 @@ function deriveIdentifierTypeSystem(
   };
 }
 
-// derive identifier.system from the assigning authority via the registry.
-// the v2 converter emits a placeholder system (http://example.com/...); we replace
-// it with the mapped canonical system for the authority. if unmapped, emit a
-// suggestion and leave a one-click/manual finding.
 function deriveIdentifierSystem(
   resource: unknown,
   finding: EngineFinding,
@@ -150,8 +139,6 @@ function deriveIdentifierSystem(
   };
 }
 
-// reformat a bad date/dateTime. HL7v2 dates arrive as YYYYMMDD; FHIR needs
-// YYYY-MM-DD. deterministic + safe when the shape is unambiguous.
 function deriveDateReformat(resource: unknown, finding: EngineFinding): DerivedFix | undefined {
   if (!finding.fhirpath) return undefined;
   if (!/date|birthDate|period|instant|dateTime/i.test(finding.fhirpath)) return undefined;
@@ -171,8 +158,6 @@ function deriveDateReformat(resource: unknown, finding: EngineFinding): DerivedF
   };
 }
 
-// map a raw HL7 gender code to a FHIR AdministrativeGender via Table 0001.
-// only fires when the value is a known table code, not already a valid FHIR value.
 function deriveGender(resource: unknown, finding: EngineFinding): DerivedFix | undefined {
   if (!finding.fhirpath || !/gender$/i.test(finding.fhirpath)) return undefined;
   const value = getAtPath(resource, finding.fhirpath);
@@ -190,11 +175,6 @@ function deriveGender(resource: unknown, finding: EngineFinding): DerivedFix | u
   };
 }
 
-// proactive scan for the v2 converter's placeholder identifier systems. the
-// converter emits http://example.com/... systems that are never conformant, and
-// a lenient validator may not error on them, so we remap them deterministically
-// regardless of whether a validator finding pointed at the system. returns the
-// list of applied fixes (for reporting) and mutates the resource in place.
 export function remapPlaceholderSystems(
   resource: unknown,
   ctx: FixContext,
@@ -234,8 +214,6 @@ const DERIVERS = [
   deriveGender,
 ] as const;
 
-// derive a fix for one finding. returns undefined when no deriver applies (the
-// finding stays manual). the identifier-system deriver needs ctx; others ignore it.
 export function deriveFix(
   resource: unknown,
   finding: EngineFinding,

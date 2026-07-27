@@ -29,12 +29,6 @@ function fmtDate(d: string | Date): string {
   });
 }
 
-/**
- * the backend describes a run debit as "Run run_xxx (1 resource)". with the
- * type label already reading "Run", the row rendered "Run / Run run_xxx (1
- * resource)" - the word three times. strip the redundant lead-in so the second
- * line carries only what the label does not already say.
- */
 function detailLine(type: LedgerType, description: string): string {
   const label = TYPE_LABEL[type];
   const trimmed = description.replace(new RegExp(`^${label}\\s+`, "i"), "");
@@ -93,9 +87,6 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
               const isCredit = r.amountDollars >= 0;
               const type = r.type as LedgerType;
               return (
-                // no hover: a ledger row is a record, not a control. nothing
-                // happens when you click it, so lighting it up on hover
-                // promises an interaction that does not exist.
                 <tr key={r.id} className="border-b last:border-0">
                   <td className="px-4 py-2.5">
                     <div className="flex min-w-0 flex-col">

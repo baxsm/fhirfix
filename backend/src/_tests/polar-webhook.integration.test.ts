@@ -4,13 +4,6 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { handleOrderPaid, handleOrderRefunded, polarWebhookRoutes } from "@/routes/polar-webhook";
 
-// integration against real Postgres. the order.paid/refunded business logic
-// (invoice + ledger + idempotency) is exercised directly with a parsed order,
-// because Polar's validateEvent requires a full, schema-complete SDK Order that
-// only the live sandbox produces. the signature-verification -> 403 path IS tested
-// end to end through the route with a deliberately bad signature. the live
-// checkout -> real webhook leg is verified separately once sandbox creds are set.
-
 const ws = `polar_test_${Date.now()}`;
 
 afterAll(async () => {

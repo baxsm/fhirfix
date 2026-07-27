@@ -23,25 +23,6 @@ const ACCEPT = ".json,.ndjson,.hl7,.txt,application/json,text/plain";
 const MAX_BYTES = 5_000_000;
 const EDITOR_PX = 340;
 
-/**
- * one question, one frame.
- *
- * the editor's own border is the ONLY box on this page. an earlier pass nested
- * three (page card > numbered section > editor) which is the card-in-card the
- * house rules forbid; jwt.io, which solves the same paste-and-inspect shape,
- * wraps its editor in exactly one.
- *
- * the header carries the two ways to GET content (upload, load a sample); the
- * footer carries the two ways to ACT on it (clear, run). every control is
- * mounted at all times and disabled when it does not apply, so acting on the
- * page never changes which controls the page has.
- *
- * a sample is an ACTION, not a selection: it drops text in and the menu closes.
- * modelling it as a mode meant a chip stayed lit over text the user had since
- * rewritten, and needed an `edited` flag to paper over the contradiction.
- * there is now exactly one piece of state - the content itself.
- */
-
 function describeInput(raw: string): string {
   const trimmed = raw.trimStart();
   if (!trimmed) return "Nothing to check yet";
@@ -76,9 +57,6 @@ export function CheckView({ workspace }: { workspace: string }) {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
 
-  // content that arrives from a sample or a file is set programmatically, so the
-  // textarea keeps whatever scroll offset it had and can open mid-resource.
-  // loading something should show you the start of it.
   const load = (next: string) => {
     setProblem(null);
     setContent(next);
@@ -122,16 +100,11 @@ export function CheckView({ workspace }: { workspace: string }) {
   const empty = charCount === 0;
   const busy = submit.isPending;
 
-  // at least one row so the gutter has a width to reserve when the editor is
-  // empty, rather than the text column shifting once the first line arrives.
   const lineNumbers = Array.from(
     { length: Math.max(content.split("\n").length, 1) },
     (_, i) => i + 1,
   );
 
-  // width="full", not "reading": the latter caps at 820px for prose, but this is
-  // a code editor and the sibling pages (mappings, monitoring) run 1454px. the
-  // narrow column made long identifier URLs wrap for no reason.
   return (
     <PageContainer width="full">
       <header className="space-y-1">
@@ -253,8 +226,6 @@ export function CheckView({ workspace }: { workspace: string }) {
             onScroll={(e) => {
               if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop;
             }}
-            // Tab indents instead of leaving the field. in a box you are meant
-            // to edit json in, losing focus on Tab is the wrong default.
             onKeyDown={(e) => {
               if (e.key !== "Tab" || e.shiftKey) return;
               e.preventDefault();

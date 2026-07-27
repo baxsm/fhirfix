@@ -12,8 +12,6 @@ export default async function DevelopersPage({
 
   if (workspaceId) {
     prefetch(trpcServer.workspace.get.queryOptions({ workspaceId }));
-    // the three sections this page is made of. their default inputs are static,
-    // so the server can start every one of them.
     prefetch(trpcServer.developers.apiKeys.list.queryOptions({ workspaceId }));
     prefetch(trpcServer.developers.webhooks.list.queryOptions({ workspaceId }));
     prefetch(

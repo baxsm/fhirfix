@@ -26,10 +26,6 @@ import { Switch } from "@/components/ui/switch";
 import { useTRPC } from "@/trpc/client";
 import { type ChannelType, CRON_PRESETS, type ScheduledCheckRow, type TargetType } from "./types";
 
-// one form for both create and edit. the fields are identical and the only
-// difference is which mutation runs, so splitting them would mean maintaining
-// the same eight inputs twice.
-
 const TARGET_OPTIONS: { value: TargetType; label: string; hint: string; placeholder: string }[] = [
   {
     value: "endpoint",
@@ -83,8 +79,6 @@ function draftFrom(check: ScheduledCheckRow): Draft {
     targetRef: check.targetRef,
     minPassRate: check.baselineConfig?.minPassRate?.toString() ?? "",
     maxErrorDelta: check.baselineConfig?.maxErrorDelta?.toString() ?? "",
-    // stored targets are encrypted, so an edit cannot show the existing values.
-    // the row is re-entered rather than silently resubmitted as ciphertext.
     channels: [],
     enabled: check.enabled,
   };
@@ -107,8 +101,6 @@ export function CheckDialog({
   const editing = target !== null;
   const [draft, setDraft] = useState<Draft>(emptyDraft);
 
-  // reload the draft whenever the dialog opens onto a different check, so
-  // editing one row never shows the previous row's values.
   useEffect(() => {
     if (!open) return;
     setDraft(target ? draftFrom(target) : emptyDraft);
