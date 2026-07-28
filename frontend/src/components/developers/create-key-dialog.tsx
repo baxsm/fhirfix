@@ -16,7 +16,6 @@ import {
 import { InlineNote } from "@/components/ui/inline-note";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { SecretReveal } from "./secret-reveal";
 
@@ -106,7 +105,9 @@ export function CreateKeyDialog({
 
             <SecretReveal value={created.key} label="Secret key" />
 
-            <InlineNote>Copy it now. You will not be able to see this key again.</InlineNote>
+            <InlineNote flush tone="critical">
+              Copy it now. You will not be able to see this key again.
+            </InlineNote>
 
             <DialogFooter>
               <Button size="sm" onClick={() => onOpenChange(false)}>
@@ -136,22 +137,19 @@ export function CreateKeyDialog({
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label>Mode</Label>
-                <div role="radiogroup" aria-label="Key mode" className="grid grid-cols-2 gap-2">
-                  <ModeButton
-                    active={mode === "test"}
-                    onClick={() => setMode("test")}
-                    title="Test"
-                    hint="Free to run"
-                  />
-                  <ModeButton
-                    active={mode === "live"}
-                    onClick={() => setMode("live")}
-                    title="Live"
-                    hint="Spends credits"
-                  />
-                </div>
+              <div className="flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40">
+                <Checkbox
+                  id="key-live"
+                  checked={mode === "live"}
+                  onCheckedChange={(v) => setMode(v ? "live" : "test")}
+                />
+                <Label
+                  htmlFor="key-live"
+                  className="flex flex-1 cursor-pointer items-center gap-2.5 font-normal"
+                >
+                  Live key
+                  <span className="ml-auto text-xs text-muted-foreground">Spends credits</span>
+                </Label>
               </div>
 
               <div className="space-y-1.5">
@@ -192,47 +190,5 @@ export function CreateKeyDialog({
         )}
       </DialogContent>
     </Dialog>
-  );
-}
-
-function ModeButton({
-  active,
-  onClick,
-  title,
-  hint,
-}: {
-  active: boolean;
-  onClick: () => void;
-  title: string;
-  hint: string;
-}) {
-  return (
-    // biome-ignore lint/a11y/useSemanticElements: a card this size cannot be an <input type="radio">
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className={cn(
-        "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2 text-left transition-colors",
-        active
-          ? "border-foreground/25 bg-muted"
-          : "border-border hover:border-foreground/20 hover:bg-muted/40",
-      )}
-    >
-      {/* an explicit dot, because a fill alone is ambiguous when the two options sit side by side - */}
-      <span
-        className={cn(
-          "mt-0.5 flex size-3.5 shrink-0 items-center justify-center rounded-full border transition-colors",
-          active ? "border-primary bg-primary" : "border-input bg-background",
-        )}
-      >
-        {active && <span className="size-1.5 rounded-full bg-primary-foreground" />}
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-medium">{title}</span>
-        <span className="block text-xs text-muted-foreground">{hint}</span>
-      </span>
-    </button>
   );
 }

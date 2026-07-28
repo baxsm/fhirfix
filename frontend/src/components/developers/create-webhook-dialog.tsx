@@ -105,7 +105,9 @@ export function CreateWebhookDialog({
 
             <SecretReveal value={secret} label="Signing secret" />
 
-            <InlineNote>Copy it now. You will not be able to see this secret again.</InlineNote>
+            <InlineNote flush tone="critical">
+              Copy it now. You will not be able to see this secret again.
+            </InlineNote>
 
             <DialogFooter>
               <Button size="sm" onClick={() => onOpenChange(false)}>

@@ -128,7 +128,7 @@ function AutoRechargeRow({
           <p className="mt-0.5 text-xs text-muted-foreground">
             Top up automatically when the balance runs low.
           </p>
-          <InlineNote className="mt-1">
+          <InlineNote className="mt-2">
             Saved as a preference, but charging is not connected yet.
           </InlineNote>
         </div>

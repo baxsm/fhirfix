@@ -107,17 +107,3 @@ export function StatusChip({
   );
 }
 
-export function railClass(tone: StatusTone): string {
-  switch (tone) {
-    case "danger":
-      return "border-l-destructive";
-    case "warning":
-      return "border-l-warning";
-    case "success":
-      return "border-l-primary";
-    case "info":
-      return "border-l-info";
-    default:
-      return "border-l-transparent";
-  }
-}

@@ -73,7 +73,9 @@ export function RotateSecretDialog({
                 your receiver with the new secret.
               </DialogDescription>
             </DialogHeader>
-            <InlineNote>Rotate only when you are ready to swap the secret on your side.</InlineNote>
+            <InlineNote flush>
+              Rotate only when you are ready to swap the secret on your side.
+            </InlineNote>
             <DialogFooter>
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                 Cancel

@@ -9,8 +9,7 @@ import { timeAgo } from "@/components/developers/shared";
 import { Button } from "@/components/ui/button";
 import { FilterPill } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
-import { railClass, StatusDot } from "@/components/ui/status";
-import { cn } from "@/lib/utils";
+import { StatusDot } from "@/components/ui/status";
 import { useTRPC } from "@/trpc/client";
 import { DRIFT_LABELS, type DriftAlertRow, severityTone } from "./types";
 
@@ -67,10 +66,7 @@ export function AlertFeed({
             {rows.map((row) => (
               <li
                 key={row.id}
-                className={cn(
-                  "flex flex-col gap-3 border-b border-l-2 px-4 py-3 last:border-b-0 sm:flex-row sm:items-center",
-                  railClass(severityTone(row.severity)),
-                )}
+                className="flex flex-col gap-3 border-b px-4 py-3 last:border-b-0 sm:flex-row sm:items-center"
               >
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
