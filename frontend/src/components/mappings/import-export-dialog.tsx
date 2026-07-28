@@ -184,9 +184,7 @@ export function ImportExportDialog({
               </p>
             )}
 
-            {/* the file is not rejected outright for a few bad rows: the good
-                ones still import, and naming the line is what lets someone fix
-                the file rather than guess at it. */}
+            {/* the file is not rejected outright for a few bad rows */}
             {errors.length > 0 && (
               <div className="max-h-32 overflow-y-auto rounded-md border border-destructive/20 bg-destructive/[0.03] p-2">
                 <p className="font-medium text-xs">

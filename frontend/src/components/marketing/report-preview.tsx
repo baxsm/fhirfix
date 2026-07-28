@@ -120,7 +120,7 @@ export function ReportPreview() {
                   <Check className="size-4 shrink-0 text-success" />
                   <span className="text-sm">
                     <span className="font-medium">4 of 6 auto-fixable</span>{" "}
-                    <span className="text-muted-foreground">— apply all safe fixes</span>
+                    <span className="text-muted-foreground">apply all safe fixes</span>
                   </span>
                 </div>
               </div>

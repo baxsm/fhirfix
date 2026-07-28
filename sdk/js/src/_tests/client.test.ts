@@ -1,8 +1,15 @@
 
 import { describe, expect, test } from "bun:test";
-import type { ApiError, RateLimitError } from "../index.js";
 import * as sdk from "../index.js";
-import { ConnectionError, Fhirfix, FhirfixError, ServerError, TimeoutError } from "../index.js";
+import {
+  type ApiError,
+  ConnectionError,
+  Fhirfix,
+  FhirfixError,
+  type RateLimitError,
+  ServerError,
+  TimeoutError,
+} from "../index.js";
 
 const BASE = "https://api.example.test/api/v1";
 

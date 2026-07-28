@@ -99,8 +99,7 @@ export function MembersSection({
               className="font-mono text-sm"
             />
           </div>
-          {/* all three controls on the same rung. this row previously ran an
-              h-9 input, an h-9 select and an h-7 button side by side. */}
+          {/* all three controls on the same rung */}
           <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as WorkspaceRole)}>
             <SelectTrigger className="w-32 font-mono text-xs">
               <SelectValue />
@@ -119,9 +118,7 @@ export function MembersSection({
         </form>
       )}
 
-      {/* flush divider-based list, NOT a nested bordered box — this renders
-          inside the SettingsSection card, so an inner border would be card-in-
-          card. a hairline top border separates it from the invite form above. */}
+      {/* divider-based list, never a bordered box: this sits inside a card already */}
       <div className="-mx-5 border-t">
         <div className="px-5 pb-1 pt-3">
           <span className="text-xs font-medium text-muted-foreground">
@@ -156,9 +153,7 @@ export function MembersSection({
               const r = m.role as WorkspaceRole;
               return (
                 <li key={m.id} className="flex items-center gap-3 px-5 py-2.5">
-                  {/* no avatar circle. there are no profile images in this
-                      product and there will not be, so a monogram in a circle
-                      is a placeholder for something that never arrives. */}
+                  {/* no avatar circle: this product has no profile images */}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium leading-tight">{m.user.name}</p>
                     <p className="truncate font-mono text-xs leading-tight text-muted-foreground">

@@ -186,8 +186,7 @@ function AutoRechargeRow({
         </p>
       )}
 
-      {/* money settings take an explicit confirm - auto-saving a spend threshold
-          on every keystroke would eventually fire real charges. */}
+      {/* money settings take an explicit confirm - auto-saving a spend threshold on every keystroke */}
       {dirty && (
         <div className="mt-3 flex items-center justify-end gap-3">
           <span className="mr-auto text-xs text-muted-foreground">Unsaved changes</span>
@@ -263,8 +262,7 @@ function SpendCapRow({
           <Label htmlFor="cap-enabled" className="cursor-pointer text-sm font-medium">
             Monthly spend alert
           </Label>
-          {/* named "alert", not "cap", because that is what it does. calling it a
-              cap implied it stops spending, which it does not. */}
+          {/* named "alert", not "cap", because that is what it does */}
           <p className="mt-0.5 text-xs text-muted-foreground">
             Email us a warning when purchases reach a monthly limit. It does not stop runs - your
             balance already does that.

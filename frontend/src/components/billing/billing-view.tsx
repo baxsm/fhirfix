@@ -95,12 +95,7 @@ export function BillingView({ workspace }: { workspace: string }) {
             <InvoicesTable workspaceId={workspaceId} />
           </SettingsSection>
 
-          {/* not `flush`. flush put a full-bleed table immediately under the
-              header's border-b, so the heading sat on a rule with a second rule
-              (the table's own head) directly beneath it - two horizontal lines
-              three pixels apart with the title stranded above them. the Usage
-              card reads well because its content starts inside the padded body,
-              so the ledger does the same and the table keeps its own inset. */}
+          {/* not flush: that puts a full-bleed table right under the header border */}
           <SettingsSection
             icon={Wallet}
             title="Ledger"
@@ -158,10 +153,7 @@ function BalanceHero({
           >
             ${summary.balanceDollars.toFixed(2)}
           </div>
-          {/* a runway projected off a near-zero burn rate produces numbers like
-              "11973 days", which is 32 years and reads as broken. past a
-              quarter the figure is meaningless, so say the useful thing
-              instead of printing a precise absurdity. */}
+          {/* a near-zero burn rate projects absurd runways, so cap the phrasing above 90 days */}
           <p className="text-xs text-muted-foreground">
             covers about{" "}
             <span className="font-mono tabular-nums text-foreground">

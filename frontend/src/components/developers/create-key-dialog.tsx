@@ -217,8 +217,7 @@ function ModeButton({
           : "border-border hover:border-foreground/20 hover:bg-muted/40",
       )}
     >
-      {/* an explicit dot, because a fill alone is ambiguous when the two options
-          sit side by side - and picking the wrong one here spends real money. */}
+      {/* an explicit dot, because a fill alone is ambiguous when the two options sit side by side - */}
       <span
         className={cn(
           "mt-0.5 flex size-3.5 shrink-0 items-center justify-center rounded-full border transition-colors",

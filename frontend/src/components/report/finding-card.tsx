@@ -120,9 +120,7 @@ export function FindingCard({
               <span className="capitalize text-muted-foreground">{finding.category}</span>
             </div>
           </div>
-          {/* no severity badge here: the coloured icon on the left already
-              states it, and the word appeared twice on every row. only the fix
-              STATUS gets a badge, because nothing else on the row says it. */}
+          {/* no severity badge here: the coloured icon on the left already states it, and the word */}
           <div className="flex shrink-0 items-center gap-2">
             <Badge variant="outline" className={STATUS_TONE[finding.fixStatus]}>
               {applied && <Wrench className="mr-1 size-3" />}

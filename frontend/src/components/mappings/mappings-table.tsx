@@ -128,10 +128,7 @@ export function MappingsTable({
 
   return (
     <div className="space-y-4">
-      {/* status swaps which set of rows the table shows, and each has its own
-          count - that is a tabbed panel, not a filter, so it takes the underline
-          treatment rather than a chip in a box. search and create ride the same
-          baseline so the rule spans the full width of the table below it. */}
+      {/* status swaps which rows the table shows and each carries its own count */}
       <PanelTabs
         label="Filter by status"
         actions={
@@ -145,9 +142,7 @@ export function MappingsTable({
                 className="h-8 w-56 pl-8 text-xs"
               />
             </div>
-            {/* import/export is an active-registry action: a file of pending
-                suggestions or tombstones is not a registry anyone would move
-                between workspaces, so the button is not offered on those tabs. */}
+            {/* import/export is an active-registry action */}
             {canEdit && status === "active" && (
               <Button variant="outline" onClick={() => setTransferOpen(true)}>
                 <ArrowDownUp />
@@ -178,10 +173,7 @@ export function MappingsTable({
         })}
       </PanelTabs>
 
-      {/* bg-card is load-bearing: `raised` only supplies a shadow, so without a
-          surface the panel and every row measured rgba(0,0,0,0) and the canvas
-          showed straight through. the border was the only thing separating the
-          table from the page. */}
+      {/* bg-card is load-bearing: `raised` only supplies a shadow, so without a surface the panel */}
       <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <ListError onRetry={() => query.refetch()} />

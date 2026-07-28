@@ -187,8 +187,7 @@ crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));`;
 export default function DocsPage() {
   return (
     <div className="space-y-12">
-      {/* intro: title prose left, the playground callout takes the rail slot so the
-          two-column rhythm starts at the very first screen. */}
+      {/* intro: title prose left, the playground callout takes the rail slot so the two-column */}
       <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
         <header className="min-w-0 space-y-2">
           <p className="text-xs text-muted-foreground">API reference</p>
@@ -199,8 +198,7 @@ export default function DocsPage() {
           </p>
         </header>
 
-        {/* the rail slot: client libraries first (the thing a reader reaches for
-            on arrival), then the playground for anyone not writing code yet. */}
+        {/* client libraries first, since that is what a reader reaches for on arrival */}
         <div className="min-w-0 space-y-3 self-start">
           <div className="rounded-lg border bg-muted/30 p-3">
             <p className="text-xs font-medium">Client libraries</p>
@@ -223,9 +221,7 @@ export default function DocsPage() {
         </div>
       </div>
 
-      {/* overview sections: same prose-left / rail-right split as the endpoints
-          below, so the reference rhythm starts at the top of the page instead of
-          leaving a dead gap next to the first three sections. */}
+      {/* same prose-left / rail-right split as the endpoints below */}
       <div className="space-y-12">
         <RefSection
           id="base-url"
@@ -363,8 +359,7 @@ export default function DocsPage() {
         </EndpointSection>
       </div>
 
-      {/* reference sections: idempotency + webhooks use the left-prose / right-rail
-          split so they match the endpoints and leave no dead gap. */}
+      {/* reference sections: idempotency + webhooks use the left-prose / right-rail split so they */}
       <div className="space-y-12">
         <RefSection
           id="idempotency"
@@ -443,8 +438,7 @@ export default function DocsPage() {
         </RefSection>
       </div>
 
-      {/* errors: the 9-row status table is genuinely wide, so it spans the full
-          content width rather than being cramped into a rail. */}
+      {/* errors: the 9-row status table is genuinely wide, so it spans the full content width rather */}
       <div className="space-y-12">
         <DocSection id="errors" title="Errors">
           <p className="max-w-2xl text-sm text-muted-foreground">
@@ -492,8 +486,7 @@ export default function DocsPage() {
         </DocSection>
       </div>
 
-      {/* client libraries: the same prose-left / rail-right split, with the rail
-          carrying the reader's own language rather than three stacked blocks. */}
+      {/* same prose-left / rail-right split, rail carries the install snippet */}
       <div className="space-y-12">
         <RefSection
           id="sdks"

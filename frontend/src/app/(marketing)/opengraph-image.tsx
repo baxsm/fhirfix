@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "FHIRfix — turn FHIR conformance errors into a fixable report";
+export const alt = "FHIRfix: turn FHIR conformance errors into a fixable report";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

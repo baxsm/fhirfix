@@ -36,7 +36,7 @@ type RevealProps = {
   children: ReactNode;
   className?: string;
   as?: ElementType;
-  // stagger index — multiplies the base step for a sequenced reveal.
+  // multiplies the base step for a sequenced reveal
   index?: number;
 };
 

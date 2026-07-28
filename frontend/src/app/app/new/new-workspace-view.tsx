@@ -23,8 +23,7 @@ const HOLDS = [
 export function NewWorkspaceView() {
   return (
     <div className="grid min-h-svh lg:grid-cols-[3fr_2fr]">
-      {/* context panel. deep canvas, one restrained top-left light wash, and a
-          plain-language explanation of what a workspace is for. */}
+      {/* context panel. deep canvas, one restrained top-left light wash, and a plain-language */}
       <div className="relative hidden flex-col justify-between overflow-hidden border-r bg-background p-10 lg:flex xl:p-14">
         <div
           className="pointer-events-none absolute -top-40 -left-40 size-[520px] rounded-full opacity-60"
@@ -71,8 +70,7 @@ export function NewWorkspaceView() {
         <div />
       </div>
 
-      {/* form panel. same emerald seam glow as the auth shell so the two halves
-          read as one surface. */}
+      {/* form panel. same emerald seam glow as the auth shell so the two halves read as one surface */}
       <div className="relative flex flex-col p-6 sm:p-10">
         <div
           className="pointer-events-none absolute inset-y-0 left-0 hidden w-px lg:block"

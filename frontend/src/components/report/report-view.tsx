@@ -318,8 +318,7 @@ export function ReportView({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              {/* the run id is already the breadcrumb's last crumb, so it is a
-                  quiet label here rather than a second competing title. */}
+              {/* the run id is already the breadcrumb's last crumb, so it is a quiet label here rather than */}
               <h1 className="truncate font-mono text-sm">{run.id}</h1>
               <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
                 {run.inputType}
@@ -361,8 +360,7 @@ export function ReportView({
           </div>
         </div>
 
-        {/* filters and score share one rule-separated band instead of the score
-            floating in its own bordered card, which read as card-in-card. */}
+        {/* filters and score share one rule-separated band instead of the score floating in its own */}
         <div className="flex flex-wrap items-center gap-2 border-y py-2.5">
           {(["error", "warning", "info"] as Severity[]).map((s) => (
             <SeverityChip
@@ -391,8 +389,7 @@ export function ReportView({
                 are safely auto-fixable.
               </span>
             </div>
-            {/* emerald button = this action makes the resource conformant (the one
-                semantic use of the pass color on a CTA). */}
+            {/* emerald here means the action makes the resource conformant, the one semantic use */}
             <Button
               variant="success"
               size="sm"
@@ -418,13 +415,7 @@ export function ReportView({
         ) : null}
       </header>
 
-      {/* body: index · findings.
-          TWO columns, not three. it was facets (200px) + list (340px) + detail
-          (flex-1), which left the diff about 200px at 1920 - a single url wrapped
-          across four lines. the list and the detail were also the same
-          information at two zoom levels, competing for the same space.
-          measured on github's own pr view at 1920: a ~256px file tree and a
-          1427px diff. the payload gets the width; navigation gets a thin rail. */}
+      {/* body: index · findings. TWO columns, not three */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <FacetSidebar
           findings={findings}
@@ -444,10 +435,7 @@ export function ReportView({
           </div>
         ) : (
           <>
-            {/* the findings themselves, stacked at the full remaining width.
-                each one carries its own diff, so nothing is hidden behind a
-                selection and the diff finally has room to render a url on one
-                line. the facet rail on the left is the index. */}
+            {/* the findings themselves, stacked at the full remaining width */}
             <div className="enter-stagger min-w-0 flex-1 space-y-3">
               {shown.map((f) => (
                 <div
@@ -501,9 +489,7 @@ function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string
               {run.inputType}
             </span>
           </div>
-          {/* deliberately NOT "0 resources scanned": a run that failed before
-              the validator ran has resourceCount 0, and reporting that as a
-              result would state something false about the file. */}
+          {/* deliberately NOT "0 resources scanned" */}
           <p className="mt-1 text-sm text-muted-foreground">
             Started {fmtRunTime(run.createdAt)}
             {run.completedAt
@@ -558,8 +544,7 @@ function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string
               </Link>
             </Button>
           )}
-          {/* the raw string is never thrown away - it is the only thing that
-              identifies the fault to support. it is just not the headline. */}
+          {/* the raw string is never thrown away: it is what identifies the fault upstream */}
           {run.errorMessage && (
             <Button size="sm" variant="ghost" onClick={() => setShowRaw((v) => !v)}>
               <ChevronRight

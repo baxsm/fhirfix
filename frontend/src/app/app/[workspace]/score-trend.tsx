@@ -124,9 +124,7 @@ export function ScoreTrend({
         </span>
       </div>
 
-      {/* the readout is driven by the hovered point and falls back to the latest
-          run. it is a fixed-height row so moving across the chart never nudges
-          the layout. */}
+      {/* the readout is driven by the hovered point and falls back to the latest run */}
       <div className="flex h-[42px] items-baseline gap-2 px-4 pt-3">
         <span className="font-mono text-2xl tabular-nums leading-none">{shown?.v ?? current}</span>
         <span className="text-xs text-muted-foreground">/ {MAX_SCORE}</span>
@@ -135,11 +133,7 @@ export function ScoreTrend({
         </span>
       </div>
 
-      {/* preserveAspectRatio="none" so the plot fills the card's width. the
-          distortion that used to cause (squashed endpoint dot, uneven stroke
-          weights) is handled instead by vectorEffect="non-scaling-stroke" on
-          every stroked element, and by drawing the dots as stroked zero-length
-          lines whose round caps render in device space. */}
+      {/* preserveAspectRatio="none" so the plot fills the card's width */}
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
@@ -206,11 +200,7 @@ export function ScoreTrend({
           />
         )}
 
-        {/* dots are zero-length round-capped lines, not circles: a <circle> in a
-            horizontally stretched viewBox renders as a flat lozenge, whereas a
-            stroke linecap is applied in device space and stays round.
-            the hovered point is drawn larger, over a card-coloured cap, so it
-            reads as a ring against the endpoint's solid dot. */}
+        {/* dots are zero-length round-capped lines, not circles */}
         {last && (
           <line
             x1={last.x}

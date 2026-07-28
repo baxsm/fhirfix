@@ -1,5 +1,5 @@
+import { type ConverterClient } from "./converter-client";
 import type { EngineFinding, OperationOutcome, RegistryMapping, RemediationResult } from "./types";
-import type { ConverterClient } from "./converter-client";
 import type { ValidatorPool } from "./validator-client";
 export declare const ENGINE_VERSION = "0.2.0";
 export interface RemediationInput {

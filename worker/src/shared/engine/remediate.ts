@@ -1,4 +1,4 @@
-import { hl7RootTemplate } from "./converter-client";
+import { type ConverterClient, hl7RootTemplate } from "./converter-client";
 import { detectInput } from "./detect";
 import { deriveFix, type FixContext, remapPlaceholderSystems } from "./fixes";
 import { fingerprint } from "./fingerprint";
@@ -11,7 +11,6 @@ import type {
   RegistryMapping,
   RemediationResult,
 } from "./types";
-import type { ConverterClient } from "./converter-client";
 import type { ValidatorPool } from "./validator-client";
 
 export const ENGINE_VERSION = "0.2.0";

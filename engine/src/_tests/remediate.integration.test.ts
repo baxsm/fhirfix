@@ -1,7 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { ConverterClient } from "../converter-client";
-import { runRemediation } from "../remediate";
-import type { EngineDeps } from "../remediate";
+import { type EngineDeps, runRemediation } from "../remediate";
 import type { RegistryMapping } from "../types";
 import { ValidatorPool } from "../validator-client";
 

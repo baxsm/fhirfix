@@ -44,7 +44,7 @@ const STAGES: Stage[] = [
     id: "detect",
     tab: "Detect",
     title: "Detect format and version",
-    body: "Point FHIRfix at anything. It fingerprints the input — FHIR JSON, an HL7v2 message, a C-CDA document — and picks the right pipeline before any validation runs.",
+    body: "Point FHIRfix at anything. It fingerprints the input (FHIR JSON, an HL7v2 message, a C-CDA document) and picks the right pipeline before any validation runs.",
     visual: (
       <MonoPanel label="input">
         <p className={SEV.dim}>received 1 payload</p>
@@ -90,7 +90,7 @@ const STAGES: Stage[] = [
     id: "validate",
     tab: "Validate",
     title: "Validate against the profile",
-    body: "The HL7 validator checks every resource and everything it references against US Core, USCDI, and Da Vinci profiles — the same rules a payer or registry will hold you to.",
+    body: "The HL7 validator checks every resource and everything it references against US Core, USCDI, and Da Vinci profiles. The same rules a payer or registry will hold you to.",
     visual: (
       <MonoPanel label="validate">
         <p>
@@ -113,7 +113,7 @@ const STAGES: Stage[] = [
     id: "rank",
     tab: "Rank",
     title: "Rank and explain, in plain language",
-    body: "Findings are deduplicated and ranked by a composite of severity, fixability, and occurrence — so a fixable high-frequency issue outranks a scary one-off. Each gets a human explanation.",
+    body: "Findings are deduplicated and ranked by a composite of severity, fixability, and occurrence. A fixable high-frequency issue outranks a scary one-off. Each gets a human explanation.",
     visual: (
       <MonoPanel label="report">
         <p>

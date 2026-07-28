@@ -96,8 +96,7 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
                       </span>
                     </div>
                   </td>
-                  {/* money in is emerald, money out is plain ink. a debit is the
-                      expected state of a metered product, not a warning. */}
+                  {/* money in is emerald, money out is plain ink */}
                   <td
                     className={cn(
                       "px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap",

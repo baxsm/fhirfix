@@ -75,10 +75,7 @@ export function ChecksTable({
 
   return (
     <>
-      {/* "Schedule a check", not "New check": the topbar already carries a
-          primary "New check" on every screen and that one runs an ad-hoc
-          validation. two buttons with the same words doing different things is
-          the noise runs-view.tsx warns about. */}
+      {/* "Schedule a check", not "New check": the topbar already carries that action */}
       <div className="flex items-center justify-end">
         {canManage && (
           <Button size="sm" onClick={() => setCreateOpen(true)}>

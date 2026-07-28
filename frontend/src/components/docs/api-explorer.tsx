@@ -120,7 +120,7 @@ export function ApiExplorer() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="pg-input">Request body — input</Label>
+          <Label htmlFor="pg-input">Request body: input</Label>
           <textarea
             id="pg-input"
             value={input}

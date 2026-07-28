@@ -23,8 +23,7 @@ export function AuthHero() {
 
   return (
     <div className="relative hidden flex-col justify-between overflow-hidden border-r bg-background p-10 lg:flex xl:p-14">
-      {/* one restrained light source, top-left, so the panel isn't dead flat.
-          a wash, not orbs. */}
+      {/* one restrained light source, a wash rather than orbs */}
       <div
         className="pointer-events-none absolute -left-40 -top-40 size-[520px] rounded-full opacity-60"
         style={{
@@ -36,12 +35,7 @@ export function AuthHero() {
         <BrandMark size="sm" />
       </a>
 
-      {/* the report screenshot, framed as a floating product shot: tilted a few
-          degrees in perspective and pushed slightly off the right edge (the
-          modern "product UI at an angle" treatment) so it reads as a deliberate
-          artifact, not the report painted onto the panel. a soft emerald ground
-          glow + a deep shadow lift the near-black card off the near-black
-          canvas. it is our real dashboard, not hand-drawn HTML. */}
+      {/* the report screenshot, framed as a floating product shot */}
       <div className="relative flex flex-1 items-center py-10" style={{ perspective: "1800px" }}>
         {/* emerald ground glow pooled behind the card so the black frame separates. */}
         <div

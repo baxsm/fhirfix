@@ -31,8 +31,7 @@ export function RunReport({
         <ChevronLeft className="size-3.5" />
         All runs
       </Link>
-      {/* no grey block while the workspace resolves - the server already knows
-          it, and on a client navigation the org list is in cache by now. */}
+      {/* no grey block while the workspace resolves - the server already knows it, and on a client */}
       {workspaceId ? (
         <ReportView
           workspaceId={workspaceId}

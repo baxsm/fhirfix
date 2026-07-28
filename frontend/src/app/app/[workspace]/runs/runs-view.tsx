@@ -91,8 +91,7 @@ export function RunsView({
 
   return (
     <PageContainer width="full">
-      {/* no New check action here: the topbar already carries it on every
-          screen, and two identical primary buttons on one page is noise. */}
+      {/* no New check action here: the topbar already carries it on every screen, and two identical */}
       <div className="flex items-start justify-between gap-4">
         <PageHeader
           title="Runs"
@@ -109,13 +108,10 @@ export function RunsView({
         <EmptyRuns workspace={workspace} />
       ) : (
         <div className="space-y-3">
-          {/* only offer the filter when there is something to filter to. a
-              permanently-disabled control is noise. */}
+          {/* only offer the filter when there is something to filter to */}
           {failedCount > 0 && (
             <div className="flex items-center gap-2">
-              {/* the icon is what says "this narrows the list" at rest. without
-                  it the control was a bare word and a number, which reads as a
-                  label until you happen to click it. */}
+              {/* the icon is what says "this narrows the list" at rest */}
               <FilterPill
                 active={failedOnly}
                 tone="danger"
@@ -217,8 +213,7 @@ export function RunsView({
                                 {r.conformanceScoreBefore}
                               </span>
                               <span className="mx-1 text-muted-foreground/50">→</span>
-                              {/* emerald appears only when the score actually
-                                  rose. a flat score is not a success. */}
+                              {/* emerald appears only when the score actually rose */}
                               <span className={improved ? "text-success" : "text-foreground"}>
                                 {r.conformanceScoreAfter}
                               </span>
@@ -231,9 +226,7 @@ export function RunsView({
                           {fmtDate(r.createdAt)}
                         </TableCell>
                         <TableCell>
-                          {/* the chevron is invisible until the row is hovered
-                              or focused, but it always occupies its cell, so
-                              revealing it never reflows the table. */}
+                          {/* the chevron is invisible until the row is hovered or focused, but it always occupies its */}
                           <ArrowRight className="row-reveal row-nudge size-3.5 text-foreground" />
                         </TableCell>
                       </TableRow>
@@ -244,8 +237,7 @@ export function RunsView({
             </div>
           </div>
 
-          {/* the backend caps this list at 50, so say so rather than implying
-              the workspace only ever had this many runs. */}
+          {/* the backend caps this list at 50, so say so rather than implying the workspace only ever */}
           <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
             <span className="font-mono tabular-nums">
               {current * PAGE_SIZE + 1}-{current * PAGE_SIZE + runs.length} of {filtered.length}

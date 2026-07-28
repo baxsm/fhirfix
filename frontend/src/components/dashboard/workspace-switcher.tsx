@@ -28,8 +28,7 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
         <div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              {/* a plain button: the shadcn SidebarMenuButton needed a
-                  SidebarProvider context that the floating rail no longer has. */}
+              {/* a plain button, since SidebarMenuButton needs a SidebarProvider this tree does not have */}
               <button
                 type="button"
                 aria-label="Switch workspace"
@@ -57,9 +56,7 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-              {/* open the create modal, not a full-page redirect - existing users
-                  get the quick path. onSelect closes the dropdown first, then we
-                  open the dialog on the next tick so focus lands cleanly in it. */}
+              {/* open the create modal, not a full-page redirect - existing users get the quick path */}
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();

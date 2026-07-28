@@ -28,8 +28,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       </header>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 gap-10 px-6">
-        {/* left nav is pinned to the viewport and scrolls on its own, so the
-            reader can jump sections without scrolling back to the top. */}
+        {/* left nav is pinned to the viewport and scrolls on its own, so the reader can jump sections */}
         <aside className="sticky top-14 hidden h-[calc(100svh-3.5rem)] w-48 shrink-0 overflow-y-auto py-10 lg:block">
           <DocsNav />
         </aside>

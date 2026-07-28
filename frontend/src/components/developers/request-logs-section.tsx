@@ -136,11 +136,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        {/* method is one choice from a short closed set where "ALL" is itself a
-            member, so it is the real segmented-control case. role=group, not
-            tablist: primer is explicit that a segmented control must not take
-            the tablist role (the keyboard contract differs - tab moves between
-            segments, not arrows). */}
+        {/* a closed set where ALL is itself a member, so this is the segmented-control case */}
         <ChoiceGroup label="Filter by method">
           {METHODS.map((m) => (
             <ChoiceChip
@@ -152,9 +148,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
             </ChoiceChip>
           ))}
         </ChoiceGroup>
-        {/* was a native checkbox tinted with --interactive, i.e. the link blue,
-            which is the same borrowed-colour bug as the api-key dialog. errors
-            only is a filter, so it uses the filter material. */}
+        {/* was a native checkbox tinted with --interactive, i.e */}
         <FilterPill
           active={onlyErrors}
           tone="danger"
@@ -164,10 +158,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
         </FilterPill>
       </div>
 
-      {/* EVERY state occupies the same frame - rows, empty, error and loading.
-          framing only the populated list still let "Errors only" (which has no
-          matches) collapse the section by 506px, because the empty state
-          rendered outside the frame. */}
+      {/* EVERY state occupies the same frame - rows, empty, error and loading */}
       {query.isPending && rows.length === 0 ? (
         <div style={{ height: FRAME_HEIGHT }}>
           <Skeleton className="h-full w-full" />
@@ -206,9 +197,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
             </Table>
           </div>
 
-          {/* page forward/back rather than an ever-growing list. an endless
-              accumulating table is the thing that makes finding one request
-              impossible once a workspace has real traffic. */}
+          {/* page forward/back rather than an ever-growing list */}
           {(hasMore || cursor) && (
             <div className="flex items-center justify-between border-t pt-3">
               <span className="font-mono text-[11px] text-muted-foreground">

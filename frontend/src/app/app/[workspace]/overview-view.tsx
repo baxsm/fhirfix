@@ -86,16 +86,7 @@ export function OverviewView({
         <OverviewSkeleton />
       ) : (
         <>
-          {/* anything needing a decision comes first and only exists when it is
-              real. an always-present "0 items need attention" panel is noise.
-
-              these are NOT another bordered card. three consecutive
-              rounded-lg-border-bg-card sections gave a two-line alert the same
-              visual weight as the chart and the run list, which is what made the
-              page read as one component pasted three times. an alert is a short,
-              urgent thing: it gets a tinted strip with a coloured left edge, so
-              it is distinguishable from the neutral panels around it at a
-              glance and does not need a card to announce itself. */}
+          {/* anything needing a decision comes first and only exists when it is real */}
           {(failedRuns.length > 0 || pendingMappings > 0) && (
             <section className="space-y-2">
               {failedRuns.length > 0 && (
@@ -121,11 +112,7 @@ export function OverviewView({
             </section>
           )}
 
-          {/* the trend is STACKED above the list, not beside it.
-              side-by-side made the chart's height a function of how many runs
-              happen to exist: two runs squashed it, twenty stretched it. a
-              chart's height is its own decision, so it gets a full-width band
-              that is always the same size no matter what the list does. */}
+          {/* the trend is STACKED above the list, not beside it */}
           <ScoreTrend points={trend} latest={latest} pending={trendQuery.isPending} />
 
           <section className="raised flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card">
@@ -133,9 +120,7 @@ export function OverviewView({
               <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
                 Recent runs
               </h2>
-              {/* the Button component, not a hand-rolled div with border and
-                  padding classes. every one-off like that is another shape the
-                  product has to teach you to recognise. */}
+              {/* the Button component, not a hand-rolled div with border and padding classes */}
               <Button variant="outline" size="xs" asChild className="-my-1">
                 <Link href={`${base}/runs`}>
                   View all

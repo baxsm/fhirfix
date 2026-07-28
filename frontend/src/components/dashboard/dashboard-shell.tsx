@@ -65,10 +65,7 @@ export function DashboardShell({
           }}
         />
         {active && <LowBalanceBanner workspace={workspace} workspaceId={active.id} />}
-        {/* children render immediately. the shell used to swap the whole page
-            for a skeleton whenever the workspace list was pending, so every
-            navigation blinked the entire app - including pages that already had
-            their own data. each page owns its own loading state now. */}
+        {/* children render immediately. the shell used to swap the whole page for a skeleton whenever */}
         <main className={cn("min-w-0 flex-1 overflow-auto pt-5 pb-8", contentInset)}>
           {children}
         </main>

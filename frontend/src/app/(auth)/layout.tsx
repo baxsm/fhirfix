@@ -10,8 +10,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <SignedInGuard />
       <AuthHero />
 
-      {/* form panel. a faint emerald seam glow runs down the divider so the two
-          halves read as one surface, not two boxes. */}
+      {/* form panel. a faint emerald seam glow runs down the divider so the two halves read as one */}
       <div className="relative flex flex-col p-6 sm:p-10">
         <div
           className="pointer-events-none absolute inset-y-0 left-0 hidden w-px lg:block"
@@ -21,8 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        {/* top row: mobile brand mark + a quiet docs link (fills the corner
-            without a corporate trust badge). */}
+        {/* top row: mobile brand mark + a quiet docs link (fills the corner without a corporate trust */}
         <div className="flex items-center justify-between">
           <Link href="/" className="lg:invisible">
             <BrandMark size="sm" />
@@ -40,9 +38,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="w-full max-w-sm">{children}</div>
         </div>
 
-        {/* legal microcopy — the honest trust signal (Resend-style), not a badge.
-            /terms and /privacy are placeholder pages until phase 8 writes the real
-            legal copy (see docs/phases/phase-8.md); the links resolve, not 404. */}
+        {/* /terms and /privacy are placeholders until phase 8, but they resolve rather than 404 */}
         <p className="text-center font-mono text-[11px] text-muted-foreground/60">
           Protected health data stays encrypted. By continuing you agree to the{" "}
           <Link href="/terms" className="underline-offset-4 hover:underline">

@@ -11,8 +11,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <TRPCReactProvider>
         <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
       </TRPCReactProvider>
-      {/* bottom-right: a toast top-right sat under the topbar actions and covered
-          the New check button while it was showing. */}
+      {/* bottom-right: a toast top-right sat under the topbar actions and covered the New check */}
       <Toaster richColors closeButton position="bottom-right" />
     </ThemeProvider>
   );

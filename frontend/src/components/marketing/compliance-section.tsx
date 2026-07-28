@@ -47,7 +47,7 @@ export function ComplianceSection() {
             Built to survive a compliance review.
           </h2>
           <p className="mt-4 text-balance text-muted-foreground">
-            When conformance is a deadline, not a nice-to-have — the controls a regulated team needs
+            When conformance is a deadline, not a nice-to-have. The controls a regulated team needs
             are already here.
           </p>
         </Reveal>

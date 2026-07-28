@@ -149,12 +149,7 @@ export function DiffView({
         <span className="font-mono text-[11px] text-muted-foreground">
           {changedCount} changed {changedCount === 1 ? "line" : "lines"}
         </span>
-        {/* a content-formatting picker - the same content, rendered two ways -
-            which is the textbook segmented-control case, so it uses the shared
-            primitive. it was a hand-rolled pair tinted with --interactive, i.e.
-            the link blue used as a selected state: the same borrowed-colour bug
-            as the api-key dialog, in a component nobody thought to check
-            because the diff itself looked fine. */}
+        {/* a content-formatting picker - the same content, rendered two ways - which is the textbook */}
         <ChoiceGroup label="Diff layout">
           <ChoiceChip active={split} onClick={() => setSplit(true)}>
             Split

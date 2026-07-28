@@ -110,8 +110,7 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
                   </span>
                 )}
                 <span className="w-24 shrink-0">
-                  {/* a bar, not just a number: relative volume is the thing being
-                      compared, and five numbers in a column do not show it. */}
+                  {/* a bar, not just a number: relative volume is what is being compared */}
                   <span className="block h-1 rounded-full bg-muted">
                     <span
                       className="block h-1 rounded-full bg-foreground/40"

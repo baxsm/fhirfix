@@ -2,8 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { applyFixes, fixWithAi } from "../apply";
 import { ConverterClient } from "../converter-client";
 import { fingerprint } from "../fingerprint";
-import { runRemediation } from "../remediate";
-import type { EngineDeps } from "../remediate";
+import { type EngineDeps, runRemediation } from "../remediate";
 import type { RegistryMapping } from "../types";
 import { ValidatorPool } from "../validator-client";
 

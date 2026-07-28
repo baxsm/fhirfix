@@ -71,10 +71,7 @@ export function MarketingFooter() {
         </div>
       </div>
 
-      {/* the signature oversized wordmark, deliberately clipped ~half by the page
-          bottom (like the reference) so it reads as a bleed, not a full label. the
-          fixed-height container crops the descending half; the glyph is pushed down
-          so its lower portion falls outside. purely decorative, hidden from a11y. */}
+      {/* oversized wordmark, deliberately clipped by the page bottom */}
       <div
         aria-hidden
         className="pointer-events-none relative select-none overflow-hidden px-5 sm:px-8"

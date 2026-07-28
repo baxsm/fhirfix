@@ -62,11 +62,7 @@ export function DevelopersView({
             <WebhooksSection workspaceId={workspaceId} canManage={canManage} />
           </SettingsSection>
 
-          {/* the recent slice only. the filters and paging moved to the full
-              logs page: switching ALL/POST/GET changes the row count, which
-              reflowed everything below it here. a fixed number of rows cannot
-              change height, so the problem is gone rather than frozen behind a
-              fixed-height frame. */}
+          {/* the recent slice only. the filters and paging moved to the full logs page */}
           <SettingsSection
             icon={ScrollText}
             title="Recent requests"

@@ -102,14 +102,7 @@ export function FindingDetail({
           />
         )}
 
-        {/* solid tokens only - this block used to nest text-muted-foreground/80
-            inside an /80 parent on a /60 background, and the stacked opacities
-            multiplied down until the text was barely visible. it now measures
-            6.1:1 for the body and 12.9:1 for the values.
-
-            select-none on the frame with select-text on the values: the labels
-            are chrome and should not show an i-beam, but the ids and the
-            validator message are worth copying. */}
+        {/* solid tokens only - this block used to nest text-muted-foreground/80 inside an /80 parent */}
         <div className="space-y-2 rounded-md border bg-muted px-3 py-2.5 text-[11px] select-none">
           <p className="font-medium text-foreground">Why we flagged this</p>
           <dl className="space-y-1.5">
@@ -132,8 +125,7 @@ export function FindingDetail({
         </div>
       </div>
 
-      {/* actions are pinned to the bottom of the pane, always visible for the
-          selected finding, and never move as the body scrolls. */}
+      {/* actions pinned to the bottom so they stay visible for the selected finding */}
       {showActions && (
         <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 px-4 py-3">
           {canApply && onApply && (

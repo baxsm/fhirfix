@@ -67,8 +67,7 @@ export function ApiKeysSection({
         <EmptyKeys canManage={canManage} onCreate={() => setCreateOpen(true)} />
       ) : (
         <>
-          {/* the count anchors the action to the left so the button is not a
-              lone object floating in an otherwise empty band. */}
+          {/* the count anchors the action to the left so the button is not a lone object floating in an */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
               {keys.filter((k) => !k.revokedAt).length} active ·{" "}

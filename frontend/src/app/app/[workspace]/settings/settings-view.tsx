@@ -53,9 +53,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
         </p>
       </header>
 
-      {/* settings sub-nav on the left, content on the right. every section renders
-          inside the same SettingsSection frame so a small section (appearance) is
-          as structured as a big one (members) — no more stranded tiny panels. */}
+      {/* every section uses the same SettingsSection frame so small ones do not look stranded */}
       <div className="grid gap-8 md:grid-cols-[180px_1fr]">
         <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
           {SECTIONS.map((s) => {

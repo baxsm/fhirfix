@@ -13,7 +13,7 @@ export function FinalCta() {
               Stop reading validator output. Start shipping conformant records.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-balance text-white/70">
-              Run your first check free against the real engine. No card, no seat license — you pay
+              Run your first check free against the real engine. No card, no seat license. You pay
               per check, only when you remediate.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">

@@ -114,8 +114,7 @@ export function CheckView({ workspace }: { workspace: string }) {
         </p>
       </header>
 
-      {/* the whole card is the drop target, so a dragged file has an area the
-          size of the panel rather than a strip inside it. */}
+      {/* the whole card is the drop target, so a dragged file has an area the size of the panel */}
       {/** biome-ignore lint/a11y/noStaticElementInteractions: drag events on the
            shell; the focusable control inside is the textarea. */}
       <div
@@ -168,8 +167,7 @@ export function CheckView({ workspace }: { workspace: string }) {
               Upload
             </Button>
 
-            {/* a menu of actions, not a select. there is no chosen value to
-                display afterwards - picking one fills the editor and closes. */}
+            {/* a menu of actions, not a select. there is no chosen value to display afterwards - picking */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button type="button" variant="outline" size="sm" className="h-7">
@@ -177,8 +175,7 @@ export function CheckView({ workspace }: { workspace: string }) {
                   Load a sample
                 </Button>
               </DropdownMenuTrigger>
-              {/* wide enough that a sample label sits on one line - at max-w-xs
-                  the longest one wrapped across four. */}
+              {/* wide enough that a sample label sits on one line - at max-w-xs the longest one wrapped */}
               <DropdownMenuContent align="end" className="w-[22rem]">
                 {SAMPLES.map((s) => (
                   <DropdownMenuItem
@@ -201,10 +198,7 @@ export function CheckView({ workspace }: { workspace: string }) {
         </div>
 
         <div className="relative flex" style={{ height: EDITOR_PX }}>
-          {/* gutter. findings cite resource paths, so a line number is the
-              cheapest way to connect a report back to the text you pasted. it
-              scrolls from the textarea's own scrollTop rather than owning a
-              scrollbar, so the two can never drift apart. */}
+          {/* line-number gutter: findings cite resource paths, so it connects the report to the pasted text */}
           <div
             ref={gutterRef}
             aria-hidden
@@ -251,9 +245,7 @@ export function CheckView({ workspace }: { workspace: string }) {
         </div>
 
         <div className="flex items-center gap-3 border-t bg-muted/30 px-3 py-2.5">
-          {/* one reserved line: the profile fact normally, the file problem when
-              there is one. rendering the problem separately would move the
-              buttons the moment it appeared. */}
+          {/* one reserved line: the profile fact normally, the file problem when there is one */}
           <span
             className={cn(
               "min-w-0 truncate text-[11px]",
@@ -264,9 +256,7 @@ export function CheckView({ workspace }: { workspace: string }) {
           </span>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            {/* clear is conditional on there being something to clear, so it is
-                absent rather than disabled. it sits between the status line and
-                Run, both of which are fixed, so its arrival moves nothing. */}
+            {/* clear is conditional on there being something to clear, so it is absent rather than disabled */}
             {!empty && (
               <Button
                 type="button"

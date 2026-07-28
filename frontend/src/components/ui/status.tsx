@@ -1,5 +1,12 @@
-import type { LucideIcon } from "lucide-react";
-import { AlertTriangle, Check, CircleDashed, Info, Loader2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  CircleDashed,
+  Info,
+  Loader2,
+  type LucideIcon,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type StatusTone = "neutral" | "success" | "warning" | "danger" | "info" | "pending";

@@ -58,8 +58,7 @@ export function FindingListRow({
           )}
         </div>
       </div>
-      {/* only the state that wants a human gets a marker in the list. an
-          "Applied" pill on every row was pure noise. */}
+      {/* only the state that wants a human gets a marker in the list */}
       {needsReview && (
         <span className="mt-0.5 shrink-0 rounded border border-warning/35 bg-warning/[0.06] px-1.5 py-0.5 text-[10px] text-warning">
           {STATUS_LABEL[finding.fixStatus]}

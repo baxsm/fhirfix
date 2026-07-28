@@ -57,13 +57,7 @@ export function MappingsView({
         description={`The versioned registry of assigning-authority and code mappings that power auto-fixes in ${active?.name ?? "this workspace"}.`}
       />
 
-      {/* gated on workspaceId ONLY. it arrives as a prop from the server, so on
-          a normal load the table renders on the first paint with its prefetched
-          rows already in place.
-          it used to also wait on wsQuery, which supplies nothing but the ROLE -
-          and the role only decides whether a few buttons render. blocking the
-          whole table on it meant a full-height skeleton flashed over data that
-          was already in the html. */}
+      {/* gated on workspaceId only: it arrives from the server, so there is no client waterfall */}
       {wsQuery.isError && !workspaceId ? (
         <ViewError onRetry={() => wsQuery.refetch()} />
       ) : !workspaceId ? (
