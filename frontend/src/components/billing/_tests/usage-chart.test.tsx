@@ -5,7 +5,7 @@ import { UsageChart } from "../usage-chart";
 describe("UsageChart", () => {
   it("shows the empty state when there is no spend", () => {
     render(<UsageChart rows={[]} days={30} />);
-    expect(screen.getByText(/No usage in the last 30 days/i)).toBeInTheDocument();
+    expect(screen.getByText(/No spend in the last/i)).toBeInTheDocument();
   });
 
   it("renders a chart when there is spend", () => {
