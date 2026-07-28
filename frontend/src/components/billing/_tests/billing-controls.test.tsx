@@ -48,7 +48,7 @@ const defaults = {
 describe("BillingControls", () => {
   it("says auto-recharge is not active, whether it is on or off", () => {
     const { rerender } = render(<BillingControls {...defaults} />);
-    expect(screen.getByText(/not active yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/charging is not connected yet/i)).toBeInTheDocument();
 
     rerender(
       <BillingControls
@@ -61,7 +61,7 @@ describe("BillingControls", () => {
         }}
       />,
     );
-    expect(screen.getByText(/not active yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/charging is not connected yet/i)).toBeInTheDocument();
   });
 
   it("reveals the recharge fields only when enabled", () => {

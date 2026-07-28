@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineNote } from "@/components/ui/inline-note";
 import {
   Dialog,
   DialogContent,
@@ -73,10 +73,7 @@ export function RotateSecretDialog({
                 your receiver with the new secret.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2.5 text-xs text-warning">
-              <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-              <span>Rotate only when you are ready to swap the secret on your side.</span>
-            </div>
+            <InlineNote>Rotate only when you are ready to swap the secret on your side.</InlineNote>
             <DialogFooter>
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                 Cancel

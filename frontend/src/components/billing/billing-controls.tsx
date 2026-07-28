@@ -1,10 +1,10 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { InlineNote } from "@/components/ui/inline-note";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -128,17 +128,11 @@ function AutoRechargeRow({
           <p className="mt-0.5 text-xs text-muted-foreground">
             Top up automatically when the balance runs low.
           </p>
+          <InlineNote className="mt-1">
+            Saved as a preference, but charging is not connected yet.
+          </InlineNote>
         </div>
         <Switch id="ar-enabled" checked={enabled} onCheckedChange={setEnabled} />
-      </div>
-
-      {/* stated up front, not buried after you enable it. */}
-      <div className="mt-2.5 flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-2 text-xs text-warning">
-        <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-        <span>
-          Not active yet. We save the preference, but unattended charging is not connected, so the
-          balance will not top up on its own. Runs stop at a zero balance until you add credits.
-        </span>
       </div>
 
       {enabled && (

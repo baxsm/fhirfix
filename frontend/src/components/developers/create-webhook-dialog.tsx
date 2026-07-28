@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { InlineNote } from "@/components/ui/inline-note";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTRPC } from "@/trpc/client";
@@ -105,10 +105,7 @@ export function CreateWebhookDialog({
 
             <SecretReveal value={secret} label="Signing secret" />
 
-            <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2.5 text-xs text-warning">
-              <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-              <span>You will not be able to see this secret again after closing this dialog.</span>
-            </div>
+            <InlineNote>Copy it now. You will not be able to see this secret again.</InlineNote>
 
             <DialogFooter>
               <Button size="sm" onClick={() => onOpenChange(false)}>
