@@ -162,9 +162,9 @@ export function ConformanceView({
               <TableHeader>
                 <TableRow>
                   <TableHead>Endpoint</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Result</TableHead>
-                  <TableHead className="text-right">Passed</TableHead>
+                  <TableHead className="w-64">Status</TableHead>
+                  <TableHead className="w-28">Result</TableHead>
+                  <TableHead className="w-20 text-right">Passed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="enter-stagger">
@@ -184,14 +184,7 @@ export function ConformanceView({
                       row.id === selectedId && "bg-accent/40",
                     )}
                   >
-                    {/* inset rail on the cell: a tr border never paints, a flush one reads as the frame */}
-                    <TableCell
-                      className={cn(
-                        "relative max-w-0",
-                        row.id === selectedId &&
-                          "before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full before:bg-foreground before:content-['']",
-                      )}
-                    >
+                    <TableCell className="max-w-0">
                       <span className="block truncate font-mono text-xs">{row.targetEndpoint}</span>
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">
                         {row.testKits.join(", ")}

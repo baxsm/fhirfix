@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { KeyRound, MoreHorizontal, Plus } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PendingRows } from "@/components/ui/pending-rows";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
@@ -64,25 +63,22 @@ export function ApiKeysSection({
 
   return (
     <div className="space-y-3">
-      {keys.length === 0 ? (
-        <EmptyKeys canManage={canManage} onCreate={() => setCreateOpen(true)} />
-      ) : (
-        <>
-          {/* the count anchors the action to the left so the button is not a lone object floating in an */}
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">
-              {keys.filter((k) => !k.revokedAt).length} active ·{" "}
-              {keys.filter((k) => k.revokedAt).length} revoked
-            </span>
-            {canManage && (
-              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
-                <Plus />
-                Create key
-              </Button>
-            )}
-          </div>
-          <KeysTable keys={keys} canManage={canManage} onRevoke={(k) => setRevokeTarget(k)} />
-        </>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-muted-foreground">
+          {keys.length === 0
+            ? "No keys yet"
+            : `${keys.filter((k) => !k.revokedAt).length} active · ${keys.filter((k) => k.revokedAt).length} revoked`}
+        </span>
+        {canManage && (
+          <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+            <Plus />
+            Create key
+          </Button>
+        )}
+      </div>
+
+      {keys.length > 0 && (
+        <KeysTable keys={keys} canManage={canManage} onRevoke={(k) => setRevokeTarget(k)} />
       )}
 
       <CreateKeyDialog
@@ -211,23 +207,5 @@ function KeysTable({
         )}
       </table>
     </div>
-  );
-}
-
-function EmptyKeys({ canManage, onCreate }: { canManage: boolean; onCreate: () => void }) {
-  return (
-    <EmptyState
-      icon={KeyRound}
-      title="No API keys yet"
-      body="Create a key to call the FHIRfix REST API from your code, CI, or the SDKs."
-      action={
-        canManage ? (
-          <Button size="sm" variant="outline" onClick={onCreate}>
-            <Plus />
-            Create key
-          </Button>
-        ) : undefined
-      }
-    />
   );
 }

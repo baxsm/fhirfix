@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ArrowRight, ChevronDown, ScrollText } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -328,12 +328,9 @@ function Detail({ label, value, mono }: { label: string; value: string; mono?: b
 function EmptyLogs({ onlyErrors }: { onlyErrors: boolean }) {
   return (
     <EmptyState
-      icon={ScrollText}
-      title={onlyErrors ? "No errors in this workspace" : "No requests yet"}
-      body={
-        onlyErrors
-          ? "Every REST call has returned a 2xx or 3xx. Turn off the filter to see all traffic."
-          : "Call the REST API with one of your keys and every request will show up here."
+      nested
+      title={
+        onlyErrors ? "No failed requests. Turn off the filter to see all traffic." : "No requests yet."
       }
     />
   );

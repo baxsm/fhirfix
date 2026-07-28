@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { MoreHorizontal, Plus, Send, Webhook } from "lucide-react";
+import { MoreHorizontal, Plus, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
@@ -81,28 +80,35 @@ export function WebhooksSection({
   const endpoints = query.data as Endpoint[];
 
   return (
-    <div className="space-y-4">
-      {canManage && endpoints.length > 0 && (
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={testPing.isPending}
-            onClick={() => testPing.mutate({ workspaceId })}
-          >
-            <Send />
-            {testPing.isPending ? "Sending..." : "Send test event"}
-          </Button>
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <Plus />
-            Add endpoint
-          </Button>
-        </div>
-      )}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs text-muted-foreground">
+          {endpoints.length === 0
+            ? "No endpoints yet"
+            : `${endpoints.filter((e) => e.enabled).length} enabled · ${endpoints.filter((e) => !e.enabled).length} paused`}
+        </span>
+        {canManage && (
+          <div className="flex items-center gap-2">
+            {endpoints.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={testPing.isPending}
+                onClick={() => testPing.mutate({ workspaceId })}
+              >
+                <Send />
+                {testPing.isPending ? "Sending..." : "Send test event"}
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+              <Plus />
+              Add endpoint
+            </Button>
+          </div>
+        )}
+      </div>
 
-      {endpoints.length === 0 ? (
-        <EmptyWebhooks canManage={canManage} onCreate={() => setCreateOpen(true)} />
-      ) : (
+      {endpoints.length > 0 && (
         <div className="divide-y rounded-md border">
           {endpoints.map((ep) => (
             <EndpointRow
@@ -223,22 +229,4 @@ function StatusIndicator({ enabled, delivery }: { enabled: boolean; delivery: st
         ? "bg-muted-foreground/40"
         : "bg-destructive";
   return <span className={cn("inline-block size-2 shrink-0 rounded-full", tone)} />;
-}
-
-function EmptyWebhooks({ canManage, onCreate }: { canManage: boolean; onCreate: () => void }) {
-  return (
-    <EmptyState
-      icon={Webhook}
-      title="No webhook endpoints"
-      body="Add an endpoint to get a signed POST when a run completes or fails, so you can react without polling."
-      action={
-        canManage ? (
-          <Button size="sm" variant="outline" onClick={onCreate}>
-            <Plus />
-            Add endpoint
-          </Button>
-        ) : undefined
-      }
-    />
-  );
 }
