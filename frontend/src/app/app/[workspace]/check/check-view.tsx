@@ -138,9 +138,9 @@ export function CheckView({ workspace }: { workspace: string }) {
       >
         <div className="flex items-center gap-2.5 border-b px-3 py-2">
           <span className="text-[13px] font-medium">Resource</span>
-          <span className="min-w-0 truncate font-mono text-[0.6875rem] text-muted-foreground">
+          <span className="min-w-0 truncate text-[0.75rem] text-muted-foreground">
             {describeInput(content)}
-            {!empty && ` · ${charCount.toLocaleString()} chars`}
+            {!empty && ` (${charCount.toLocaleString()} chars)`}
           </span>
 
           {/* getting content IN lives here; acting on it lives in the footer. */}
