@@ -1,3 +1,4 @@
+import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
 import { getRun, getRunFindings, listRuns } from "@shared/db/runs";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import type { Context } from "hono";
@@ -34,25 +35,21 @@ export async function batchController(c: Context<ApiV1Env>) {
   const runId = createId("run");
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
-  const { sha256, sizeBytes } = await blobStore.put(inputKey, input, "application/json");
-  // blobStore.put created the row with the bytes; merge the metadata onto it.
-  await db
-    .insert(schema.storedObject)
-    .values({
-      key: inputKey,
-      workspaceId,
-      bucket: "local",
-      kind: "input",
-      sizeBytes,
-      contentType: "application/json",
-      sha256,
-      containsPhi: false,
-      uploadState: "stored",
-    })
-    .onConflictDoUpdate({
-      target: schema.storedObject.key,
-      set: { bucket: "local", kind: "input", sizeBytes, sha256, uploadState: "stored" },
-    });
+  const policy = await redactionPolicyFor(db, workspaceId);
+  const stored = await storeRunInput(db, blobStore, {
+    workspaceId,
+    key: inputKey,
+    content: input,
+    policy,
+  });
+  if (stored.rejected) {
+    return apiError(
+      c,
+      422,
+      "redaction_required",
+      "This workspace requires PHI redaction and this input could not be parsed to redact it.",
+    );
+  }
   await db.insert(schema.run).values({
     id: runId,
     workspaceId,
@@ -63,7 +60,7 @@ export async function batchController(c: Context<ApiV1Env>) {
     engineVersion: ENGINE_VERSION,
     status: "queued",
     profilesRequested: profiles,
-    inputRef: inputKey,
+    inputRef: stored.key,
   });
   await remediationQueue.add(
     "remediate",

@@ -8,16 +8,22 @@
   "exports": {
     ".": "./index.ts",
     "./schema": "./schema/index.ts",
+    "./auto-recharge": "./auto-recharge.ts",
     "./blob": "./blob.ts",
     "./credits": "./credits.ts",
+    "./cron": "./cron.ts",
     "./drift": "./drift.ts",
+    "./ingest": "./ingest.ts",
     "./ledger": "./ledger.ts",
+    "./mappings": "./mappings.ts",
     "./notifications": "./notifications.ts",
+    "./phi": "./phi.ts",
     "./runs": "./runs.ts",
     "./webhooks": "./webhooks.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

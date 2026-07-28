@@ -1,3 +1,4 @@
+import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -25,26 +26,22 @@ export const runRouter = router({
     const inputType = detectInput(input.content).inputType;
     const key = blobKey(ctx.workspaceId, runId, "input");
 
-    const { sha256, sizeBytes } = await blobStore.put(key, input.content, "application/json");
-
-    // blobStore.put created the row with the bytes; merge the metadata onto it.
-    await ctx.db
-      .insert(schema.storedObject)
-      .values({
-        key,
-        workspaceId: ctx.workspaceId,
-        bucket: "local",
-        kind: "input",
-        sizeBytes,
-        contentType: "application/json",
-        sha256,
-        containsPhi: false,
-        uploadState: "stored",
-      })
-      .onConflictDoUpdate({
-        target: schema.storedObject.key,
-        set: { bucket: "local", kind: "input", sizeBytes, sha256, uploadState: "stored" },
+    // one ingest path for every entry point: applies the workspace redaction
+    // policy and records whether what landed on disk actually carries PHI.
+    const policy = await redactionPolicyFor(ctx.db, ctx.workspaceId);
+    const stored = await storeRunInput(ctx.db, blobStore, {
+      workspaceId: ctx.workspaceId,
+      key,
+      content: input.content,
+      policy,
+    });
+    if (stored.rejected) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message:
+          "This workspace requires PHI redaction, and this input could not be parsed to redact it. Send FHIR JSON, or change the redaction policy in settings.",
       });
+    }
 
     await ctx.db.insert(schema.run).values({
       id: runId,
@@ -56,7 +53,8 @@ export const runRouter = router({
       engineVersion: ENGINE_VERSION,
       status: "queued",
       profilesRequested: input.profiles ?? [],
-      inputRef: key,
+      // null under the "required" policy: the raw artifact is never persisted.
+      inputRef: stored.key,
     });
 
     await remediationQueue.add(

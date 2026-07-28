@@ -12,6 +12,7 @@
     "db:seed": "bun run --cwd backend db:seed",
     "auth:generate": "bun run --cwd backend auth:generate",
     "typecheck": "bun run --cwd db typecheck || true && bun run --cwd backend typecheck && npm --prefix frontend run typecheck",
+    "test": "bun run --cwd db test && bun run --cwd backend test && npm --prefix frontend test",
     "lint": "bun run --cwd backend lint && npm --prefix frontend run lint"
   },
   "devDependencies": {

@@ -1,3 +1,4 @@
+import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import { and, desc, eq } from "drizzle-orm";
 import { blobKey, blobStore, db, logger, runId as makeRunId, schema } from "./lib";
@@ -53,25 +54,22 @@ export async function executeScheduledCheck(job: ScheduleJob): Promise<void> {
   const runId = makeRunId();
   const key = blobKey(check.workspaceId, runId, "input");
 
+  let stored: Awaited<ReturnType<typeof storeRunInput>>;
   try {
-    const { sha256, sizeBytes } = await blobStore.put(key, content, "application/json");
-    await db
-      .insert(schema.storedObject)
-      .values({
-        key,
-        workspaceId: check.workspaceId,
-        bucket: "local",
-        kind: "input",
-        sizeBytes,
-        contentType: "application/json",
-        sha256,
-        containsPhi: false,
-        uploadState: "stored",
-      })
-      .onConflictDoUpdate({
-        target: schema.storedObject.key,
-        set: { bucket: "local", kind: "input", sizeBytes, sha256, uploadState: "stored" },
-      });
+    const policy = await redactionPolicyFor(db, check.workspaceId);
+    stored = await storeRunInput(db, blobStore, {
+      workspaceId: check.workspaceId,
+      key,
+      content,
+      policy,
+    });
+    if (stored.rejected) {
+      await recordFailure(
+        scheduledCheckId,
+        "workspace requires PHI redaction and the fetched payload could not be parsed to redact it",
+      );
+      return;
+    }
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     await recordFailure(scheduledCheckId, `could not store input: ${detail}`);
@@ -91,7 +89,7 @@ export async function executeScheduledCheck(job: ScheduleJob): Promise<void> {
     engineVersion: ENGINE_VERSION,
     status: "queued",
     profilesRequested: check.profiles ?? [],
-    inputRef: key,
+    inputRef: stored.key,
   });
 
   await remediationQueue.add(

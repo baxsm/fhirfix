@@ -1,4 +1,6 @@
+import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
 import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
+import { redactPhi } from "@shared/db/phi";
 import { persistCompletedRun } from "@shared/db/runs";
 import {
   describeSidecarError,
@@ -15,7 +17,6 @@ import { db, schema } from "@/lib/db";
 import { engineDeps, ensureEngineWarm } from "@/lib/engine";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
-import { redactPhi } from "@/lib/phi";
 import { dispatchWebhook } from "@/queues/index";
 import type { ApiV1Env } from "./context";
 import { apiError } from "./middleware";
@@ -114,32 +115,25 @@ async function runAndPersist(
   const runId = createId("run");
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
-  const { sha256, sizeBytes } = await blobStore.put(inputKey, input, "application/json");
-  // put() already created the row, so this merges metadata rather than inserting a second
-  await db
-    .insert(schema.storedObject)
-    .values({
-      key: inputKey,
-      workspaceId,
-      bucket: "local",
-      kind: "input",
-      sizeBytes,
-      contentType: "application/json",
-      sha256,
-      containsPhi: false,
-      uploadState: "stored",
-    })
-    .onConflictDoUpdate({
-      target: schema.storedObject.key,
-      set: {
-        bucket: "local",
-        kind: "input",
-        sizeBytes,
-        sha256,
-        containsPhi: false,
-        uploadState: "stored",
-      },
-    });
+  // shared ingest: applies the workspace redaction policy and records whether
+  // the stored bytes actually carry PHI.
+  const policy = await redactionPolicyFor(db, workspaceId);
+  const stored = await storeRunInput(db, blobStore, {
+    workspaceId,
+    key: inputKey,
+    content: input,
+    policy,
+  });
+  if (stored.rejected) {
+    return {
+      res: apiError(
+        c,
+        422,
+        "redaction_required",
+        "This workspace requires PHI redaction and this input could not be parsed to redact it.",
+      ),
+    };
+  }
 
   try {
     await db.insert(schema.run).values({
@@ -152,7 +146,7 @@ async function runAndPersist(
       engineVersion: ENGINE_VERSION,
       status: "running",
       profilesRequested: profiles ?? [],
-      inputRef: inputKey,
+      inputRef: stored.key,
       idempotencyKey: idempotencyKey ?? null,
       requestHash,
     });
@@ -182,7 +176,9 @@ async function runAndPersist(
 
   let result: RemediationResult;
   try {
-    result = await runRemediation({ raw: input, mappings, profiles, autoFix }, engineDeps);
+    // stored.content, not the raw body: under a redacting policy the engine must
+    // see the redacted copy, or a fix gets derived from PHI we promised to drop.
+    result = await runRemediation({ raw: stored.content, mappings, profiles, autoFix }, engineDeps);
   } catch (err) {
     // sidecar unreachable/timed out: mark failed, no debit, 503 with real detail.
     const detail =
