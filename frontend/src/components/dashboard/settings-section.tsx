@@ -9,7 +9,7 @@ export function SettingsSection({
   flush,
   children,
 }: {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   title: string;
   description: string;
   actions?: React.ReactNode;
@@ -21,7 +21,7 @@ export function SettingsSection({
       <div className="flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0 space-y-0.5">
           <h2 className="flex items-center gap-2 text-sm font-semibold leading-tight">
-            <Icon className="size-3.5 shrink-0 text-muted-foreground" />
+            {Icon && <Icon className="size-3.5 shrink-0 text-muted-foreground" />}
             {title}
           </h2>
           <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>

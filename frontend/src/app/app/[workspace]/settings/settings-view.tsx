@@ -53,7 +53,6 @@ export function SettingsView({ workspace }: { workspace: string }) {
         </p>
       </header>
 
-      {/* every section uses the same SettingsSection frame so small ones do not look stranded */}
       <div className="grid gap-8 md:grid-cols-[180px_1fr]">
         <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
           {SECTIONS.map((s) => {
@@ -71,7 +70,6 @@ export function SettingsView({ workspace }: { workspace: string }) {
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                 )}
               >
-                {/* neutral active fill, same language as the app sidebar */}
                 <s.icon
                   className={cn("size-4", activeSection ? "text-foreground" : "opacity-70")}
                 />
@@ -84,7 +82,6 @@ export function SettingsView({ workspace }: { workspace: string }) {
         <div className="min-w-0">
           {section === "members" && (
             <SettingsSection
-              icon={Users}
               title="Members"
               description="Invite teammates and manage their roles in this workspace."
             >
@@ -98,7 +95,6 @@ export function SettingsView({ workspace }: { workspace: string }) {
 
           {section === "defaults" && (
             <SettingsSection
-              icon={SlidersHorizontal}
               title="Workspace defaults"
               description="How this workspace handles PHI and how long it keeps run data."
             >
