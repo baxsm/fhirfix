@@ -155,21 +155,21 @@ function BalanceHero({
           </div>
           {/* a near-zero burn rate projects absurd runways, so cap the phrasing above 90 days */}
           <p className="text-xs text-muted-foreground">
-            covers about{" "}
+            Covers about{" "}
             <span className="font-mono tabular-nums text-foreground">
               {summary.resourcesRemaining.toLocaleString()}
             </span>{" "}
             more resources
             {summary.daysRemaining != null &&
               (summary.daysRemaining > 90 ? (
-                <> · months of runway at this pace</>
+                <>, more than three months at this pace</>
               ) : (
                 <>
-                  {" · "}~
+                  , about{" "}
                   <span className="font-mono tabular-nums text-foreground">
                     {summary.daysRemaining}
                   </span>{" "}
-                  days at current pace
+                  days at this pace
                 </>
               ))}
           </p>

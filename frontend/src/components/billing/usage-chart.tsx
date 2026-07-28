@@ -38,12 +38,14 @@ function pivot(
 const SOURCE_LABEL: Record<string, string> = {
   ui: "Dashboard",
   api: "API",
+  scheduled: "Scheduled",
   other: "Other",
 };
 
 const SOURCE_COLOR: Record<string, string> = {
   ui: "var(--color-chart-ui)",
   api: "var(--color-chart-api)",
+  scheduled: "var(--color-chart-scheduled)",
   other: "var(--color-chart-other)",
 };
 
@@ -71,8 +73,9 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
 
   if (!hasSpend) {
     return (
-      <div className="flex h-56 items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
-        No usage in the last {days} days.
+      <div className="flex h-56 flex-col items-center justify-center gap-1 rounded-md bg-muted/40">
+        <p className="text-sm font-medium">No spend in the last {days} days</p>
+        <p className="text-xs text-muted-foreground">Usage appears here once checks run.</p>
       </div>
     );
   }
