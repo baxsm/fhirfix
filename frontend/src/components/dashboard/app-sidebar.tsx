@@ -36,7 +36,7 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
           if (items.length === 0) return null;
           return (
             <div key={group.label} className={gi === 0 ? "" : "mt-5"}>
-              <p className="px-2 pb-1.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
+              <p className="px-2 pb-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
                 {group.label}
               </p>
               {/* gap-1.5, not gap-0.5: at 2px an active chip sits flush against a hovered neighbour */}
@@ -49,7 +49,7 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
                         href={item.href}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "row-interactive flex h-8 items-center gap-2.5 rounded-lg px-2 text-[13px]",
+                          "row-interactive flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px]",
                           active
                             ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
                             : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -98,7 +98,7 @@ function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspace
   return (
     <Link
       href={`/app/${workspace}/billing`}
-      className="row-interactive -mx-1 block rounded-lg px-2 py-1.5 hover:bg-sidebar-accent"
+      className="row-interactive -mx-1 block rounded-md px-2 py-1.5 hover:bg-sidebar-accent"
     >
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">

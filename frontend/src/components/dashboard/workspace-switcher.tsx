@@ -32,7 +32,7 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
               <button
                 type="button"
                 aria-label="Switch workspace"
-                className="press flex w-full cursor-pointer items-center gap-2 rounded-lg bg-muted/60 px-2 py-1.5 text-left hover:bg-muted data-[state=open]:bg-muted"
+                className="press flex w-full cursor-pointer items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5 text-left hover:bg-muted data-[state=open]:bg-muted"
               >
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-[0.6875rem] text-primary-foreground">
                   {(active?.name ?? "?").slice(0, 1).toUpperCase()}

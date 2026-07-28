@@ -101,12 +101,12 @@ export function MembersSection({
           </div>
           {/* all three controls on the same rung */}
           <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as WorkspaceRole)}>
-            <SelectTrigger className="w-32 font-mono text-xs">
+            <SelectTrigger className="w-32 text-xs capitalize">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {ROLES.filter((r) => r !== "owner").map((r) => (
-                <SelectItem key={r} value={r} className="font-mono text-xs">
+                <SelectItem key={r} value={r} className="text-xs capitalize">
                   {r}
                 </SelectItem>
               ))}
@@ -153,7 +153,9 @@ export function MembersSection({
               const r = m.role as WorkspaceRole;
               return (
                 <li key={m.id} className="flex items-center gap-3 px-5 py-2.5">
-                  {/* no avatar circle: this product has no profile images */}
+                  <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted text-[0.6875rem] font-medium text-muted-foreground uppercase">
+                    {(m.user.name || m.user.email).slice(0, 1)}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium leading-tight">{m.user.name}</p>
                     <p className="truncate font-mono text-xs leading-tight text-muted-foreground">
@@ -174,12 +176,12 @@ export function MembersSection({
                           })
                         }
                       >
-                        <SelectTrigger className="h-8 w-full font-mono text-xs" size="sm">
+                        <SelectTrigger className="h-8 w-full text-xs capitalize" size="sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {ROLES.map((role) => (
-                            <SelectItem key={role} value={role} className="font-mono text-xs">
+                            <SelectItem key={role} value={role} className="text-xs capitalize">
                               {role}
                             </SelectItem>
                           ))}
@@ -187,7 +189,7 @@ export function MembersSection({
                       </Select>
                     ) : (
                       <span
-                        className={`inline-flex h-8 items-center rounded-md border px-2.5 font-mono text-xs ${roleTone[r]}`}
+                        className={`inline-flex h-8 items-center rounded-md border px-2.5 text-xs capitalize ${roleTone[r]}`}
                       >
                         {r}
                       </span>

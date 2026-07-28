@@ -8,6 +8,7 @@ import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NavRow } from "@/components/ui/nav-row";
 import {
   Select,
   SelectContent,
@@ -58,23 +59,15 @@ export function SettingsView({ workspace }: { workspace: string }) {
           {SECTIONS.map((s) => {
             const activeSection = section === s.id;
             return (
-              <button
+              <NavRow
                 key={s.id}
-                type="button"
+                active={activeSection}
                 onClick={() => setSection(s.id)}
-                aria-current={activeSection}
-                className={cn(
-                  "flex shrink-0 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors md:w-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  activeSection
-                    ? "bg-foreground/[0.07] font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                )}
+                className="w-auto shrink-0 py-2 md:w-full"
               >
-                <s.icon
-                  className={cn("size-4", activeSection ? "text-foreground" : "opacity-70")}
-                />
+                <s.icon className={cn("size-4", !activeSection && "opacity-70")} />
                 {s.label}
-              </button>
+              </NavRow>
             );
           })}
         </nav>
