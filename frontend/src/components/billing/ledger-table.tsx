@@ -131,7 +131,8 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
             <Button
               variant="outline"
               size="sm"
-              disabled={page === 0 || query.isPlaceholderData}
+              disabled={query.isPlaceholderData}
+              aria-disabled={page === 0}
               onClick={() => setPage((p) => Math.max(0, p - 1))}
             >
               Previous
@@ -139,8 +140,9 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
             <Button
               variant="outline"
               size="sm"
-              disabled={!hasMore || query.isPlaceholderData}
-              onClick={() => setPage((p) => p + 1)}
+              disabled={query.isPlaceholderData}
+              aria-disabled={!hasMore}
+              onClick={() => hasMore && setPage((p) => p + 1)}
             >
               Next
             </Button>

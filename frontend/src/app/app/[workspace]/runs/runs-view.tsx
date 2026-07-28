@@ -245,8 +245,8 @@ export function RunsView({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={current === 0}
-                  onClick={() => setPage(current - 1)}
+                  aria-disabled={current === 0}
+                  onClick={() => current > 0 && setPage(current - 1)}
                 >
                   Previous
                 </Button>
@@ -256,8 +256,8 @@ export function RunsView({
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={current >= pageCount - 1}
-                  onClick={() => setPage(current + 1)}
+                  aria-disabled={current >= pageCount - 1}
+                  onClick={() => current < pageCount - 1 && setPage(current + 1)}
                 >
                   Next
                 </Button>

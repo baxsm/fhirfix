@@ -207,8 +207,10 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={!cursor || stale}
+                  disabled={stale}
+                  aria-disabled={!cursor}
                   onClick={() => {
+                    if (!cursor) return;
                     setCursor(undefined);
                     setExpanded(null);
                   }}
@@ -218,8 +220,10 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={!hasMore || stale}
+                  disabled={stale}
+                  aria-disabled={!hasMore}
                   onClick={() => {
+                    if (!hasMore) return;
                     setCursor(nextCursor);
                     setExpanded(null);
                   }}
