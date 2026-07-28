@@ -4,6 +4,7 @@ import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
 import { generateKey } from "@/lib/api-key";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
@@ -78,11 +79,15 @@ export const developersRouter = router({
           scopes: input.scopes,
           createdBy: ctx.user.id,
         });
-        // audit_log lands in phase 8; until then a structured log line is the trail.
-        logger.info(
-          "apikey.created",
-          `${id} (${input.mode}) in ${ctx.workspaceId} by ${ctx.user.id}`,
-        );
+        await writeAudit({
+          workspaceId: ctx.workspaceId,
+          action: "key.created",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: id,
+          ip: ipFromHeaders(ctx.headers),
+          metadata: { name: input.name, mode: input.mode, scopes: input.scopes },
+        });
         return { id, name: input.name, mode: input.mode, prefix, key: full };
       }),
 
@@ -104,7 +109,14 @@ export const developersRouter = router({
         if (res.length === 0) {
           throw new TRPCError({ code: "NOT_FOUND", message: "API key not found." });
         }
-        logger.info("apikey.revoked", `${input.keyId} in ${ctx.workspaceId} by ${ctx.user.id}`);
+        await writeAudit({
+          workspaceId: ctx.workspaceId,
+          action: "key.revoked",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: input.keyId,
+          ip: ipFromHeaders(ctx.headers),
+        });
         return { revoked: true };
       }),
   }),
@@ -146,7 +158,15 @@ export const developersRouter = router({
           secret: encryptSecret(secret),
           createdBy: ctx.user.id,
         });
-        logger.info("webhook.created", `${id} -> ${input.url} in ${ctx.workspaceId}`);
+        await writeAudit({
+          workspaceId: ctx.workspaceId,
+          action: "webhook.created",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: id,
+          ip: ipFromHeaders(ctx.headers),
+          metadata: { url: input.url, events: input.events },
+        });
         return { id, url: input.url, events: input.events, secret };
       }),
 
@@ -168,7 +188,14 @@ export const developersRouter = router({
         if (res.length === 0) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Webhook not found." });
         }
-        logger.info("webhook.rotated", `${input.id} in ${ctx.workspaceId}`);
+        await writeAudit({
+          workspaceId: ctx.workspaceId,
+          action: "webhook.secret_rotated",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: input.id,
+          ip: ipFromHeaders(ctx.headers),
+        });
         return { secret };
       }),
 
@@ -207,7 +234,14 @@ export const developersRouter = router({
           .returning({ id: schema.webhookEndpoint.id });
         if (res.length === 0)
           throw new TRPCError({ code: "NOT_FOUND", message: "Webhook not found." });
-        logger.info("webhook.deleted", `${input.id} in ${ctx.workspaceId}`);
+        await writeAudit({
+          workspaceId: ctx.workspaceId,
+          action: "webhook.deleted",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: input.id,
+          ip: ipFromHeaders(ctx.headers),
+        });
         return { deleted: true };
       }),
 

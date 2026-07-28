@@ -1,19 +1,28 @@
-import { ScrollText } from "lucide-react";
-import { PhasePlaceholder } from "@/components/dashboard/phase-placeholder";
+import { AuditPageView } from "@/components/audit/audit-page-view";
+import { resolveWorkspace } from "@/trpc/resolve-workspace";
+import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 
 export default async function Page({ params }: { params: Promise<{ workspace: string }> }) {
   const { workspace } = await params;
+  const workspaceId = await resolveWorkspace(workspace);
+
+  if (workspaceId) {
+    prefetch(trpcServer.workspace.get.queryOptions({ workspaceId }));
+    // the unfiltered first page, which is what the view opens on.
+    prefetch(
+      trpcServer.audit.list.queryOptions({
+        workspaceId,
+        action: undefined,
+        cursor: undefined,
+        limit: 25,
+      }),
+    );
+    prefetch(trpcServer.audit.actions.queryOptions({ workspaceId }));
+  }
+
   return (
-    <PhasePlaceholder
-      title="Audit log"
-      icon={ScrollText}
-      description="Immutable log of every run, mapping change, key rotation, and role change."
-      whatItWillDo="Show who changed what and when, in a record that cannot be edited, so you can answer an auditor without reconstructing history."
-      meanwhile={{
-        label: "View request logs",
-        href: `/app/${workspace}/developers`,
-        body: "API request logs already record every call this workspace made.",
-      }}
-    />
+    <HydrateClient>
+      <AuditPageView workspaceId={workspaceId} />
+    </HydrateClient>
   );
 }

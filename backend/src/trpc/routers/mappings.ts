@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
@@ -220,7 +221,15 @@ export const mappingsRouter = router({
         });
       }
 
-      logger.info("mapping.created", `${id} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { created: true },
+      });
       return { id };
     }),
 
@@ -278,9 +287,17 @@ export const mappingsRouter = router({
           approvedBy: ctx.user.id,
         });
 
-        logger.info(
-          "mapping.updated",
-          `${current.id} -> ${newId} (v${current.version + 1}) in ${ctx.workspaceId} by ${ctx.user.id}`,
+        await writeAudit(
+          {
+            workspaceId: ctx.workspaceId,
+            action: "mapping.changed",
+            actorType: "user",
+            actorId: ctx.user.id,
+            targetRef: newId,
+            ip: ipFromHeaders(ctx.headers),
+            metadata: { supersedes: current.id, version: current.version + 1 },
+          },
+          tx,
         );
         return { id: newId, version: current.version + 1 };
       });
@@ -309,6 +326,14 @@ export const mappingsRouter = router({
         });
       }
       logger.info("mapping.approved", `${input.mappingId} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.approved",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.mappingId,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { approved: true };
     }),
 
@@ -336,6 +361,15 @@ export const mappingsRouter = router({
         });
       }
       logger.info("mapping.rejected", `${input.mappingId} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.mappingId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { status: "rejected" },
+      });
       return { rejected: true };
     }),
 
@@ -365,6 +399,14 @@ export const mappingsRouter = router({
         "mapping.deprecated",
         `${input.mappingId} in ${ctx.workspaceId} by ${ctx.user.id}`,
       );
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.deprecated",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.mappingId,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { deprecated: true };
     }),
 
@@ -394,6 +436,15 @@ export const mappingsRouter = router({
         "mapping.reactivated",
         `${input.mappingId} in ${ctx.workspaceId} by ${ctx.user.id}`,
       );
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.mappingId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { status: "active" },
+      });
       return { reactivated: true };
     }),
 
@@ -428,7 +479,14 @@ export const mappingsRouter = router({
         .orderBy(desc(schema.mappingRegistryEntry.createdAt))
         .limit(5000);
 
-      logger.info("mapping.exported", `${rows.length} from ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "data.exported",
+        actorType: "user",
+        actorId: ctx.user.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { kind: "mappings", rows: rows.length, status: input.status ?? "active" },
+      });
       return rows;
     }),
 
@@ -525,6 +583,14 @@ export const mappingsRouter = router({
         "mapping.imported",
         `${fresh.length} added, ${skipped.length} skipped in ${ctx.workspaceId} by ${ctx.user.id}`,
       );
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "mapping.imported",
+        actorType: "user",
+        actorId: ctx.user.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { imported: fresh.length, skipped: skipped.length + duplicateInFile.length },
+      });
       return {
         imported: fresh.length,
         skipped: [...skipped, ...duplicateInFile],

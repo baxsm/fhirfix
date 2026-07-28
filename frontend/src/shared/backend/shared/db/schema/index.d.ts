@@ -10,3 +10,4 @@ export * from "./conformance";
 export * from "./api-key";
 export * from "./webhook";
 export * from "./api-log";
+export * from "./audit";

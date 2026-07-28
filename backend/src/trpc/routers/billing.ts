@@ -11,6 +11,7 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { createCheckout, isBillingConfigured, productIdForPack } from "@/lib/polar";
@@ -242,6 +243,15 @@ export const billingRouter = router({
         customerExternalId: ctx.workspaceId,
       });
       logger.info("billing.checkout", `${ctx.workspaceId} -> ${pack.id} (${checkout.id})`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "billing.checkout_started",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: checkout.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { packId: pack.id },
+      });
       return { url: checkout.url };
     }),
 
@@ -283,6 +293,18 @@ export const billingRouter = router({
         })
         .where(eq(schema.billingAccount.workspaceId, ctx.workspaceId));
 
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "billing.auto_recharge_changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: {
+          enabled: input.enabled,
+          thresholdDollars: input.thresholdDollars ?? null,
+          amountCents: input.amountCents ?? null,
+        },
+      });
       return { enabled: input.enabled };
     }),
 
@@ -300,6 +322,14 @@ export const billingRouter = router({
         .update(schema.billingAccount)
         .set({ monthlySpendCapCents: input.monthlyCents })
         .where(eq(schema.billingAccount.workspaceId, ctx.workspaceId));
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "billing.spend_cap_changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { monthlyCents: input.monthlyCents },
+      });
       return { monthlyCents: input.monthlyCents };
     }),
 });

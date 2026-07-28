@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { blobKey, blobStore } from "@/lib/blob";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
@@ -70,6 +71,15 @@ export const runRouter = router({
     );
 
     logger.info("run.submit", `queued ${runId} (${inputType})`);
+    await writeAudit({
+      workspaceId: ctx.workspaceId,
+      action: "run.created",
+      actorType: "user",
+      actorId: ctx.user.id,
+      targetRef: runId,
+      ip: ipFromHeaders(ctx.headers),
+      metadata: { inputType, source: "ui" },
+    });
     return { runId, status: "queued" as const };
   }),
 
@@ -254,6 +264,14 @@ export const runRouter = router({
         .update(schema.run)
         .set({ status: "failed", errorMessage: "Cancelled by user.", completedAt: new Date() })
         .where(eq(schema.run.id, input.runId));
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "run.cancelled",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.runId,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { cancelled: true as const, status: "failed" as const };
     }),
 

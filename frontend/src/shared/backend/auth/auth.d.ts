@@ -31,6 +31,22 @@ export declare const auth: import("better-auth").Auth<{
             token: string;
         }) => Promise<void>;
     };
+    databaseHooks: {
+        session: {
+            create: {
+                after: (session: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    expiresAt: Date;
+                    token: string;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
+                } & Record<string, unknown>) => Promise<void>;
+            };
+        };
+    };
     advanced: {
         defaultCookieAttributes: {
             sameSite: "lax" | "none";

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { auth } from "@/auth/auth";
-import { logger } from "@/lib/logger";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { enforceRole, router, workspaceProcedure } from "../trpc";
 
 const roleEnum = z.enum(["owner", "admin", "member", "billing", "auditor"]);
@@ -32,7 +32,15 @@ export const memberRouter = router({
           organizationId: input.workspaceId,
         },
       });
-      logger.info("member.invite", `${input.email} as ${input.role}`);
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "member.invited",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.email,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { role: input.role },
+      });
       return invitation;
     }),
 
@@ -60,6 +68,15 @@ export const memberRouter = router({
           organizationId: input.workspaceId,
         },
       });
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "member.role_changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.memberId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { role: input.role },
+      });
       return updated;
     }),
 
@@ -69,6 +86,14 @@ export const memberRouter = router({
       const result = await auth.api.removeMember({
         headers: ctx.headers,
         body: { memberIdOrEmail: input.memberId, organizationId: input.workspaceId },
+      });
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "member.removed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.memberId,
+        ip: ipFromHeaders(ctx.headers),
       });
       return result;
     }),

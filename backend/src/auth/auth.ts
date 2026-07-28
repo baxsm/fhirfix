@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink, organization } from "better-auth/plugins";
+import { recordLogin } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
 import { env } from "@/lib/env";
@@ -41,6 +42,19 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       const { subject, html, text } = verificationEmail(url);
       await sendEmail({ to: user.email, subject, html, text });
+    },
+  },
+
+  // a login is an auditable event, but it is not a trpc mutation. a session row
+  // is created on every sign-in path (password, magic link, verification), so
+  // hooking session creation catches all of them in one place.
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          await recordLogin({ userId: session.userId, ip: session.ipAddress ?? null });
+        },
+      },
     },
   },
 

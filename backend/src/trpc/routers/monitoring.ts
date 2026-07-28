@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { hasPermission } from "@/auth/permissions";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
@@ -134,7 +135,15 @@ export const monitoringRouter = router({
         await registerSchedule(id, input.scheduleCron);
       }
 
-      logger.info("schedule.created", `${id} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "check.created",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { name: input.name, cron: input.scheduleCron, targetType: input.targetType },
+      });
       return { id };
     }),
 
@@ -175,7 +184,14 @@ export const monitoringRouter = router({
         await unregisterSchedule(input.id);
       }
 
-      logger.info("schedule.updated", `${input.id} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "check.changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.id,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { id: input.id };
     }),
 
@@ -234,7 +250,14 @@ export const monitoringRouter = router({
       // drop the timer too, or it fires forever against a check that is gone.
       await unregisterSchedule(input.id);
 
-      logger.info("schedule.deleted", `${input.id} in ${ctx.workspaceId} by ${ctx.user.id}`);
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "check.deleted",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.id,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { deleted: true };
     }),
 

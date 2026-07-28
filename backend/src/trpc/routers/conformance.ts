@@ -3,6 +3,7 @@ import { automatableKits, diffMatrices, summarizeMatrix, TEST_KITS } from "@shar
 import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { blobStore } from "@/lib/blob";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
@@ -202,6 +203,14 @@ export const conformanceRouter = router({
         { removeOnComplete: 100, removeOnFail: 500 },
       );
 
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "packet.launched",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: packetRunId,
+        ip: ipFromHeaders(ctx.headers),
+      });
       return { packetRunId };
     }),
 

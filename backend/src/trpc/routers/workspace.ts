@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/auth/auth";
+import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
@@ -75,6 +76,15 @@ export const workspaceRouter = router({
       if (!updated) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace settings not found." });
       }
+      await writeAudit({
+        workspaceId,
+        action: "settings.changed",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: workspaceId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { changed: Object.keys(changes) },
+      });
       return updated;
     }),
 
