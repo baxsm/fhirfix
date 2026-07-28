@@ -70,7 +70,6 @@ export function BillingView({ workspace }: { workspace: string }) {
           <BalanceHero workspaceId={workspaceId} canManage={canManage} summary={summary.data} />
 
           <SettingsSection
-            icon={TrendingDown}
             title="Usage"
             description={`Credits spent per day over the last ${USAGE_DAYS} days, by source.`}
           >
@@ -87,17 +86,12 @@ export function BillingView({ workspace }: { workspace: string }) {
             />
           )}
 
-          <SettingsSection
-            icon={Receipt}
-            title="Invoices"
-            description="Every credit purchase, newest first."
-          >
+          <SettingsSection title="Invoices" description="Every credit purchase, newest first.">
             <InvoicesTable workspaceId={workspaceId} />
           </SettingsSection>
 
           {/* not flush: that puts a full-bleed table right under the header border */}
           <SettingsSection
-            icon={Wallet}
             title="Ledger"
             description="Every credit movement: grants, purchases, and per-run debits."
           >

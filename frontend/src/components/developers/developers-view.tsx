@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { KeyRound, ScrollText, Webhook } from "lucide-react";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingsSection } from "@/components/dashboard/settings-section";
@@ -47,7 +46,6 @@ export function DevelopersView({
       ) : (
         <>
           <SettingsSection
-            icon={KeyRound}
             title="API keys"
             description="Authenticate REST requests with a Bearer key. Keep live keys secret."
           >
@@ -55,7 +53,6 @@ export function DevelopersView({
           </SettingsSection>
 
           <SettingsSection
-            icon={Webhook}
             title="Webhooks"
             description="Get a signed POST when a run completes or fails, so you can react without polling."
           >
@@ -64,7 +61,6 @@ export function DevelopersView({
 
           {/* the recent slice only. the filters and paging moved to the full logs page */}
           <SettingsSection
-            icon={ScrollText}
             title="Recent requests"
             description="The last few REST calls this workspace made, including ones that never started a run."
           >

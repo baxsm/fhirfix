@@ -48,11 +48,7 @@ export function AccountView() {
           </p>
         </header>
 
-        <SettingsSection
-          icon={UserRound}
-          title="Profile"
-          description="Your name and the email you sign in with."
-        >
+        <SettingsSection title="Profile" description="Your name and the email you sign in with.">
           <ProfileForm
             initialName={accountQuery.data?.name ?? ""}
             email={accountQuery.data?.email ?? ""}
@@ -60,7 +56,6 @@ export function AccountView() {
         </SettingsSection>
 
         <SettingsSection
-          icon={KeyRound}
           title="Password"
           description="Change the password used to sign in to your account."
         >
