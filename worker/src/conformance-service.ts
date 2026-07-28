@@ -11,6 +11,7 @@ import {
   requiredSuiteInputs,
   summarizeMatrix,
   TEST_KITS,
+  willAuthenticate,
 } from "@shared/engine";
 import { and, eq } from "drizzle-orm";
 import { env } from "./env";
@@ -133,6 +134,11 @@ export async function executeConformancePacket(job: ConformanceJob): Promise<voi
   try {
     const infernoVersion = await inferno.version();
     const auth = await loadAuth(packet.authConfigRef);
+    if (auth && !willAuthenticate(auth)) {
+      throw new Error(
+        "The stored credentials cannot obtain a token, so the scan would run unauthenticated.",
+      );
+    }
     const igVersions: Record<string, string> = {};
     const progress: Record<string, { total: number; completed: number; status: string }> = {};
     const cells: MatrixCell[] = [];

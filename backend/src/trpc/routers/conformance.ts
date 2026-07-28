@@ -12,15 +12,25 @@ import { router, workspaceProcedure } from "../trpc";
 
 const KIT_IDS = TEST_KITS.map((kit) => kit.id) as [string, ...string[]];
 
-const authConfig = z.object({
-  auth_type: z.string().max(50).optional(),
-  token_url: z.string().max(500).optional(),
-  auth_url: z.string().max(500).optional(),
-  requested_scopes: z.string().max(1000).optional(),
-  client_id: z.string().max(500).optional(),
-  client_secret: z.string().max(500).optional(),
-  access_token: z.string().max(4000).optional(),
-});
+// inferno rejects any auth_type outside this set, so it is validated at the edge
+const authConfig = z
+  .object({
+    auth_type: z.enum(["public", "symmetric", "asymmetric", "backend_services"]),
+    token_url: z.string().max(500).optional(),
+    requested_scopes: z.string().max(1000).optional(),
+    client_id: z.string().max(500).optional(),
+    client_secret: z.string().max(500).optional(),
+    access_token: z.string().max(4000).optional(),
+  })
+  .refine(
+    (auth) =>
+      auth.access_token !== undefined ||
+      (auth.auth_type === "backend_services" && !!auth.token_url && !!auth.client_id),
+    {
+      message:
+        "Provide an access token, or pick backend services and give a token URL and client ID.",
+    },
+  );
 
 async function requirePremium(db: Db, workspaceId: string): Promise<void> {
   const [settings] = await db

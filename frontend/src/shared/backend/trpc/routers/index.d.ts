@@ -1174,9 +1174,8 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 testKits: string[];
                 targetEndpoint: string;
                 auth?: {
-                    auth_type?: string | undefined;
+                    auth_type: "asymmetric" | "backend_services" | "public" | "symmetric";
                     token_url?: string | undefined;
-                    auth_url?: string | undefined;
                     requested_scopes?: string | undefined;
                     client_id?: string | undefined;
                     client_secret?: string | undefined;

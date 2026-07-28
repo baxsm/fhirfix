@@ -78,6 +78,16 @@ export function automatableKits(): TestKitDefinition[] {
   return TEST_KITS.filter((kit) => !kit.attended);
 }
 
+// any other config makes inferno scan unauthenticated instead of getting a token
+export function willAuthenticate(auth: {
+  auth_type?: string;
+  token_url?: string;
+  access_token?: string;
+}): boolean {
+  if (auth.access_token) return true;
+  return auth.auth_type === "backend_services" && !!auth.token_url;
+}
+
 export interface MatrixCell {
   requirementId: string;
   requirement: string;

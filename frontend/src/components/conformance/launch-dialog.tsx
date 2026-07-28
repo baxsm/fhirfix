@@ -16,7 +16,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FilterPill } from "@/components/ui/segmented";
 import { useTRPC } from "@/trpc/client";
+
+type AuthMode = "none" | "backend_services" | "token";
+
+interface LaunchAuth {
+  auth_type: "public" | "symmetric" | "asymmetric" | "backend_services";
+  token_url?: string;
+  client_id?: string;
+  requested_scopes?: string;
+  access_token?: string;
+}
 
 export function LaunchDialog({
   workspaceId,
@@ -37,10 +48,11 @@ export function LaunchDialog({
 
   const [selected, setSelected] = useState<string[]>(["plan_net"]);
   const [endpoint, setEndpoint] = useState("");
+  const [authMode, setAuthMode] = useState<AuthMode>("none");
   const [tokenUrl, setTokenUrl] = useState("");
   const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
   const [scopes, setScopes] = useState("");
+  const [accessToken, setAccessToken] = useState("");
 
   const launch = useMutation(
     trpc.conformance.launch.mutationOptions({
@@ -51,7 +63,7 @@ export function LaunchDialog({
         toast.success("Packet queued");
         onOpenChange(false);
         setEndpoint("");
-        setClientSecret("");
+        setAccessToken("");
       },
       onError: (error) => toast.error(error.message || "Could not launch the packet"),
     }),
@@ -59,23 +71,29 @@ export function LaunchDialog({
 
   const runnable = (kitsQuery.data ?? []).filter((kit) => !kit.attended);
   const attended = (kitsQuery.data ?? []).filter((kit) => kit.attended);
-  const canSubmit = endpoint.trim().length > 0 && selected.length > 0 && !launch.isPending;
+  const authReady =
+    authMode === "none" ||
+    (authMode === "backend_services" && !!tokenUrl.trim() && !!clientId.trim()) ||
+    (authMode === "token" && !!accessToken.trim());
+  const canSubmit =
+    endpoint.trim().length > 0 && selected.length > 0 && authReady && !launch.isPending;
 
   function toggle(id: string) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((k) => k !== id) : [...prev, id]));
   }
 
   function submit() {
-    const auth =
-      clientId || clientSecret || tokenUrl
-        ? {
-            auth_type: "client_credentials",
-            token_url: tokenUrl || undefined,
-            client_id: clientId || undefined,
-            client_secret: clientSecret || undefined,
-            requested_scopes: scopes || undefined,
-          }
-        : undefined;
+    let auth: LaunchAuth | undefined;
+    if (authMode === "backend_services") {
+      auth = {
+        auth_type: "backend_services",
+        token_url: tokenUrl.trim(),
+        client_id: clientId.trim(),
+        requested_scopes: scopes.trim() || undefined,
+      };
+    } else if (authMode === "token") {
+      auth = { auth_type: "symmetric", access_token: accessToken.trim() };
+    }
     launch.mutate({ workspaceId, testKits: selected, targetEndpoint: endpoint.trim(), auth });
   }
 
@@ -139,33 +157,60 @@ export function LaunchDialog({
           </fieldset>
 
           <div className="space-y-2 rounded-md border border-border p-3">
-            <p className="text-sm font-medium">OAuth credentials</p>
-            <p className="text-xs text-muted-foreground">
-              Leave blank for an open endpoint. The secret is encrypted and never shown again.
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Input
-                value={tokenUrl}
-                onChange={(e) => setTokenUrl(e.target.value)}
-                placeholder="Token URL"
-              />
-              <Input
-                value={scopes}
-                onChange={(e) => setScopes(e.target.value)}
-                placeholder="Scopes"
-              />
-              <Input
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
-                placeholder="Client ID"
-              />
-              <Input
-                type="password"
-                value={clientSecret}
-                onChange={(e) => setClientSecret(e.target.value)}
-                placeholder="Client secret"
-              />
+            <p className="text-sm font-medium">Authorization</p>
+            <div className="flex flex-wrap gap-1.5">
+              <FilterPill active={authMode === "none"} onClick={() => setAuthMode("none")}>
+                Open endpoint
+              </FilterPill>
+              <FilterPill
+                active={authMode === "backend_services"}
+                onClick={() => setAuthMode("backend_services")}
+              >
+                SMART Backend Services
+              </FilterPill>
+              <FilterPill active={authMode === "token"} onClick={() => setAuthMode("token")}>
+                Paste access token
+              </FilterPill>
             </div>
+
+            {authMode === "backend_services" && (
+              <div className="grid gap-2 pt-1 sm:grid-cols-2">
+                <Input
+                  value={tokenUrl}
+                  onChange={(e) => setTokenUrl(e.target.value)}
+                  placeholder="Token URL"
+                />
+                <Input
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value)}
+                  placeholder="Client ID"
+                />
+                <Input
+                  className="sm:col-span-2"
+                  value={scopes}
+                  onChange={(e) => setScopes(e.target.value)}
+                  placeholder="Scopes (for example system/*.read)"
+                />
+                <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
+                  Register Inferno&apos;s public JWKS with the payer. It signs a JWT to get a token,
+                  so no client secret is sent.
+                </p>
+              </div>
+            )}
+
+            {authMode === "token" && (
+              <div className="pt-1">
+                <Input
+                  type="password"
+                  value={accessToken}
+                  onChange={(e) => setAccessToken(e.target.value)}
+                  placeholder="Bearer access token"
+                />
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  Stored encrypted. Use this when you already hold a token from the payer.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

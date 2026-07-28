@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildCoverageMatrix, summarizeMatrix, TEST_KITS } from "../conformance";
-import { InfernoClient, type InfernoTestResult } from "../inferno-client";
+import { InfernoClient, requiredSuiteInputs, type InfernoTestResult } from "../inferno-client";
 
 const INFERNO_URL = process.env.INFERNO_URL ?? "http://localhost:4568";
 const TARGET = process.env.CONFORMANCE_TARGET ?? "https://hapi.fhir.org/baseR4";
@@ -11,6 +11,29 @@ if (!planNet) throw new Error("plan_net kit missing from the registry");
 
 const reachable = await client.ready().catch(() => false);
 const suite = reachable ? describe : describe.skip;
+
+// inferno signs with its private key, so this only works if the gateway verifies
+async function mintToken(gateway: string): Promise<string> {
+  const signed = await fetch(`${gateway}/sign-assertion`).catch(() => null);
+  if (!signed?.ok) throw new Error("auth gateway cannot sign a test assertion");
+  const { assertion } = (await signed.json()) as { assertion: string };
+
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    scope: "system/*.read",
+    client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+    client_assertion: assertion,
+  });
+  const res = await fetch(`${gateway}/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!res.ok) throw new Error(`token exchange failed: ${res.status}`);
+  const token = (await res.json()) as { access_token?: string };
+  if (!token.access_token) throw new Error("token response had no access_token");
+  return token.access_token;
+}
 
 suite("inferno plan-net against a live fhir server", () => {
   it("reports a real inferno version", async () => {
@@ -79,6 +102,60 @@ suite("inferno plan-net against a live fhir server", () => {
       expect(summary.pass + summary.fail).toBeGreaterThan(0);
     },
     10 * 60 * 1000,
+  );
+
+  it(
+    "carries a bearer token through a real scan against a gated endpoint",
+    async () => {
+      // the gateway is reached from the host, but inferno runs in docker
+      const gateway = process.env.AUTHGW_URL ?? "http://localhost:8090";
+      const gatewayFromInferno =
+        process.env.AUTHGW_INTERNAL_URL ?? "http://host.docker.internal:8090";
+
+      const token = await mintToken(gateway);
+      expect(token).toBeTruthy();
+
+      const unauthorized = await fetch(`${gateway}/metadata`);
+      expect(unauthorized.status).toBe(401);
+
+      const authorized = await fetch(`${gateway}/metadata`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      expect(authorized.status).toBe(200);
+
+      const sessionId = await client.createSession(planNet.suiteId);
+      const suite = await client.suite(planNet.suiteId);
+      const inputs = requiredSuiteInputs(suite, {
+        url: gatewayFromInferno,
+        max_instances: "1",
+        max_pages: "1",
+        smart_auth_info: JSON.stringify({
+          auth_type: "backend_services",
+          token_url: `${gatewayFromInferno}/token`,
+          client_id: "fhirfix-test-client",
+          requested_scopes: "system/*.read",
+          access_token: token,
+          expires_in: 300,
+        }),
+      });
+
+      const started = await client.startRun(sessionId, planNet.suiteId, inputs);
+      const deadline = Date.now() + 5 * 60 * 1000;
+      let results: InfernoTestResult[] = [];
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 4000));
+        const run = await client.getRun(started.id);
+        results = run.results ?? results;
+        if (run.status === "done" || run.status === "cancelled") break;
+      }
+      await client.cancelRun(started.id).catch(() => {});
+
+      // this gateway 401s every unauthenticated read, so few denials proves the token landed
+      const denied = results.filter((r) => (r.result_message ?? "").includes("401")).length;
+      expect(results.length).toBeGreaterThan(0);
+      expect(denied).toBeLessThan(5);
+    },
+    6 * 60 * 1000,
   );
 
   it("answers 409 when a session is given a second concurrent run", async () => {

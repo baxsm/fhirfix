@@ -5,6 +5,7 @@ import {
   diffMatrices,
   summarizeMatrix,
   TEST_KITS,
+  willAuthenticate,
   type MatrixCell,
   type TestKitDefinition,
 } from "../conformance";
@@ -204,6 +205,28 @@ describe("requiredSuiteInputs", () => {
   it("lets a caller override a declared default", () => {
     const inputs = requiredSuiteInputs(declared, { url: "https://x/fhir", max_instances: "2" });
     expect(inputs.find((i) => i.name === "max_instances")?.value).toBe("2");
+  });
+});
+
+describe("willAuthenticate", () => {
+  it("accepts a pre-minted access token", () => {
+    expect(willAuthenticate({ auth_type: "symmetric", access_token: "abc" })).toBe(true);
+  });
+
+  it("accepts backend services with a token url", () => {
+    expect(
+      willAuthenticate({ auth_type: "backend_services", token_url: "https://x/token" }),
+    ).toBe(true);
+  });
+
+  it("rejects backend services with no token url", () => {
+    expect(willAuthenticate({ auth_type: "backend_services" })).toBe(false);
+  });
+
+  // inferno never mints a token from a client secret, so this config would scan
+  // unauthenticated and report every requirement as failed
+  it("rejects a client secret without a token, which would scan unauthenticated", () => {
+    expect(willAuthenticate({ auth_type: "symmetric", token_url: "https://x/token" })).toBe(false);
   });
 });
 

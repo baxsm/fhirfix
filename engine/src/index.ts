@@ -36,6 +36,7 @@ export {
   summarizeMatrix,
   TEST_KITS,
   automatableKits,
+  willAuthenticate,
 } from "./conformance";
 export type {
   MatrixCell,

@@ -12,6 +12,11 @@ export interface TestKitDefinition {
 }
 export declare const TEST_KITS: TestKitDefinition[];
 export declare function automatableKits(): TestKitDefinition[];
+export declare function willAuthenticate(auth: {
+    auth_type?: string;
+    token_url?: string;
+    access_token?: string;
+}): boolean;
 export interface MatrixCell {
     requirementId: string;
     requirement: string;
