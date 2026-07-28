@@ -258,8 +258,9 @@ export function MappingsTable({
                         <button
                           type="button"
                           onClick={() => setHistoryTarget(m)}
-                          className="cursor-pointer rounded-sm text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                          className="-mx-1.5 inline-flex h-7 cursor-pointer items-center rounded-md px-1.5 text-xs text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
                           title="View version history"
+                          aria-label={`Version history for ${m.sourceValue}`}
                         >
                           v{m.version}
                         </button>

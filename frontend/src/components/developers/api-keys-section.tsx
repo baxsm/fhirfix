@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PendingRows } from "@/components/ui/pending-rows";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { CreateKeyDialog } from "./create-key-dialog";
 import { RevokeKeyDialog } from "./revoke-key-dialog";
@@ -67,7 +68,7 @@ export function ApiKeysSection({
         <span className="text-xs text-muted-foreground">
           {keys.length === 0
             ? "No keys yet"
-            : `${keys.filter((k) => !k.revokedAt).length} active · ${keys.filter((k) => k.revokedAt).length} revoked`}
+            : `${keys.filter((k) => !k.revokedAt).length} active, ${keys.filter((k) => k.revokedAt).length} revoked`}
         </span>
         {canManage && (
           <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
@@ -128,7 +129,10 @@ function KeysTable({
             {keys.map((k) => {
               const revoked = !!k.revokedAt;
               return (
-                <tr key={k.id} className="border-b last:border-0">
+                <tr
+                  key={k.id}
+                  className={cn("border-b last:border-0", revoked && "opacity-55 grayscale")}
+                >
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
                       <span
