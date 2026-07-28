@@ -207,7 +207,6 @@ function RecentRun({ row, href }: { row: RunRow; href: string }) {
       href={href}
       className={cn(
         "row-interactive group flex items-center gap-3 px-4 py-2.5",
-        row.status === "failed" && "bg-destructive/[0.03]",
       )}
     >
       <div className="min-w-0 flex-1">

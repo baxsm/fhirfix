@@ -172,10 +172,7 @@ export function RunsView({
                             go();
                           }
                         }}
-                        className={cn(
-                          "row-interactive group cursor-pointer",
-                          isRealFailure(r) && "bg-destructive/[0.03]",
-                        )}
+                        className="row-interactive group cursor-pointer"
                       >
                         <TableCell>
                           <div className="flex flex-col">
