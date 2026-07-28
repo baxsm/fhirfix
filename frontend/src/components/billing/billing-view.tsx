@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CreditCard, Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
+import { Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -261,8 +261,7 @@ function BillingSkeleton() {
 
 function SectionError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="raised flex flex-col items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-16 text-center">
-      <CreditCard className="size-8 text-muted-foreground" />
+    <div className="raised flex flex-col items-center gap-3 rounded-xl border bg-card px-6 py-16 text-center">
       <h2 className="font-medium">Could not load billing</h2>
       <p className="text-sm text-muted-foreground">Check your connection and try again.</p>
       <Button variant="outline" size="sm" onClick={onRetry}>

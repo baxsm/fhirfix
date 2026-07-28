@@ -91,7 +91,7 @@ export function MonitoringView({
 
 function ViewError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/[0.03] px-6 py-14 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-lg border bg-card px-6 py-14 text-center">
       <h2 className="text-sm font-medium">Could not load monitoring</h2>
       <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
       <Button variant="outline" size="sm" onClick={onRetry}>

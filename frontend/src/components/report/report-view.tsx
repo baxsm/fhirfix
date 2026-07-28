@@ -368,7 +368,7 @@ export function ReportView({
 
         {/* the highest-leverage line: turns a scary total into one action. */}
         {fixableNow.length > 0 ? (
-          <div className="raised flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success/25 bg-success/[0.04] px-4 py-3">
+          <div className="raised flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3">
             <div className="flex items-center gap-2 text-sm">
               <Wrench className="size-4 shrink-0 text-success" />
               <span>
@@ -395,7 +395,7 @@ export function ReportView({
           run.conformanceScoreBefore != null &&
           run.conformanceScoreAfter >= run.conformanceScoreBefore &&
           openErrors === 0 ? (
-          <div className="raised flex items-center gap-2 rounded-lg border border-success/25 bg-success/[0.04] px-4 py-3 text-sm">
+          <div className="raised flex items-center gap-2 rounded-lg border bg-card px-4 py-3 text-sm">
             <CheckCircle2 className="size-4 shrink-0 text-success" />
             Re-verified clean. No conformance errors remain.
           </div>
@@ -567,7 +567,7 @@ function TerminalState({
 }) {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-md border bg-card px-6 py-12 text-center raised">
-      <Icon className={cn("size-8", tone === "error" ? "text-destructive" : "text-success")} />
+      <Icon className={cn("size-5", tone === "error" ? "text-destructive" : "text-success")} />
       <h2 className="font-medium">{title}</h2>
       <p className="text-sm text-muted-foreground">{body}</p>
       {action}
@@ -577,8 +577,8 @@ function TerminalState({
 
 function AllClear({ resourceCount }: { resourceCount: number }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-md border border-success/20 bg-success/5 px-6 py-14 text-center raised">
-      <CheckCircle2 className="size-9 text-success" />
+    <div className="flex flex-col items-center gap-3 rounded-md border bg-card px-6 py-14 text-center raised">
+      <CheckCircle2 className="size-5 text-success" />
       <h2 className="font-medium">Conformant</h2>
       <p className="max-w-sm text-sm text-muted-foreground">
         {resourceCount} {resourceCount === 1 ? "resource was" : "resources were"} scanned against US
@@ -591,7 +591,7 @@ function AllClear({ resourceCount }: { resourceCount: number }) {
 function FilteredZero({ onClear }: { onClear: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-md border bg-card px-6 py-14 text-center raised">
-      <TriangleAlert className="size-7 text-muted-foreground" />
+      <TriangleAlert className="size-5 text-muted-foreground" />
       <h2 className="font-medium">No findings match these filters</h2>
       <p className="text-sm text-muted-foreground">Clear the filters to see the full report.</p>
       <Button variant="outline" size="sm" onClick={onClear}>
