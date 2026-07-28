@@ -93,7 +93,7 @@ export function FilterPill({
           ? tone === "danger"
             ? "border-destructive/40 bg-destructive/10 font-medium text-destructive"
             : "border-foreground/25 bg-muted font-medium text-foreground"
-          : "border-border text-muted-foreground hover:border-foreground/25 hover:bg-muted/50 hover:text-foreground",
+          : "border-border bg-card text-foreground hover:border-foreground/25 hover:bg-muted",
       )}
     >
       {Icon && <Icon className="size-3.5" />}
