@@ -4,7 +4,15 @@ import { ArrowDownRight, ArrowUpRight, ListChecks } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FilterPill } from "@/components/ui/segmented";
-import { StatusChip, type StatusTone } from "@/components/ui/status";
+import { StatusDot, type StatusTone } from "@/components/ui/status";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { InfernoResult, MatrixCell, RegressionEntry } from "./types";
 
@@ -116,27 +124,25 @@ export function CoverageMatrix({
           body="Clear the filter to see the rest of the requirements."
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[42rem] border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 text-left">
-                <th className="px-3 py-2 font-medium text-muted-foreground">Requirement</th>
-                <th className="w-28 px-3 py-2 font-medium text-muted-foreground">Level</th>
-                <th className="w-36 px-3 py-2 font-medium text-muted-foreground">Result</th>
-                <th className="w-20 px-3 py-2 text-right font-medium text-muted-foreground">
-                  Tests
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+        <div
+          key={`${filter}-${kit}`}
+          className="raised enter overflow-hidden rounded-md border bg-card"
+        >
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Requirement</TableHead>
+                <TableHead className="w-28">Level</TableHead>
+                <TableHead className="w-36">Result</TableHead>
+                <TableHead className="w-20 text-right">Tests</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="enter-stagger">
               {visible.map((cell) => {
                 const moved = movedBy.get(`${cell.testKit}::${cell.requirementId}`);
                 return (
-                  <tr
-                    key={`${cell.testKit}-${cell.requirementId}`}
-                    className="border-b border-border last:border-0 align-top"
-                  >
-                    <td className="px-3 py-2">
+                  <TableRow key={`${cell.testKit}-${cell.requirementId}`} className="align-top">
+                    <TableCell className="whitespace-normal">
                       <p className="leading-snug">{cell.requirement}</p>
                       <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                         {cell.requirementId}
@@ -146,17 +152,17 @@ export function CoverageMatrix({
                           {cell.message}
                         </p>
                       )}
-                    </td>
-                    <td className="px-3 py-2">
+                    </TableCell>
+                    <TableCell>
                       <span className="font-mono text-[11px] text-muted-foreground">
                         {cell.conformance}
                       </span>
-                    </td>
-                    <td className="px-3 py-2">
+                    </TableCell>
+                    <TableCell className="whitespace-normal">
                       <div className="flex flex-col items-start gap-1">
-                        <StatusChip tone={RESULT_TONE[cell.result]}>
+                        <StatusDot tone={RESULT_TONE[cell.result]}>
                           {RESULT_LABEL[cell.result]}
-                        </StatusChip>
+                        </StatusDot>
                         {moved && (
                           <span
                             className={cn(
@@ -174,15 +180,15 @@ export function CoverageMatrix({
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono text-xs text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
                       {cell.testIds.length}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

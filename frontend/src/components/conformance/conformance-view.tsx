@@ -9,8 +9,17 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatusChip, type StatusTone } from "@/components/ui/status";
+import { StatusDot, type StatusTone } from "@/components/ui/status";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useListOrganizations } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { CoverageMatrix } from "./coverage-matrix";
 import { LaunchDialog } from "./launch-dialog";
@@ -65,6 +74,7 @@ export function ConformanceView({
   });
 
   const packets = listQuery.data ?? [];
+  const hasPackets = packets.length > 0;
   const selectedId = openPacket ?? packets[0]?.id ?? null;
 
   const packetQuery = useQuery({
@@ -108,9 +118,12 @@ export function ConformanceView({
         title="Conformance packets"
         description={`Run the Da Vinci Inferno test kits against a live endpoint and keep the evidence for ${active?.name ?? "this workspace"}.`}
         actions={
-          <Button onClick={() => setLaunchOpen(true)} disabled={!workspaceId}>
-            New packet
-          </Button>
+          // the empty state carries the only call to action until a packet exists
+          hasPackets ? (
+            <Button onClick={() => setLaunchOpen(true)} disabled={!workspaceId}>
+              New packet
+            </Button>
+          ) : null
         }
       />
 
@@ -144,69 +157,73 @@ export function ConformanceView({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[40rem] border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40 text-left">
-                  <th className="px-3 py-2 font-medium text-muted-foreground">Endpoint</th>
-                  <th className="w-32 px-3 py-2 font-medium text-muted-foreground">Status</th>
-                  <th className="w-32 px-3 py-2 font-medium text-muted-foreground">Result</th>
-                  <th className="w-28 px-3 py-2 text-right font-medium text-muted-foreground">
-                    Passed
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="raised overflow-hidden rounded-md border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Endpoint</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Result</TableHead>
+                  <TableHead className="text-right">Passed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="enter-stagger">
                 {packets.map((row) => (
-                  <tr
+                  <TableRow
                     key={row.id}
-                    className={`border-b border-border transition-colors last:border-0 hover:bg-muted/40 ${
-                      row.id === selectedId ? "bg-muted/50" : ""
-                    }`}
+                    tabIndex={0}
+                    onClick={() => setOpenPacket(row.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOpenPacket(row.id);
+                      }
+                    }}
+                    className={cn(
+                      "cursor-pointer transition-colors",
+                      row.id === selectedId && "bg-accent/40",
+                    )}
                   >
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        aria-pressed={row.id === selectedId}
-                        onClick={() => setOpenPacket(row.id)}
-                        className="block w-full cursor-pointer text-left"
-                      >
-                        <span className="block truncate font-mono text-xs">
-                          {row.targetEndpoint}
-                        </span>
-                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                          {row.testKits.join(", ")}
-                        </span>
-                      </button>
-                    </td>
-                    <td className="px-3 py-2">
-                      <StatusChip tone={STATUS_TONE[row.status] ?? "neutral"}>
-                        {row.status}
-                      </StatusChip>
-                      {row.status === "failed" && row.errorMessage && (
-                        <p className="mt-1 text-[11px] leading-relaxed text-destructive">
-                          {row.errorMessage}
-                        </p>
+                    {/* the rail lives on the cell: a border on the tr does not paint */}
+                    <TableCell
+                      className={cn(
+                        "max-w-0 border-l-2",
+                        row.id === selectedId ? "border-l-foreground" : "border-l-transparent",
                       )}
-                    </td>
-                    <td className="px-3 py-2">
+                    >
+                      <span className="block truncate font-mono text-xs">{row.targetEndpoint}</span>
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {row.testKits.join(", ")}
+                      </span>
+                    </TableCell>
+                    <TableCell className="whitespace-normal">
+                      <StatusDot tone={STATUS_TONE[row.status] ?? "neutral"}>
+                        {row.status}
+                      </StatusDot>
+                      {row.status === "failed" && row.errorMessage && (
+                        <span className="mt-1 block text-[11px] leading-relaxed text-destructive">
+                          {row.errorMessage}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       {row.overallResult ? (
-                        <StatusChip tone={OVERALL_TONE[row.overallResult] ?? "neutral"}>
+                        <StatusDot tone={OVERALL_TONE[row.overallResult] ?? "neutral"}>
                           {row.overallResult}
-                        </StatusChip>
+                        </StatusDot>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs tabular-nums">
                       {row.passCount != null && row.failCount != null
                         ? `${row.passCount}/${row.passCount + row.failCount}`
                         : "—"}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {selectedId && (

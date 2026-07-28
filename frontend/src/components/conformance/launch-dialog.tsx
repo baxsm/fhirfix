@@ -169,7 +169,7 @@ export function LaunchDialog({
                 SMART Backend Services
               </FilterPill>
               <FilterPill active={authMode === "token"} onClick={() => setAuthMode("token")}>
-                Paste access token
+                Access token
               </FilterPill>
             </div>
 
@@ -189,11 +189,10 @@ export function LaunchDialog({
                   className="sm:col-span-2"
                   value={scopes}
                   onChange={(e) => setScopes(e.target.value)}
-                  placeholder="Scopes (for example system/*.read)"
+                  placeholder="system/*.read"
                 />
                 <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
-                  Register Inferno&apos;s public JWKS with the payer. It signs a JWT to get a token,
-                  so no client secret is sent.
+                  Register Inferno&apos;s public JWKS with the payer first.
                 </p>
               </div>
             )}
@@ -204,11 +203,8 @@ export function LaunchDialog({
                   type="password"
                   value={accessToken}
                   onChange={(e) => setAccessToken(e.target.value)}
-                  placeholder="Bearer access token"
+                  placeholder="Access token"
                 />
-                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                  Stored encrypted. Use this when you already hold a token from the payer.
-                </p>
               </div>
             )}
           </div>

@@ -75,15 +75,15 @@ export function ChecksTable({
 
   return (
     <>
-      {/* "Schedule a check", not "New check": the topbar already carries that action */}
-      <div className="flex items-center justify-end">
-        {canManage && (
+      {/* hidden while empty: the empty state carries the only call to action */}
+      {canManage && rows.length > 0 && (
+        <div className="flex items-center justify-end">
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus />
             Schedule a check
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
@@ -249,8 +249,7 @@ function ChecksEmpty({ canManage, onCreate }: { canManage: boolean; onCreate: ()
       <div className="space-y-1">
         <p className="text-sm font-medium">No scheduled checks yet</p>
         <p className="max-w-sm text-xs text-muted-foreground">
-          Point a check at an endpoint and we will validate it on a schedule, then tell you when
-          conformance drops.
+          Validate an endpoint on a schedule and get alerted when conformance drops.
         </p>
       </div>
       {canManage && (
