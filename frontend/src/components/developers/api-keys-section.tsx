@@ -122,7 +122,7 @@ function KeysTable({
             <th className="w-8 px-5 py-2" />
           </tr>
         </thead>
-        <tbody>
+        <tbody className="enter-stagger">
           {keys.map((k) => {
             const revoked = !!k.revokedAt;
             return (

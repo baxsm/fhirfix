@@ -107,7 +107,7 @@ export function ChecksTable({
                   <th className="w-8 px-4 py-2" />
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="enter-stagger">
                 {rows.map((row) => (
                   <tr key={row.id} className="border-b last:border-0">
                     <td className="px-4 py-3">

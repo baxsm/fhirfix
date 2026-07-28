@@ -82,7 +82,7 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
               <th className="px-4 py-2 text-right font-medium">When</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={page} className="enter-stagger">
             {rows.map((r) => {
               const isCredit = r.amountDollars >= 0;
               const type = r.type as LedgerType;

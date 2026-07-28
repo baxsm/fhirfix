@@ -65,7 +65,7 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
             <th className="px-5 py-2 text-right font-medium">Date</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="enter-stagger">
           {query.data.map((inv) => (
             <tr key={inv.id} className="border-b last:border-0">
               <td className="px-5 py-2.5 font-mono text-xs">{inv.id}</td>

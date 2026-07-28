@@ -201,7 +201,7 @@ export function MappingsTable({
                   <th className="w-8 px-4 py-2" />
                 </tr>
               </thead>
-              <tbody>
+              <tbody key={`${status}-${search}`} className="enter-stagger">
                 {rows.map((m) => (
                   <tr key={m.id} className="border-b last:border-0">
                     <td className="px-4 py-3">

@@ -184,11 +184,12 @@ export function ConformanceView({
                       row.id === selectedId && "bg-accent/40",
                     )}
                   >
-                    {/* the rail lives on the cell: a border on the tr does not paint */}
+                    {/* inset rail on the cell: a tr border never paints, a flush one reads as the frame */}
                     <TableCell
                       className={cn(
-                        "max-w-0 border-l-2",
-                        row.id === selectedId ? "border-l-foreground" : "border-l-transparent",
+                        "relative max-w-0",
+                        row.id === selectedId &&
+                          "before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full before:bg-foreground before:content-['']",
                       )}
                     >
                       <span className="block truncate font-mono text-xs">{row.targetEndpoint}</span>
