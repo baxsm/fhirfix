@@ -463,49 +463,52 @@ function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string
       <header className="space-y-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="truncate font-mono text-sm">{run.id}</h1>
-            <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[0.75rem] uppercase text-muted-foreground">
-              {run.inputType}
+            <h1 className="truncate text-lg font-semibold tracking-tight">
+              {run.inputType.replace(/_/g, " ").toUpperCase()} check
+            </h1>
+            <span className="shrink-0 font-mono text-[0.6875rem] text-muted-foreground/60">
+              {run.id.slice(-8)}
             </span>
           </div>
-          {/* deliberately NOT "0 resources scanned" */}
-          <p className="mt-1 text-sm text-muted-foreground">
-            Started {fmtRunTime(run.createdAt)}
-            {run.completedAt
-              ? ` · ${cancelled ? "cancelled" : "failed"} ${fmtRunTime(run.completedAt)}`
-              : null}
-          </p>
-        </div>
-        <div className="border-y py-2.5">
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 text-xs",
-              cancelled ? "text-muted-foreground" : "text-destructive",
-            )}
-          >
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <span
               className={cn(
-                "size-1.5 rounded-full",
-                cancelled ? "bg-muted-foreground/50" : "bg-destructive",
+                "inline-flex items-center gap-1.5",
+                cancelled ? "text-muted-foreground" : "text-destructive",
               )}
-            />
-            {cancelled ? "Cancelled" : "Failed"}
-          </span>
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  cancelled ? "bg-muted-foreground/50" : "bg-destructive",
+                )}
+              />
+              {cancelled ? "Cancelled" : "Failed"}
+            </span>
+            <span className="text-muted-foreground/40">/</span>
+            {run.completedAt
+              ? `after ${runDuration(run.createdAt, run.completedAt)}`
+              : `started ${fmtRunTime(run.createdAt)}`}
+          </p>
         </div>
       </header>
 
-      <div
-        className={cn(
-          "raised rounded-lg border px-4 py-4",
-          cancelled ? "bg-card" : "border-destructive/25 bg-destructive/[0.04]",
-        )}
-      >
+      <div className="raised rounded-lg border bg-card px-4 py-4">
         <div className="flex gap-3">
-          {cancelled ? (
-            <CircleSlash className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-          ) : (
-            <FileWarning className="mt-0.5 size-4 shrink-0 text-destructive" />
-          )}
+          <span
+            className={cn(
+              "grid size-7 shrink-0 place-items-center rounded-md",
+              cancelled
+                ? "bg-muted text-muted-foreground"
+                : "bg-destructive-subtle text-destructive",
+            )}
+          >
+            {cancelled ? (
+              <CircleSlash className="size-3.5" />
+            ) : (
+              <FileWarning className="size-3.5" />
+            )}
+          </span>
           <div className="min-w-0 flex-1 space-y-1">
             <p className="text-sm font-medium leading-tight">{failure.title}</p>
             <p className="text-sm leading-relaxed text-muted-foreground">{failure.cause}</p>
@@ -552,6 +555,15 @@ function fmtRunTime(d: string | Date): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function runDuration(start: string | Date, end: string | Date): string {
+  const ms = new Date(end).getTime() - new Date(start).getTime();
+  if (ms < 1000) return "under a second";
+  const secs = Math.round(ms / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  return `${mins}m ${secs % 60}s`;
 }
 
 function TerminalState({

@@ -149,7 +149,7 @@ export function ChoiceChip({
       aria-current={active ? "true" : undefined}
       onClick={onClick}
       className={cn(
-        "press cursor-pointer rounded-[6px] px-2 py-1 text-xs transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        "press cursor-pointer rounded-sm px-2 py-1 text-xs transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         active
           ? "bg-background font-medium text-foreground shadow-[0_1px_2px_0_oklch(0.145_0_0/0.10)]"
           : "text-muted-foreground hover:text-foreground",
