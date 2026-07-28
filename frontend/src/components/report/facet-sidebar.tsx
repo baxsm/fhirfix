@@ -70,7 +70,7 @@ function Row({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-left text-[13px] transition-colors",
+        "flex w-full cursor-pointer items-center justify-between rounded-md px-2.5 py-1.5 text-left text-[13px] transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         active
           ? "bg-foreground/[0.07] text-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",

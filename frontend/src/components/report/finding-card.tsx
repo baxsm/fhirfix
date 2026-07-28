@@ -85,7 +85,7 @@ export function FindingCard({
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="row-interactive flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left"
+          className="row-interactive flex w-full cursor-pointer items-start gap-3 px-3 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
           aria-expanded={open}
         >
           <ChevronRight

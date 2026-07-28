@@ -258,7 +258,7 @@ export function MappingsTable({
                         <button
                           type="button"
                           onClick={() => setHistoryTarget(m)}
-                          className="cursor-pointer text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                          className="cursor-pointer rounded-sm text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                           title="View version history"
                         >
                           v{m.version}

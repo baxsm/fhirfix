@@ -130,7 +130,7 @@ export function RunsView({
                   <button
                     type="button"
                     onClick={() => setFailedOnly(false)}
-                    className="cursor-pointer underline underline-offset-2 hover:text-foreground"
+                    className="cursor-pointer rounded-sm underline underline-offset-2 hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     Show all
                   </button>

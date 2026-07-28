@@ -64,7 +64,7 @@ export function SettingsView({ workspace }: { workspace: string }) {
                 onClick={() => setSection(s.id)}
                 aria-current={activeSection}
                 className={cn(
-                  "relative flex shrink-0 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors md:w-full",
+                  "flex shrink-0 items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors md:w-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                   activeSection
                     ? "bg-foreground/[0.07] font-medium text-foreground"
                     : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",

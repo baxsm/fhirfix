@@ -35,7 +35,7 @@ export function FindingListRow({
       onClick={onSelect}
       aria-current={selected ? "true" : undefined}
       className={cn(
-        "row-interactive flex w-full cursor-pointer items-start gap-2.5 border-b px-3 py-2.5 text-left last:border-b-0",
+        "row-interactive flex w-full cursor-pointer items-start gap-2.5 border-b px-3 py-2.5 text-left last:border-b-0 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         selected && "bg-secondary hover:bg-secondary",
         dismissed && "opacity-55",
       )}
