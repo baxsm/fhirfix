@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Receipt, TrendingDown, Wallet, Zap } from "lucide-react";
+import { Plus, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingsSection } from "@/components/dashboard/settings-section";
@@ -38,18 +38,27 @@ export function BillingView({ workspace }: { workspace: string }) {
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
   const canManage = can(role, "billing", "manage");
 
-  // returning from a Polar checkout: confirm and refetch the balance.
+  // the ledger is credited by the order.paid webhook, which can land a moment
+  // after the checkout reports success. refetch once now and once shortly after,
+  // so the balance settles without the user reloading.
+  const confirmPurchase = useCallback(() => {
+    toast.success("Credits added to your workspace.");
+    summary.refetch();
+    window.setTimeout(() => summary.refetch(), 2000);
+  }, [summary]);
+
+  // the embedded checkout stays on this page, but a redirect-based return (an
+  // older tab, or a wallet payment that leaves the iframe) still lands here.
   const params = useSearchParams();
   const toasted = useRef(false);
   useEffect(() => {
     if (params.get("success") === "1" && !toasted.current) {
       toasted.current = true;
-      toast.success("Credits added to your workspace.");
-      summary.refetch();
+      confirmPurchase();
       // drop the query param so a refresh does not re-toast.
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [params, summary]);
+  }, [params, confirmPurchase]);
 
   return (
     <PageContainer>
@@ -67,7 +76,12 @@ export function BillingView({ workspace }: { workspace: string }) {
         <BillingSkeleton />
       ) : (
         <>
-          <BalanceHero workspaceId={workspaceId} canManage={canManage} summary={summary.data} />
+          <BalanceHero
+            workspaceId={workspaceId}
+            canManage={canManage}
+            summary={summary.data}
+            onPurchased={confirmPurchase}
+          />
 
           <SettingsSection
             title="Usage"
@@ -118,10 +132,12 @@ function BalanceHero({
   workspaceId,
   canManage,
   summary,
+  onPurchased,
 }: {
   workspaceId: string;
   canManage: boolean;
   summary: Summary;
+  onPurchased: () => void;
 }) {
   const [addOpen, setAddOpen] = useState(false);
   const low = summary.balanceDollars <= 1;
@@ -199,6 +215,7 @@ function BalanceHero({
         open={addOpen}
         onOpenChange={setAddOpen}
         billingConfigured={summary.billingConfigured}
+        onPurchased={onPurchased}
       />
     </section>
   );

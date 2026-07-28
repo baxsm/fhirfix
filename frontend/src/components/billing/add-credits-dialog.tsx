@@ -2,6 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -22,14 +23,18 @@ export function AddCreditsDialog({
   open,
   onOpenChange,
   billingConfigured,
+  onPurchased,
 }: {
   workspaceId: string;
   packs: { id: string; label: string; cents: number }[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   billingConfigured: boolean;
+  onPurchased: () => void;
 }) {
   const trpc = useTRPC();
+  // read inside the click handler only, so there is no server/client mismatch.
+  const { resolvedTheme } = useTheme();
   const [packId, setPackId] = useState(packs[1]?.id ?? packs[0]?.id ?? "");
 
   useEffect(() => {
@@ -38,8 +43,21 @@ export function AddCreditsDialog({
 
   const checkout = useMutation(
     trpc.billing.checkout.mutationOptions({
-      onSuccess: ({ url }) => {
-        window.location.href = url;
+      onSuccess: async ({ url }) => {
+        // the checkout is an iframe on polar's domain, so it cannot be styled to
+        // match ours. embedding it still keeps the user on this page and lets the
+        // success event refresh the balance without a round trip through a redirect.
+        const { PolarEmbedCheckout } = await import("@polar-sh/checkout/embed");
+        const embed = await PolarEmbedCheckout.create(url, {
+          theme: resolvedTheme === "dark" ? "dark" : "light",
+        });
+        // close our own dialog so the checkout is not stacked on top of it.
+        onOpenChange(false);
+        embed.addEventListener("success", (event) => {
+          // never redirect: staying put is the reason to embed at all.
+          event.preventDefault();
+          onPurchased();
+        });
       },
       onError: (e) => toast.error(e.message ?? "Could not start checkout."),
     }),
@@ -112,7 +130,7 @@ export function AddCreditsDialog({
             onClick={() => selected && checkout.mutate({ workspaceId, packId: selected.id })}
           >
             {checkout.isPending && <Loader2 className="size-3.5 animate-spin" />}
-            {checkout.isPending ? "Opening checkout..." : `Continue to checkout`}
+            {checkout.isPending ? "Opening checkout..." : `Pay ${selected?.label ?? ""}`}
           </Button>
         </DialogFooter>
       </DialogContent>

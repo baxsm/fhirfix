@@ -128,7 +128,8 @@ function AutoRechargeRow({
           <p className="mt-0.5 text-xs text-muted-foreground">
             Top up automatically when the balance runs low.
           </p>
-          <InlineNote className="mt-2">
+          {/* setup info, not a caveat: info tone, so it does not read as a fault */}
+          <InlineNote tone="info" className="mt-2">
             Charges the card from your last purchase. Buy credits once to set it up.
           </InlineNote>
         </div>
