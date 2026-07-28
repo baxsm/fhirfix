@@ -14,6 +14,7 @@ export const idPrefix = {
   invoice: "inv",
   packet: "pkt",
   evidence: "evd",
+  secret: "sec",
   scheduledCheck: "sch",
   driftAlert: "drf",
   webhook: "whk",

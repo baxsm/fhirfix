@@ -21,6 +21,7 @@ const WEBHOOK_EVENTS = [
   "batch.completed",
   "credits.low",
   "drift.detected",
+  "conformance.completed",
 ] as const;
 
 function requireKeyPermission(role: string, action: "create" | "revoke") {

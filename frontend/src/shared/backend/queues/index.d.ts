@@ -17,7 +17,7 @@ export declare function schedulerId(scheduledCheckId: string): string;
 export declare function registerSchedule(scheduledCheckId: string, cronPattern: string): Promise<void>;
 export declare function unregisterSchedule(scheduledCheckId: string): Promise<void>;
 export interface WebhookJob {
-    event: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected";
+    event: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected" | "conformance.completed";
     workspaceId: string;
     data: Record<string, unknown>;
 }

@@ -24,7 +24,8 @@ type WebhookEvent =
   | "run.failed"
   | "batch.completed"
   | "credits.low"
-  | "drift.detected";
+  | "drift.detected"
+  | "conformance.completed";
 
 // the events an endpoint can subscribe to. mirrors WEBHOOK_EVENTS in the router.
 const EVENTS: { id: WebhookEvent; hint: string }[] = [
@@ -33,6 +34,7 @@ const EVENTS: { id: WebhookEvent; hint: string }[] = [
   { id: "batch.completed", hint: "A batch of runs finished" },
   { id: "credits.low", hint: "Balance dropped below your alert threshold" },
   { id: "drift.detected", hint: "A scheduled check found a regression" },
+  { id: "conformance.completed", hint: "A conformance packet finished" },
 ];
 
 const DEFAULT_EVENTS: WebhookEvent[] = ["run.completed", "run.failed"];

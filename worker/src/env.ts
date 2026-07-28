@@ -15,6 +15,7 @@ const base = createEnv({
     VALIDATOR_URLS: z.string().default("http://localhost:4567"),
     VALIDATOR_MAX_INFLIGHT: portSchema.default("4"),
     CONVERTER_URL: z.url().default("http://localhost:8081"),
+    INFERNO_URL: z.url().default("http://localhost:4568"),
     US_CORE_VERSION: z.string().default("6.1.0"),
     WORKER_CONCURRENCY: portSchema.default("4"),
 

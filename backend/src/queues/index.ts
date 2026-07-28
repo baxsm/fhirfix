@@ -46,7 +46,13 @@ export async function unregisterSchedule(scheduledCheckId: string): Promise<void
 }
 
 export interface WebhookJob {
-  event: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected";
+  event:
+    | "run.completed"
+    | "run.failed"
+    | "batch.completed"
+    | "credits.low"
+    | "drift.detected"
+    | "conformance.completed";
   workspaceId: string;
   data: Record<string, unknown>;
 }

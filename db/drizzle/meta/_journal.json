@@ -57,6 +57,13 @@
       "when": 1785076710783,
       "tag": "0007_organic_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785201258233,
+      "tag": "0008_spicy_gargoyle",
+      "breakpoints": true
     }
   ]
 }

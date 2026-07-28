@@ -10,7 +10,8 @@ export type WebhookEvent =
   | "run.failed"
   | "batch.completed"
   | "credits.low"
-  | "drift.detected";
+  | "drift.detected"
+  | "conformance.completed";
 
 // enabled endpoints in a workspace subscribed to a given event.
 export async function listEndpointsForEvent(db: Db, workspaceId: string, event: WebhookEvent) {

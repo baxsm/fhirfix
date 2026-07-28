@@ -1,6 +1,7 @@
 import { ENGINE_VERSION } from "@shared/engine";
 import { Worker } from "bullmq";
 import { type ApplyJob, executeApply } from "./apply-service";
+import { type ConformanceJob, executeConformancePacket } from "./conformance-service";
 import { env } from "./env";
 import { logger } from "./lib";
 import type { WebhookJob } from "./queues";
@@ -36,6 +37,16 @@ const webhookWorker = new Worker<WebhookJob>(
   { connection, concurrency },
 );
 
+// one at a time: a packet run holds an inferno session for minutes, and inferno
+// rejects a second concurrent run on the same session with a 409
+const conformanceWorker = new Worker<ConformanceJob>(
+  "conformance",
+  async (job) => {
+    await executeConformancePacket(job.data);
+  },
+  { connection, concurrency: 1 },
+);
+
 const scheduleWorker = new Worker<ScheduleJob>(
   "schedule",
   async (job) => {
@@ -65,6 +76,12 @@ webhookWorker.on("failed", (job, err) => {
 webhookWorker.on("error", (err) => {
   logger.error("webhook.error", err.message);
 });
+conformanceWorker.on("failed", (job, err) => {
+  logger.error("conformance.failed", `${job?.data.packetRunId ?? "?"}: ${err.message}`);
+});
+conformanceWorker.on("error", (err) => {
+  logger.error("conformance.error", err.message);
+});
 scheduleWorker.on("failed", (job, err) => {
   logger.error("schedule.failed", `${job?.data.scheduledCheckId ?? "?"}: ${err.message}`);
 });
@@ -82,6 +99,7 @@ async function shutdown() {
     worker.close(),
     applyWorker.close(),
     webhookWorker.close(),
+    conformanceWorker.close(),
     scheduleWorker.close(),
   ]);
   process.exit(0);

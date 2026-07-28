@@ -1,5 +1,5 @@
 import type { Db } from "./client";
-export type WebhookEvent = "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected";
+export type WebhookEvent = "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected" | "conformance.completed";
 export declare function listEndpointsForEvent(db: Db, workspaceId: string, event: WebhookEvent): Promise<{
     id: string;
     url: string;

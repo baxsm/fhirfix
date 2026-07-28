@@ -9,7 +9,13 @@ export const scheduleQueue = new Queue("schedule", { connection });
 export const remediationQueue = new Queue("remediation", { connection });
 
 export interface WebhookJob {
-  event: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected";
+  event:
+    | "run.completed"
+    | "run.failed"
+    | "batch.completed"
+    | "credits.low"
+    | "drift.detected"
+    | "conformance.completed";
   workspaceId: string;
   data: Record<string, unknown>;
 }

@@ -1,6 +1,7 @@
 import { publicProcedure, router } from "../trpc";
 import { accountRouter } from "./account";
 import { billingRouter } from "./billing";
+import { conformanceRouter } from "./conformance";
 import { developersRouter } from "./developers";
 import { mappingsRouter } from "./mappings";
 import { memberRouter } from "./member";
@@ -18,6 +19,7 @@ export const appRouter = router({
   run: runRouter,
   mappings: mappingsRouter,
   monitoring: monitoringRouter,
+  conformance: conformanceRouter,
   billing: billingRouter,
   developers: developersRouter,
 });

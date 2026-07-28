@@ -241,7 +241,7 @@ export declare const apiRequestLog: import("drizzle-orm/pg-core").PgTableWithCol
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type ApiRequestLog = typeof apiRequestLog.$inferSelect;
 export type NewApiRequestLog = typeof apiRequestLog.$inferInsert;

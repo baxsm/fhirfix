@@ -61,6 +61,9 @@ Thumbs.db
 .idea/
 *.swp
 
+# inferno test kits cloned at a pinned tag for the local conformance image
+/.inferno/
+
 # scratch / temp
 tmp/
 temp/

@@ -8,6 +8,7 @@ export declare const idPrefix: {
     readonly invoice: "inv";
     readonly packet: "pkt";
     readonly evidence: "evd";
+    readonly secret: "sec";
     readonly scheduledCheck: "sch";
     readonly driftAlert: "drf";
     readonly webhook: "whk";

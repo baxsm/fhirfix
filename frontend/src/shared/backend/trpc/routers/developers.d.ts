@@ -13,8 +13,8 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined | undefined;
-            userAgent?: string | null | undefined | undefined;
+            ipAddress?: string | null | undefined;
+            userAgent?: string | null | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -24,7 +24,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined | undefined;
+            image?: string | null | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -45,8 +45,8 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -56,7 +56,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -72,7 +72,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 name: string;
                 prefix: string;
-                mode: "test" | "live";
+                mode: "live" | "test";
                 scopes: string[];
                 createdAt: Date;
                 lastUsedAt: Date | null;
@@ -84,13 +84,13 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 name: string;
-                mode: "test" | "live";
-                scopes?: ("validate" | "convert" | "fix" | "runs" | "mappings")[] | undefined;
+                mode: "live" | "test";
+                scopes?: ("convert" | "fix" | "mappings" | "runs" | "validate")[] | undefined;
             };
             output: {
                 id: string;
                 name: string;
-                mode: "test" | "live";
+                mode: "live" | "test";
                 prefix: string;
                 key: string;
             };
@@ -120,8 +120,8 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -131,7 +131,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };
@@ -158,12 +158,12 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 url: string;
-                events: ("run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected")[];
+                events: ("batch.completed" | "conformance.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed")[];
             };
             output: {
                 id: string;
                 url: string;
-                events: ("run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected")[];
+                events: ("batch.completed" | "conformance.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed")[];
                 secret: string;
             };
             meta: object;
@@ -202,7 +202,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
         testPing: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 workspaceId: string;
-                event?: "run.completed" | "run.failed" | "batch.completed" | "credits.low" | "drift.detected" | undefined;
+                event?: "batch.completed" | "conformance.completed" | "credits.low" | "drift.detected" | "run.completed" | "run.failed" | undefined;
             };
             output: {
                 dispatched: boolean;
@@ -224,8 +224,8 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 userId: string;
                 expiresAt: Date;
                 token: string;
-                ipAddress?: string | null | undefined | undefined;
-                userAgent?: string | null | undefined | undefined;
+                ipAddress?: string | null | undefined;
+                userAgent?: string | null | undefined;
                 activeOrganizationId?: string | null | undefined;
             } | null;
             user: {
@@ -235,7 +235,7 @@ export declare const developersRouter: import("@trpc/server").TRPCBuiltRouter<{
                 email: string;
                 emailVerified: boolean;
                 name: string;
-                image?: string | null | undefined | undefined;
+                image?: string | null | undefined;
                 notificationPrefs?: string | null | undefined;
             } | null;
         };

@@ -69,6 +69,62 @@ services:
       retries: 20
       start_period: 30s
 
+  # Inferno Plan-Net test kit for phase-7 conformance packets. Opt-in because the
+  # image is ~2GB and only the conformance feature needs it. Build it first with
+  # scripts/build-inferno.sh, which clones the kit at the pinned tag.
+  inferno:
+    image: fhirfix-inferno-plannet:v0.13.4
+    container_name: fhirfix-inferno
+    profiles: ["conformance"]
+    restart: unless-stopped
+    environment:
+      REDIS_URL: redis://inferno-redis:6379/0
+      APP_ENV: production
+    ports:
+      - "4568:4567"
+    volumes:
+      - fhirfix-infernodata:/opt/inferno/data
+    depends_on:
+      - inferno-redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4567/api/version || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # inferno runs its tests through sidekiq, so the web container alone accepts a
+  # run and then never executes it
+  inferno-worker:
+    image: fhirfix-inferno-plannet:v0.13.4
+    container_name: fhirfix-inferno-worker
+    profiles: ["conformance"]
+    restart: unless-stopped
+    command: ["bundle", "exec", "sidekiq", "-r", "./worker.rb"]
+    environment:
+      REDIS_URL: redis://inferno-redis:6379/0
+      APP_ENV: production
+    volumes:
+      - fhirfix-infernodata:/opt/inferno/data
+    depends_on:
+      - inferno-redis
+
+  inferno-redis:
+    image: redis:7-alpine
+    container_name: fhirfix-inferno-redis
+    profiles: ["conformance"]
+    restart: unless-stopped
+
+  # inferno validates resources against this, separate from the app's validator
+  inferno-validator:
+    image: infernocommunity/inferno-resource-validator
+    container_name: fhirfix-inferno-validator
+    profiles: ["conformance"]
+    restart: unless-stopped
+    environment:
+      SESSION_CACHE_DURATION: -1
+
 volumes:
   fhirfix-pgdata:
   fhirfix-redisdata:
+  fhirfix-infernodata:

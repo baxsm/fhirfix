@@ -12,6 +12,38 @@ export { ValidatorPool } from "./validator-client";
 export type { ValidatorInstance, ValidatorPoolOptions } from "./validator-client";
 export { ConverterClient, hl7RootTemplate } from "./converter-client";
 export type { ConverterOptions, ConverterInputFormat } from "./converter-client";
+export {
+  InfernoClient,
+  INFERNO_RESULTS,
+  flattenRequirementIds,
+  isRunFinished,
+  requiredSuiteInputs,
+} from "./inferno-client";
+export type {
+  InfernoOptions,
+  InfernoResult,
+  InfernoTestRun,
+  InfernoTestResult,
+  InfernoRequirement,
+  InfernoSuite,
+  InfernoInput,
+  InfernoSuiteInput,
+  AuthInfo,
+} from "./inferno-client";
+export {
+  buildCoverageMatrix,
+  diffMatrices,
+  summarizeMatrix,
+  TEST_KITS,
+  automatableKits,
+} from "./conformance";
+export type {
+  MatrixCell,
+  MatrixSummary,
+  RegressionEntry,
+  TestKitDefinition,
+  TestKitId,
+} from "./conformance";
 
 export { detectInput } from "./detect";
 export type { DetectResult } from "./detect";
