@@ -45,7 +45,7 @@ export function PanelTab({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "-mb-px inline-flex cursor-pointer items-center gap-1.5 border-b-2 px-0.5 pb-2 text-sm transition-colors",
+        "-mb-px inline-flex cursor-pointer items-center gap-1.5 border-b-2 px-0.5 pb-2 text-sm transition-colors outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50",
         active
           ? "border-foreground font-medium text-foreground"
           : "border-transparent text-muted-foreground hover:border-border hover:text-foreground",
@@ -88,7 +88,7 @@ export function FilterPill({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "press inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors",
+        "press inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
         active
           ? tone === "danger"
             ? "border-destructive/40 bg-destructive/10 font-medium text-destructive"
@@ -149,7 +149,7 @@ export function ChoiceChip({
       aria-current={active ? "true" : undefined}
       onClick={onClick}
       className={cn(
-        "press cursor-pointer rounded-[6px] px-2 py-1 text-xs transition-colors",
+        "press cursor-pointer rounded-[6px] px-2 py-1 text-xs transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         active
           ? "bg-background font-medium text-foreground shadow-[0_1px_2px_0_oklch(0.145_0_0/0.10)]"
           : "text-muted-foreground hover:text-foreground",
