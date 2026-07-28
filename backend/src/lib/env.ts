@@ -43,6 +43,9 @@ const baseEnv = createEnv({
     POLAR_PRODUCT_PACK_10: z.string().default(""),
     POLAR_PRODUCT_PACK_25: z.string().default(""),
     POLAR_PRODUCT_PACK_100: z.string().default(""),
+    // recurring product for the premium plan. unset means premium cannot be
+    // bought, which is the honest state until the product exists in Polar.
+    POLAR_PRODUCT_PREMIUM: z.string().default(""),
     // absolute url of the frontend, used to build Polar success/return urls.
     APP_URL: z.url().default("http://localhost:3000"),
 

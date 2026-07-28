@@ -1229,6 +1229,12 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                     label: "$10" | "$100" | "$25";
                     cents: 1000 | 2500 | 10000;
                 }[];
+                plan: {
+                    tier: "free" | "premium" | "team";
+                    premiumCents: 49900;
+                    premiumLabel: "$499";
+                    purchasable: boolean;
+                };
             };
             meta: object;
         }>;
@@ -1281,6 +1287,15 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             input: {
                 workspaceId: string;
                 packId: string;
+            };
+            output: {
+                url: string;
+            };
+            meta: object;
+        }>;
+        upgradeToPremium: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                workspaceId: string;
             };
             output: {
                 url: string;

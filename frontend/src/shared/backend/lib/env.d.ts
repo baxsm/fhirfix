@@ -22,6 +22,7 @@ export declare const env: {
     POLAR_PRODUCT_PACK_10: string;
     POLAR_PRODUCT_PACK_25: string;
     POLAR_PRODUCT_PACK_100: string;
+    POLAR_PRODUCT_PREMIUM: string;
     APP_URL: string;
     API_KEY_PEPPER: string;
     WEBHOOK_ENCRYPTION_KEY: string;

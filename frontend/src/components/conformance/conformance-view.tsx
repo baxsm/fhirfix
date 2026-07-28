@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -9,35 +9,12 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatusDot, type StatusTone } from "@/components/ui/status";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useListOrganizations } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { CoverageMatrix } from "./coverage-matrix";
 import { LaunchDialog } from "./launch-dialog";
 import type { MatrixCell, RegressionEntry } from "./types";
-
-const STATUS_TONE: Record<string, StatusTone> = {
-  queued: "pending",
-  running: "pending",
-  completed: "success",
-  failed: "danger",
-  cancelled: "neutral",
-};
-
-const OVERALL_TONE: Record<string, StatusTone> = {
-  pass: "success",
-  fail: "danger",
-  partial: "warning",
-};
 
 // a queued or running packet is still moving, so the list refetches until it settles
 const ACTIVE_POLL_MS = 4000;
@@ -57,6 +34,25 @@ export function ConformanceView({
   const queryClient = useQueryClient();
   const [launchOpen, setLaunchOpen] = useState(false);
   const [openPacket, setOpenPacket] = useState<string | null>(null);
+
+  // the plan gates this whole screen, so it is read here rather than guessed at.
+  const summaryQuery = useQuery({
+    ...trpc.billing.summary.queryOptions({ workspaceId }),
+    enabled: !!workspaceId,
+  });
+  const plan = summaryQuery.data?.plan;
+  // treat an unread plan as premium so the gate never flashes over a paying
+  // workspace while the summary is still loading.
+  const isPremium = plan == null || plan.tier === "premium";
+
+  const upgrade = useMutation(
+    trpc.billing.upgradeToPremium.mutationOptions({
+      onSuccess: ({ url }) => {
+        window.location.href = url;
+      },
+      onError: (e) => toast.error(e.message ?? "Could not start checkout."),
+    }),
+  );
 
   const listQuery = useQuery({
     ...trpc.conformance.list.queryOptions({ workspaceId }),
@@ -119,7 +115,7 @@ export function ConformanceView({
         description={`Run the Da Vinci Inferno test kits against a live endpoint and keep the evidence for ${active?.name ?? "this workspace"}.`}
         actions={
           // the empty state carries the only call to action until a packet exists
-          hasPackets ? (
+          hasPackets && isPremium ? (
             <Button onClick={() => setLaunchOpen(true)} disabled={!workspaceId}>
               New packet
             </Button>
@@ -142,6 +138,29 @@ export function ConformanceView({
         </div>
       ) : listQuery.isPending || !workspaceId ? (
         <Skeleton className="h-64 w-full rounded-xl" />
+      ) : !isPremium ? (
+        // offering "New packet" on a free plan means offering a button that can
+        // only fail. say what the plan costs and let them buy it instead.
+        <div className="rounded-xl border border-border">
+          <EmptyState
+            icon={ShieldCheck}
+            title="Conformance packets are part of Premium"
+            body={`Run the Da Vinci Inferno test kits against a live endpoint and keep a signed, immutable evidence bundle. ${plan?.premiumLabel ?? ""} per month.`}
+            action={
+              plan?.purchasable ? (
+                <Button
+                  size="sm"
+                  disabled={upgrade.isPending}
+                  onClick={() => upgrade.mutate({ workspaceId })}
+                >
+                  {upgrade.isPending
+                    ? "Opening checkout..."
+                    : `Upgrade for ${plan.premiumLabel}/mo`}
+                </Button>
+              ) : undefined
+            }
+          />
+        </div>
       ) : packets.length === 0 ? (
         <div className="rounded-xl border border-border">
           <EmptyState

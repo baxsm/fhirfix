@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Plus, TrendingDown, Wallet, Zap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -88,6 +88,13 @@ export function BillingView({ workspace }: { workspace: string }) {
             description={`Credits spent per day over the last ${USAGE_DAYS} days, by source.`}
           >
             <UsageSection workspaceId={workspaceId} />
+          </SettingsSection>
+
+          <SettingsSection
+            title="Plan"
+            description="Credits cover every run. Premium adds the conformance packet."
+          >
+            <PlanRow workspaceId={workspaceId} plan={summary.data.plan} canManage={canManage} />
           </SettingsSection>
 
           {canManage && (
@@ -218,6 +225,50 @@ function BalanceHero({
         onPurchased={onPurchased}
       />
     </section>
+  );
+}
+
+function PlanRow({
+  workspaceId,
+  plan,
+  canManage,
+}: {
+  workspaceId: string;
+  plan: { tier: string; premiumLabel: string; purchasable: boolean };
+  canManage: boolean;
+}) {
+  const trpc = useTRPC();
+  const isPremium = plan.tier === "premium";
+  const upgrade = useMutation(
+    trpc.billing.upgradeToPremium.mutationOptions({
+      onSuccess: ({ url }) => {
+        window.location.href = url;
+      },
+      onError: (e) => toast.error(e.message ?? "Could not start checkout."),
+    }),
+  );
+
+  return (
+    <div className="flex items-center justify-between gap-4 px-4 py-3.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{isPremium ? "Premium" : "Free"}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {isPremium
+            ? "Conformance packets, audit trail, and priority validator capacity."
+            : "Runs and mapping rules. Conformance packets need Premium."}
+        </p>
+      </div>
+      {!isPremium && canManage && plan.purchasable && (
+        <Button
+          size="sm"
+          className="shrink-0"
+          disabled={upgrade.isPending}
+          onClick={() => upgrade.mutate({ workspaceId })}
+        >
+          {upgrade.isPending ? "Opening checkout..." : `Upgrade for ${plan.premiumLabel}/mo`}
+        </Button>
+      )}
+    </div>
   );
 }
 

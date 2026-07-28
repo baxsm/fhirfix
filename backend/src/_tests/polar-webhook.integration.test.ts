@@ -2,14 +2,31 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { reconcileBalance } from "@shared/db/ledger";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
-import { handleOrderPaid, handleOrderRefunded, polarWebhookRoutes } from "@/routes/polar-webhook";
+import {
+  handleOrderPaid,
+  handleOrderRefunded,
+  handleSubscription,
+  polarWebhookRoutes,
+} from "@/routes/polar-webhook";
 
 const ws = `polar_test_${Date.now()}`;
+const subWs = `polar_sub_${Date.now()}`;
+
+async function tierOf(workspaceId: string): Promise<string | undefined> {
+  const [row] = await db
+    .select({ planTier: schema.workspaceSettings.planTier })
+    .from(schema.workspaceSettings)
+    .where(eq(schema.workspaceSettings.workspaceId, workspaceId))
+    .limit(1);
+  return row?.planTier;
+}
 
 afterAll(async () => {
   await db.delete(schema.creditLedgerEntry).where(eq(schema.creditLedgerEntry.workspaceId, ws));
   await db.delete(schema.invoice).where(eq(schema.invoice.workspaceId, ws));
   await db.delete(schema.billingAccount).where(eq(schema.billingAccount.workspaceId, ws));
+  await db.delete(schema.workspaceSettings).where(eq(schema.workspaceSettings.workspaceId, subWs));
+  await db.delete(schema.auditLogEntry).where(eq(schema.auditLogEntry.workspaceId, subWs));
 });
 
 const order = (id: string, creditsMicro: number, amountCents: number) => ({
@@ -65,6 +82,36 @@ describe("Polar order handling", () => {
   test("a redelivered refund is idempotent (no double reversal)", async () => {
     await handleOrderRefunded(order("ord_1", 25_000_000, 2500));
     expect(await reconcileBalance(db, ws)).toBe(0); // still zero, not negative
+  });
+});
+
+describe("Polar subscription handling", () => {
+  test("an active subscription grants premium, and losing it drops back to free", async () => {
+    await db.insert(schema.workspaceSettings).values({
+      id: `wss_sub_${Date.now()}`,
+      workspaceId: subWs,
+    });
+
+    await handleSubscription({ workspaceId: subWs, active: true });
+    expect(await tierOf(subWs)).toBe("premium");
+
+    await handleSubscription({ workspaceId: subWs, active: false });
+    expect(await tierOf(subWs)).toBe("free");
+  });
+
+  test("a subscription for an unknown workspace changes nothing", async () => {
+    await handleSubscription({ workspaceId: "ws_does_not_exist", active: true });
+    const rows = await db
+      .select()
+      .from(schema.workspaceSettings)
+      .where(eq(schema.workspaceSettings.workspaceId, "ws_does_not_exist"));
+    expect(rows).toHaveLength(0);
+  });
+
+  test("granting premium twice is idempotent", async () => {
+    await handleSubscription({ workspaceId: subWs, active: true });
+    await handleSubscription({ workspaceId: subWs, active: true });
+    expect(await tierOf(subWs)).toBe("premium");
   });
 });
 

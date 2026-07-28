@@ -51,6 +51,28 @@ export async function createCheckout(args: {
   return { url: checkout.url, id: checkout.id };
 }
 
+export function premiumProductId(): string | null {
+  return env.POLAR_PRODUCT_PREMIUM.length > 0 ? env.POLAR_PRODUCT_PREMIUM : null;
+}
+
+// the premium plan is a recurring subscription, so it uses its own checkout with
+// the workspace tagged in metadata - that tag is how the subscription webhook
+// knows which workspace to grant the tier to.
+export async function createPremiumCheckout(args: {
+  productId: string;
+  workspaceId: string;
+  customerExternalId: string;
+}): Promise<{ url: string; id: string }> {
+  const polar = getPolar();
+  const checkout = await polar.checkouts.create({
+    products: [args.productId],
+    successUrl: `${env.APP_URL}/app/${args.workspaceId}/billing?upgraded=1`,
+    externalCustomerId: args.customerExternalId,
+    metadata: { workspaceId: args.workspaceId, plan: "premium" },
+  });
+  return { url: checkout.url, id: checkout.id };
+}
+
 export type OffSessionResult =
   | { ok: true; orderId: string }
   | { ok: false; reason: "no_payment_method" | "declined" | "not_enabled" | "error"; detail: string };
@@ -98,14 +120,43 @@ export type ParsedOrder = {
   customerId: string | null;
 };
 
+export type ParsedSubscription = {
+  workspaceId: string;
+  // true while the plan should be honoured. "canceled" means it will not renew,
+  // but access runs to the end of the paid period, so only revoked/unpaid drop it.
+  active: boolean;
+};
+
 export function parseWebhook(
   rawBody: string,
   headers: Record<string, string>,
 ): {
-  kind: "order.paid" | "order.refunded" | "ignored";
+  kind: "order.paid" | "order.refunded" | "subscription" | "ignored";
   order?: ParsedOrder;
+  subscription?: ParsedSubscription;
 } {
   const event = validateEvent(rawBody, headers, env.POLAR_WEBHOOK_SECRET);
+
+  if (
+    event.type === "subscription.active" ||
+    event.type === "subscription.updated" ||
+    event.type === "subscription.canceled" ||
+    event.type === "subscription.uncanceled" ||
+    event.type === "subscription.revoked" ||
+    event.type === "subscription.past_due"
+  ) {
+    const data = event.data;
+    const meta = (data.metadata ?? {}) as Record<string, unknown>;
+    const workspaceId = typeof meta.workspaceId === "string" ? meta.workspaceId : "";
+    // not one of ours, or not the premium product we gate on.
+    if (!workspaceId || data.productId !== env.POLAR_PRODUCT_PREMIUM) {
+      return { kind: "ignored" };
+    }
+    // trust the status on the payload rather than the event name: `updated` can
+    // carry any status, and a re-sent event must not flip the tier the wrong way.
+    const active = data.status === "active" || data.status === "trialing";
+    return { kind: "subscription", subscription: { workspaceId, active } };
+  }
 
   if (event.type === "order.paid" || event.type === "order.refunded") {
     const data = event.data;

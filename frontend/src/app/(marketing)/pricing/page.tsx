@@ -37,15 +37,17 @@ const TIERS = [
   },
   {
     name: "Premium",
+    price: "$499",
+    period: "per month, plus credits",
     tagline: "For regulated production workloads.",
     features: [
       "Everything in Team",
       "CMS-0057-F conformance packet",
-      "SSO / SAML + audit trail",
-      "BAA + PHI retention controls",
+      "Signed, immutable evidence bundles",
+      "Regression tracking across runs",
       "Priority validator capacity",
     ],
-    cta: "Contact sales",
+    cta: "Start free",
     href: "/sign-up",
     highlight: false,
   },
@@ -83,7 +85,22 @@ export default function PricingPage() {
               </div>
               <p className="text-sm text-muted-foreground">{tier.tagline}</p>
             </div>
-            <ul className="mt-4 flex-1 space-y-2">
+            {/* only premium carries a fixed price. the slot is reserved on every
+                card so the three feature lists still start on one line. */}
+            <div className="mt-4 min-h-[2.75rem]">
+              {"price" in tier && tier.price ? (
+                <>
+                  <span className="text-2xl font-semibold tracking-tight">{tier.price}</span>
+                  <p className="text-xs text-muted-foreground">{tier.period}</p>
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl font-semibold tracking-tight">Pay as you go</span>
+                  <p className="text-xs text-muted-foreground">$0.01 per resource validated</p>
+                </>
+              )}
+            </div>
+            <ul className="mt-5 flex-1 space-y-2">
               {tier.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm">
                   <Check className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />

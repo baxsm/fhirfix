@@ -12,6 +12,9 @@ export const PRICING = {
   ],
   // new workspaces get $5 of credits to try the product.
   trialGrantMicro: 5 * MICRO_PER_DOLLAR,
+  // the premium plan. a recurring subscription, separate from prepaid credits:
+  // runs still spend credits, this unlocks the conformance packet.
+  premium: { cents: 49900, label: "$499" },
 } as const;
 
 export type CreditPack = (typeof PRICING.packs)[number];

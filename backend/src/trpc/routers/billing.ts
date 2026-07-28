@@ -14,7 +14,13 @@ import { hasPermission } from "@/auth/permissions";
 import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { createCheckout, isBillingConfigured, productIdForPack } from "@/lib/polar";
+import {
+  createCheckout,
+  createPremiumCheckout,
+  isBillingConfigured,
+  premiumProductId,
+  productIdForPack,
+} from "@/lib/polar";
 import { rateLimit } from "@/lib/redis";
 import { router, workspaceProcedure } from "../trpc";
 
@@ -38,6 +44,12 @@ export const billingRouter = router({
   summary: workspaceProcedure.query(async ({ ctx }) => {
     const account = await ensureBillingAccount(ctx.db, ctx.workspaceId);
     const balanceMicro = account?.balanceMicroCredits ?? 0;
+
+    const [settings] = await ctx.db
+      .select({ planTier: schema.workspaceSettings.planTier })
+      .from(schema.workspaceSettings)
+      .where(eq(schema.workspaceSettings.workspaceId, ctx.workspaceId))
+      .limit(1);
 
     // burn: sum of debits over the last 30 days -> daily average -> monthly estimate.
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -116,6 +128,14 @@ export const billingRouter = router({
         spentThisCycleCents,
       },
       packs: PRICING.packs.map((p) => ({ id: p.id, label: p.label, cents: p.cents })),
+      plan: {
+        tier: settings?.planTier ?? "free",
+        premiumCents: PRICING.premium.cents,
+        premiumLabel: PRICING.premium.label,
+        // false when no product is configured, so the UI can say so honestly
+        // rather than offering a button that cannot work.
+        purchasable: premiumProductId() != null,
+      },
     };
   }),
 
@@ -251,6 +271,36 @@ export const billingRouter = router({
         targetRef: checkout.id,
         ip: ipFromHeaders(ctx.headers),
         metadata: { packId: pack.id },
+      });
+      return { url: checkout.url };
+    }),
+
+  // premium is a recurring subscription, not a credit pack, so it gets its own
+  // checkout. the tier itself is granted by the subscription webhook, never here.
+  upgradeToPremium: workspaceProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      requireManage(ctx.role);
+      const productId = premiumProductId();
+      if (!isBillingConfigured() || !productId) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "The premium plan is not available yet.",
+        });
+      }
+      const checkout = await createPremiumCheckout({
+        productId,
+        workspaceId: input.workspaceId,
+        customerExternalId: ctx.workspaceId,
+      });
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "billing.checkout_started",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: checkout.id,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { plan: "premium" },
       });
       return { url: checkout.url };
     }),

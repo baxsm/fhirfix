@@ -1,10 +1,16 @@
 import { postLedgerEntry } from "@shared/db/ledger";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { writeAudit } from "@/lib/audit";
 import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
-import { type ParsedOrder, parseWebhook, WebhookVerificationError } from "@/lib/polar";
+import {
+  type ParsedOrder,
+  type ParsedSubscription,
+  parseWebhook,
+  WebhookVerificationError,
+} from "@/lib/polar";
 
 export const polarWebhookRoutes = new Hono();
 
@@ -28,15 +34,15 @@ polarWebhookRoutes.post("/api/polar/webhook", async (c) => {
     return c.json({ error: "webhook error" }, 400);
   }
 
-  if (parsed.kind === "ignored" || !parsed.order) {
-    return c.json({ ok: true, handled: false }, 202);
-  }
-
   try {
-    if (parsed.kind === "order.paid") {
+    if (parsed.kind === "order.paid" && parsed.order) {
       await handleOrderPaid(parsed.order);
-    } else if (parsed.kind === "order.refunded") {
+    } else if (parsed.kind === "order.refunded" && parsed.order) {
       await handleOrderRefunded(parsed.order);
+    } else if (parsed.kind === "subscription" && parsed.subscription) {
+      await handleSubscription(parsed.subscription);
+    } else {
+      return c.json({ ok: true, handled: false }, 202);
     }
   } catch (err) {
     logger.error("polar.webhook", err);
@@ -91,6 +97,31 @@ export async function handleOrderPaid(order: ParsedOrder): Promise<void> {
     "polar.webhook",
     `credited ${order.creditsMicro} micro to ${order.workspaceId} (order ${order.polarOrderId})`,
   );
+}
+
+// the ONLY place plan_tier is written. an active premium subscription grants it,
+// and anything else (revoked, unpaid, past due) drops back to free.
+export async function handleSubscription(sub: ParsedSubscription): Promise<void> {
+  const planTier = sub.active ? "premium" : "free";
+  const updated = await db
+    .update(schema.workspaceSettings)
+    .set({ planTier, updatedAt: new Date() })
+    .where(eq(schema.workspaceSettings.workspaceId, sub.workspaceId))
+    .returning({ workspaceId: schema.workspaceSettings.workspaceId });
+
+  if (updated.length === 0) {
+    logger.warn("polar.webhook", `subscription for unknown workspace ${sub.workspaceId}`);
+    return;
+  }
+
+  await writeAudit({
+    workspaceId: sub.workspaceId,
+    action: "settings.changed",
+    actorType: "system",
+    targetRef: sub.workspaceId,
+    metadata: { planTier, source: "polar.subscription" },
+  });
+  logger.info("polar.webhook", `${sub.workspaceId} -> ${planTier}`);
 }
 
 export async function handleOrderRefunded(order: ParsedOrder): Promise<void> {

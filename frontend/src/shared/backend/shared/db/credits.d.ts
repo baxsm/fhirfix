@@ -19,6 +19,10 @@ export declare const PRICING: {
         readonly creditsMicro: number;
     }];
     readonly trialGrantMicro: number;
+    readonly premium: {
+        readonly cents: 49900;
+        readonly label: "$499";
+    };
 };
 export type CreditPack = (typeof PRICING.packs)[number];
 export declare const PURCHASABLE_CENTS: readonly number[];
