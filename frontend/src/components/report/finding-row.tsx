@@ -47,12 +47,12 @@ export function FindingListRow({
         </p>
         <div className="mt-0.5 flex items-center gap-1.5">
           {finding.fhirpath && (
-            <span className="truncate font-mono text-[10px] text-muted-foreground">
+            <span className="truncate font-mono text-[0.75rem] text-muted-foreground">
               {finding.fhirpath}
             </span>
           )}
           {finding.occurrenceCount > 1 && (
-            <span className="shrink-0 font-mono text-[10px] text-muted-foreground tabular-nums">
+            <span className="shrink-0 font-mono text-[0.75rem] text-muted-foreground tabular-nums">
               ×{finding.occurrenceCount}
             </span>
           )}
@@ -60,7 +60,7 @@ export function FindingListRow({
       </div>
       {/* only the state that wants a human gets a marker in the list */}
       {needsReview && (
-        <span className="mt-0.5 shrink-0 rounded border border-warning/35 bg-warning/[0.06] px-1.5 py-0.5 text-[10px] text-warning">
+        <span className="mt-0.5 shrink-0 rounded border border-warning/35 bg-warning/[0.06] px-1.5 py-0.5 text-[0.75rem] text-warning">
           {STATUS_LABEL[finding.fixStatus]}
         </span>
       )}

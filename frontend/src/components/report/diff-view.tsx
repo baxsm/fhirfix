@@ -124,7 +124,7 @@ function Tokens({
   );
 }
 
-const GUTTER = "select-none pr-3 text-right text-[10px] text-muted-foreground/50 tabular-nums";
+const GUTTER = "select-none pr-3 text-right text-[0.75rem] text-muted-foreground/50 tabular-nums";
 
 // minified json diffs as one giant line against a pretty-printed side, so normalize both first
 function formatJson(text: string): string {
@@ -162,11 +162,11 @@ export function DiffView({
     return (
       <div className="overflow-hidden rounded-md border bg-card raised">
         <div className="border-b bg-muted/30 px-3 py-1.5">
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="font-mono text-[0.6875rem] text-muted-foreground">
             No proposed change to this fragment
           </span>
         </div>
-        <div className="max-h-[420px] overflow-auto font-mono text-[11px] leading-[1.6]">
+        <div className="max-h-[420px] overflow-auto font-mono text-[0.6875rem] leading-[1.6]">
           {formatJson(before)
             .split("\n")
             .map((line, k) => (
@@ -183,7 +183,7 @@ export function DiffView({
   return (
     <div className="overflow-hidden rounded-md border bg-card raised">
       <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-1.5">
-        <span className="font-mono text-[11px] text-muted-foreground">
+        <span className="font-mono text-[0.6875rem] text-muted-foreground">
           {changedCount} changed {changedCount === 1 ? "line" : "lines"}
         </span>
         <ChoiceGroup label="Diff layout">
@@ -246,9 +246,9 @@ function SplitBody({
   afterLabel: string;
 }) {
   return (
-    <div className="grid grid-cols-1 font-mono text-[11px] leading-[1.6] sm:grid-cols-2">
+    <div className="grid grid-cols-1 font-mono text-[0.6875rem] leading-[1.6] sm:grid-cols-2">
       <div className="border-b sm:border-b-0 sm:border-r">
-        <div className="sticky top-0 border-b bg-muted/40 px-3 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <div className="sticky top-0 border-b bg-muted/40 px-3 py-1 text-[0.75rem] uppercase tracking-wide text-muted-foreground">
           {beforeLabel}
         </div>
         {rows.map((c, idx) =>
@@ -260,7 +260,7 @@ function SplitBody({
         )}
       </div>
       <div>
-        <div className="sticky top-0 border-b bg-muted/40 px-3 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <div className="sticky top-0 border-b bg-muted/40 px-3 py-1 text-[0.75rem] uppercase tracking-wide text-muted-foreground">
           {afterLabel}
         </div>
         {rows.map((c, idx) =>
@@ -333,7 +333,7 @@ function SideLine({
 
 function UnifiedBody({ rows }: { rows: Collapsed[] }) {
   return (
-    <div className="font-mono text-[11px] leading-[1.6]">
+    <div className="font-mono text-[0.6875rem] leading-[1.6]">
       {rows.map((c, idx) => {
         if (c.kind === "gap") return <GapRow key={`ug${idx}`} count={c.count} />;
         const r = c.row;
@@ -360,7 +360,7 @@ function UnifiedBody({ rows }: { rows: Collapsed[] }) {
 
 function GapRow({ count }: { count: number }) {
   return (
-    <div className="bg-muted/20 px-3 py-1 text-center text-[10px] text-muted-foreground/60">
+    <div className="bg-muted/20 px-3 py-1 text-center text-[0.75rem] text-muted-foreground/60">
       {count} unchanged {count === 1 ? "line" : "lines"}
     </div>
   );

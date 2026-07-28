@@ -61,7 +61,7 @@ function ScoreDelta({ before, after }: { before: number | null; after: number | 
       >
         {after ?? "—"}
       </span>
-      {improved && <span className="font-mono text-[11px] tabular-nums text-success">+{gain}</span>}
+      {improved && <span className="font-mono text-[0.6875rem] tabular-nums text-success">+{gain}</span>}
     </div>
   );
 }
@@ -309,16 +309,17 @@ export function ReportView({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              {/* the run id is already the breadcrumb's last crumb, so it is a quiet label here rather than */}
-              <h1 className="truncate font-mono text-sm">{run.id}</h1>
-              <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
-                {run.inputType}
+              <h1 className="truncate text-lg font-semibold tracking-tight">
+                {run.inputType.replace(/_/g, " ").toUpperCase()} check
+              </h1>
+              <span className="shrink-0 font-mono text-[0.6875rem] text-muted-foreground/60">
+                {run.id.slice(-8)}
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {run.resourceCount} {run.resourceCount === 1 ? "resource" : "resources"} scanned ·{" "}
-              {findings.length} {findings.length === 1 ? "finding" : "findings"}
-              {applied > 0 && <span className="text-success"> · {applied} auto-fixed</span>}
+              {findings.length === 0
+                ? `No findings across ${run.resourceCount} ${run.resourceCount === 1 ? "resource" : "resources"}.`
+                : `${findings.length} ${findings.length === 1 ? "finding" : "findings"} across ${run.resourceCount} ${run.resourceCount === 1 ? "resource" : "resources"}${applied > 0 ? `, ${applied} fixed automatically` : ""}.`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -349,17 +350,19 @@ export function ReportView({
 
         {/* filters and score share one rule-separated band instead of the score floating in its own */}
         <div className="flex flex-wrap items-center gap-2 border-y py-2.5">
-          {(["error", "warning", "info"] as Severity[]).map((s) => (
-            <SeverityChip
-              key={s}
-              severity={s}
-              count={counts[s]}
-              active={facets.severities.has(s)}
-              onClick={() => toggleChip(s)}
-            />
-          ))}
+          {(["error", "warning", "info"] as Severity[])
+            .filter((s) => counts[s] > 0)
+            .map((s) => (
+              <SeverityChip
+                key={s}
+                severity={s}
+                count={counts[s]}
+                active={facets.severities.has(s)}
+                onClick={() => toggleChip(s)}
+              />
+            ))}
           <div className="ml-auto flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+            <span className="font-mono text-[0.75rem] uppercase tracking-wide text-muted-foreground">
               Score
             </span>
             <ScoreDelta before={run.conformanceScoreBefore} after={run.conformanceScoreAfter} />
@@ -461,7 +464,7 @@ function FailedRun({ run, workspace }: { run: RunData["run"]; workspace?: string
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="truncate font-mono text-sm">{run.id}</h1>
-            <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+            <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 font-mono text-[0.75rem] uppercase text-muted-foreground">
               {run.inputType}
             </span>
           </div>

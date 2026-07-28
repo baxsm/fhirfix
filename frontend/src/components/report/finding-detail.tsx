@@ -72,7 +72,7 @@ export function FindingDetail({
         <Icon className={cn("mt-0.5 size-4 shrink-0", SEVERITY_COLOR[finding.severity])} />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium leading-snug">{finding.plainMessage}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[0.6875rem]">
             {finding.fhirpath && (
               <span className="font-mono text-muted-foreground">{finding.fhirpath}</span>
             )}
@@ -103,7 +103,7 @@ export function FindingDetail({
         )}
 
         {/* solid tokens only - this block used to nest text-muted-foreground/80 inside an /80 parent */}
-        <div className="space-y-2 rounded-md border bg-muted px-3 py-2.5 text-[11px] select-none">
+        <div className="space-y-2 rounded-md border bg-muted px-3 py-2.5 text-[0.6875rem] select-none">
           <p className="font-medium text-foreground">Why we flagged this</p>
           <dl className="space-y-1.5">
             <div className="flex gap-2">

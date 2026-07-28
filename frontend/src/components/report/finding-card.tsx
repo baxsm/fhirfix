@@ -108,12 +108,12 @@ export function FindingCard({
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium text-sm">{finding.plainMessage}</span>
               {finding.occurrenceCount > 1 && (
-                <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground tabular-nums">
+                <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.75rem] text-muted-foreground tabular-nums">
                   ×{finding.occurrenceCount}
                 </span>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-[0.6875rem]">
               {finding.fhirpath && (
                 <span className="font-mono text-muted-foreground">{finding.fhirpath}</span>
               )}
@@ -145,11 +145,11 @@ export function FindingCard({
             )}
 
             <details className="group">
-              <summary className="cursor-pointer text-[11px] text-muted-foreground hover:text-foreground">
+              <summary className="cursor-pointer text-[0.6875rem] text-muted-foreground hover:text-foreground">
                 Why we flagged this
               </summary>
               {/* solid tokens only: stacked opacities here measured 1.0:1. */}
-              <div className="mt-2 space-y-1.5 rounded-md border bg-muted px-3 py-2 text-[11px]">
+              <div className="mt-2 space-y-1.5 rounded-md border bg-muted px-3 py-2 text-[0.6875rem]">
                 <p>
                   <span className="text-muted-foreground">Rule:</span>{" "}
                   <span className="font-mono text-foreground">{finding.ruleSource}</span>

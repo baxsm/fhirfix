@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Activity, ArrowRight, FileScan, Filter } from "lucide-react";
+import { Activity, ArrowRight, Braces, FileScan, Filter } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -175,11 +175,22 @@ export function RunsView({
                         className="row-interactive group cursor-pointer"
                       >
                         <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-mono text-xs">{r.id}</span>
-                            <span className="font-mono text-[0.75rem] uppercase text-muted-foreground">
-                              {r.inputType}
+                          <div className="flex items-center gap-2.5">
+                            <span className="grid size-7 shrink-0 place-items-center rounded-md bg-muted text-muted-foreground">
+                              {r.inputType.toLowerCase().includes("json") ? (
+                                <Braces className="size-3.5" />
+                              ) : (
+                                <FileScan className="size-3.5" />
+                              )}
                             </span>
+                            <div className="flex min-w-0 flex-col gap-0.5">
+                              <span className="text-[13px] font-medium">
+                                {r.inputType.replace(/_/g, " ").toUpperCase()}
+                              </span>
+                              <span className="font-mono text-[0.6875rem] text-muted-foreground/60">
+                                {r.id.slice(-8)}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -197,7 +208,7 @@ export function RunsView({
                               {r.findingsTotal}
                               {r.findingsAutoFixable > 0 && (
                                 <span className="ml-1 text-muted-foreground">
-                                  · {r.findingsAutoFixable} auto
+                                  ({r.findingsAutoFixable} auto-fixed)
                                 </span>
                               )}
                             </>

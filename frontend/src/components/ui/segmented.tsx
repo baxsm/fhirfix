@@ -101,7 +101,7 @@ export function FilterPill({
       {count != null && (
         <span
           className={cn(
-            "rounded font-mono text-[11px] tabular-nums",
+            "rounded font-mono text-[0.6875rem] tabular-nums",
             active ? "text-foreground/70" : "text-muted-foreground/70",
           )}
         >
