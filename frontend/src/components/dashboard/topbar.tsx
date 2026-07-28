@@ -5,17 +5,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
+import type { WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
+import { MobileNav } from "./mobile-nav";
 import { breadcrumbs } from "./nav-items";
 import { UserMenu } from "./user-menu";
 
 type Props = {
   workspace: string;
   workspaceName: string;
+  role: WorkspaceRole;
   user: { name: string; email: string };
 };
 
-export function Topbar({ workspace, workspaceName, user }: Props) {
+export function Topbar({ workspace, workspaceName, role, user }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -28,6 +31,7 @@ export function Topbar({ workspace, workspaceName, user }: Props) {
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-canvas/85 px-3 backdrop-blur-md sm:px-4">
+      <MobileNav workspace={workspace} role={role} />
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-sm">
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;

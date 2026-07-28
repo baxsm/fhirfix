@@ -59,6 +59,7 @@ export function DashboardShell({
         <Topbar
           workspace={workspace}
           workspaceName={active?.name ?? slugToName(workspace)}
+          role={role}
           user={{
             name: session?.user.name ?? "",
             email: session?.user.email ?? "",
