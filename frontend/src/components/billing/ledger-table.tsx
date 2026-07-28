@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PendingRows } from "@/components/ui/pending-rows";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 
@@ -50,7 +50,6 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
     placeholderData: keepPreviousData,
   });
 
-  if (query.isPending) return <Skeleton className="h-40 w-full" />;
   if (query.isError)
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-center">
@@ -60,15 +59,16 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
         </Button>
       </div>
     );
-  if (query.data.length === 0 && page === 0)
+  if (!query.isPending && query.data.length === 0 && page === 0)
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
         No credit activity yet. Grants, purchases, and run debits will appear here.
       </p>
     );
 
-  const hasMore = query.data.length > PAGE_SIZE;
-  const rows = hasMore ? query.data.slice(0, PAGE_SIZE) : query.data;
+  const entries = query.data ?? [];
+  const hasMore = entries.length > PAGE_SIZE;
+  const rows = hasMore ? entries.slice(0, PAGE_SIZE) : entries;
 
   return (
     <div>
@@ -82,39 +82,43 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
               <th className="px-4 py-2 text-right font-medium">When</th>
             </tr>
           </thead>
-          <tbody key={page} className="enter-stagger">
-            {rows.map((r) => {
-              const isCredit = r.amountDollars >= 0;
-              const type = r.type as LedgerType;
-              return (
-                <tr key={r.id} className="border-b last:border-0">
-                  <td className="px-4 py-2.5">
-                    <div className="flex min-w-0 flex-col">
-                      <span className="font-medium">{TYPE_LABEL[type]}</span>
-                      <span className="truncate font-mono text-[11px] text-muted-foreground">
-                        {detailLine(type, r.description)}
-                      </span>
-                    </div>
-                  </td>
-                  {/* money in is emerald, money out is plain ink */}
-                  <td
-                    className={cn(
-                      "px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap",
-                      isCredit ? "text-success" : "text-foreground",
-                    )}
-                  >
-                    {isCredit ? "+" : "-"}${Math.abs(r.amountDollars).toFixed(2)}
-                  </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap text-muted-foreground">
-                    ${r.balanceAfterDollars.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-2.5 text-right text-xs whitespace-nowrap text-muted-foreground">
-                    {fmtDate(r.createdAt)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+          {query.isPending ? (
+            <PendingRows columns={4} />
+          ) : (
+            <tbody key={page} className="enter-stagger">
+              {rows.map((r) => {
+                const isCredit = r.amountDollars >= 0;
+                const type = r.type as LedgerType;
+                return (
+                  <tr key={r.id} className="border-b last:border-0">
+                    <td className="px-4 py-2.5">
+                      <div className="flex min-w-0 flex-col">
+                        <span className="font-medium">{TYPE_LABEL[type]}</span>
+                        <span className="truncate font-mono text-[11px] text-muted-foreground">
+                          {detailLine(type, r.description)}
+                        </span>
+                      </div>
+                    </td>
+                    {/* money in is emerald, money out is plain ink */}
+                    <td
+                      className={cn(
+                        "px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap",
+                        isCredit ? "text-success" : "text-foreground",
+                      )}
+                    >
+                      {isCredit ? "+" : "-"}${Math.abs(r.amountDollars).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono text-xs tabular-nums whitespace-nowrap text-muted-foreground">
+                      ${r.balanceAfterDollars.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right text-xs whitespace-nowrap text-muted-foreground">
+                      {fmtDate(r.createdAt)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          )}
         </table>
       </div>
 

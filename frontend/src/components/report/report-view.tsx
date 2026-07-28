@@ -590,7 +590,7 @@ function TerminalState({
 }) {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-md border bg-card px-6 py-12 text-center raised">
-      <Icon className={cn("size-8", tone === "error" ? "text-red-400" : "text-emerald-400")} />
+      <Icon className={cn("size-8", tone === "error" ? "text-destructive" : "text-success")} />
       <h2 className="font-medium">{title}</h2>
       <p className="text-sm text-muted-foreground">{body}</p>
       {action}
@@ -600,8 +600,8 @@ function TerminalState({
 
 function AllClear({ resourceCount }: { resourceCount: number }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-md border border-emerald-500/20 bg-emerald-500/5 px-6 py-14 text-center raised">
-      <CheckCircle2 className="size-9 text-emerald-400" />
+    <div className="flex flex-col items-center gap-3 rounded-md border border-success/20 bg-success/5 px-6 py-14 text-center raised">
+      <CheckCircle2 className="size-9 text-success" />
       <h2 className="font-medium">Conformant</h2>
       <p className="max-w-sm text-sm text-muted-foreground">
         {resourceCount} {resourceCount === 1 ? "resource was" : "resources were"} scanned against US

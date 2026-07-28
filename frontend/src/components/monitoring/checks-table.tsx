@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PendingRows } from "@/components/ui/pending-rows";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusDot } from "@/components/ui/status";
 import { Switch } from "@/components/ui/switch";
@@ -88,14 +89,11 @@ export function ChecksTable({
       <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <ListError onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <div className="p-4">
-            <Skeleton className="h-40 w-full" />
-          </div>
-        ) : rows.length === 0 ? (
+        ) : !query.isPending && rows.length === 0 ? (
           <ChecksEmpty canManage={canManage} onCreate={() => setCreateOpen(true)} />
         ) : (
           <div className="overflow-x-auto">
+            {/* the header is static, so it stays mounted while rows load */}
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-muted-foreground">
@@ -107,81 +105,85 @@ export function ChecksTable({
                   <th className="w-8 px-4 py-2" />
                 </tr>
               </thead>
-              <tbody className="enter-stagger">
-                {rows.map((row) => (
-                  <tr key={row.id} className="border-b last:border-0">
-                    <td className="px-4 py-3">
-                      <p className="font-medium">{row.name}</p>
-                      {row.baselineConfig?.minPassRate != null && (
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">
-                          Alerts below {row.baselineConfig.minPassRate}%
+              {query.isPending ? (
+                <PendingRows columns={6} />
+              ) : (
+                <tbody className="enter-stagger">
+                  {rows.map((row) => (
+                    <tr key={row.id} className="border-b last:border-0">
+                      <td className="px-4 py-3">
+                        <p className="font-medium">{row.name}</p>
+                        {row.baselineConfig?.minPassRate != null && (
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
+                            Alerts below {row.baselineConfig.minPassRate}%
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.scheduleLabel}</td>
+                      <td className="max-w-[280px] px-4 py-3">
+                        <p className="text-xs text-muted-foreground">
+                          {TARGET_LABELS[row.targetType]}
                         </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.scheduleLabel}</td>
-                    <td className="max-w-[280px] px-4 py-3">
-                      <p className="text-xs text-muted-foreground">
-                        {TARGET_LABELS[row.targetType]}
-                      </p>
-                      <code className="block truncate font-mono text-xs" title={row.targetRef}>
-                        {row.targetRef}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3">
-                      <LastRun row={row} workspace={workspace} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Switch
-                        checked={row.enabled}
-                        disabled={!canManage || busy}
-                        aria-label={`Run ${row.name} on schedule`}
-                        onCheckedChange={(enabled) =>
-                          toggle.mutate({ workspaceId, id: row.id, enabled })
-                        }
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {canManage && (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={busy}
-                            aria-label={`Run ${row.name} now`}
-                            onClick={() => runNow.mutate({ workspaceId, id: row.id })}
-                          >
-                            <Play />
-                            Run now
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                disabled={busy}
-                                aria-label={`Actions for ${row.name}`}
-                              >
-                                <MoreHorizontal />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onSelect={() => setEditTarget(row)}>
-                                Edit check
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                variant="destructive"
-                                onSelect={() => remove.mutate({ workspaceId, id: row.id })}
-                              >
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                        <code className="block truncate font-mono text-xs" title={row.targetRef}>
+                          {row.targetRef}
+                        </code>
+                      </td>
+                      <td className="px-4 py-3">
+                        <LastRun row={row} workspace={workspace} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <Switch
+                          checked={row.enabled}
+                          disabled={!canManage || busy}
+                          aria-label={`Run ${row.name} on schedule`}
+                          onCheckedChange={(enabled) =>
+                            toggle.mutate({ workspaceId, id: row.id, enabled })
+                          }
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {canManage && (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={busy}
+                              aria-label={`Run ${row.name} now`}
+                              onClick={() => runNow.mutate({ workspaceId, id: row.id })}
+                            >
+                              <Play />
+                              Run now
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  disabled={busy}
+                                  aria-label={`Actions for ${row.name}`}
+                                >
+                                  <MoreHorizontal />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onSelect={() => setEditTarget(row)}>
+                                  Edit check
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  variant="destructive"
+                                  onSelect={() => remove.mutate({ workspaceId, id: row.id })}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              )}
             </table>
           </div>
         )}

@@ -3,14 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PendingRows } from "@/components/ui/pending-rows";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 
 type InvoiceStatus = "draft" | "open" | "paid" | "void";
 
 const STATUS_TONE: Record<InvoiceStatus, string> = {
-  paid: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+  paid: "border-success/30 bg-success/10 text-success",
   open: "border-sky-500/30 bg-sky-500/10 text-sky-400",
   draft: "border-muted bg-muted/40 text-muted-foreground",
   void: "border-muted bg-muted/40 text-muted-foreground line-through",
@@ -31,7 +31,6 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
     enabled: !!workspaceId,
   });
 
-  if (query.isPending) return <Skeleton className="h-24 w-full" />;
   if (query.isError)
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-center">
@@ -46,7 +45,7 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
         </Button>
       </div>
     );
-  if (query.data.length === 0)
+  if (!query.isPending && query.data.length === 0)
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
         No purchases yet. Buy credits and your invoices will show up here.
@@ -65,30 +64,34 @@ export function InvoicesTable({ workspaceId }: { workspaceId: string }) {
             <th className="px-5 py-2 text-right font-medium">Date</th>
           </tr>
         </thead>
-        <tbody className="enter-stagger">
-          {query.data.map((inv) => (
-            <tr key={inv.id} className="border-b last:border-0">
-              <td className="px-5 py-2.5 font-mono text-xs">{inv.id}</td>
-              <td className="px-5 py-2.5">
-                <Badge
-                  variant="outline"
-                  className={cn("capitalize", STATUS_TONE[inv.status as InvoiceStatus])}
-                >
-                  {inv.status}
-                </Badge>
-              </td>
-              <td className="px-5 py-2.5 text-right font-mono text-xs tabular-nums">
-                ${(inv.creditsPurchasedMicro / 1_000_000).toFixed(2)}
-              </td>
-              <td className="px-5 py-2.5 text-right font-mono text-xs tabular-nums">
-                ${(inv.amountCents / 100).toFixed(2)}
-              </td>
-              <td className="px-5 py-2.5 text-right text-xs text-muted-foreground">
-                {fmtDate(inv.issuedAt)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        {query.isPending ? (
+          <PendingRows columns={5} />
+        ) : (
+          <tbody className="enter-stagger">
+            {(query.data ?? []).map((inv) => (
+              <tr key={inv.id} className="border-b last:border-0">
+                <td className="px-5 py-2.5 font-mono text-xs">{inv.id}</td>
+                <td className="px-5 py-2.5">
+                  <Badge
+                    variant="outline"
+                    className={cn("capitalize", STATUS_TONE[inv.status as InvoiceStatus])}
+                  >
+                    {inv.status}
+                  </Badge>
+                </td>
+                <td className="px-5 py-2.5 text-right font-mono text-xs tabular-nums">
+                  ${(inv.creditsPurchasedMicro / 1_000_000).toFixed(2)}
+                </td>
+                <td className="px-5 py-2.5 text-right font-mono text-xs tabular-nums">
+                  ${(inv.amountCents / 100).toFixed(2)}
+                </td>
+                <td className="px-5 py-2.5 text-right text-xs text-muted-foreground">
+                  {fmtDate(inv.issuedAt)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        )}
       </table>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PendingRows } from "@/components/ui/pending-rows";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
 import { CreateKeyDialog } from "./create-key-dialog";
@@ -47,7 +48,7 @@ export function ApiKeysSection({
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<ApiKey | null>(null);
 
-  if (query.isPending) return <Skeleton className="h-32 w-full" />;
+  if (query.isPending) return <KeysTable keys={[]} canManage={false} onRevoke={() => {}} pending />;
   if (query.isError) {
     return (
       <div className="flex flex-col items-center gap-2 py-10 text-center">
@@ -104,10 +105,12 @@ function KeysTable({
   keys,
   canManage,
   onRevoke,
+  pending = false,
 }: {
   keys: ApiKey[];
   canManage: boolean;
   onRevoke: (k: ApiKey) => void;
+  pending?: boolean;
 }) {
   return (
     <div className="-mx-5 overflow-x-auto">
@@ -122,82 +125,90 @@ function KeysTable({
             <th className="w-8 px-5 py-2" />
           </tr>
         </thead>
-        <tbody className="enter-stagger">
-          {keys.map((k) => {
-            const revoked = !!k.revokedAt;
-            return (
-              <tr key={k.id} className="border-b last:border-0">
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={revoked ? "text-muted-foreground line-through" : "font-medium"}
-                    >
-                      {k.name}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={
-                        k.mode === "live"
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                          : "border-muted bg-muted/40 text-muted-foreground"
-                      }
-                    >
-                      {k.mode}
-                    </Badge>
-                  </div>
-                </td>
-                <td className="px-5 py-3">
-                  <code className="font-mono text-xs text-muted-foreground">
-                    {k.prefix}
-                    <span className="text-muted-foreground/50">••••••••</span>
-                  </code>
-                </td>
-                <td className="px-5 py-3">
-                  <div className="flex flex-wrap gap-1">
-                    {k.scopes.map((s) => (
+        {pending ? (
+          <PendingRows columns={6} />
+        ) : (
+          <tbody className="enter-stagger">
+            {keys.map((k) => {
+              const revoked = !!k.revokedAt;
+              return (
+                <tr key={k.id} className="border-b last:border-0">
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
                       <span
-                        key={s}
-                        className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                        className={revoked ? "text-muted-foreground line-through" : "font-medium"}
                       >
-                        {s}
+                        {k.name}
                       </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-5 py-3">
-                  {revoked ? (
-                    <span className="text-xs text-muted-foreground">Revoked</span>
-                  ) : (
-                    <span
-                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                      title={k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : "Never used"}
-                    >
-                      <FreshnessDot lastUsedAt={k.lastUsedAt} />
-                      {timeAgo(k.lastUsedAt)}
-                    </span>
-                  )}
-                </td>
-                <td className="px-5 py-3 text-xs text-muted-foreground">{fmtDate(k.createdAt)}</td>
-                <td className="px-5 py-3 text-right">
-                  {canManage && !revoked && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-sm" aria-label="Key actions">
-                          <MoreHorizontal />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem variant="destructive" onSelect={() => onRevoke(k)}>
-                          Revoke key
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
+                      <Badge
+                        variant="outline"
+                        className={
+                          k.mode === "live"
+                            ? "border-success/30 bg-success/10 text-success"
+                            : "border-muted bg-muted/40 text-muted-foreground"
+                        }
+                      >
+                        {k.mode}
+                      </Badge>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    <code className="font-mono text-xs text-muted-foreground">
+                      {k.prefix}
+                      <span className="text-muted-foreground/50">••••••••</span>
+                    </code>
+                  </td>
+                  <td className="px-5 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {k.scopes.map((s) => (
+                        <span
+                          key={s}
+                          className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    {revoked ? (
+                      <span className="text-xs text-muted-foreground">Revoked</span>
+                    ) : (
+                      <span
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        title={
+                          k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : "Never used"
+                        }
+                      >
+                        <FreshnessDot lastUsedAt={k.lastUsedAt} />
+                        {timeAgo(k.lastUsedAt)}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3 text-xs text-muted-foreground">
+                    {fmtDate(k.createdAt)}
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    {canManage && !revoked && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon-sm" aria-label="Key actions">
+                            <MoreHorizontal />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem variant="destructive" onSelect={() => onRevoke(k)}>
+                            Revoke key
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        )}
       </table>
     </div>
   );

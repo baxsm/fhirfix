@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { PendingRows } from "@/components/ui/pending-rows";
 import { PanelTab, PanelTabs } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
@@ -177,11 +178,7 @@ export function MappingsTable({
       <div className="raised overflow-hidden rounded-md border bg-card">
         {query.isError ? (
           <ListError onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <div className="p-4">
-            <Skeleton className="h-40 w-full" />
-          </div>
-        ) : rows.length === 0 ? (
+        ) : !query.isPending && rows.length === 0 ? (
           <EmptyState
             status={status}
             searching={!!search.trim()}
@@ -190,6 +187,7 @@ export function MappingsTable({
           />
         ) : (
           <div className="overflow-x-auto">
+            {/* the header is static, so it stays mounted while rows load or the tab changes */}
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-xs text-muted-foreground">
@@ -201,86 +199,90 @@ export function MappingsTable({
                   <th className="w-8 px-4 py-2" />
                 </tr>
               </thead>
-              <tbody key={`${status}-${search}`} className="enter-stagger">
-                {rows.map((m) => (
-                  <tr key={m.id} className="border-b last:border-0">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <code className="font-mono text-xs">{m.sourceValue}</code>
-                        {m.status === "suggested" && m.confidence != null && (
-                          <Badge
-                            variant="outline"
-                            className="border-amber-500/30 bg-amber-500/10 text-[10px] text-amber-400"
-                          >
-                            {m.confidence}% confident
-                          </Badge>
-                        )}
-                      </div>
-                      {m.createdBy === "system" && (
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">Auto-learned</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <code className="break-all font-mono text-muted-foreground text-xs">
-                        {m.targetValue}
-                      </code>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs text-muted-foreground">{TYPE_LABELS[m.type]}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {m.scope === "source_system" ? (
-                        <span
-                          className="text-xs text-muted-foreground"
-                          title={`Only applies to ${m.sourceSystem}`}
-                        >
-                          {m.sourceSystem}
-                        </span>
-                      ) : overriddenBy[m.id] ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-muted-foreground">Workspace</span>
-                          <span
-                            className="text-[11px] text-amber-600"
-                            title={overriddenBy[m.id]
-                              ?.map((w) => `${w.sourceSystem} uses ${w.targetValue}`)
-                              .join("\n")}
-                          >
-                            Overridden on{" "}
-                            {overriddenBy[m.id]?.map((w) => w.sourceSystem).join(", ")}
-                          </span>
+              {query.isPending ? (
+                <PendingRows columns={6} />
+              ) : (
+                <tbody key={`${status}-${search}`} className="enter-stagger">
+                  {rows.map((m) => (
+                    <tr key={m.id} className="border-b last:border-0">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <code className="font-mono text-xs">{m.sourceValue}</code>
+                          {m.status === "suggested" && m.confidence != null && (
+                            <Badge
+                              variant="outline"
+                              className="border-warning/30 bg-warning/10 text-[10px] text-warning"
+                            >
+                              {m.confidence}% confident
+                            </Badge>
+                          )}
                         </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Workspace</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setHistoryTarget(m)}
-                        className="cursor-pointer text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-                        title="View version history"
-                      >
-                        v{m.version}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <RowActions
-                        row={m}
-                        busy={busy}
-                        canEdit={canEdit}
-                        canApprove={canApprove}
-                        canDeprecate={canDeprecate}
-                        onApprove={() => approve.mutate({ workspaceId, mappingId: m.id })}
-                        onReject={() => reject.mutate({ workspaceId, mappingId: m.id })}
-                        onDeprecate={() => deprecate.mutate({ workspaceId, mappingId: m.id })}
-                        onReactivate={() => reactivate.mutate({ workspaceId, mappingId: m.id })}
-                        onEdit={() => setEditTarget(m)}
-                        onHistory={() => setHistoryTarget(m)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                        {m.createdBy === "system" && (
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">Auto-learned</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <code className="break-all font-mono text-muted-foreground text-xs">
+                          {m.targetValue}
+                        </code>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs text-muted-foreground">{TYPE_LABELS[m.type]}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {m.scope === "source_system" ? (
+                          <span
+                            className="text-xs text-muted-foreground"
+                            title={`Only applies to ${m.sourceSystem}`}
+                          >
+                            {m.sourceSystem}
+                          </span>
+                        ) : overriddenBy[m.id] ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-xs text-muted-foreground">Workspace</span>
+                            <span
+                              className="text-[11px] text-amber-600"
+                              title={overriddenBy[m.id]
+                                ?.map((w) => `${w.sourceSystem} uses ${w.targetValue}`)
+                                .join("\n")}
+                            >
+                              Overridden on{" "}
+                              {overriddenBy[m.id]?.map((w) => w.sourceSystem).join(", ")}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Workspace</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => setHistoryTarget(m)}
+                          className="cursor-pointer text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                          title="View version history"
+                        >
+                          v{m.version}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <RowActions
+                          row={m}
+                          busy={busy}
+                          canEdit={canEdit}
+                          canApprove={canApprove}
+                          canDeprecate={canDeprecate}
+                          onApprove={() => approve.mutate({ workspaceId, mappingId: m.id })}
+                          onReject={() => reject.mutate({ workspaceId, mappingId: m.id })}
+                          onDeprecate={() => deprecate.mutate({ workspaceId, mappingId: m.id })}
+                          onReactivate={() => reactivate.mutate({ workspaceId, mappingId: m.id })}
+                          onEdit={() => setEditTarget(m)}
+                          onHistory={() => setHistoryTarget(m)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              )}
             </table>
           </div>
         )}

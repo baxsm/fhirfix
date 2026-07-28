@@ -261,7 +261,7 @@ function BillingSkeleton() {
 
 function SectionError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="raised flex flex-col items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-6 py-16 text-center">
+    <div className="raised flex flex-col items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-6 py-16 text-center">
       <CreditCard className="size-8 text-muted-foreground" />
       <h2 className="font-medium">Could not load billing</h2>
       <p className="text-sm text-muted-foreground">Check your connection and try again.</p>

@@ -174,7 +174,7 @@ function EndpointRow({
               Last delivery{" "}
               <span
                 className={
-                  isDeliveryOk(endpoint.lastDeliveryStatus) ? "text-emerald-400" : "text-red-400"
+                  isDeliveryOk(endpoint.lastDeliveryStatus) ? "text-success" : "text-destructive"
                 }
               >
                 {endpoint.lastDeliveryStatus ?? "unknown"}

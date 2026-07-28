@@ -6,8 +6,7 @@ export function FreshnessDot({ lastUsedAt }: { lastUsedAt: string | Date | null 
   }
   const ms = Date.now() - new Date(lastUsedAt).getTime();
   const day = 24 * 60 * 60 * 1000;
-  const tone =
-    ms < day ? "bg-emerald-500" : ms < 30 * day ? "bg-warning" : "bg-muted-foreground/40";
+  const tone = ms < day ? "bg-success" : ms < 30 * day ? "bg-warning" : "bg-muted-foreground/40";
   return <span className={cn("inline-block size-1.5 rounded-full", tone)} />;
 }
 

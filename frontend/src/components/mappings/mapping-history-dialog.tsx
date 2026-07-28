@@ -74,7 +74,7 @@ export function MappingHistoryDialog({
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">v{v.version}</span>
                       {current && (
-                        <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-emerald-400">
+                        <span className="rounded border border-success/30 bg-success/10 px-1.5 py-0.5 text-[10px] text-success">
                           current
                         </span>
                       )}

@@ -124,7 +124,7 @@ export function ShareDialog({
               </span>
               <Button size="sm" variant="ghost" onClick={() => copy(activeShare.token)}>
                 {copied ? (
-                  <Check className="size-3.5 text-emerald-400" />
+                  <Check className="size-3.5 text-success" />
                 ) : (
                   <Copy className="size-3.5" />
                 )}
@@ -150,8 +150,8 @@ export function ShareDialog({
           </div>
         ) : phiPrompt ? (
           <div className="space-y-3">
-            <div className="flex gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
-              <ShieldAlert className="mt-0.5 size-4 shrink-0 text-amber-400" />
+            <div className="flex gap-2 rounded-md border border-warning/30 bg-warning/5 p-3">
+              <ShieldAlert className="mt-0.5 size-4 shrink-0 text-warning" />
               <p className="text-sm text-muted-foreground">
                 This report contains patient identifiers. A public link would expose them. Share a
                 redacted copy instead, with names, contacts, and identifier values removed.
