@@ -94,7 +94,7 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
                     <td className="px-4 py-2.5">
                       <div className="flex min-w-0 flex-col">
                         <span className="font-medium">{TYPE_LABEL[type]}</span>
-                        <span className="truncate font-mono text-[11px] text-muted-foreground">
+                        <span className="truncate font-mono text-[0.6875rem] text-muted-foreground">
                           {detailLine(type, r.description)}
                         </span>
                       </div>
@@ -124,7 +124,7 @@ export function LedgerTable({ workspaceId }: { workspaceId: string }) {
 
       {(hasMore || page > 0) && (
         <div className="flex items-center justify-between gap-3 border-t px-4 py-2.5">
-          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          <span className="font-mono text-[0.6875rem] tabular-nums text-muted-foreground">
             {page * PAGE_SIZE + 1}-{page * PAGE_SIZE + rows.length}
           </span>
           <div className="flex gap-2">

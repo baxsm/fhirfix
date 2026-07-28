@@ -168,13 +168,13 @@ function EndpointRow({
           {endpoint.events.map((ev) => (
             <span
               key={ev}
-              className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+              className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[0.75rem] text-muted-foreground"
             >
               {ev}
             </span>
           ))}
         </div>
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-[0.6875rem] text-muted-foreground">
           {endpoint.lastDeliveryAt ? (
             <>
               Last delivery{" "}
@@ -195,7 +195,7 @@ function EndpointRow({
 
       {canManage && (
         <div className="flex shrink-0 items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-[0.6875rem] text-muted-foreground">
             {endpoint.enabled ? "Enabled" : "Paused"}
           </span>
           <DropdownMenu>

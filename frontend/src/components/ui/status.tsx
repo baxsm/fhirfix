@@ -20,10 +20,10 @@ const TONE: Record<StatusTone, { dot: string; text: string; icon: LucideIcon; ri
     ring: "border-border",
   },
   success: {
-    dot: "bg-primary",
-    text: "text-primary",
+    dot: "bg-success",
+    text: "text-success",
     icon: Check,
-    ring: "border-primary/30",
+    ring: "border-success/30",
   },
   warning: {
     dot: "bg-warning",

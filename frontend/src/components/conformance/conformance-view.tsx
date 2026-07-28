@@ -192,7 +192,7 @@ export function ConformanceView({
                         <span className="block truncate font-mono text-xs">
                           {row.targetEndpoint}
                         </span>
-                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        <span className="mt-0.5 block text-[0.6875rem] text-muted-foreground">
                           {row.testKits.join(", ")}
                         </span>
                       </TableCell>
@@ -201,7 +201,7 @@ export function ConformanceView({
                           {row.status}
                         </StatusDot>
                         {row.status === "failed" && row.errorMessage && (
-                          <span className="mt-1 block text-[11px] leading-relaxed text-destructive">
+                          <span className="mt-1 block text-[0.6875rem] leading-relaxed text-destructive">
                             {row.errorMessage}
                           </span>
                         )}
@@ -233,7 +233,7 @@ export function ConformanceView({
                 <div>
                   <h2 className="text-sm font-medium">Coverage matrix</h2>
                   {packet?.infernoVersion && packet.infernoVersion !== "pending" && (
-                    <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                    <p className="mt-0.5 font-mono text-[0.6875rem] text-muted-foreground">
                       Inferno {packet.infernoVersion} ·{" "}
                       {Object.entries(packet.igVersions ?? {})
                         .map(([ig, version]) => `${ig}@${version}`)
@@ -255,7 +255,7 @@ export function ConformanceView({
               </div>
 
               {packet?.evidence && (
-                <p className="font-mono text-[11px] break-all text-muted-foreground">
+                <p className="font-mono text-[0.6875rem] break-all text-muted-foreground">
                   sha256 {packet.evidence.sha256}
                 </p>
               )}

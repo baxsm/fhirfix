@@ -114,7 +114,7 @@ export function ChecksTable({
                       <td className="px-4 py-3">
                         <p className="font-medium">{row.name}</p>
                         {row.baselineConfig?.minPassRate != null && (
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">
+                          <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">
                             Alerts below {row.baselineConfig.minPassRate}%
                           </p>
                         )}
@@ -213,7 +213,7 @@ function LastRun({ row, workspace }: { row: ScheduledCheckRow; workspace: string
       <div className="min-w-0">
         <StatusDot tone="danger">Failed</StatusDot>
         <p
-          className="mt-0.5 max-w-[220px] truncate text-[11px] text-muted-foreground"
+          className="mt-0.5 max-w-[220px] truncate text-[0.6875rem] text-muted-foreground"
           title={row.lastError}
         >
           {row.lastError}
@@ -235,7 +235,7 @@ function LastRun({ row, workspace }: { row: ScheduledCheckRow; workspace: string
       {row.lastRunId && (
         <Link
           href={`/app/${workspace}/runs/${row.lastRunId}`}
-          className="mt-0.5 block text-[11px] underline-offset-2 hover:underline"
+          className="mt-0.5 block text-[0.6875rem] underline-offset-2 hover:underline"
         >
           View report
         </Link>

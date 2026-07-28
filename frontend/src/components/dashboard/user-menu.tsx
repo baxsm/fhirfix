@@ -56,7 +56,7 @@ export function UserMenu({
         {/* NOT a tint. muted/50 resolves to ~L96.2 and the canvas is L96.3, so a tinted header made */}
         <div className="px-3 py-2.5">
           <p className="truncate text-[13px] font-semibold leading-tight">{user.name}</p>
-          <p className="truncate pt-0.5 font-mono text-[11px] leading-tight text-muted-foreground">
+          <p className="truncate pt-0.5 font-mono text-[0.6875rem] leading-tight text-muted-foreground">
             {user.email}
           </p>
         </div>

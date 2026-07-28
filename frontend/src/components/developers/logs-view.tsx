@@ -99,7 +99,7 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
 
       {topPaths.length > 0 && (
         <div className="px-4 py-3">
-          <p className="text-[11px] font-medium text-muted-foreground">Busiest endpoints</p>
+          <p className="text-[0.6875rem] font-medium text-muted-foreground">Busiest endpoints</p>
           <ul className="mt-2 space-y-1.5">
             {topPaths.map((p) => (
               <li key={p.path} className="flex items-center gap-3 text-xs">
@@ -135,7 +135,7 @@ function StatsStrip({ workspaceId }: { workspaceId: string }) {
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "danger" }) {
   return (
     <div className="min-w-0 px-4 py-3">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
+      <p className="text-[0.6875rem] text-muted-foreground">{label}</p>
       <p
         className={`mt-1 font-mono text-lg leading-none tabular-nums ${
           tone === "danger" ? "text-destructive" : ""

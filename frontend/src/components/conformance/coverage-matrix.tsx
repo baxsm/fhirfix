@@ -144,7 +144,7 @@ export function CoverageMatrix({
                   <TableRow key={`${cell.testKit}-${cell.requirementId}`} className="align-top">
                     <TableCell className="whitespace-normal">
                       <p className="leading-snug">{cell.requirement}</p>
-                      <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                      <p className="mt-0.5 font-mono text-[0.6875rem] text-muted-foreground">
                         {cell.requirementId}
                       </p>
                       {cell.message && (
@@ -154,7 +154,7 @@ export function CoverageMatrix({
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="font-mono text-[11px] text-muted-foreground">
+                      <span className="font-mono text-[0.6875rem] text-muted-foreground">
                         {cell.conformance}
                       </span>
                     </TableCell>
@@ -166,8 +166,8 @@ export function CoverageMatrix({
                         {moved && (
                           <span
                             className={cn(
-                              "inline-flex items-center gap-1 text-[11px]",
-                              moved.direction === "fixed" ? "text-primary" : "text-destructive",
+                              "inline-flex items-center gap-1 text-[0.6875rem]",
+                              moved.direction === "fixed" ? "text-success" : "text-destructive",
                             )}
                           >
                             {moved.direction === "fixed" ? (

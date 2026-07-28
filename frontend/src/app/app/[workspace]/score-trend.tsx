@@ -50,7 +50,7 @@ export function ScoreTrend({
     return (
       <div className="raised rounded-lg border bg-card">
         <div className="border-b px-4 py-2.5">
-          <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
             Conformance trend
           </h3>
         </div>
@@ -63,7 +63,7 @@ export function ScoreTrend({
     return (
       <div className="raised rounded-lg border bg-card">
         <div className="border-b px-4 py-2.5">
-          <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+          <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
             Conformance trend
           </h3>
         </div>
@@ -116,10 +116,10 @@ export function ScoreTrend({
   return (
     <div className="raised rounded-lg border bg-card">
       <div className="flex items-baseline justify-between gap-3 border-b px-4 py-2.5">
-        <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+        <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
           Conformance trend
         </h3>
-        <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+        <span className="font-mono text-[0.6875rem] tabular-nums text-muted-foreground">
           median {median} · {scored.length} runs
         </span>
       </div>
@@ -128,7 +128,7 @@ export function ScoreTrend({
       <div className="flex h-[42px] items-baseline gap-2 px-4 pt-3">
         <span className="font-mono text-2xl tabular-nums leading-none">{shown?.v ?? current}</span>
         <span className="text-xs text-muted-foreground">/ {MAX_SCORE}</span>
-        <span className="ml-auto truncate font-mono text-[10px] text-muted-foreground/70">
+        <span className="ml-auto truncate font-mono text-[0.75rem] text-muted-foreground/70">
           {shown ? fmtDay(shown.p.createdAt) : ""}
         </span>
       </div>
@@ -138,7 +138,7 @@ export function ScoreTrend({
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="none"
-        className="h-20 w-full touch-none"
+        className="h-28 w-full touch-none"
         role="img"
         aria-label={`Conformance score trend across ${scored.length} runs, currently ${current} out of ${MAX_SCORE}`}
         onPointerMove={onMove}
@@ -146,8 +146,8 @@ export function ScoreTrend({
       >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--foreground)" stopOpacity="0.07" />
-            <stop offset="100%" stopColor="var(--foreground)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.16" />
+            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -178,9 +178,8 @@ export function ScoreTrend({
         <path
           d={line}
           fill="none"
-          stroke="var(--foreground)"
-          strokeWidth="1.5"
-          strokeOpacity="0.8"
+          stroke="var(--primary)"
+          strokeWidth="2"
           strokeLinejoin="round"
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
@@ -202,16 +201,28 @@ export function ScoreTrend({
 
         {/* dots are zero-length round-capped lines, not circles */}
         {last && (
-          <line
-            x1={last.x}
-            y1={last.y}
-            x2={last.x}
-            y2={last.y}
-            stroke="var(--foreground)"
-            strokeWidth="5"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
+          <>
+            <line
+              x1={last.x}
+              y1={last.y}
+              x2={last.x}
+              y2={last.y}
+              stroke="var(--background)"
+              strokeWidth="9"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={last.x}
+              y1={last.y}
+              x2={last.x}
+              y2={last.y}
+              stroke="var(--primary)"
+              strokeWidth="5.5"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </>
         )}
         {active && (
           <>

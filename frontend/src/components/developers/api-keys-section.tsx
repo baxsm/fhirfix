@@ -159,7 +159,7 @@ function KeysTable({
                       {k.scopes.map((s) => (
                         <span
                           key={s}
-                          className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                          className="rounded border bg-muted/40 px-1.5 py-0.5 font-mono text-[0.75rem] text-muted-foreground"
                         >
                           {s}
                         </span>

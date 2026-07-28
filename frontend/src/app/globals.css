@@ -34,7 +34,14 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-destructive: var(--destructive);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-accent-foreground: var(--accent-foreground);
@@ -82,57 +89,45 @@
    work: both providers write the class on <html> and the root (dark) wins. */
 :root,
 .light {
-  /* GREYSCALE CHROME, COLOUR ONLY FOR MEANING.
-     ---------------------------------------------------------------
-     the surface roles are pure neutral and, critically, SPACED. the old set
-     had secondary/muted/accent all at 0.968 - three names, one invisible
-     value - which is why every element sank into the page. the ladder below
-     is measured off a real dashboard theme (tweakcn "Minimal Neutral"):
-
-       background 1.0    card 0.993   input 0.96
-       border/muted/accent 0.934      secondary 0.831   <- the real step
-       ring 0.63         muted-foreground 0.45          primary 0.145
-
-     because chrome carries NO hue, every saturated pixel on screen belongs to
-     a finding. that is the product's whole story (broken -> conformant), and
-     it is what stopped the ui drowning in green. */
+  /* ink carries a trace of warmth so text reads as printed, not as #000 */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(0.993 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.185 0.006 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.185 0.006 285);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* primary = the action. near-black, 17.9:1 with white text - more than
-     three times the contrast of a blue button, and it leaves blue/green/red
-     free to mean something. */
-  --primary: oklch(0.145 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  /* success = conformant / pass / applied. the product's promise. this used to
-     be called --primary, which is why "pass" green ended up on buttons. */
+  --popover-foreground: oklch(0.185 0.006 285);
+  /* primary = the action, and it is the brand. black is reserved for ink */
+  --primary: oklch(0.585 0.212 285);
+  --primary-foreground: oklch(1 0 0);
+  --primary-hover: oklch(0.535 0.212 285);
+  /* the tinted wash selection and hover live on. never used for an action */
+  --primary-subtle: oklch(0.965 0.018 285);
+  --primary-subtle-foreground: oklch(0.46 0.19 285);
+  /* success = conformant / pass / applied */
   --success: oklch(0.52 0.13 163);
   --success-foreground: oklch(0.985 0 0);
-  /* interactive = links and focus. blue is kept ONLY for things you can follow
-     or focus, never for filled buttons. */
+  --success-subtle: oklch(0.965 0.03 163);
   --interactive: oklch(0.52 0.19 256);
   --interactive-foreground: oklch(0.985 0 0);
   --info: oklch(0.52 0.19 256);
-  /* brand = the violet dot in the wordmark. logo only, never chrome. */
-  --brand: oklch(0.635 0.214 285);
-  /* secondary is a REAL mid-grey fill (0.831), not a whisper. this is what
-     makes a secondary button read as a solid object without any colour. */
-  --secondary: oklch(0.831 0 0);
-  --secondary-foreground: oklch(0.145 0 0);
-  --muted: oklch(0.934 0 0);
-  --muted-foreground: oklch(0.451 0 0);
-  --accent: oklch(0.934 0 0);
-  --accent-foreground: oklch(0.145 0 0);
-  --destructive: oklch(0.505 0.19 17);
+  --brand: oklch(0.585 0.212 285);
+  /* secondary = a bordered white object, not a grey fill */
+  --secondary: oklch(1 0 0);
+  --secondary-foreground: oklch(0.285 0.006 285);
+  --muted: oklch(0.972 0.002 285);
+  --muted-foreground: oklch(0.505 0.008 285);
+  --accent: oklch(0.972 0.002 285);
+  --accent-foreground: oklch(0.185 0.006 285);
+  --destructive: oklch(0.545 0.208 22);
   --destructive-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.55 0.13 70);
+  --destructive-subtle: oklch(0.968 0.022 22);
+  --warning: oklch(0.62 0.145 62);
   --warning-foreground: oklch(0.985 0 0);
-  --border: oklch(0.934 0 0);
-  --input: oklch(0.96 0 0);
-  --ring: oklch(0.63 0 0);
+  --warning-subtle: oklch(0.972 0.032 75);
+  --border: oklch(0.923 0.003 285);
+  --border-strong: oklch(0.868 0.004 285);
+  --input: oklch(1 0 0);
+  --ring: oklch(0.585 0.212 285);
   /* charts are ink first: a near-black primary series with grey supporting
      series. status colours only enter a chart when the chart is ABOUT status. */
   --chart-1: oklch(0.145 0 0);
@@ -161,22 +156,25 @@
   --chart-ui: #4a3aa7; /* violet */
   --chart-api: #eb6834; /* orange */
   --chart-other: #1baf7a; /* aqua */
-  /* softer than the old 0.4rem, which was a big part of the "boxed" feel. */
-  --radius: 0.75rem;
-  /* the rail is a CARD floating on the canvas, so it is the lighter surface and
-     the canvas behind it is the darker one - the inverse of a docked sidebar. */
-  --sidebar: oklch(0.993 0 0);
-  --sidebar-foreground: oklch(0.32 0 0);
-  /* active nav row = a solid dark chip, not a whisper of grey. */
-  --sidebar-primary: oklch(0.145 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.951 0 0);
-  --sidebar-accent-foreground: oklch(0.145 0 0);
-  --sidebar-border: oklch(0.934 0 0);
-  --sidebar-ring: oklch(0.63 0 0);
-  /* the canvas the rail floats on. deliberately a step BELOW the rail and the
-     cards so both read as objects resting on it. */
-  --canvas: oklch(0.968 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.986 0.002 285);
+  --sidebar-foreground: oklch(0.375 0.008 285);
+  /* selection is a tinted surface, never the filled action colour */
+  --sidebar-primary: var(--primary-subtle);
+  --sidebar-primary-foreground: var(--primary-subtle-foreground);
+  --sidebar-accent: oklch(0.958 0.003 285);
+  --sidebar-accent-foreground: oklch(0.185 0.006 285);
+  --sidebar-border: oklch(0.923 0.003 285);
+  --sidebar-ring: oklch(0.585 0.212 285);
+  --canvas: oklch(0.976 0.002 285);
+
+  /* type scale. 5 steps, replacing the 9 ad-hoc sizes measured on /app */
+  --text-micro: 0.6875rem;
+  --text-meta: 0.75rem;
+  --text-body: 0.8125rem;
+  --text-title: 0.9375rem;
+  --text-display: 1.5rem;
+  --tracking-micro: 0.06em;
 }
 
 .dark {

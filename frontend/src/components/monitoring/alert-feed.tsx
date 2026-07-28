@@ -80,7 +80,7 @@ export function AlertFeed({
                     <span className="text-xs text-muted-foreground">{row.checkName}</span>
                   </div>
                   <p className="text-sm leading-relaxed">{row.detail}</p>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] text-muted-foreground">
                     {row.metricBefore && row.metricAfter && (
                       <span className="font-mono">
                         {row.metricBefore} to {row.metricAfter}

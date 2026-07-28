@@ -177,7 +177,7 @@ export function RunsView({
                         <TableCell>
                           <div className="flex flex-col">
                             <span className="font-mono text-xs">{r.id}</span>
-                            <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                            <span className="font-mono text-[0.75rem] uppercase text-muted-foreground">
                               {r.inputType}
                             </span>
                           </div>

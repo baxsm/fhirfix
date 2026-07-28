@@ -17,7 +17,7 @@ export function SecretReveal({ value, label }: { value: string; label: string })
 
   return (
     <div className="space-y-1.5">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </p>
       <div className="flex items-stretch gap-2">

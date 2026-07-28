@@ -200,7 +200,7 @@ export function RequestLogsSection({ workspaceId }: { workspaceId: string }) {
           {/* page forward/back rather than an ever-growing list */}
           {(hasMore || cursor) && (
             <div className="flex items-center justify-between border-t pt-3">
-              <span className="font-mono text-[11px] text-muted-foreground">
+              <span className="font-mono text-[0.6875rem] text-muted-foreground">
                 {rows.length} shown
               </span>
               <div className="flex gap-2">
@@ -268,7 +268,7 @@ function LogEntry({ row, open, onToggle }: { row: LogRow; open: boolean; onToggl
         <TableCell className="pr-3">
           <span
             className={cn(
-              "inline-flex h-5 items-center rounded border px-1.5 font-mono text-[11px] tabular-nums",
+              "inline-flex h-5 items-center rounded border px-1.5 font-mono text-[0.6875rem] tabular-nums",
               statusTone(row.statusCode),
             )}
           >
@@ -319,7 +319,7 @@ function LogEntry({ row, open, onToggle }: { row: LogRow; open: boolean; onToggl
 function Detail({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="min-w-0 space-y-0.5">
-      <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">
+      <dt className="text-[0.75rem] font-medium uppercase tracking-wide text-muted-foreground/70">
         {label}
       </dt>
       <dd className={cn("truncate text-xs", mono ? "font-mono" : "text-muted-foreground")}>

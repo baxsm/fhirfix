@@ -138,7 +138,7 @@ export function CheckView({ workspace }: { workspace: string }) {
       >
         <div className="flex items-center gap-2.5 border-b px-3 py-2">
           <span className="text-[13px] font-medium">Resource</span>
-          <span className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">
+          <span className="min-w-0 truncate font-mono text-[0.6875rem] text-muted-foreground">
             {describeInput(content)}
             {!empty && ` · ${charCount.toLocaleString()} chars`}
           </span>
@@ -185,11 +185,11 @@ export function CheckView({ workspace }: { workspace: string }) {
                   >
                     <span className="flex w-full items-center gap-1.5 text-xs font-medium">
                       <span className="truncate">{s.label}</span>
-                      <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
+                      <span className="ml-auto shrink-0 font-mono text-[0.75rem] text-muted-foreground">
                         {s.kind}
                       </span>
                     </span>
-                    <span className="text-[11px] leading-snug text-muted-foreground">{s.hint}</span>
+                    <span className="text-[0.6875rem] leading-snug text-muted-foreground">{s.hint}</span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -248,7 +248,7 @@ export function CheckView({ workspace }: { workspace: string }) {
           {/* one reserved line: the profile fact normally, the file problem when there is one */}
           <span
             className={cn(
-              "min-w-0 truncate text-[11px]",
+              "min-w-0 truncate text-[0.6875rem]",
               problem ? "text-destructive" : "text-muted-foreground",
             )}
           >

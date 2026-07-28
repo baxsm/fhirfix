@@ -117,7 +117,7 @@ export function OverviewView({
 
           <section className="raised flex min-w-0 flex-col overflow-hidden rounded-lg border bg-card">
             <div className="flex shrink-0 items-baseline justify-between gap-3 border-b px-4 py-2.5">
-              <h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+              <h2 className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
                 Recent runs
               </h2>
               {/* the Button component, not a hand-rolled div with border and padding classes */}
@@ -172,22 +172,22 @@ function AttentionRow({
   icon: typeof Map;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-3 rounded-md border border-l-2 py-2.5 pr-3 pl-3",
-        tone === "danger"
-          ? "border-destructive/25 border-l-destructive bg-destructive/[0.04]"
-          : "border-warning/25 border-l-warning bg-warning/[0.05]",
-      )}
-    >
-      <Icon
-        className={cn("size-4 shrink-0", tone === "danger" ? "text-destructive" : "text-warning")}
-      />
+    <div className="flex items-center gap-3 rounded-lg border bg-card py-2.5 pr-3 pl-3">
+      <span
+        className={cn(
+          "grid size-7 shrink-0 place-items-center rounded-md",
+          tone === "danger"
+            ? "bg-destructive-subtle text-destructive"
+            : "bg-warning-subtle text-warning",
+        )}
+      >
+        <Icon className="size-3.5" />
+      </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-tight">{title}</p>
+        <p className="text-[0.8125rem] font-medium leading-tight">{title}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{body}</p>
       </div>
-      <Button variant="outline" size="xs" asChild className="shrink-0 bg-background">
+      <Button variant="outline" size="xs" asChild className="shrink-0">
         <Link href={href}>
           {action}
           <ArrowRight className="size-3" />
@@ -197,38 +197,70 @@ function AttentionRow({
   );
 }
 
+function relativeTime(value: string | Date) {
+  const then = new Date(value);
+  const mins = Math.round((Date.now() - then.getTime()) / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return then.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function runSummary({ status, findingsTotal, findingsAutoFixable }: RunRow) {
+  if (status === "failed") return "The engine could not finish this run";
+  if (status === "queued") return "Waiting to start";
+  if (status === "running") return "Checking now";
+  if (findingsTotal === 0) return "Clean, no findings";
+  const findings = `${findingsTotal} finding${findingsTotal === 1 ? "" : "s"}`;
+  if (findingsAutoFixable > 0) return `${findings}, ${findingsAutoFixable} auto-fixed`;
+  return findings;
+}
+
 function RecentRun({ row, href }: { row: RunRow; href: string }) {
   const improved =
     row.conformanceScoreBefore != null &&
     row.conformanceScoreAfter != null &&
     row.conformanceScoreAfter > row.conformanceScoreBefore;
   return (
-    <Link
-      href={href}
-      className={cn(
-        "row-interactive group flex items-center gap-3 px-4 py-2.5",
-      )}
-    >
+    <Link href={href} className="row-interactive group flex items-center gap-4 px-4 py-3">
       <div className="min-w-0 flex-1">
-        <p className="truncate font-mono text-xs">{row.id}</p>
-        <p className="font-mono text-[10px] uppercase text-muted-foreground">{row.inputType}</p>
+        <p className="flex items-baseline gap-2 leading-tight">
+          <span className="text-[0.8125rem] font-medium">{relativeTime(row.createdAt)}</span>
+          <span className="font-mono text-[0.6875rem] tracking-[0.06em] text-muted-foreground uppercase">
+            {row.inputType.replace(/_/g, " ")}
+          </span>
+        </p>
+        <p className="mt-0.5 truncate text-xs leading-tight text-muted-foreground">
+          {runSummary(row)}
+        </p>
       </div>
       {row.status === "failed" ? (
         <StatusDot tone="danger">failed</StatusDot>
-      ) : (
-        <span className="shrink-0 font-mono text-xs tabular-nums whitespace-nowrap">
-          {row.conformanceScoreBefore != null && row.conformanceScoreAfter != null ? (
-            <>
-              <span className="text-muted-foreground">{row.conformanceScoreBefore}</span>
-              <span className="mx-1 text-muted-foreground/50">→</span>
-              <span className={improved ? "text-success" : "text-foreground"}>
-                {row.conformanceScoreAfter}
-              </span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">—</span>
-          )}
+      ) : row.status === "running" || row.status === "queued" ? (
+        <StatusDot tone="pending">{row.status}</StatusDot>
+      ) : row.conformanceScoreBefore != null && row.conformanceScoreAfter != null ? (
+        <span className="flex shrink-0 items-baseline gap-1.5 font-mono text-xs tabular-nums whitespace-nowrap">
+          <span className="text-muted-foreground">{row.conformanceScoreBefore}</span>
+          <ArrowRight className="size-3 self-center text-muted-foreground/45" />
+          <span
+            className={cn(
+              "text-[0.9375rem] font-medium",
+              improved ? "text-success" : "text-foreground",
+            )}
+          >
+            {row.conformanceScoreAfter}
+          </span>
+          {improved ? (
+            <span className="text-[0.6875rem] text-success">
+              +{row.conformanceScoreAfter - row.conformanceScoreBefore}
+            </span>
+          ) : null}
         </span>
+      ) : (
+        <span className="shrink-0 text-xs text-muted-foreground">not scored</span>
       )}
     </Link>
   );
@@ -275,7 +307,7 @@ function FirstRun({ base }: { base: string }) {
               Paste FHIR or HL7v2 and the engine detects, explains, and fixes the conformance
               failures.
             </p>
-            <p className="pt-1 font-mono text-[11px] text-muted-foreground/70">
+            <p className="pt-1 font-mono text-[0.6875rem] text-muted-foreground/70">
               US Core 6.1.0 · FHIR R4 · Da Vinci PAS 2.0.1 / PDex 2.0.0
             </p>
           </div>
@@ -288,7 +320,7 @@ function FirstRun({ base }: { base: string }) {
         </div>
       </div>
       <section className="space-y-2">
-        <h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
+        <h3 className="text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-muted-foreground/70">
           Set up your workspace
         </h3>
         <AttentionRow

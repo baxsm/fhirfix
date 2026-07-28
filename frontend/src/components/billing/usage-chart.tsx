@@ -88,7 +88,7 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
           tickMargin={8}
           minTickGap={24}
           tickFormatter={shortDay}
-          className="text-[10px]"
+          className="text-[0.75rem]"
         />
         <YAxis
           tickLine={false}
@@ -96,7 +96,7 @@ export function UsageChart({ rows, days }: { rows: UsageRow[]; days: number }) {
           width={44}
           allowDecimals
           tickFormatter={(v: number) => (inCents ? `${(v * 100).toFixed(1)}¢` : `$${v.toFixed(2)}`)}
-          className="text-[10px]"
+          className="text-[0.75rem]"
         />
         <ChartTooltip
           content={

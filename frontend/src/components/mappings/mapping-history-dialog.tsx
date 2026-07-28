@@ -74,19 +74,19 @@ export function MappingHistoryDialog({
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">v{v.version}</span>
                       {current && (
-                        <span className="rounded border border-success/30 bg-success/10 px-1.5 py-0.5 text-[10px] text-success">
+                        <span className="rounded border border-success/30 bg-success/10 px-1.5 py-0.5 text-[0.75rem] text-success">
                           current
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[0.6875rem] text-muted-foreground">
                       {fmtDateTime(v.createdAt)}
                     </span>
                   </div>
                   <code className="mt-1 block break-all font-mono text-xs text-muted-foreground">
                     {v.targetValue}
                   </code>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
+                  <p className="mt-1 text-[0.6875rem] text-muted-foreground">
                     {v.createdBy === "system" ? "Auto-learned" : "Edited by a member"}
                     {v.status !== "active" && ` · ${v.status}`}
                   </p>

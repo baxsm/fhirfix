@@ -34,14 +34,14 @@ export function WorkspaceSwitcher({ current, workspaces }: Props) {
                 aria-label="Switch workspace"
                 className="press flex w-full cursor-pointer items-center gap-2 rounded-lg bg-muted/60 px-2 py-1.5 text-left hover:bg-muted data-[state=open]:bg-muted"
               >
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-[11px] text-primary-foreground">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary font-mono text-[0.6875rem] text-primary-foreground">
                   {(active?.name ?? "?").slice(0, 1).toUpperCase()}
                 </span>
                 <div className="grid min-w-0 flex-1 leading-tight">
                   <span className="truncate text-[13px] font-medium">
                     {active?.name ?? "Select workspace"}
                   </span>
-                  <span className="truncate font-mono text-[10px] text-muted-foreground">
+                  <span className="truncate font-mono text-[0.75rem] text-muted-foreground">
                     {active?.slug ?? ""}
                   </span>
                 </div>

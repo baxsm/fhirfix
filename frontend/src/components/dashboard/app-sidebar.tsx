@@ -36,7 +36,7 @@ export function AppSidebar({ workspace, role, workspaces }: Props) {
           if (items.length === 0) return null;
           return (
             <div key={group.label} className={gi === 0 ? "" : "mt-5"}>
-              <p className="px-2 pb-1.5 font-mono text-[9px] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
+              <p className="px-2 pb-1.5 font-mono text-[0.6875rem] font-medium uppercase tracking-[0.11em] text-muted-foreground/70">
                 {group.label}
               </p>
               {/* gap-1.5, not gap-0.5: at 2px an active chip sits flush against a hovered neighbour */}
@@ -101,7 +101,7 @@ function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspace
       className="row-interactive -mx-1 block rounded-lg px-2 py-1.5 hover:bg-sidebar-accent"
     >
       <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+        <span className="flex items-center gap-1.5 text-[0.6875rem] font-medium text-muted-foreground">
           <Wallet className="size-3.5" />
           Credits
         </span>
@@ -123,7 +123,7 @@ function CreditsMeter({ workspace, workspaceId }: { workspace: string; workspace
           style={{ width: `${fillPct}%` }}
         />
       </div>
-      <p className="mt-1.5 text-[10px] text-muted-foreground/70">
+      <p className="mt-1.5 text-[0.75rem] text-muted-foreground/70">
         {empty
           ? "Add credits to run checks"
           : low

@@ -156,7 +156,7 @@ export function CreateWebhookDialog({
                         className="flex flex-1 cursor-pointer items-center gap-2.5 font-normal"
                       >
                         <span className="font-mono text-xs">{ev.id}</span>
-                        <span className="ml-auto text-right text-[11px] text-muted-foreground">
+                        <span className="ml-auto text-right text-[0.6875rem] text-muted-foreground">
                           {ev.hint}
                         </span>
                       </Label>

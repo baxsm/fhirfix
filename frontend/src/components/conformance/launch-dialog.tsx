@@ -133,7 +133,7 @@ export function LaunchDialog({
                 />
                 <Label htmlFor={`kit-${kit.id}`} className="min-w-0 cursor-pointer font-normal">
                   <span className="block text-sm">{kit.label}</span>
-                  <span className="block font-mono text-[11px] text-muted-foreground">
+                  <span className="block font-mono text-[0.6875rem] text-muted-foreground">
                     IG {kit.igVersion} · kit {kit.kitVersion}
                   </span>
                 </Label>
@@ -148,7 +148,7 @@ export function LaunchDialog({
                 <Lock className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="min-w-0">
                   <span className="block text-sm text-muted-foreground">{kit.label}</span>
-                  <span className="block text-[11px] leading-relaxed text-muted-foreground">
+                  <span className="block text-[0.6875rem] leading-relaxed text-muted-foreground">
                     {kit.attendedReason}
                   </span>
                 </span>
@@ -191,7 +191,7 @@ export function LaunchDialog({
                   onChange={(e) => setScopes(e.target.value)}
                   placeholder="system/*.read"
                 />
-                <p className="text-[11px] leading-relaxed text-muted-foreground sm:col-span-2">
+                <p className="text-[0.6875rem] leading-relaxed text-muted-foreground sm:col-span-2">
                   Register Inferno&apos;s public JWKS with the payer first.
                 </p>
               </div>

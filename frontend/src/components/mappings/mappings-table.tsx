@@ -211,14 +211,14 @@ export function MappingsTable({
                           {m.status === "suggested" && m.confidence != null && (
                             <Badge
                               variant="outline"
-                              className="border-warning/30 bg-warning/10 text-[10px] text-warning"
+                              className="border-warning/30 bg-warning/10 text-[0.75rem] text-warning"
                             >
                               {m.confidence}% confident
                             </Badge>
                           )}
                         </div>
                         {m.createdBy === "system" && (
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">Auto-learned</p>
+                          <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">Auto-learned</p>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -241,7 +241,7 @@ export function MappingsTable({
                           <div className="flex flex-col gap-0.5">
                             <span className="text-xs text-muted-foreground">Workspace</span>
                             <span
-                              className="text-[11px] text-warning"
+                              className="text-[0.6875rem] text-warning"
                               title={overriddenBy[m.id]
                                 ?.map((w) => `${w.sourceSystem} uses ${w.targetValue}`)
                                 .join("\n")}
