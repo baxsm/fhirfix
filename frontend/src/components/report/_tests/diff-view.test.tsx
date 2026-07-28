@@ -28,8 +28,17 @@ describe("DiffView", () => {
     expect(screen.getByText("Corrected")).toBeInTheDocument();
   });
 
-  it("shows zero changed lines for identical input", () => {
+  it("collapses to a single pane when nothing changed", () => {
     render(<DiffView before={before} after={before} />);
-    expect(screen.getByText("0 changed lines")).toBeInTheDocument();
+    expect(screen.getByText("No proposed change to this fragment")).toBeInTheDocument();
+    expect(screen.queryByText("Unified")).not.toBeInTheDocument();
+  });
+
+  it("pretty-prints a minified side instead of diffing it as one long line", () => {
+    const minified = '{"system":"http://example.com/mrn","value":"10009"}';
+    const { container } = render(<DiffView before={minified} after={after} />);
+    expect(screen.getByText(/changed line/)).toBeInTheDocument();
+    // the unchanged closing brace only lines up once both sides are formatted
+    expect(container.textContent).toContain('"value": "10009"');
   });
 });

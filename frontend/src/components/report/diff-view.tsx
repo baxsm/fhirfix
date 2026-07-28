@@ -113,8 +113,8 @@ function Tokens({
           className={cn(
             tok.c &&
               (tone === "add"
-                ? "rounded-[3px] bg-emerald-500/25 text-emerald-200"
-                : "rounded-[3px] bg-red-500/25 text-red-200"),
+                ? "rounded-[3px] bg-success/20 text-success"
+                : "rounded-[3px] bg-destructive/20 text-destructive"),
           )}
         >
           {tok.t}
@@ -125,6 +125,18 @@ function Tokens({
 }
 
 const GUTTER = "select-none pr-3 text-right text-[10px] text-muted-foreground/50 tabular-nums";
+
+// minified json diffs as one giant line against a pretty-printed side, so normalize both first
+function formatJson(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) return text;
+  if (trimmed.includes("\n")) return text;
+  try {
+    return JSON.stringify(JSON.parse(trimmed), null, 2);
+  } catch {
+    return text;
+  }
+}
 
 export function DiffView({
   before,
@@ -138,10 +150,35 @@ export function DiffView({
   afterLabel?: string;
 }) {
   const [split, setSplit] = useState(true);
-  const rows = useMemo(() => diffLines(before.split("\n"), after.split("\n")), [before, after]);
+  const rows = useMemo(
+    () => diffLines(formatJson(before).split("\n"), formatJson(after).split("\n")),
+    [before, after],
+  );
 
   const collapsed = useMemo(() => collapse(rows), [rows]);
   const changedCount = rows.filter((r) => r.op !== "same").length;
+
+  if (changedCount === 0) {
+    return (
+      <div className="overflow-hidden rounded-md border bg-card raised">
+        <div className="border-b bg-muted/30 px-3 py-1.5">
+          <span className="font-mono text-[11px] text-muted-foreground">
+            No proposed change to this fragment
+          </span>
+        </div>
+        <div className="max-h-[420px] overflow-auto font-mono text-[11px] leading-[1.6]">
+          {formatJson(before)
+            .split("\n")
+            .map((line, k) => (
+              <div key={`${k}-${line}`} className="flex px-3 py-px">
+                <span className={GUTTER}>{k + 1}</span>
+                <span className="whitespace-pre-wrap break-all">{line}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-hidden rounded-md border bg-card raised">
@@ -149,7 +186,6 @@ export function DiffView({
         <span className="font-mono text-[11px] text-muted-foreground">
           {changedCount} changed {changedCount === 1 ? "line" : "lines"}
         </span>
-        {/* a content-formatting picker - the same content, rendered two ways - which is the textbook */}
         <ChoiceGroup label="Diff layout">
           <ChoiceChip active={split} onClick={() => setSplit(true)}>
             Split
@@ -285,8 +321,8 @@ function SideLine({
     <div
       className={cn(
         "flex px-3 py-px",
-        row.op === "del" && side === "left" && "bg-red-500/10",
-        row.op === "add" && side === "right" && "bg-emerald-500/10",
+        row.op === "del" && side === "left" && "bg-destructive/[0.07]",
+        row.op === "add" && side === "right" && "bg-success/[0.07]",
       )}
     >
       <span className={GUTTER}>{no ?? ""}</span>
@@ -307,8 +343,8 @@ function UnifiedBody({ rows }: { rows: Collapsed[] }) {
             key={`u${idx}-${r.op}-${r.leftNo ?? r.rightNo ?? ""}`}
             className={cn(
               "flex px-3 py-px",
-              r.op === "del" && "bg-red-500/10",
-              r.op === "add" && "bg-emerald-500/10",
+              r.op === "del" && "bg-destructive/[0.07]",
+              r.op === "add" && "bg-success/[0.07]",
             )}
           >
             <span className="w-4 select-none text-muted-foreground/60">
