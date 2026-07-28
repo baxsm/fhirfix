@@ -168,54 +168,61 @@ export function ConformanceView({
                 </TableRow>
               </TableHeader>
               <TableBody className="enter-stagger">
-                {packets.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    tabIndex={0}
-                    onClick={() => setOpenPacket(row.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setOpenPacket(row.id);
+                {packets.map((row) => {
+                  const isSelected = row.id === selectedId;
+                  return (
+                    <TableRow
+                      key={row.id}
+                      aria-current={isSelected}
+                      tabIndex={isSelected ? undefined : 0}
+                      onClick={isSelected ? undefined : () => setOpenPacket(row.id)}
+                      onKeyDown={
+                        isSelected
+                          ? undefined
+                          : (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setOpenPacket(row.id);
+                              }
+                            }
                       }
-                    }}
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      row.id === selectedId && "bg-accent/40",
-                    )}
-                  >
-                    <TableCell className="max-w-0">
-                      <span className="block truncate font-mono text-xs">{row.targetEndpoint}</span>
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        {row.testKits.join(", ")}
-                      </span>
-                    </TableCell>
-                    <TableCell className="whitespace-normal">
-                      <StatusDot tone={STATUS_TONE[row.status] ?? "neutral"}>
-                        {row.status}
-                      </StatusDot>
-                      {row.status === "failed" && row.errorMessage && (
-                        <span className="mt-1 block text-[11px] leading-relaxed text-destructive">
-                          {row.errorMessage}
+                      className={cn(isSelected ? "bg-accent/40" : "row-interactive cursor-pointer")}
+                    >
+                      <TableCell className="max-w-0">
+                        <span className="block truncate font-mono text-xs">
+                          {row.targetEndpoint}
                         </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {row.overallResult ? (
-                        <StatusDot tone={OVERALL_TONE[row.overallResult] ?? "neutral"}>
-                          {row.overallResult}
+                        <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                          {row.testKits.join(", ")}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-normal">
+                        <StatusDot tone={STATUS_TONE[row.status] ?? "neutral"}>
+                          {row.status}
                         </StatusDot>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs tabular-nums">
-                      {row.passCount != null && row.failCount != null
-                        ? `${row.passCount}/${row.passCount + row.failCount}`
-                        : "—"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {row.status === "failed" && row.errorMessage && (
+                          <span className="mt-1 block text-[11px] leading-relaxed text-destructive">
+                            {row.errorMessage}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {row.overallResult ? (
+                          <StatusDot tone={OVERALL_TONE[row.overallResult] ?? "neutral"}>
+                            {row.overallResult}
+                          </StatusDot>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs tabular-nums">
+                        {row.passCount != null && row.failCount != null
+                          ? `${row.passCount}/${row.passCount + row.failCount}`
+                          : "—"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
