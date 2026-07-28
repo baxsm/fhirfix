@@ -142,19 +142,25 @@ export function CreateWebhookDialog({
                 <Label>Events</Label>
                 <div className="space-y-1.5">
                   {EVENTS.map((ev) => (
-                    <label
+                    <div
                       key={ev.id}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
+                      className="flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
                     >
                       <Checkbox
+                        id={`event-${ev.id}`}
                         checked={events.includes(ev.id)}
                         onCheckedChange={() => toggleEvent(ev.id)}
                       />
-                      <span className="font-mono text-xs">{ev.id}</span>
-                      <span className="ml-auto text-right text-[11px] text-muted-foreground">
-                        {ev.hint}
-                      </span>
-                    </label>
+                      <Label
+                        htmlFor={`event-${ev.id}`}
+                        className="flex flex-1 cursor-pointer items-center gap-2.5 font-normal"
+                      >
+                        <span className="font-mono text-xs">{ev.id}</span>
+                        <span className="ml-auto text-right text-[11px] text-muted-foreground">
+                          {ev.hint}
+                        </span>
+                      </Label>
+                    </div>
                   ))}
                 </div>
               </div>

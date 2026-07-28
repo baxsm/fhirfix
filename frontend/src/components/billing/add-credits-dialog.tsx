@@ -63,6 +63,7 @@ export function AddCreditsDialog({
             const active = p.id === packId;
             const resources = Math.round(p.cents);
             return (
+              // biome-ignore lint/a11y/useSemanticElements: a card this size cannot be an <input type="radio">
               <button
                 key={p.id}
                 type="button"

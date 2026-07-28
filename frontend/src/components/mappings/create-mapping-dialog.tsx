@@ -160,10 +160,19 @@ export function CreateMappingDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-              <Checkbox checked={scoped} onCheckedChange={(v) => setScoped(v === true)} />
-              Only apply to one source system
-            </label>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="mapping-scoped"
+                checked={scoped}
+                onCheckedChange={(v) => setScoped(v === true)}
+              />
+              <Label
+                htmlFor="mapping-scoped"
+                className="cursor-pointer font-normal text-xs text-muted-foreground"
+              >
+                Only apply to one source system
+              </Label>
+            </div>
             {scoped && (
               <Input
                 value={sourceSystem}

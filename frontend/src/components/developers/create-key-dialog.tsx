@@ -122,8 +122,7 @@ export function CreateKeyDialog({
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
-                A key authenticates REST requests. Test keys are safe for development; live keys run
-                against real credits.
+                A key authenticates REST requests to the FHIRfix API.
               </DialogDescription>
             </DialogHeader>
 
@@ -134,7 +133,7 @@ export function CreateKeyDialog({
                   id="key-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. CI pipeline"
+                  placeholder="CI pipeline"
                   maxLength={80}
                   autoFocus
                 />
@@ -147,13 +146,13 @@ export function CreateKeyDialog({
                     active={mode === "test"}
                     onClick={() => setMode("test")}
                     title="Test"
-                    hint="ffx_test_ · for development"
+                    hint="Free to run"
                   />
                   <ModeButton
                     active={mode === "live"}
                     onClick={() => setMode("live")}
                     title="Live"
-                    hint="ffx_live_ · charges credits"
+                    hint="Spends credits"
                   />
                 </div>
               </div>
@@ -162,17 +161,23 @@ export function CreateKeyDialog({
                 <Label>Scopes</Label>
                 <div className="space-y-1.5">
                   {SCOPES.map((s) => (
-                    <label
+                    <div
                       key={s.id}
-                      className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
+                      className="flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors hover:bg-muted/40"
                     >
                       <Checkbox
+                        id={`scope-${s.id}`}
                         checked={scopes.includes(s.id)}
                         onCheckedChange={() => toggleScope(s.id)}
                       />
-                      <span className="font-mono text-xs">{s.label}</span>
-                      <span className="ml-auto text-xs text-muted-foreground">{s.hint}</span>
-                    </label>
+                      <Label
+                        htmlFor={`scope-${s.id}`}
+                        className="flex flex-1 cursor-pointer items-center gap-2.5 font-normal"
+                      >
+                        <span className="font-mono text-xs">{s.label}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">{s.hint}</span>
+                      </Label>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -205,6 +210,7 @@ function ModeButton({
   hint: string;
 }) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: a card this size cannot be an <input type="radio">
     <button
       type="button"
       role="radio"
@@ -228,7 +234,7 @@ function ModeButton({
       </span>
       <span className="min-w-0">
         <span className="block text-sm font-medium">{title}</span>
-        <span className="block font-mono text-[10px] text-muted-foreground">{hint}</span>
+        <span className="block text-xs text-muted-foreground">{hint}</span>
       </span>
     </button>
   );
