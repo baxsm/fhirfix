@@ -160,8 +160,8 @@ export function ApiExplorer() {
                 className={cn(
                   "inline-flex h-5 items-center rounded border px-1.5 font-mono text-[11px] tabular-nums",
                   result.ok
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                    : "border-amber-500/30 bg-amber-500/10 text-amber-400",
+                    ? "border-success/30 bg-success/10 text-success"
+                    : "border-warning/30 bg-warning/10 text-warning",
                 )}
               >
                 {result.status}

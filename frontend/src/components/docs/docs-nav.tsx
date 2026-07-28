@@ -9,7 +9,7 @@ type Method = "GET" | "POST";
 
 interface NavItem {
   label: string;
-  // section id on the /docs page, or null for a separate route (playground).
+  // section id on the /docs page, or null for a separate route
   id: string | null;
   href: string;
   method?: Method;
@@ -55,7 +55,7 @@ const SECTIONS: { group: string; items: NavItem[] }[] = [
 ];
 
 const METHOD_TONE: Record<Method, string> = {
-  GET: "text-emerald-400",
+  GET: "text-success",
   POST: "text-interactive",
 };
 
@@ -71,7 +71,7 @@ export function DocsNav() {
   const activeId = useScrollSpy(onDocsRoot ? SPY_IDS : NO_SPY);
 
   const handleClick = (e: React.MouseEvent, id: string | null) => {
-    // smooth-scroll within the docs page; let real route links (playground) pass.
+    // smooth-scroll within the docs page; let real route links pass
     if (!onDocsRoot || id == null) return;
     e.preventDefault();
     if (id === "top") {

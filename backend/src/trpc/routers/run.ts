@@ -7,7 +7,6 @@ import { blobKey, blobStore } from "@/lib/blob";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
-import { containsPhi, redactPhi } from "@/lib/phi";
 import { applyQueue, remediationQueue } from "@/queues/index";
 import { creditGatedProcedure, router, workspaceProcedure } from "../trpc";
 
@@ -18,8 +17,6 @@ const submitSchema = z.object({
   autoFix: z.boolean().default(true),
 });
 
-// how long a share link lives by default. explicit expiry can shorten it.
-const SHARE_TTL_DAYS = 30;
 
 export const runRouter = router({
   submit: creditGatedProcedure.input(submitSchema).mutation(async ({ ctx, input }) => {
@@ -114,19 +111,7 @@ export const runRouter = router({
         }
       }
 
-      const [share] = await ctx.db
-        .select({
-          token: schema.reportShare.token,
-          redacted: schema.reportShare.redacted,
-          expiresAt: schema.reportShare.expiresAt,
-          revokedAt: schema.reportShare.revokedAt,
-        })
-        .from(schema.reportShare)
-        .where(eq(schema.reportShare.runId, input.runId))
-        .orderBy(desc(schema.reportShare.createdAt))
-        .limit(1);
-
-      return { run: runRow, findings, corrected, input: inputRaw, share: share ?? null };
+      return { run: runRow, findings, corrected, input: inputRaw };
     }),
 
   // recent runs for the workspace. drives the run history table.
@@ -272,107 +257,4 @@ export const runRouter = router({
       return { cancelled: true as const, status: "failed" as const };
     }),
 
-  share: workspaceProcedure
-    .input(
-      z.object({
-        workspaceId: z.string(),
-        runId: z.string(),
-        redact: z.boolean().default(false),
-        expiresInDays: z.number().int().min(1).max(365).optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (!hasPermission(ctx.role, "run", "view")) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Your role cannot share reports." });
-      }
-      const [runRow] = await ctx.db
-        .select({ correctedRef: schema.run.correctedRef, status: schema.run.status })
-        .from(schema.run)
-        .where(and(eq(schema.run.id, input.runId), eq(schema.run.workspaceId, ctx.workspaceId)))
-        .limit(1);
-      if (!runRow) throw new TRPCError({ code: "NOT_FOUND", message: "Run not found." });
-      if (runRow.status !== "completed") {
-        throw new TRPCError({ code: "CONFLICT", message: "Only completed runs can be shared." });
-      }
-
-      let hasPhi = false;
-      if (runRow.correctedRef) {
-        try {
-          hasPhi = containsPhi(JSON.parse(await blobStore.get(runRow.correctedRef)));
-        } catch {
-          hasPhi = false;
-        }
-      }
-
-      if (hasPhi && !input.redact) {
-        // do not silently share PHI. tell the client to re-call with redact:true.
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message:
-            "This report contains patient identifiers. Share a redacted copy (redact: true) instead.",
-        });
-      }
-
-      const token = createId("reportShare");
-      let redacted = false;
-      if (hasPhi && input.redact && runRow.correctedRef) {
-        const parsed = JSON.parse(await blobStore.get(runRow.correctedRef));
-        const key = `${ctx.workspaceId}/${input.runId}/share-${token}.json`;
-        const safe = JSON.stringify(redactPhi(parsed), null, 2);
-        const { sha256, sizeBytes } = await blobStore.put(key, safe, "application/json");
-        // blobStore.put created the row with the bytes; merge the metadata onto it.
-        await ctx.db
-          .insert(schema.storedObject)
-          .values({
-            key,
-            workspaceId: ctx.workspaceId,
-            bucket: "local",
-            kind: "export",
-            sizeBytes,
-            contentType: "application/json",
-            sha256,
-            containsPhi: false,
-            uploadState: "stored",
-          })
-          .onConflictDoUpdate({
-            target: schema.storedObject.key,
-            set: { bucket: "local", kind: "export", sizeBytes, sha256, uploadState: "stored" },
-          });
-        redacted = true;
-      }
-
-      const days = input.expiresInDays ?? SHARE_TTL_DAYS;
-      const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-      await ctx.db.insert(schema.reportShare).values({
-        token,
-        runId: input.runId,
-        workspaceId: ctx.workspaceId,
-        createdBy: ctx.user.id,
-        redacted,
-        expiresAt,
-      });
-      logger.info("run.share", `${input.runId} shared as ${token} (redacted=${redacted})`);
-      return { token, redacted, expiresAt };
-    }),
-
-  // revoke a share link. immediate; the public read path checks revokedAt.
-  revokeShare: workspaceProcedure
-    .input(z.object({ workspaceId: z.string(), token: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const res = await ctx.db
-        .update(schema.reportShare)
-        .set({ revokedAt: new Date() })
-        .where(
-          and(
-            eq(schema.reportShare.token, input.token),
-            eq(schema.reportShare.workspaceId, ctx.workspaceId),
-          ),
-        )
-        .returning({ token: schema.reportShare.token });
-      if (res.length === 0) throw new TRPCError({ code: "NOT_FOUND", message: "Share not found." });
-      return { revoked: true };
-    }),
 });
-
-// re-export for tests that assert the share ttl.
-export { SHARE_TTL_DAYS };

@@ -1,7 +1,6 @@
 import { ComplianceSection } from "@/components/marketing/compliance-section";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { Hero } from "@/components/marketing/hero";
-import { LiveProof } from "@/components/marketing/live-proof";
 import { PipelineSection } from "@/components/marketing/pipeline-section";
 import { ReportPreview } from "@/components/marketing/report-preview";
 import { ScaleCards } from "@/components/marketing/scale-cards";
@@ -40,7 +39,6 @@ export default function LandingPage() {
       />
       <Hero />
       <StandardsBar />
-      <LiveProof />
       <PipelineSection />
       <ReportPreview />
       <ScaleCards />

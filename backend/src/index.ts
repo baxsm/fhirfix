@@ -8,7 +8,6 @@ import { initSentry } from "@/lib/sentry";
 import { apiV1 } from "@/routes/api-v1/index";
 import { exportRoutes } from "@/routes/export";
 import { polarWebhookRoutes } from "@/routes/polar-webhook";
-import { publicRoutes } from "@/routes/public";
 import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
 
@@ -27,8 +26,6 @@ const dashboardCors = cors({
 app.use("/trpc/*", dashboardCors);
 app.use("/api/auth/*", dashboardCors);
 app.use("/api/runs/*", dashboardCors);
-app.use("/api/demo/*", dashboardCors);
-app.use("/api/share/*", dashboardCors);
 
 app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
 
@@ -37,8 +34,6 @@ app.route("/api/v1", apiV1);
 // Better Auth owns all /api/auth/** routes (sign-in/up, verify, reset, org, etc).
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
-// unauthenticated marketing demo + public share reads (rate-limited, PHI-safe).
-app.route("/", publicRoutes);
 // authenticated report exports + corrected-artifact fetch (session-gated REST).
 app.route("/", exportRoutes);
 // Polar billing webhooks (server-to-server, signature-verified, no session).

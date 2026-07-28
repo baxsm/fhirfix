@@ -111,27 +111,7 @@ export const finding = pgTable(
   }),
 );
 
-export const reportShare = pgTable(
-  "report_share",
-  {
-    token: text("token").primaryKey(), // shr_...
-    runId: text("run_id").notNull(),
-    workspaceId: text("workspace_id").notNull(),
-    createdBy: text("created_by").notNull(), // user.id
-    redacted: boolean("redacted").notNull().default(false), // corrected copy was PHI-safe
-    viewCount: integer("view_count").notNull().default(0),
-    expiresAt: timestamp("expires_at", { withTimezone: true }),
-    revokedAt: timestamp("revoked_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => ({
-    byRun: index("report_share_run_idx").on(t.runId),
-  }),
-);
-
 export type Run = typeof run.$inferSelect;
 export type NewRun = typeof run.$inferInsert;
 export type Finding = typeof finding.$inferSelect;
 export type NewFinding = typeof finding.$inferInsert;
-export type ReportShare = typeof reportShare.$inferSelect;
-export type NewReportShare = typeof reportShare.$inferInsert;

@@ -68,15 +68,15 @@ export function ScoreLift({ before, after }: { before: number; after: number }) 
     <div className="flex items-center gap-1.5 font-mono text-xs tabular-nums">
       <span className="text-muted-foreground">{before}</span>
       <ArrowRight className="size-3 text-muted-foreground/50" />
-      <span className="text-emerald-400">{after}</span>
-      {gain > 0 && <span className="text-emerald-400">+{gain}</span>}
+      <span className="text-success">{after}</span>
+      {gain > 0 && <span className="text-success">+{gain}</span>}
     </div>
   );
 }
 
 export function RoutePill({ method, path }: { method: "GET" | "POST"; path: string }) {
   const tone =
-    method === "GET" ? "bg-emerald-500/10 text-emerald-400" : "bg-interactive/10 text-interactive";
+    method === "GET" ? "bg-success/10 text-success" : "bg-interactive/10 text-interactive";
   return (
     <div className="inline-flex items-center gap-2 rounded-lg border bg-card px-2.5 py-1.5">
       <span className={cn("rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold", tone)}>
@@ -106,7 +106,7 @@ export function ParamRow({
         <code className="font-mono text-sm font-medium">{name}</code>
         <span className="font-mono text-xs text-muted-foreground">{type}</span>
         {noChip ? null : required ? (
-          <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+          <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
             required
           </span>
         ) : (

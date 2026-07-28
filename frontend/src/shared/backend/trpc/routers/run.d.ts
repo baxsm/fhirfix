@@ -1,5 +1,4 @@
 import { schema } from "@/lib/db";
-declare const SHARE_TTL_DAYS = 30;
 export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import("drizzle-orm/postgres-js").PostgresJsDatabase<typeof schema> & {
@@ -105,12 +104,6 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
             }[];
             corrected: string | null;
             input: string | null;
-            share: {
-                token: string;
-                redacted: boolean;
-                expiresAt: Date | null;
-                revokedAt: Date | null;
-            } | null;
         };
         meta: object;
     }>;
@@ -211,29 +204,4 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
         };
         meta: object;
     }>;
-    share: import("@trpc/server").TRPCMutationProcedure<{
-        input: {
-            workspaceId: string;
-            runId: string;
-            redact?: boolean | undefined;
-            expiresInDays?: number | undefined;
-        };
-        output: {
-            token: string;
-            redacted: boolean;
-            expiresAt: Date;
-        };
-        meta: object;
-    }>;
-    revokeShare: import("@trpc/server").TRPCMutationProcedure<{
-        input: {
-            workspaceId: string;
-            token: string;
-        };
-        output: {
-            revoked: boolean;
-        };
-        meta: object;
-    }>;
 }>>;
-export { SHARE_TTL_DAYS };

@@ -547,12 +547,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
                 }[];
                 corrected: string | null;
                 input: string | null;
-                share: {
-                    token: string;
-                    redacted: boolean;
-                    expiresAt: Date | null;
-                    revokedAt: Date | null;
-                } | null;
             };
             meta: object;
         }>;
@@ -650,30 +644,6 @@ export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
             } | {
                 cancelled: true;
                 status: "failed";
-            };
-            meta: object;
-        }>;
-        share: import("@trpc/server").TRPCMutationProcedure<{
-            input: {
-                workspaceId: string;
-                runId: string;
-                redact?: boolean | undefined;
-                expiresInDays?: number | undefined;
-            };
-            output: {
-                token: string;
-                redacted: boolean;
-                expiresAt: Date;
-            };
-            meta: object;
-        }>;
-        revokeShare: import("@trpc/server").TRPCMutationProcedure<{
-            input: {
-                workspaceId: string;
-                token: string;
-            };
-            output: {
-                revoked: boolean;
             };
             meta: object;
         }>;

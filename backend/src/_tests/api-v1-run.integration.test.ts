@@ -3,7 +3,7 @@ import { grantTrialCredits } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
 import { generateKey } from "@/lib/api-key";
 import { db, schema } from "@/lib/db";
-import { DEMO_SAMPLES } from "@/lib/demo-samples";
+import { SAMPLE_FIXTURES } from "./fixtures-samples";
 import { createId } from "@/lib/id";
 import { apiV1 } from "@/routes/api-v1/index";
 
@@ -39,8 +39,8 @@ async function post(path: string, key: string, body: unknown, idem?: string): Pr
   return apiV1.request(path, { method: "POST", headers, body: JSON.stringify(body) });
 }
 
-const patientSample = DEMO_SAMPLES.find((s) => s.kind === "fhir_json")?.content ?? "";
-const hl7Sample = DEMO_SAMPLES.find((s) => s.kind === "hl7v2")?.content ?? "";
+const patientSample = SAMPLE_FIXTURES.find((s) => s.kind === "fhir_json")?.content ?? "";
+const hl7Sample = SAMPLE_FIXTURES.find((s) => s.kind === "hl7v2")?.content ?? "";
 
 afterAll(async () => {
   const runs = await db

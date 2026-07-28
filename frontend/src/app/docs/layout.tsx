@@ -16,9 +16,6 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         </Link>
         <nav className="flex items-center gap-1">
           <Button asChild variant="ghost" size="sm">
-            <Link href="/playground">Playground</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
             <Link href="/pricing">Pricing</Link>
           </Button>
           <Button asChild size="sm">

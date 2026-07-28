@@ -33,7 +33,7 @@ export function Hero() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-11 px-5 text-[0.95rem]">
-              <Link href="/playground">Try the playground</Link>
+              <Link href="/docs">Read the docs</Link>
             </Button>
           </div>
 

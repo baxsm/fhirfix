@@ -187,7 +187,6 @@ crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected));`;
 export default function DocsPage() {
   return (
     <div className="space-y-12">
-      {/* intro: title prose left, the playground callout takes the rail slot so the two-column */}
       <div className="grid gap-x-10 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
         <header className="min-w-0 space-y-2">
           <p className="text-xs text-muted-foreground">API reference</p>

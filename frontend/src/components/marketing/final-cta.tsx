@@ -33,7 +33,7 @@ export function FinalCta() {
                 variant="outline"
                 className="h-11 border-white/25 bg-transparent px-5 text-[0.95rem] text-white hover:bg-white/10 hover:text-white"
               >
-                <Link href="/playground">Try the playground</Link>
+                <Link href="/docs">Read the docs</Link>
               </Button>
             </div>
           </div>

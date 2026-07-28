@@ -9,7 +9,6 @@ import {
   Download,
   FileWarning,
   Loader2,
-  Share2,
   Sparkles,
   TriangleAlert,
   Wrench,
@@ -40,7 +39,6 @@ import {
 import { FindingDetail } from "./finding-detail";
 import type { FindingRow, Severity } from "./report-types";
 import { describeFailure } from "./run-failure";
-import { ShareDialog } from "./share-dialog";
 
 const SEVERITY_LABEL: Record<Severity, string> = {
   error: "Errors",
@@ -121,12 +119,6 @@ interface RunData {
   findings: FindingRow[];
   corrected: string | null;
   input: string | null;
-  share: {
-    token: string;
-    redacted: boolean;
-    expiresAt: string | Date | null;
-    revokedAt: string | Date | null;
-  } | null;
 }
 
 export function ReportView({
@@ -162,7 +154,6 @@ export function ReportView({
   const [preset, setPreset] = useState<Preset>("all");
   const [facets, setFacets] = useState<Facets>({ ...EMPTY_FACETS });
   const [busyFp, setBusyFp] = useState<string | null>(null);
-  const [shareOpen, setShareOpen] = useState(false);
   const [applyingAll, setApplyingAll] = useState(false);
 
   const setPresetAndFacets = (p: Preset) => {
@@ -331,10 +322,6 @@ export function ReportView({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
-              <Share2 className="size-3.5" />
-              Share
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -460,16 +447,6 @@ export function ReportView({
           </>
         )}
       </div>
-
-      <ShareDialog
-        open={shareOpen}
-        onOpenChange={setShareOpen}
-        workspaceId={workspaceId}
-        runId={runId}
-        existing={data?.share ?? null}
-        client={client}
-        onChanged={() => invalidate()}
-      />
     </div>
   );
 }

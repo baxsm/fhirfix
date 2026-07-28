@@ -241,7 +241,7 @@ export function MappingsTable({
                           <div className="flex flex-col gap-0.5">
                             <span className="text-xs text-muted-foreground">Workspace</span>
                             <span
-                              className="text-[11px] text-amber-600"
+                              className="text-[11px] text-warning"
                               title={overriddenBy[m.id]
                                 ?.map((w) => `${w.sourceSystem} uses ${w.targetValue}`)
                                 .join("\n")}

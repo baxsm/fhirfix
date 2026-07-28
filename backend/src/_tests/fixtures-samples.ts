@@ -1,4 +1,4 @@
-export interface DemoSample {
+export interface SampleFixture {
   id: string;
   label: string;
   kind: "fhir_json" | "hl7v2";
@@ -6,7 +6,7 @@ export interface DemoSample {
   content: string;
 }
 
-export const DEMO_SAMPLES: DemoSample[] = [
+export const SAMPLE_FIXTURES: SampleFixture[] = [
   {
     id: "patient-naive",
     label: "US Core Patient (naive)",
