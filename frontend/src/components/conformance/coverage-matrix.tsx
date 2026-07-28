@@ -160,9 +160,16 @@ export function CoverageMatrix({
                     </TableCell>
                     <TableCell className="whitespace-normal">
                       <div className="flex flex-col items-start gap-1">
-                        <StatusDot tone={RESULT_TONE[cell.result]}>
-                          {RESULT_LABEL[cell.result]}
-                        </StatusDot>
+                        {/* "not tested" is the default for most rows, so it gets no dot */}
+                        {cell.result === "skip" || cell.result === "omit" ? (
+                          <span className="text-xs text-muted-foreground/70">
+                            {RESULT_LABEL[cell.result]}
+                          </span>
+                        ) : (
+                          <StatusDot tone={RESULT_TONE[cell.result]}>
+                            {RESULT_LABEL[cell.result]}
+                          </StatusDot>
+                        )}
                         {moved && (
                           <span
                             className={cn(

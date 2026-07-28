@@ -157,74 +157,71 @@ export function ConformanceView({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="raised overflow-hidden rounded-md border bg-card">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Endpoint</TableHead>
-                  <TableHead className="w-64">Status</TableHead>
-                  <TableHead className="w-28">Result</TableHead>
-                  <TableHead className="w-20 text-right">Passed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="enter-stagger">
-                {packets.map((row) => {
-                  const isSelected = row.id === selectedId;
-                  return (
-                    <TableRow
-                      key={row.id}
-                      aria-current={isSelected}
-                      tabIndex={isSelected ? undefined : 0}
-                      onClick={isSelected ? undefined : () => setOpenPacket(row.id)}
-                      onKeyDown={
-                        isSelected
-                          ? undefined
-                          : (e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                setOpenPacket(row.id);
-                              }
-                            }
-                      }
-                      className={cn(isSelected ? "bg-accent/40" : "row-interactive cursor-pointer")}
-                    >
-                      <TableCell className="max-w-0">
-                        <span className="block truncate font-mono text-xs">
-                          {row.targetEndpoint}
+          <div className="raised divide-y overflow-hidden rounded-md border bg-card">
+            {packets.map((row) => {
+              const isSelected = row.id === selectedId;
+              const total =
+                row.passCount != null && row.failCount != null
+                  ? row.passCount + row.failCount
+                  : null;
+              const done = row.status === "completed";
+              return (
+                // biome-ignore lint/a11y/useSemanticElements: the selected row is inert, not a button
+                <div
+                  key={row.id}
+                  role={isSelected ? undefined : "button"}
+                  aria-current={isSelected}
+                  tabIndex={isSelected ? undefined : 0}
+                  onClick={isSelected ? undefined : () => setOpenPacket(row.id)}
+                  onKeyDown={
+                    isSelected
+                      ? undefined
+                      : (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setOpenPacket(row.id);
+                          }
+                        }
+                  }
+                  className={cn(
+                    "flex items-center gap-4 px-4 py-3",
+                    isSelected ? "bg-accent/40" : "row-interactive cursor-pointer",
+                  )}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-mono text-[13px]">{row.targetEndpoint}</p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {row.testKits.join(", ")}
+                      {!done ? ` (${row.status})` : null}
+                    </p>
+                    {row.status === "failed" && row.errorMessage ? (
+                      <p className="mt-1 text-xs leading-relaxed text-destructive">
+                        {row.errorMessage}
+                      </p>
+                    ) : null}
+                  </div>
+                  {total != null ? (
+                    <div className="shrink-0 text-right">
+                      <p className="font-mono text-[0.9375rem] tabular-nums">
+                        <span
+                          className={
+                            row.overallResult === "pass" ? "text-success" : "text-destructive"
+                          }
+                        >
+                          {row.passCount}
                         </span>
-                        <span className="mt-0.5 block text-[0.6875rem] text-muted-foreground">
-                          {row.testKits.join(", ")}
-                        </span>
-                      </TableCell>
-                      <TableCell className="whitespace-normal">
-                        <StatusDot tone={STATUS_TONE[row.status] ?? "neutral"}>
-                          {row.status}
-                        </StatusDot>
-                        {row.status === "failed" && row.errorMessage && (
-                          <span className="mt-1 block text-[0.6875rem] leading-relaxed text-destructive">
-                            {row.errorMessage}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {row.overallResult ? (
-                          <StatusDot tone={OVERALL_TONE[row.overallResult] ?? "neutral"}>
-                            {row.overallResult}
-                          </StatusDot>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-xs tabular-nums">
-                        {row.passCount != null && row.failCount != null
-                          ? `${row.passCount}/${row.passCount + row.failCount}`
-                          : "—"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                        <span className="text-muted-foreground">/{total}</span>
+                      </p>
+                      <p className="text-[0.6875rem] text-muted-foreground">passed</p>
+                    </div>
+                  ) : (
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {done ? "no results" : "running"}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {selectedId && (
