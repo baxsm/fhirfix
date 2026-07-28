@@ -32,6 +32,13 @@ const base = createEnv({
       .default("true")
       .transform((v) => v === "true"),
 
+    // most runs complete here, so auto-recharge fires here too.
+    POLAR_ACCESS_TOKEN: z.string().default(""),
+    POLAR_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
+    POLAR_PRODUCT_PACK_10: z.string().default(""),
+    POLAR_PRODUCT_PACK_25: z.string().default(""),
+    POLAR_PRODUCT_PACK_100: z.string().default(""),
+
     // deep links in alert emails point back at the dashboard.
     APP_URL: z.url().default("http://localhost:3000"),
   },

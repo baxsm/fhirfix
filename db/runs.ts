@@ -2,8 +2,8 @@ import { and, desc, eq, gte, lte, type SQL } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import type { BlobStore } from "./blob";
 import type { Db } from "./client";
-import { nextAlertThreshold, priceForRun } from "./credits";
-import { postLedgerEntry } from "./ledger";
+import { centsFromMicro, evaluateAutoRecharge, nextAlertThreshold, priceForRun } from "./credits";
+import { ensureBillingAccount, postLedgerEntry } from "./ledger";
 import { hasNotification, recordNotification } from "./notifications";
 import * as schema from "./schema/index";
 
@@ -70,6 +70,18 @@ async function writeFindings(
   );
 }
 
+// a run started by a test-mode api key. only api-key runs can be test mode: the
+// dashboard and scheduled checks are always live.
+async function isTestModeRun(db: Db, runId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ mode: schema.apiKey.mode })
+    .from(schema.run)
+    .innerJoin(schema.apiKey, eq(schema.apiKey.id, schema.run.actorId))
+    .where(and(eq(schema.run.id, runId), eq(schema.run.actorType, "api_key")))
+    .limit(1);
+  return row?.mode === "test";
+}
+
 export async function persistCompletedRun(
   db: Db,
   blobStore: BlobStore,
@@ -108,7 +120,11 @@ export async function persistCompletedRun(
 
   await writeFindings(db, runId, workspaceId, result);
 
-  const chargeMicro = priceForRun({ resourceCount: result.resourceCount });
+  // a test key must not spend real credits. the UI sells "live" as the mode that
+  // spends, so charging a test run would be taking money we said we would not.
+  const chargeMicro = (await isTestModeRun(db, runId))
+    ? 0
+    : priceForRun({ resourceCount: result.resourceCount });
 
   await db
     .update(schema.run)
@@ -128,6 +144,13 @@ export async function persistCompletedRun(
     })
     .where(eq(schema.run.id, runId));
 
+  // a free run posts no ledger entry at all. a zero-amount debit would clutter
+  // the ledger with rows that never moved the balance.
+  if (chargeMicro === 0) {
+    const account = await ensureBillingAccount(db, workspaceId);
+    return { chargeMicro: 0, balanceAfter: account?.balanceMicroCredits ?? 0 };
+  }
+
   const { balanceAfter } = await postLedgerEntry(db, {
     workspaceId,
     type: "debit",
@@ -137,9 +160,87 @@ export async function persistCompletedRun(
     relatedRunId: runId,
   });
 
-  await maybeSendLowBalanceAlert(db, workspaceId, balanceAfter);
+  // top up first: a successful recharge means the balance is no longer low, so
+  // alerting before it would send a warning that is already out of date.
+  const afterRecharge = await maybeAutoRecharge(db, workspaceId, balanceAfter);
+  await maybeSendLowBalanceAlert(db, workspaceId, afterRecharge);
 
-  return { chargeMicro, balanceAfter };
+  return { chargeMicro, balanceAfter: afterRecharge };
+}
+
+// charging a card needs a payment provider, which db/ does not depend on. the
+// backend registers this at startup, same as the email transport.
+type AutoRechargeHandler = (args: {
+  workspaceId: string;
+  rechargeCents: number;
+}) => Promise<{ credited: boolean; balanceMicro: number }>;
+
+let autoRechargeHandler: AutoRechargeHandler | null = null;
+
+export function setAutoRechargeHandler(handler: AutoRechargeHandler): void {
+  autoRechargeHandler = handler;
+}
+
+// returns the balance after any top-up, or the balance unchanged.
+async function maybeAutoRecharge(
+  db: Db,
+  workspaceId: string,
+  balanceAfter: number,
+): Promise<number> {
+  if (!autoRechargeHandler) return balanceAfter;
+
+  const account = await ensureBillingAccount(db, workspaceId);
+  if (!account) return balanceAfter;
+
+  const spendThisCycleCents = await purchasesThisCycleCents(db, workspaceId);
+  const decision = evaluateAutoRecharge({
+    balanceMicro: balanceAfter,
+    enabled: account.autoRechargeEnabled,
+    thresholdMicro: account.autoRechargeThreshold,
+    rechargeAmountCents: account.autoRechargeAmountCents,
+    spendThisCycleCents,
+    monthlySpendCapCents: account.monthlySpendCapCents,
+  });
+  if (!decision.shouldRecharge) return balanceAfter;
+
+  const result = await autoRechargeHandler({
+    workspaceId,
+    rechargeCents: decision.rechargeCents,
+  });
+  return result.credited ? result.balanceMicro : balanceAfter;
+}
+
+// purchases since the start of the current calendar month, which is the window
+// the monthly spend cap is measured against.
+async function purchasesThisCycleCents(db: Db, workspaceId: string): Promise<number> {
+  const now = new Date();
+  const cycleStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const rows = await db
+    .select({ amountMicro: schema.creditLedgerEntry.amountMicroCredits })
+    .from(schema.creditLedgerEntry)
+    .where(
+      and(
+        eq(schema.creditLedgerEntry.workspaceId, workspaceId),
+        eq(schema.creditLedgerEntry.type, "purchase"),
+        gte(schema.creditLedgerEntry.createdAt, cycleStart),
+      ),
+    );
+  return rows.reduce((sum, r) => sum + centsFromMicro(r.amountMicro), 0);
+}
+
+// db/ has no email dependency of its own, so the process that owns a transport
+// (backend, worker) registers one at startup. unset means no alert can be sent,
+// which is recorded as a failure rather than a silent success.
+type LowBalanceSender = (args: {
+  to: string;
+  threshold: number;
+  balanceMicro: number;
+}) => Promise<void>;
+
+let sendLowBalanceEmail: LowBalanceSender | null = null;
+
+export function setLowBalanceSender(sender: LowBalanceSender): void {
+  sendLowBalanceEmail = sender;
 }
 
 export async function maybeSendLowBalanceAlert(
@@ -192,19 +293,48 @@ export async function maybeSendLowBalanceAlert(
   if (await hasNotification(db, { workspaceId, type: "credits.low", dedup })) return;
 
   const target = await resolveBillingEmail(db, workspaceId, account.contactUserId);
+  // no contact to reach: record the miss honestly rather than logging a delivery.
+  if (!target) {
+    await recordNotification(db, {
+      workspaceId,
+      channel: "email",
+      type: "credits.low",
+      target: "unknown",
+      status: "failed",
+      metadata: { dedup, threshold, balanceAfter, baselineMicro, reason: "no billing contact" },
+    });
+    return;
+  }
+
+  // send first, then record what actually happened. recording "sent" before the
+  // send is how the log ends up claiming deliveries that never occurred.
+  let status: "sent" | "failed" = "sent";
+  let failure: string | undefined;
+  try {
+    if (!sendLowBalanceEmail) throw new Error("no email transport configured");
+    await sendLowBalanceEmail({ to: target, threshold, balanceMicro: balanceAfter });
+  } catch (error) {
+    status = "failed";
+    failure = error instanceof Error ? error.message : String(error);
+  }
 
   await recordNotification(db, {
     workspaceId,
     channel: "email",
     type: "credits.low",
-    target: target ?? "unknown",
-    status: "sent",
-    metadata: { dedup, threshold, balanceAfter, baselineMicro },
+    target,
+    status,
+    metadata: { dedup, threshold, balanceAfter, baselineMicro, ...(failure ? { failure } : {}) },
   });
-  await db
-    .update(schema.billingAccount)
-    .set({ lastAlertThreshold: threshold })
-    .where(eq(schema.billingAccount.workspaceId, workspaceId));
+
+  // only consume the threshold when the alert actually went out, so a transient
+  // failure does not permanently silence this level.
+  if (status === "sent") {
+    await db
+      .update(schema.billingAccount)
+      .set({ lastAlertThreshold: threshold })
+      .where(eq(schema.billingAccount.workspaceId, workspaceId));
+  }
 }
 
 // the billing contact email, else the workspace owner's. best-effort.

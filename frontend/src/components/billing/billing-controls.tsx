@@ -129,7 +129,7 @@ function AutoRechargeRow({
             Top up automatically when the balance runs low.
           </p>
           <InlineNote className="mt-2">
-            Saved as a preference, but charging is not connected yet.
+            Charges the card from your last purchase. Buy credits once to set it up.
           </InlineNote>
         </div>
         <Switch id="ar-enabled" checked={enabled} onCheckedChange={setEnabled} />
@@ -176,7 +176,7 @@ function AutoRechargeRow({
 
       {enabled && autoRecharge.blockedByCap && (
         <p className="mt-2.5 text-xs text-warning">
-          Your monthly spend cap is already reached, so this would not fire even once connected.
+          Your monthly spend cap is already reached, so auto-recharge will not fire.
         </p>
       )}
 
@@ -254,12 +254,11 @@ function SpendCapRow({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <Label htmlFor="cap-enabled" className="cursor-pointer text-sm font-medium">
-            Monthly spend alert
+            Monthly spend cap
           </Label>
-          {/* named "alert", not "cap", because that is what it does */}
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Email us a warning when purchases reach a monthly limit. It does not stop runs - your
-            balance already does that.
+            Stops auto-recharge once purchases reach this much in a month. It does not stop runs -
+            your balance already does that.
           </p>
         </div>
         <Switch id="cap-enabled" checked={enabled} onCheckedChange={setEnabled} />

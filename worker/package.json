@@ -16,6 +16,7 @@
     "typecheck": "bun x tsc --noEmit"
   },
   "dependencies": {
+    "@polar-sh/sdk": "^0.48.1",
     "@t3-oss/env-core": "0.13.11",
     "bullmq": "5.80.2",
     "drizzle-orm": "0.45.2",

@@ -51,6 +51,45 @@ export async function createCheckout(args: {
   return { url: checkout.url, id: checkout.id };
 }
 
+export type OffSessionResult =
+  | { ok: true; orderId: string }
+  | { ok: false; reason: "no_payment_method" | "declined" | "not_enabled" | "error"; detail: string };
+
+// charge a saved payment method with no user present: create a draft order, then
+// finalize it. the order carries the same metadata as a checkout, so the existing
+// order.paid webhook credits the ledger by the same path.
+export async function chargeSavedMethod(args: {
+  packId: string;
+  productId: string;
+  workspaceId: string;
+  creditsMicro: number;
+  polarCustomerId: string;
+}): Promise<OffSessionResult> {
+  const polar = getPolar();
+  try {
+    const draft = await polar.orders.create({
+      customerId: args.polarCustomerId,
+      productId: args.productId,
+      metadata: {
+        workspaceId: args.workspaceId,
+        packId: args.packId,
+        creditsMicro: String(args.creditsMicro),
+        autoRecharge: "true",
+      },
+    });
+    const paid = await polar.orders.finalize({ id: draft.id });
+    return { ok: true, orderId: paid.id };
+  } catch (error) {
+    const status = (error as { statusCode?: number })?.statusCode;
+    const detail = error instanceof Error ? error.message : String(error);
+    // 402 is a decline or a missing/unusable method; 403 means the organization
+    // is not approved for off-session charges at all.
+    if (status === 402) return { ok: false, reason: "declined", detail };
+    if (status === 403) return { ok: false, reason: "not_enabled", detail };
+    return { ok: false, reason: "error", detail };
+  }
+}
+
 export type ParsedOrder = {
   polarOrderId: string;
   workspaceId: string;

@@ -10,11 +10,14 @@ import { apiV1 } from "@/routes/api-v1/index";
 const workspaces: string[] = [];
 const keyIds: string[] = [];
 
-async function seedKey(): Promise<{ full: string; workspaceId: string }> {
+async function seedKey(mode: "test" | "live" = "test"): Promise<{
+  full: string;
+  workspaceId: string;
+}> {
   const workspaceId = `apiv1run_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
   workspaces.push(workspaceId);
   await grantTrialCredits(db, workspaceId, "system");
-  const { full, prefix, hash } = generateKey("test");
+  const { full, prefix, hash } = generateKey(mode);
   const id = createId("apiKey");
   keyIds.push(id);
   await db.insert(schema.apiKey).values({
@@ -23,7 +26,7 @@ async function seedKey(): Promise<{ full: string; workspaceId: string }> {
     name: "run key",
     prefix,
     hashedKey: hash,
-    mode: "test",
+    mode,
     scopes: ["validate", "convert", "fix", "runs", "mappings"],
     createdBy: "system",
   });
@@ -89,7 +92,7 @@ describe("api-v1 validate/fix/convert", () => {
   }, 30_000);
 
   test("fix applies safe fixes, re-verifies, returns corrected, and debits", async () => {
-    const { full } = await seedKey();
+    const { full } = await seedKey("live");
     const res = await post("/fix", full, { input: patientSample });
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
@@ -112,6 +115,23 @@ describe("api-v1 validate/fix/convert", () => {
       .from(schema.creditLedgerEntry)
       .where(eq(schema.creditLedgerEntry.relatedRunId, body.runId));
     expect(debits.length).toBe(1);
+  }, 30_000);
+
+  test("a test-mode key runs without spending credits", async () => {
+    if (!patientSample) return;
+    const { full } = await seedKey("test");
+    const res = await post("/fix", full, { input: patientSample });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { runId: string };
+
+    const [row] = await db.select().from(schema.run).where(eq(schema.run.id, body.runId)).limit(1);
+    expect(row?.creditsCharged).toBe(0);
+    // and no ledger entry at all, not a zero-amount one.
+    const debits = await db
+      .select({ id: schema.creditLedgerEntry.id })
+      .from(schema.creditLedgerEntry)
+      .where(eq(schema.creditLedgerEntry.relatedRunId, body.runId));
+    expect(debits.length).toBe(0);
   }, 30_000);
 
   test("convert turns HL7v2 into FHIR resources", async () => {

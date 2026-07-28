@@ -46,9 +46,9 @@ const defaults = {
 };
 
 describe("BillingControls", () => {
-  it("says auto-recharge is not active, whether it is on or off", () => {
+  it("names the card auto-recharge will charge, whether it is on or off", () => {
     const { rerender } = render(<BillingControls {...defaults} />);
-    expect(screen.getByText(/charging is not connected yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/card from your last purchase/i)).toBeInTheDocument();
 
     rerender(
       <BillingControls
@@ -61,7 +61,7 @@ describe("BillingControls", () => {
         }}
       />,
     );
-    expect(screen.getByText(/charging is not connected yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/card from your last purchase/i)).toBeInTheDocument();
   });
 
   it("reveals the recharge fields only when enabled", () => {
@@ -95,23 +95,23 @@ describe("BillingControls", () => {
     expect(screen.getAllByRole("button", { name: /^save$/i })).toHaveLength(1);
   });
 
-  it("saves the spend alert as cents, and clears it when switched off", () => {
+  it("saves the spend cap as cents, and clears it when switched off", () => {
     saveMutate.mockReset();
     const { rerender } = render(
       <BillingControls {...defaults} spendCap={{ monthlyCents: null }} />,
     );
-    fireEvent.click(screen.getByRole("switch", { name: /monthly spend alert/i }));
+    fireEvent.click(screen.getByRole("switch", { name: /monthly spend cap/i }));
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     expect(saveMutate).toHaveBeenCalledWith(expect.objectContaining({ monthlyCents: 10000 }));
 
     saveMutate.mockReset();
     rerender(<BillingControls {...defaults} spendCap={{ monthlyCents: 10000 }} />);
-    fireEvent.click(screen.getByRole("switch", { name: /monthly spend alert/i }));
+    fireEvent.click(screen.getByRole("switch", { name: /monthly spend cap/i }));
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     expect(saveMutate).toHaveBeenCalledWith(expect.objectContaining({ monthlyCents: null }));
   });
 
-  it("describes the alert as a notice, not a limit that stops runs", () => {
+  it("says the cap stops auto-recharge, not runs", () => {
     render(<BillingControls {...defaults} />);
     expect(screen.getByText(/does not stop runs/i)).toBeInTheDocument();
   });

@@ -12,6 +12,21 @@ export declare function createCheckout(args: {
     url: string;
     id: string;
 }>;
+export type OffSessionResult = {
+    ok: true;
+    orderId: string;
+} | {
+    ok: false;
+    reason: "no_payment_method" | "declined" | "not_enabled" | "error";
+    detail: string;
+};
+export declare function chargeSavedMethod(args: {
+    packId: string;
+    productId: string;
+    workspaceId: string;
+    creditsMicro: number;
+    polarCustomerId: string;
+}): Promise<OffSessionResult>;
 export type ParsedOrder = {
     polarOrderId: string;
     workspaceId: string;

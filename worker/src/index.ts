@@ -1,9 +1,13 @@
+import { performAutoRecharge } from "@shared/db/auto-recharge";
+import { setAutoRechargeHandler, setLowBalanceSender } from "@shared/db/runs";
 import { ENGINE_VERSION } from "@shared/engine";
 import { Worker } from "bullmq";
 import { type ApplyJob, executeApply } from "./apply-service";
 import { type ConformanceJob, executeConformancePacket } from "./conformance-service";
+import { sendLowBalanceEmail } from "./email";
 import { env } from "./env";
-import { logger } from "./lib";
+import { db, logger } from "./lib";
+import { chargeSavedMethod, isBillingConfigured, productIdForPack } from "./polar";
 import type { WebhookJob } from "./queues";
 import { executeRun, type RemediationJob } from "./run-service";
 import { executeScheduledCheck, type ScheduleJob } from "./schedule-service";
@@ -12,6 +16,22 @@ import { executeWebhook } from "./webhook-service";
 
 const connection = { url: env.REDIS_URL };
 const concurrency = Number(env.WORKER_CONCURRENCY);
+
+// runs complete here, so this is the process that hits the low-balance threshold
+// and the auto-recharge trigger.
+setLowBalanceSender(sendLowBalanceEmail);
+setAutoRechargeHandler((args) =>
+  performAutoRecharge(
+    db,
+    {
+      charge: chargeSavedMethod,
+      productIdForPack,
+      isConfigured: isBillingConfigured,
+      onError: (context, detail) => logger.error(context, detail),
+    },
+    args,
+  ),
+);
 
 const worker = new Worker<RemediationJob>(
   "remediation",

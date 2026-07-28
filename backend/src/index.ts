@@ -1,7 +1,10 @@
 import { trpcServer } from "@hono/trpc-server";
+import { setAutoRechargeHandler, setLowBalanceSender } from "@shared/db/runs";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "@/auth/auth";
+import { runAutoRecharge } from "@/lib/auto-recharge";
+import { sendLowBalanceEmail } from "@/lib/billing-email";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
@@ -12,6 +15,9 @@ import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
 
 initSentry();
+// the REST api completes runs in-process, so this side needs a transport too.
+setLowBalanceSender(sendLowBalanceEmail);
+setAutoRechargeHandler(runAutoRecharge);
 
 const app = new Hono();
 
