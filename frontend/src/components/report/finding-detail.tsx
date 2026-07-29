@@ -25,14 +25,18 @@ const SEVERITY_COLOR: Record<Severity, string> = {
   info: "text-info",
 };
 
+// a diff nobody can locate the change in is worse than a short one: when the leaf
+// is not found, head the document rather than rendering all of it
+const FRAGMENT_FALLBACK_LINES = 11;
+
 function fragmentFor(fhirpath: string | null, before: string, after: string) {
-  if (!fhirpath) return { before, after };
-  const leaf = fhirpath.split(/[.[]/).filter(Boolean).pop() ?? "";
-  if (!leaf) return { before, after };
+  const head = (src: string) => src.split("\n").slice(0, FRAGMENT_FALLBACK_LINES).join("\n");
+  const leaf = fhirpath?.split(/[.[]/).filter(Boolean).pop() ?? "";
+  if (!leaf) return { before: head(before), after: head(after) };
   const grab = (src: string) => {
     const lines = src.split("\n");
     const hit = lines.findIndex((l) => l.includes(`"${leaf}"`));
-    if (hit < 0) return src;
+    if (hit < 0) return head(src);
     return lines.slice(Math.max(0, hit - 2), Math.min(lines.length, hit + 6)).join("\n");
   };
   return { before: grab(before), after: grab(after) };
@@ -67,7 +71,7 @@ export function FindingDetail({
   const fragment = before && after ? fragmentFor(finding.fhirpath, before, after) : null;
 
   return (
-    <div className="flex max-h-[560px] flex-col">
+    <div className="flex flex-col">
       <div className="flex items-start gap-2.5 border-b px-4 py-3">
         <Icon className={cn("mt-0.5 size-4 shrink-0", SEVERITY_COLOR[finding.severity])} />
         <div className="min-w-0 flex-1">
@@ -90,7 +94,7 @@ export function FindingDetail({
         </Badge>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-auto px-4 py-3.5">
+      <div className="space-y-4 px-4 py-3.5">
         <p className="text-sm text-muted-foreground">{finding.suggestedFix}</p>
 
         {fragment && (
@@ -125,7 +129,6 @@ export function FindingDetail({
         </div>
       </div>
 
-      {/* actions pinned to the bottom so they stay visible for the selected finding */}
       {showActions && (
         <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 px-4 py-3">
           {canApply && onApply && (
@@ -139,13 +142,12 @@ export function FindingDetail({
             </Button>
           )}
           {canAi && onFixWithAi && (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => onFixWithAi(finding)}
-            >
-              <Sparkles className="size-3.5" />
+            <Button size="sm" disabled={busy} onClick={() => onFixWithAi(finding)}>
+              {busy ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
               Fix with AI
             </Button>
           )}

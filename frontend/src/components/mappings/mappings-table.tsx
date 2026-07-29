@@ -207,12 +207,12 @@ export function MappingsTable({
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <code className="font-mono text-xs">{m.sourceValue}</code>
-                          {m.status === "suggested" && m.confidence != null && (
+                          {m.status === "suggested" && (
                             <Badge
                               variant="outline"
                               className="border-warning/30 bg-warning/10 text-[0.75rem] text-warning"
                             >
-                              {m.confidence}% confident
+                              Needs review
                             </Badge>
                           )}
                         </div>

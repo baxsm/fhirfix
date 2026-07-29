@@ -124,6 +124,7 @@ function deriveIdentifierSystem(
       sourceValue: authority,
       targetValue: `urn:fhirfix:unmapped:${authority.toLowerCase()}`,
       targetSystem: null,
+      // placeholder, not a measurement - never show this as a percentage
       confidence: 40,
       reason: `Authority "${authority}" appeared with a placeholder identifier system and has no registry entry.`,
     });

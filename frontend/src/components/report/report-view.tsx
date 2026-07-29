@@ -327,7 +327,7 @@ export function ReportView({
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="ghost" size="sm">
                   <Download className="size-3.5" />
                   Export
                 </Button>
