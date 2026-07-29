@@ -161,6 +161,22 @@ export function RunsView({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* a ?status=failed link can outlive the failure it pointed at, so say
+                      nothing is failing rather than showing a bare header and "0 of 0" */}
+                  {runs.length === 0 && (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={6} className="py-10 text-center">
+                        <p className="text-sm">No failed runs.</p>
+                        <button
+                          type="button"
+                          onClick={() => showFailedOnly(false)}
+                          className="mt-1 cursor-pointer rounded-sm text-xs text-muted-foreground underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                          Show all runs
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  )}
                   {runs.map((r) => {
                     const href = `/app/${workspace}/runs/${r.id}`;
                     const go = () => router.push(href);
@@ -256,8 +272,12 @@ export function RunsView({
           {/* the backend caps this list at 50, so say so rather than implying the workspace only ever */}
           <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
             <span className="font-mono tabular-nums">
-              {current * PAGE_SIZE + 1}-{current * PAGE_SIZE + runs.length} of {filtered.length}
-              {all.length >= 50 && !failedOnly && " (most recent 50)"}
+              {runs.length > 0 && (
+                <>
+                  {current * PAGE_SIZE + 1}-{current * PAGE_SIZE + runs.length} of {filtered.length}
+                  {all.length >= 50 && !failedOnly && " (most recent 50)"}
+                </>
+              )}
             </span>
             {pageCount > 1 && (
               <div className="flex items-center gap-2">

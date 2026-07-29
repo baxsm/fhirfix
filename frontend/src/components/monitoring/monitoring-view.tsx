@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Button } from "@/components/ui/button";
+import { LoadError } from "@/components/ui/load-error";
 import { PanelTab, PanelTabs } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
@@ -50,7 +50,7 @@ export function MonitoringView({
       />
 
       {wsQuery.isError ? (
-        <ViewError onRetry={() => wsQuery.refetch()} />
+        <LoadError what="monitoring" onRetry={() => wsQuery.refetch()} />
       ) : wsQuery.isPending || !workspaceId ? (
         <Skeleton className="h-96 w-full rounded-xl" />
       ) : (
@@ -89,14 +89,3 @@ export function MonitoringView({
   );
 }
 
-function ViewError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border bg-card px-6 py-14 text-center">
-      <h2 className="text-sm font-medium">Could not load monitoring</h2>
-      <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Retry
-      </Button>
-    </div>
-  );
-}

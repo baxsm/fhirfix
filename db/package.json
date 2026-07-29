@@ -13,6 +13,7 @@
     "./credits": "./credits.ts",
     "./cron": "./cron.ts",
     "./drift": "./drift.ts",
+    "./gdpr": "./gdpr.ts",
     "./ingest": "./ingest.ts",
     "./ledger": "./ledger.ts",
     "./mappings": "./mappings.ts",

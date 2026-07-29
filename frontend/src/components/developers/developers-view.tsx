@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingsSection } from "@/components/dashboard/settings-section";
-import { Button } from "@/components/ui/button";
+import { LoadError } from "@/components/ui/load-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
@@ -40,7 +40,7 @@ export function DevelopersView({
       />
 
       {wsQuery.isError ? (
-        <SectionError onRetry={() => wsQuery.refetch()} />
+        <LoadError what="developer settings" onRetry={() => wsQuery.refetch()} />
       ) : wsQuery.isPending || !workspaceId ? (
         <DevelopersSkeleton />
       ) : (
@@ -82,14 +82,3 @@ function DevelopersSkeleton() {
   );
 }
 
-function SectionError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border bg-card px-6 py-14 text-center">
-      <h2 className="text-sm font-medium">Could not load developer settings</h2>
-      <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Retry
-      </Button>
-    </div>
-  );
-}

@@ -13,6 +13,8 @@ import { useListOrganizations } from "@/lib/auth-client";
 import { useDelayedFlag } from "@/lib/use-delayed-flag";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
+import { describeFailure } from "@/components/report/run-failure";
+import { isRealFailure } from "./runs/run-status";
 import { ScoreTrend } from "./score-trend";
 
 interface RunRow {
@@ -24,6 +26,7 @@ interface RunRow {
   findingsTotal: number;
   findingsAutoFixable: number;
   createdAt: string | Date;
+  errorMessage: string | null;
 }
 
 export function OverviewView({
@@ -56,7 +59,8 @@ export function OverviewView({
   const loading = useDelayedFlag(settling);
   // data is on screen and being refreshed: annotate, never tear down.
   const refreshing = !settling && runsQuery.isFetching;
-  const failedRuns = runs.filter((r) => r.status === "failed");
+  // a run the user cancelled is not an alarm, so it never raises the notice
+  const failedRuns = runs.filter(isRealFailure);
   const inFlight = runs.filter((r) => r.status === "running" || r.status === "queued");
   const latest = runs[0];
 
@@ -88,32 +92,25 @@ export function OverviewView({
         <>
           {/* anything needing a decision comes first and only exists when it is real */}
           {(failedRuns.length > 0 || pendingMappings > 0) && (
-            <section className="space-y-2">
-              {failedRuns.length > 0 && (
-                <AttentionRow
-                  // one failure goes straight to it; several go to the filtered list,
-                  // so "Review" never drops the user into the unfiltered run history.
-                  href={
-                    failedRuns.length === 1 && failedRuns[0]
-                      ? `${base}/runs/${failedRuns[0].id}`
-                      : `${base}/runs?status=failed`
-                  }
-                  tone="danger"
-                  icon={AlertTriangle}
-                  title={`${failedRuns.length} ${failedRuns.length === 1 ? "run" : "runs"} failed`}
-                  body="The engine could not finish these. Open the run to see why."
-                  action="Review"
-                />
+            <section className="space-y-3">
+              {failedRuns.length > 0 && failedRuns[0] && (
+                <FailureNotice runs={failedRuns} base={base} />
               )}
               {pendingMappings > 0 && (
-                <AttentionRow
-                  href={`${base}/mappings`}
-                  tone="warning"
-                  icon={Map}
-                  title={`${pendingMappings} mapping ${pendingMappings === 1 ? "suggestion" : "suggestions"} to review`}
-                  body="Approving a suggestion lets future runs auto-fix it."
-                  action="Review"
-                />
+                <p className="flex items-center gap-2 text-[0.8125rem] text-muted-foreground">
+                  <Map className="size-3.5 shrink-0" />
+                  <span>
+                    {pendingMappings} mapping{" "}
+                    {pendingMappings === 1 ? "suggestion needs" : "suggestions need"} review.
+                    Approving one lets future runs auto-fix it.
+                  </span>
+                  <Link
+                    href={`${base}/mappings`}
+                    className="shrink-0 rounded-sm font-medium text-foreground underline underline-offset-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    Review
+                  </Link>
+                </p>
               )}
             </section>
           )}
@@ -160,6 +157,40 @@ function summaryLine({
     return `${failed} of your last ${runs} run${runs === 1 ? "" : "s"} failed and need a look.`;
   }
   return `${runs} check${runs === 1 ? "" : "s"} run in this workspace. Everything completed.`;
+}
+
+// a failure states the actual cause and is the only tinted surface on the page.
+// the suggestion beside it is a line of text: they are not the same kind of news.
+function FailureNotice({ runs, base }: { runs: RunRow[]; base: string }) {
+  const first = runs[0];
+  if (!first) return null;
+  const failure = describeFailure(first.errorMessage);
+  const many = runs.length > 1;
+
+  return (
+    <div className="rounded-lg border border-destructive/25 bg-destructive-subtle px-3.5 py-3">
+      <div className="flex items-start gap-2.5">
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.8125rem] font-medium leading-tight text-destructive">
+            {many ? `${runs.length} runs failed` : failure.title}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-foreground/80">
+            {many ? `Most recent: ${failure.title}. ${failure.cause}` : failure.cause}
+          </p>
+          {failure.next && (
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{failure.next}</p>
+          )}
+        </div>
+        <Button variant="outline" size="xs" asChild className="shrink-0">
+          <Link href={many ? `${base}/runs?status=failed` : `${base}/runs/${first.id}`}>
+            {many ? "See all" : "Open run"}
+            <ArrowRight className="size-3" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 function AttentionRow({

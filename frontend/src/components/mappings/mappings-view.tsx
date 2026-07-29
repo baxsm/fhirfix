@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Button } from "@/components/ui/button";
+import { LoadError } from "@/components/ui/load-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
@@ -53,7 +53,7 @@ export function MappingsView({
 
       {/* gated on workspaceId only: it arrives from the server, so there is no client waterfall */}
       {wsQuery.isError && !workspaceId ? (
-        <ViewError onRetry={() => wsQuery.refetch()} />
+        <LoadError what="mappings" onRetry={() => wsQuery.refetch()} />
       ) : !workspaceId ? (
         <Skeleton className="h-96 w-full rounded-xl" />
       ) : (
@@ -71,14 +71,3 @@ export function MappingsView({
   );
 }
 
-function ViewError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border bg-card px-6 py-14 text-center">
-      <h2 className="text-sm font-medium">Could not load mappings</h2>
-      <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Retry
-      </Button>
-    </div>
-  );
-}

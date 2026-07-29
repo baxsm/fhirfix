@@ -128,7 +128,7 @@ export declare const workspaceSettings: import("drizzle-orm/pg-core").PgTableWit
             tableName: "workspace_settings";
             dataType: "string";
             columnType: "PgText";
-            data: "free" | "team" | "premium";
+            data: "free" | "premium" | "team";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -175,7 +175,7 @@ export declare const workspaceSettings: import("drizzle-orm/pg-core").PgTableWit
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type WorkspaceSettings = typeof workspaceSettings.$inferSelect;
 export type NewWorkspaceSettings = typeof workspaceSettings.$inferInsert;

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
+import { LoadError } from "@/components/ui/load-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
@@ -77,7 +78,7 @@ export function BillingView({
       </header>
 
       {summary.isError ? (
-        <SectionError onRetry={() => summary.refetch()} />
+        <LoadError what="billing" onRetry={() => summary.refetch()} />
       ) : summary.isPending || !workspaceId ? (
         <BillingSkeleton />
       ) : (
@@ -327,14 +328,3 @@ function BillingSkeleton() {
   );
 }
 
-function SectionError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="raised flex flex-col items-center gap-3 rounded-xl border bg-card px-6 py-16 text-center">
-      <h2 className="font-medium">Could not load billing</h2>
-      <p className="text-sm text-muted-foreground">Check your connection and try again.</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Retry
-      </Button>
-    </div>
-  );
-}
