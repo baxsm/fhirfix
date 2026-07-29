@@ -60,7 +60,10 @@ export function WebhooksSection({
 
   const testPing = useMutation(
     trpc.developers.webhooks.testPing.mutationOptions({
-      onSuccess: (res) => toast.success(`Sent a ${res.event} test event to your endpoints.`),
+      onSuccess: (res) =>
+        res.delivered === 0
+          ? toast.error("No endpoint is subscribed to that event, so nothing was sent.")
+          : toast.success(`Sent a ${res.event} test event to ${res.delivered} endpoint(s).`),
       onError: (e) => toast.error(e.message ?? "Could not send the test event."),
     }),
   );

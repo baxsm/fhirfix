@@ -61,7 +61,9 @@ function ScoreDelta({ before, after }: { before: number | null; after: number | 
       >
         {after ?? "—"}
       </span>
-      {improved && <span className="font-mono text-[0.6875rem] tabular-nums text-success">+{gain}</span>}
+      {improved && (
+        <span className="font-mono text-[0.6875rem] tabular-nums text-success">+{gain}</span>
+      )}
     </div>
   );
 }
@@ -331,9 +333,14 @@ export function ReportView({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <a href={`${base}/download`}>Corrected FHIR</a>
-                </DropdownMenuItem>
+                {/* a validate-only or failed run has no corrected artifact, and
+                    the download route 404s to a raw json page. offer it only
+                    when there is something to download. */}
+                {data?.corrected && (
+                  <DropdownMenuItem asChild>
+                    <a href={`${base}/download`}>Corrected FHIR</a>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <a href={`${base}/export/json`}>JSON report</a>
                 </DropdownMenuItem>

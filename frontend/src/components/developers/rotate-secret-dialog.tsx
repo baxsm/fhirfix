@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { InlineNote } from "@/components/ui/inline-note";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { InlineNote } from "@/components/ui/inline-note";
 import { useTRPC } from "@/trpc/client";
 import { SecretReveal } from "./secret-reveal";
 

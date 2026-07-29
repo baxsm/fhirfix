@@ -1,4 +1,4 @@
-import type { WebhookEvent } from "@shared/db/webhooks";
+import { listEndpointsForEvent, type WebhookEvent } from "@shared/db/webhooks";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -250,12 +250,17 @@ export const developersRouter = router({
       .mutation(async ({ ctx, input }) => {
         requireWebhookPermission(ctx.role);
         const event = (input.event ?? "run.completed") as WebhookEvent;
-        await dispatchWebhook({
-          event,
-          workspaceId: ctx.workspaceId,
-          data: { test: true, message: "This is a FHIRfix test event." },
-        });
-        return { dispatched: true, event };
+        // the fan-out filters by subscription, so a test for an event nobody
+        // subscribed to silently reaches nothing. count first and say so.
+        const targets = await listEndpointsForEvent(ctx.db, ctx.workspaceId, event);
+        if (targets.length > 0) {
+          await dispatchWebhook({
+            event,
+            workspaceId: ctx.workspaceId,
+            data: { test: true, message: "This is a FHIRfix test event." },
+          });
+        }
+        return { dispatched: targets.length > 0, event, delivered: targets.length };
       }),
   }),
 

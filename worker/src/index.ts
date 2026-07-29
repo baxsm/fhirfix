@@ -1,6 +1,10 @@
 import { performAutoRecharge } from "@shared/db/auto-recharge";
 import { sweepExpiredBlobs } from "@shared/db/retention";
-import { setAutoRechargeHandler, setLowBalanceSender } from "@shared/db/runs";
+import {
+  setAutoRechargeHandler,
+  setLowBalanceSender,
+  setLowBalanceWebhook,
+} from "@shared/db/runs";
 import { ENGINE_VERSION } from "@shared/engine";
 import { Worker } from "bullmq";
 import { type ApplyJob, executeApply } from "./apply-service";
@@ -9,7 +13,7 @@ import { sendLowBalanceEmail } from "./email";
 import { env } from "./env";
 import { db, logger } from "./lib";
 import { chargeSavedMethod, isBillingConfigured, productIdForPack } from "./polar";
-import { registerRetentionSweep, type WebhookJob } from "./queues";
+import { dispatchWebhook, registerRetentionSweep, type WebhookJob } from "./queues";
 import { executeRun, type RemediationJob } from "./run-service";
 import { executeScheduledCheck, type ScheduleJob } from "./schedule-service";
 import { syncSchedulers } from "./schedule-sync";
@@ -21,6 +25,13 @@ const concurrency = Number(env.WORKER_CONCURRENCY);
 // runs complete here, so this is the process that hits the low-balance threshold
 // and the auto-recharge trigger.
 setLowBalanceSender(sendLowBalanceEmail);
+setLowBalanceWebhook(({ workspaceId, threshold, balanceMicro }) =>
+  dispatchWebhook({
+    event: "credits.low",
+    workspaceId,
+    data: { threshold, balanceMicro, balanceDollars: balanceMicro / 1_000_000 },
+  }),
+);
 setAutoRechargeHandler((args) =>
   performAutoRecharge(
     db,

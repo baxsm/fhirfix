@@ -1,7 +1,7 @@
 import type { Db } from "@shared/db/client";
 import { automatableKits, diffMatrices, summarizeMatrix, TEST_KITS } from "@shared/engine";
 import { TRPCError } from "@trpc/server";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { blobStore } from "@/lib/blob";
@@ -32,6 +32,28 @@ const authConfig = z
         "Provide an access token, or pick backend services and give a token URL and client ID.",
     },
   );
+
+// the most recent completed packet against this endpoint, for regression diffing.
+// endpoints are stored redacted, so compare the redacted form.
+async function lastPacketFor(
+  db: Db,
+  workspaceId: string,
+  targetEndpoint: string,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ id: schema.conformancePacketRun.id })
+    .from(schema.conformancePacketRun)
+    .where(
+      and(
+        eq(schema.conformancePacketRun.workspaceId, workspaceId),
+        eq(schema.conformancePacketRun.targetEndpoint, redactEndpoint(targetEndpoint)),
+        eq(schema.conformancePacketRun.status, "completed"),
+      ),
+    )
+    .orderBy(desc(schema.conformancePacketRun.createdAt))
+    .limit(1);
+  return row?.id ?? null;
+}
 
 async function requirePremium(db: Db, workspaceId: string): Promise<void> {
   const [settings] = await db
@@ -183,6 +205,11 @@ export const conformanceRouter = router({
         authConfigRef = secretId;
       }
 
+      // regression tracking only means something against the SAME endpoint, so
+      // link to the last completed packet for it automatically. nothing in the
+      // ui ever sent previousRunId, which left the whole diff permanently empty.
+      const previousRunId = input.previousRunId ?? (await lastPacketFor(ctx.db, ctx.workspaceId, input.targetEndpoint));
+
       const packetRunId = createId("packet");
       await ctx.db.insert(schema.conformancePacketRun).values({
         id: packetRunId,
@@ -193,7 +220,7 @@ export const conformanceRouter = router({
         infernoVersion: "pending",
         targetEndpoint: redactEndpoint(input.targetEndpoint),
         authConfigRef,
-        previousRunId: input.previousRunId ?? null,
+        previousRunId,
         status: "queued",
       });
 

@@ -243,6 +243,20 @@ export function setLowBalanceSender(sender: LowBalanceSender): void {
   sendLowBalanceEmail = sender;
 }
 
+// the credits.low webhook. subscribable in the dashboard but never dispatched
+// until this was wired, so an endpoint subscribed to it received nothing.
+type LowBalanceWebhook = (args: {
+  workspaceId: string;
+  threshold: number;
+  balanceMicro: number;
+}) => Promise<void>;
+
+let dispatchLowBalance: LowBalanceWebhook | null = null;
+
+export function setLowBalanceWebhook(dispatch: LowBalanceWebhook): void {
+  dispatchLowBalance = dispatch;
+}
+
 export async function maybeSendLowBalanceAlert(
   db: Db,
   workspaceId: string,
@@ -326,6 +340,14 @@ export async function maybeSendLowBalanceAlert(
     status,
     metadata: { dedup, threshold, balanceAfter, baselineMicro, ...(failure ? { failure } : {}) },
   });
+
+  // the webhook is a separate channel from the email: a failed email must not
+  // suppress it, and it is best-effort either way.
+  if (dispatchLowBalance) {
+    await dispatchLowBalance({ workspaceId, threshold, balanceMicro: balanceAfter }).catch(
+      () => {},
+    );
+  }
 
   // only consume the threshold when the alert actually went out, so a transient
   // failure does not permanently silence this level.

@@ -103,20 +103,28 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     logger.error("drift.evaluate", `${runId}: ${err instanceof Error ? err.message : String(err)}`),
   );
 
-  await dispatchWebhook({
-    event: "run.completed",
-    workspaceId,
-    data: {
-      runId,
-      inputType: result.inputType,
-      resourceCount: result.resourceCount,
-      conformanceScoreBefore: result.conformanceScoreBefore,
-      conformanceScoreAfter: result.conformanceScoreAfter,
-      findingsTotal: result.findingsTotal,
-      findingsAutoFixable: result.findingsAutoFixable,
-      reVerifiedClean: result.reVerifiedClean,
-    },
-  }).catch((err) => logger.error("webhook.dispatch", String(err)));
+  const payload = {
+    runId,
+    inputType: result.inputType,
+    resourceCount: result.resourceCount,
+    conformanceScoreBefore: result.conformanceScoreBefore,
+    conformanceScoreAfter: result.conformanceScoreAfter,
+    findingsTotal: result.findingsTotal,
+    findingsAutoFixable: result.findingsAutoFixable,
+    reVerifiedClean: result.reVerifiedClean,
+  };
+
+  await dispatchWebhook({ event: "run.completed", workspaceId, data: payload }).catch((err) =>
+    logger.error("webhook.dispatch", String(err)),
+  );
+
+  // a multi-resource input IS the batch. subscribers to batch.completed were
+  // previously never called, because only run.completed was ever dispatched.
+  if (result.inputType === "bundle" || result.inputType === "ndjson") {
+    await dispatchWebhook({ event: "batch.completed", workspaceId, data: payload }).catch((err) =>
+      logger.error("webhook.dispatch", String(err)),
+    );
+  }
 }
 
 async function failRun(runId: string, detail: string, workspaceId?: string): Promise<void> {

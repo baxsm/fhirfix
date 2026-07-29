@@ -1,5 +1,9 @@
 import { trpcServer } from "@hono/trpc-server";
-import { setAutoRechargeHandler, setLowBalanceSender } from "@shared/db/runs";
+import {
+  setAutoRechargeHandler,
+  setLowBalanceSender,
+  setLowBalanceWebhook,
+} from "@shared/db/runs";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "@/auth/auth";
@@ -11,12 +15,20 @@ import { initSentry } from "@/lib/sentry";
 import { apiV1 } from "@/routes/api-v1/index";
 import { exportRoutes } from "@/routes/export";
 import { polarWebhookRoutes } from "@/routes/polar-webhook";
+import { dispatchWebhook } from "@/queues/index";
 import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
 
 initSentry();
 // the REST api completes runs in-process, so this side needs a transport too.
 setLowBalanceSender(sendLowBalanceEmail);
+setLowBalanceWebhook(({ workspaceId, threshold, balanceMicro }) =>
+  dispatchWebhook({
+    event: "credits.low",
+    workspaceId,
+    data: { threshold, balanceMicro, balanceDollars: balanceMicro / 1_000_000 },
+  }),
+);
 setAutoRechargeHandler(runAutoRecharge);
 
 const app = new Hono();

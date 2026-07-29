@@ -334,7 +334,9 @@ function EmptyLogs({ onlyErrors }: { onlyErrors: boolean }) {
     <EmptyState
       nested
       title={
-        onlyErrors ? "No failed requests. Turn off the filter to see all traffic." : "No requests yet."
+        onlyErrors
+          ? "No failed requests. Turn off the filter to see all traffic."
+          : "No requests yet."
       }
     />
   );

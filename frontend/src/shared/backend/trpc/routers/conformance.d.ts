@@ -12,8 +12,8 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -52,10 +52,10 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
         };
         output: {
             id: string;
-            status: "cancelled" | "completed" | "failed" | "queued" | "running";
+            status: "queued" | "running" | "completed" | "failed" | "cancelled";
             testKits: string[];
             targetEndpoint: string;
-            overallResult: "fail" | "partial" | "pass" | null;
+            overallResult: "pass" | "fail" | "partial" | null;
             passCount: number | null;
             failCount: number | null;
             igVersions: Record<string, string>;
@@ -73,28 +73,6 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
             packetRunId: string;
         };
         output: {
-            id: string;
-            workspaceId: string;
-            actorId: string;
-            testKits: string[];
-            igVersions: Record<string, string>;
-            infernoVersion: string;
-            targetEndpoint: string;
-            status: "cancelled" | "completed" | "failed" | "queued" | "running";
-            resultsMatrix: schema.StoredMatrixCell[] | null;
-            progress: Record<string, {
-                total: number;
-                completed: number;
-                status: string;
-            }>;
-            overallResult: "fail" | "partial" | "pass" | null;
-            passCount: number | null;
-            failCount: number | null;
-            previousRunId: string | null;
-            errorMessage: string | null;
-            startedAt: Date | null;
-            completedAt: Date | null;
-            createdAt: Date;
             summary: import("@shared/engine").MatrixSummary | null;
             evidence: {
                 id: string;
@@ -103,6 +81,28 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 createdAt: Date;
             } | null;
             regressions: import("@shared/engine").RegressionEntry[];
+            id: string;
+            workspaceId: string;
+            actorId: string;
+            testKits: string[];
+            igVersions: Record<string, string>;
+            infernoVersion: string;
+            targetEndpoint: string;
+            status: "queued" | "running" | "completed" | "failed" | "cancelled";
+            resultsMatrix: schema.StoredMatrixCell[] | null;
+            progress: Record<string, {
+                total: number;
+                completed: number;
+                status: string;
+            }>;
+            overallResult: "pass" | "fail" | "partial" | null;
+            passCount: number | null;
+            failCount: number | null;
+            previousRunId: string | null;
+            errorMessage: string | null;
+            startedAt: Date | null;
+            completedAt: Date | null;
+            createdAt: Date;
         };
         meta: object;
     }>;
@@ -112,7 +112,7 @@ export declare const conformanceRouter: import("@trpc/server").TRPCBuiltRouter<{
             testKits: string[];
             targetEndpoint: string;
             auth?: {
-                auth_type: "asymmetric" | "backend_services" | "public" | "symmetric";
+                auth_type: "backend_services" | "public" | "symmetric" | "asymmetric";
                 token_url?: string | undefined;
                 requested_scopes?: string | undefined;
                 client_id?: string | undefined;
