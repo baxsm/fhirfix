@@ -9,6 +9,7 @@ import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { LoadError } from "@/components/ui/load-error";
+import { PanelTab, PanelTabs } from "@/components/ui/segmented";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useListOrganizations } from "@/lib/auth-client";
 import { can, type WorkspaceRole } from "@/lib/permissions";
@@ -97,13 +98,6 @@ export function BillingView({
             <UsageSection workspaceId={workspaceId} />
           </SettingsSection>
 
-          <SettingsSection
-            title="Plan"
-            description="Credits cover every run. Premium adds the conformance packet."
-          >
-            <PlanRow workspaceId={workspaceId} plan={summary.data.plan} canManage={canManage} />
-          </SettingsSection>
-
           {canManage && (
             <BillingControls
               workspaceId={workspaceId}
@@ -114,17 +108,7 @@ export function BillingView({
             />
           )}
 
-          <SettingsSection title="Invoices" description="Every credit purchase, newest first.">
-            <InvoicesTable workspaceId={workspaceId} />
-          </SettingsSection>
-
-          {/* not flush: that puts a full-bleed table right under the header border */}
-          <SettingsSection
-            title="Ledger"
-            description="Every credit movement: grants, purchases, and per-run debits."
-          >
-            <LedgerTable workspaceId={workspaceId} />
-          </SettingsSection>
+          <HistorySection workspaceId={workspaceId} />
         </>
       )}
     </PageContainer>
@@ -140,6 +124,7 @@ type Summary = {
   isTrial: boolean;
   billingConfigured: boolean;
   packs: { id: string; label: string; cents: number }[];
+  plan: { tier: string; premiumLabel: string; purchasable: boolean };
 };
 
 function BalanceHero({
@@ -223,6 +208,10 @@ function BalanceHero({
         />
       </div>
 
+      <div className="border-t">
+        <PlanRow workspaceId={workspaceId} plan={summary.plan} canManage={canManage} />
+      </div>
+
       <AddCreditsDialog
         workspaceId={workspaceId}
         packs={summary.packs}
@@ -299,6 +288,39 @@ function HeroTile({
       <div className="mt-1 font-mono text-lg tabular-nums leading-none">{value}</div>
       <p className="mt-1 truncate text-[0.6875rem] text-muted-foreground/70">{hint}</p>
     </div>
+  );
+}
+
+// invoices and the ledger answer the same question - where did the money go -
+// so they share one panel instead of stacking two identical ones
+function HistorySection({ workspaceId }: { workspaceId: string }) {
+  const [tab, setTab] = useState<"invoices" | "ledger">("invoices");
+
+  return (
+    <section className="raised flex flex-col overflow-hidden rounded-lg border bg-card">
+      <div className="px-4 pt-3">
+        <PanelTabs label="Billing history">
+          <PanelTab active={tab === "invoices"} onClick={() => setTab("invoices")}>
+            Invoices
+          </PanelTab>
+          <PanelTab active={tab === "ledger"} onClick={() => setTab("ledger")}>
+            Ledger
+          </PanelTab>
+        </PanelTabs>
+      </div>
+      <div className="px-5 py-3.5">
+        <p className="pb-2 text-xs text-muted-foreground">
+          {tab === "invoices"
+            ? "Every credit purchase, newest first."
+            : "Every credit movement: grants, purchases, and per-run debits."}
+        </p>
+        {tab === "invoices" ? (
+          <InvoicesTable workspaceId={workspaceId} />
+        ) : (
+          <LedgerTable workspaceId={workspaceId} />
+        )}
+      </div>
+    </section>
   );
 }
 
