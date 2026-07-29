@@ -1,14 +1,24 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Bell, SlidersHorizontal, Users } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell, DatabaseBackup, Download, SlidersHorizontal, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NavRow } from "@/components/ui/nav-row";
 import {
   Select,
@@ -24,11 +34,12 @@ import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { MembersSection } from "./members-section";
 
-type SectionId = "members" | "defaults";
+type SectionId = "members" | "defaults" | "data";
 
 const SECTIONS: { id: SectionId; label: string; icon: typeof Users; hint: string }[] = [
   { id: "members", label: "Members", icon: Users, hint: "People and roles" },
   { id: "defaults", label: "Defaults", icon: SlidersHorizontal, hint: "PHI and retention" },
+  { id: "data", label: "Data", icon: DatabaseBackup, hint: "Export and deletion" },
 ];
 
 export function SettingsView({
@@ -127,9 +138,160 @@ export function SettingsView({
               </SettingRow>
             </SettingsSection>
           )}
+
+          {section === "data" && (
+            <SettingsSection
+              title="Export and deletion"
+              description="Take your data with you, or remove this workspace entirely."
+            >
+              <DataSection
+                workspaceId={workspaceId}
+                workspaceSlug={active?.slug ?? workspace}
+                workspaceName={active?.name ?? workspace}
+                canExport={can(role, "workspaceSettings", "update")}
+                isOwner={role === "owner"}
+              />
+            </SettingsSection>
+          )}
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+function DataSection({
+  workspaceId,
+  workspaceSlug,
+  workspaceName,
+  canExport,
+  isOwner,
+}: {
+  workspaceId: string;
+  workspaceSlug: string;
+  workspaceName: string;
+  canExport: boolean;
+  isOwner: boolean;
+}) {
+  const trpc = useTRPC();
+  const router = useRouter();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+
+  // fetched on demand through the client rather than a disabled useQuery:
+  // refetch() on a disabled query is a no-op in react-query v5, so the button
+  // would silently do nothing.
+  const queryClient = useQueryClient();
+  const [exporting, setExporting] = useState(false);
+
+  const runExport = async () => {
+    setExporting(true);
+    try {
+      const data = await queryClient.fetchQuery(
+        trpc.workspace.exportData.queryOptions({ workspaceId }),
+      );
+      const body = `${JSON.stringify(data, null, 2)}\n`;
+      const url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${workspaceSlug}-export.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch {
+      toast.error("Could not build the export.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const remove = useMutation(
+    trpc.workspace.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success(`${workspaceName} was deleted.`);
+        // the workspace this page belongs to no longer exists.
+        router.replace("/app");
+      },
+      onError: (e) => toast.error(e.message ?? "Could not delete the workspace."),
+    }),
+  );
+
+  return (
+    <>
+      <SettingRow
+        label="Export workspace data"
+        hint="Runs, findings, mappings, ledger, and the audit trail as one JSON file."
+      >
+        <Button variant="outline" size="sm" disabled={!canExport || exporting} onClick={runExport}>
+          <Download className="size-3.5" />
+          {exporting ? "Preparing..." : "Export"}
+        </Button>
+      </SettingRow>
+
+      <SettingRow
+        label="Delete this workspace"
+        hint="Removes every run, finding, and stored file. Billing records and the audit trail are kept, detached from the workspace."
+      >
+        <Button
+          variant="destructive"
+          size="sm"
+          disabled={!isOwner}
+          onClick={() => {
+            setTyped("");
+            setConfirmOpen(true);
+          }}
+        >
+          Delete workspace
+        </Button>
+      </SettingRow>
+      {!isOwner && (
+        <p className="px-4 pb-3 text-xs text-muted-foreground">
+          Only an owner can delete a workspace.
+        </p>
+      )}
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete {workspaceName}?</DialogTitle>
+            <DialogDescription>
+              This cannot be undone. Every run, finding, mapping, API key, and stored file in this
+              workspace is deleted immediately, and all members lose access.
+            </DialogDescription>
+          </DialogHeader>
+
+          <p className="text-xs text-muted-foreground">
+            Your billing records and audit trail are kept for accounting and compliance, detached
+            from the workspace and stripped of who did what.
+          </p>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-slug">
+              Type <span className="font-mono text-foreground">{workspaceSlug}</span> to confirm
+            </Label>
+            <Input
+              id="confirm-slug"
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              autoComplete="off"
+              className="font-mono"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={typed !== workspaceSlug || remove.isPending}
+              onClick={() => remove.mutate({ workspaceId, confirmSlug: typed })}
+            >
+              {remove.isPending ? "Deleting..." : "Delete permanently"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

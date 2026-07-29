@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -113,12 +114,10 @@ export function CheckView({
 
   return (
     <PageContainer width="full">
-      <header className="space-y-1">
-        <h1 className="text-lg font-semibold tracking-tight">New check</h1>
-        <p className="text-sm text-muted-foreground">
-          Converts, validates against US Core, auto-fixes what it safely can, then re-verifies.
-        </p>
-      </header>
+      <PageHeader
+        title="New check"
+        description="Converts, validates against US Core, auto-fixes what it safely can, then re-verifies."
+      />
 
       {/* the whole card is the drop target, so a dragged file has an area the size of the panel */}
       {/** biome-ignore lint/a11y/noStaticElementInteractions: drag events on the

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import { LoadError } from "@/components/ui/load-error";
@@ -70,13 +71,10 @@ export function BillingView({
 
   return (
     <PageContainer>
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Billing</h1>
-        <p className="text-sm text-muted-foreground">
-          Your prepaid credit balance, usage, and invoices for{" "}
-          <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
-        </p>
-      </header>
+      <PageHeader
+        title="Billing"
+        description="Your prepaid credit balance, usage, and invoices for this workspace."
+      />
 
       {summary.isError ? (
         <LoadError what="billing" onRetry={() => summary.refetch()} />
