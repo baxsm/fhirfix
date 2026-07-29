@@ -76,9 +76,6 @@ describe("shared primitives are not re-implemented", () => {
 
     for (const file of dashboardFiles()) {
       if (rel(file) === "components/ui/load-error.tsx") continue;
-      // TODO(runs-view): last hand-rolled copy. left in place only because another
-      // change was open on this file; convert to LoadError and delete this line
-      if (rel(file) === "app/app/[workspace]/runs/runs-view.tsx") continue;
       const src = readFileSync(file, "utf8");
       // match per JSX block, not per file: one file can hold a legitimate empty
       // state AND a "Could not load" EmptyState without either being an offender

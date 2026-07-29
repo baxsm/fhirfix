@@ -9,6 +9,7 @@ import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { RefreshingNote } from "@/components/dashboard/refreshing-note";
 import { Button } from "@/components/ui/button";
+import { LoadError } from "@/components/ui/load-error";
 import { FilterPill } from "@/components/ui/segmented";
 import { StatusDot, type StatusTone } from "@/components/ui/status";
 import {
@@ -112,7 +113,7 @@ export function RunsView({
       </div>
 
       {query.isError ? (
-        <ListError onRetry={() => query.refetch()} />
+        <LoadError what="runs" onRetry={() => query.refetch()} />
       ) : loading ? (
         <SkeletonTable />
       ) : settling ? null : all.length === 0 ? (
@@ -343,14 +344,3 @@ function EmptyRuns({ workspace }: { workspace: string }) {
   );
 }
 
-function ListError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border bg-card px-6 py-14 text-center">
-      <h2 className="text-sm font-medium">Could not load runs</h2>
-      <p className="text-xs text-muted-foreground">Check your connection and try again.</p>
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        Retry
-      </Button>
-    </div>
-  );
-}
