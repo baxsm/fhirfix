@@ -1,4 +1,4 @@
-import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
+import { redactionPolicyFor, resolveProfiles, storeRunInput } from "@shared/db/ingest";
 import { getRun, getRunFindings, listRuns } from "@shared/db/runs";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import type { Context } from "hono";
@@ -35,6 +35,7 @@ export async function batchController(c: Context<ApiV1Env>) {
   const runId = createId("run");
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
+  const runProfiles = await resolveProfiles(db, workspaceId, profiles);
   const policy = await redactionPolicyFor(db, workspaceId);
   const stored = await storeRunInput(db, blobStore, {
     workspaceId,
@@ -59,12 +60,12 @@ export async function batchController(c: Context<ApiV1Env>) {
     inputType,
     engineVersion: ENGINE_VERSION,
     status: "queued",
-    profilesRequested: profiles,
+    profilesRequested: runProfiles,
     inputRef: stored.key,
   });
   await remediationQueue.add(
     "remediate",
-    { runId, workspaceId, profiles, autoFix },
+    { runId, workspaceId, profiles: runProfiles, autoFix },
     { removeOnComplete: 1000, removeOnFail: 1000 },
   );
   c.set("runId", runId);

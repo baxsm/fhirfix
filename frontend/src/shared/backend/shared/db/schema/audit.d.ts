@@ -43,7 +43,7 @@ export declare const auditLogEntry: import("drizzle-orm/pg-core").PgTableWithCol
             tableName: "audit_log_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "user" | "api_key" | "system";
+            data: "api_key" | "system" | "user";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -77,7 +77,7 @@ export declare const auditLogEntry: import("drizzle-orm/pg-core").PgTableWithCol
             tableName: "audit_log_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "workspace.deleted";
+            data: "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -89,7 +89,7 @@ export declare const auditLogEntry: import("drizzle-orm/pg-core").PgTableWithCol
             identity: undefined;
             generated: undefined;
         }, {}, {
-            $type: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "workspace.deleted";
+            $type: "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
         }>;
         targetRef: import("drizzle-orm/pg-core").PgColumn<{
             name: "target_ref";
@@ -162,7 +162,7 @@ export declare const auditLogEntry: import("drizzle-orm/pg-core").PgTableWithCol
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type AuditLogEntry = typeof auditLogEntry.$inferSelect;
 export type NewAuditLogEntry = typeof auditLogEntry.$inferInsert;

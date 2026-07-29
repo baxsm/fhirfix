@@ -17,6 +17,22 @@ export async function redactionPolicyFor(db: Db, workspaceId: string): Promise<R
   return (row?.policy ?? "on_ingest") as RedactionPolicy;
 }
 
+// the profiles a run validates against when the caller does not name any. the
+// workspace default is the point of the setting; falling back to [] ignored it.
+export async function resolveProfiles(
+  db: Db,
+  workspaceId: string,
+  requested: string[] | undefined,
+): Promise<string[]> {
+  if (requested && requested.length > 0) return requested;
+  const [row] = await db
+    .select({ defaults: schema.workspaceSettings.defaultProfiles })
+    .from(schema.workspaceSettings)
+    .where(eq(schema.workspaceSettings.workspaceId, workspaceId))
+    .limit(1);
+  return row?.defaults ?? [];
+}
+
 // when this workspace's artifacts should be swept, from its retention setting.
 export async function retentionExpiryFor(db: Db, workspaceId: string): Promise<Date> {
   const [row] = await db

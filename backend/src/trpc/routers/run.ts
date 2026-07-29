@@ -1,4 +1,4 @@
-import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
+import { redactionPolicyFor, resolveProfiles, storeRunInput } from "@shared/db/ingest";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq } from "drizzle-orm";
@@ -26,6 +26,9 @@ export const runRouter = router({
     const inputType = detectInput(input.content).inputType;
     const key = blobKey(ctx.workspaceId, runId, "input");
 
+    // an unspecified profile set falls back to the workspace default, which is
+    // what that setting is for.
+    const profiles = await resolveProfiles(ctx.db, ctx.workspaceId, input.profiles);
     // one ingest path for every entry point: applies the workspace redaction
     // policy and records whether what landed on disk actually carries PHI.
     const policy = await redactionPolicyFor(ctx.db, ctx.workspaceId);
@@ -52,7 +55,7 @@ export const runRouter = router({
       inputType,
       engineVersion: ENGINE_VERSION,
       status: "queued",
-      profilesRequested: input.profiles ?? [],
+      profilesRequested: profiles,
       // null under the "required" policy: the raw artifact is never persisted.
       inputRef: stored.key,
     });
@@ -62,7 +65,7 @@ export const runRouter = router({
       {
         runId,
         workspaceId: ctx.workspaceId,
-        profiles: input.profiles ?? [],
+        profiles,
         autoFix: input.autoFix,
       },
       { removeOnComplete: 1000, removeOnFail: 1000 },

@@ -1,4 +1,4 @@
-import { redactionPolicyFor, storeRunInput } from "@shared/db/ingest";
+import { redactionPolicyFor, resolveProfiles, storeRunInput } from "@shared/db/ingest";
 import { loadActiveMappings, persistSuggestions } from "@shared/db/mappings";
 import { redactPhi } from "@shared/db/phi";
 import { persistCompletedRun } from "@shared/db/runs";
@@ -117,6 +117,8 @@ async function runAndPersist(
   const inputKey = blobKey(workspaceId, runId, "input");
   // shared ingest: applies the workspace redaction policy and records whether
   // the stored bytes actually carry PHI.
+  // unspecified profiles fall back to the workspace default.
+  const runProfiles = await resolveProfiles(db, workspaceId, profiles);
   const policy = await redactionPolicyFor(db, workspaceId);
   const stored = await storeRunInput(db, blobStore, {
     workspaceId,
@@ -145,7 +147,7 @@ async function runAndPersist(
       inputType,
       engineVersion: ENGINE_VERSION,
       status: "running",
-      profilesRequested: profiles ?? [],
+      profilesRequested: runProfiles,
       inputRef: stored.key,
       idempotencyKey: idempotencyKey ?? null,
       requestHash,
@@ -178,7 +180,10 @@ async function runAndPersist(
   try {
     // stored.content, not the raw body: under a redacting policy the engine must
     // see the redacted copy, or a fix gets derived from PHI we promised to drop.
-    result = await runRemediation({ raw: stored.content, mappings, profiles, autoFix }, engineDeps);
+    result = await runRemediation(
+      { raw: stored.content, mappings, profiles: runProfiles, autoFix },
+      engineDeps,
+    );
   } catch (err) {
     // sidecar unreachable/timed out: mark failed, no debit, 503 with real detail.
     const detail =
