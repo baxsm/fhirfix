@@ -21,10 +21,16 @@ import { UsageChart } from "./usage-chart";
 
 const USAGE_DAYS = 30;
 
-export function BillingView({ workspace }: { workspace: string }) {
+export function BillingView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const trpc = useTRPC();
   const summary = useQuery({

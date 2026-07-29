@@ -59,9 +59,11 @@ function fmtDate(d: string | Date): string {
 export function RunsView({
   workspace,
   workspaceId: serverWorkspaceId,
+  initialFailedOnly = false,
 }: {
   workspace: string;
   workspaceId?: string;
+  initialFailedOnly?: boolean;
 }) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
@@ -70,12 +72,21 @@ export function RunsView({
   const router = useRouter();
   const trpc = useTRPC();
   const [page, setPage] = useState(0);
-  const [failedOnly, setFailedOnly] = useState(false);
+  const [failedOnly, setFailedOnly] = useState(initialFailedOnly);
 
   const query = useQuery({
     ...trpc.run.list.queryOptions({ workspaceId }),
     enabled: !!workspaceId,
   });
+
+  // the filter lives in the URL so the overview's "run failed" banner can link
+  // straight to it, and so a refresh or a shared link keeps the same view.
+  const showFailedOnly = (next: boolean) => {
+    setFailedOnly(next);
+    setPage(0);
+    const url = next ? `/app/${workspace}/runs?status=failed` : `/app/${workspace}/runs`;
+    window.history.replaceState({}, "", url);
+  };
 
   const all = useMemo(() => (query.data ?? []) as RunRow[], [query.data]);
   const filtered = useMemo(() => (failedOnly ? all.filter(isRealFailure) : all), [all, failedOnly]);
@@ -117,10 +128,7 @@ export function RunsView({
                 tone="danger"
                 count={failedCount}
                 icon={Filter}
-                onClick={() => {
-                  setFailedOnly((v) => !v);
-                  setPage(0);
-                }}
+                onClick={() => showFailedOnly(!failedOnly)}
               >
                 Failed only
               </FilterPill>
@@ -129,7 +137,7 @@ export function RunsView({
                   Showing failed runs only.{" "}
                   <button
                     type="button"
-                    onClick={() => setFailedOnly(false)}
+                    onClick={() => showFailedOnly(false)}
                     className="cursor-pointer rounded-sm underline underline-offset-2 hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     Show all

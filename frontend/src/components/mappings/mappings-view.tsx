@@ -42,12 +42,6 @@ export function MappingsView({
   const canApprove = can(role, "mapping", "approve");
   const canDeprecate = can(role, "mapping", "deprecate");
 
-  const countsQuery = useQuery({
-    ...trpc.mappings.counts.queryOptions({ workspaceId }),
-    enabled: !!workspaceId,
-  });
-  const counts = countsQuery.data;
-
   const [status, setStatus] = useState<MappingStatus>(initialStatus);
 
   return (
@@ -68,8 +62,6 @@ export function MappingsView({
           status={status}
           onStatusChange={setStatus}
           filters={FILTERS}
-          counts={counts}
-          onCountsChange={() => countsQuery.refetch()}
           canEdit={canEdit}
           canApprove={canApprove}
           canDeprecate={canDeprecate}

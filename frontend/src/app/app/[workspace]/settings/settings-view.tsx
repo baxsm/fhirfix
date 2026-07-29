@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Bell, SlidersHorizontal, Users } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
@@ -30,10 +31,16 @@ const SECTIONS: { id: SectionId; label: string; icon: typeof Users; hint: string
   { id: "defaults", label: "Defaults", icon: SlidersHorizontal, hint: "PHI and retention" },
 ];
 
-export function SettingsView({ workspace }: { workspace: string }) {
+export function SettingsView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const trpc = useTRPC();
   const wsQuery = useQuery({
@@ -103,15 +110,20 @@ export function SettingsView({ workspace }: { workspace: string }) {
                   }}
                 />
               )}
+              {/* these emails go to a person, not a workspace, so the control
+                  lives on the account. this row only points at it. */}
               <SettingRow
                 label="Notifications"
-                hint="Run and alert emails use these workspace defaults."
+                hint="Billing emails are sent to you personally, not to the workspace."
                 muted
               >
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Link
+                  href="/account"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                >
                   <Bell className="size-3.5" />
-                  Configured per workspace
-                </span>
+                  Account settings
+                </Link>
               </SettingRow>
             </SettingsSection>
           )}

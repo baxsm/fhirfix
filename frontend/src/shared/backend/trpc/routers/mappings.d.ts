@@ -66,6 +66,7 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     counts: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
+            search?: string | undefined;
         };
         output: {
             active: number;

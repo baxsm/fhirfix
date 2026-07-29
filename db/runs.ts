@@ -306,7 +306,24 @@ export async function maybeSendLowBalanceAlert(
   const dedup = `${baselineMicro}:${threshold}`;
   if (await hasNotification(db, { workspaceId, type: "credits.low", dedup })) return;
 
-  const target = await resolveBillingEmail(db, workspaceId, account.contactUserId);
+  const contact = await resolveBillingEmail(db, workspaceId, account.contactUserId);
+  const target = contact?.email ?? null;
+
+  // the recipient turned these off. consume the threshold anyway: they asked not
+  // to be told, so re-firing at the same level later would ignore that.
+  if (contact && !contact.wantsAlert) {
+    if (dispatchLowBalance) {
+      await dispatchLowBalance({ workspaceId, threshold, balanceMicro: balanceAfter }).catch(
+        () => {},
+      );
+    }
+    await db
+      .update(schema.billingAccount)
+      .set({ lastAlertThreshold: threshold })
+      .where(eq(schema.billingAccount.workspaceId, workspaceId));
+    return;
+  }
+
   // no contact to reach: record the miss honestly rather than logging a delivery.
   if (!target) {
     await recordNotification(db, {
@@ -360,26 +377,38 @@ export async function maybeSendLowBalanceAlert(
 }
 
 // the billing contact email, else the workspace owner's. best-effort.
+// a user who turned low-balance emails off must not receive one. the prefs blob
+// is app-defined json on the user row; anything unparseable means "default on".
+function wantsLowBalance(raw: unknown): boolean {
+  if (typeof raw !== "string" || raw.length === 0) return true;
+  try {
+    const parsed = JSON.parse(raw) as { lowBalance?: unknown };
+    return parsed.lowBalance !== false;
+  } catch {
+    return true;
+  }
+}
+
 async function resolveBillingEmail(
   db: Db,
   workspaceId: string,
   contactUserId: string | null,
-): Promise<string | null> {
+): Promise<{ email: string; wantsAlert: boolean } | null> {
   if (contactUserId) {
     const [u] = await db
-      .select({ email: schema.user.email })
+      .select({ email: schema.user.email, prefs: schema.user.notificationPrefs })
       .from(schema.user)
       .where(eq(schema.user.id, contactUserId))
       .limit(1);
-    if (u?.email) return u.email;
+    if (u?.email) return { email: u.email, wantsAlert: wantsLowBalance(u.prefs) };
   }
   const [owner] = await db
-    .select({ email: schema.user.email })
+    .select({ email: schema.user.email, prefs: schema.user.notificationPrefs })
     .from(schema.member)
     .innerJoin(schema.user, eq(schema.member.userId, schema.user.id))
     .where(and(eq(schema.member.organizationId, workspaceId), eq(schema.member.role, "owner")))
     .limit(1);
-  return owner?.email ?? null;
+  return owner?.email ? { email: owner.email, wantsAlert: wantsLowBalance(owner.prefs) } : null;
 }
 
 

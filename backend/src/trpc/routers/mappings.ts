@@ -25,6 +25,18 @@ function requireMappingPermission(role: string, action: MappingAction) {
 // live rows only: a superseded row is history and must never show up as current.
 const isLive = isNull(schema.mappingRegistryEntry.supersededById);
 
+// one definition, used by both `list` and `counts`. if they diverge, a tab count
+// stops matching the rows under it.
+function searchFilter(search: string | undefined) {
+  const term = search?.trim();
+  if (!term) return undefined;
+  const needle = `%${term.toLowerCase()}%`;
+  return or(
+    sql`lower(${schema.mappingRegistryEntry.sourceValue}) like ${needle}`,
+    sql`lower(${schema.mappingRegistryEntry.targetValue}) like ${needle}`,
+  );
+}
+
 const scopeFields = z.object({
   scope: z.enum(MAPPING_SCOPES).default("workspace"),
   sourceSystem: z.string().min(1).max(200).nullable().default(null),
@@ -59,13 +71,8 @@ export const mappingsRouter = router({
       if (input.type) {
         conditions.push(eq(schema.mappingRegistryEntry.type, input.type));
       }
-      if (input.search) {
-        const needle = `%${input.search.toLowerCase()}%`;
-        const bySource = sql`lower(${schema.mappingRegistryEntry.sourceValue}) like ${needle}`;
-        const byTarget = sql`lower(${schema.mappingRegistryEntry.targetValue}) like ${needle}`;
-        const match = or(bySource, byTarget);
-        if (match) conditions.push(match);
-      }
+      const match = searchFilter(input.search);
+      if (match) conditions.push(match);
 
       return ctx.db
         .select({
@@ -115,22 +122,30 @@ export const mappingsRouter = router({
       return findConflicts(rows);
     }),
 
-  counts: workspaceProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db
-      .select({
-        status: schema.mappingRegistryEntry.status,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(schema.mappingRegistryEntry)
-      .where(and(eq(schema.mappingRegistryEntry.workspaceId, ctx.workspaceId), isLive))
-      .groupBy(schema.mappingRegistryEntry.status);
+  // counts must honour the same search the list does, or a tab can read
+  // "Rejected 1" above an empty result and look broken.
+  counts: workspaceProcedure
+    .input(z.object({ workspaceId: z.string(), search: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      const conditions = [eq(schema.mappingRegistryEntry.workspaceId, ctx.workspaceId), isLive];
+      const match = searchFilter(input.search);
+      if (match) conditions.push(match);
 
-    const counts = { active: 0, suggested: 0, deprecated: 0, rejected: 0 };
-    for (const r of rows) {
-      counts[r.status] = r.count;
-    }
-    return counts;
-  }),
+      const rows = await ctx.db
+        .select({
+          status: schema.mappingRegistryEntry.status,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(schema.mappingRegistryEntry)
+        .where(and(...conditions))
+        .groupBy(schema.mappingRegistryEntry.status);
+
+      const counts = { active: 0, suggested: 0, deprecated: 0, rejected: 0 };
+      for (const r of rows) {
+        counts[r.status] = r.count;
+      }
+      return counts;
+    }),
 
   // the supersede chain for one mapping, oldest first
   history: workspaceProcedure

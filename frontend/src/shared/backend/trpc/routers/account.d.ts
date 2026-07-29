@@ -39,10 +39,7 @@ export declare const accountRouter: import("@trpc/server").TRPCBuiltRouter<{
             image: string | null | undefined;
             emailVerified: boolean;
             notificationPrefs: {
-                runComplete: boolean;
-                driftAlerts: boolean;
                 lowBalance: boolean;
-                productUpdates: boolean;
             };
         };
         meta: object;
@@ -70,16 +67,10 @@ export declare const accountRouter: import("@trpc/server").TRPCBuiltRouter<{
     }>;
     notificationPrefs: import("@trpc/server").TRPCMutationProcedure<{
         input: {
-            runComplete?: boolean | undefined;
-            driftAlerts?: boolean | undefined;
             lowBalance?: boolean | undefined;
-            productUpdates?: boolean | undefined;
         };
         output: {
-            runComplete: boolean;
-            driftAlerts: boolean;
             lowBalance: boolean;
-            productUpdates: boolean;
         };
         meta: object;
     }>;

@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { PendingRows } from "@/components/ui/pending-rows";
 import { PanelTab, PanelTabs } from "@/components/ui/segmented";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useTRPC } from "@/trpc/client";
 import { CreateMappingDialog } from "./create-mapping-dialog";
 import { EditMappingDialog } from "./edit-mapping-dialog";
@@ -23,20 +22,11 @@ import { ImportExportDialog } from "./import-export-dialog";
 import { MappingHistoryDialog } from "./mapping-history-dialog";
 import { type MappingRow, type MappingStatus, TYPE_LABELS } from "./types";
 
-interface Counts {
-  active: number;
-  suggested: number;
-  deprecated: number;
-  rejected: number;
-}
-
 export function MappingsTable({
   workspaceId,
   status,
   onStatusChange,
   filters,
-  counts,
-  onCountsChange,
   canEdit,
   canApprove,
   canDeprecate,
@@ -45,8 +35,6 @@ export function MappingsTable({
   status: MappingStatus;
   onStatusChange: (s: MappingStatus) => void;
   filters: { key: MappingStatus; label: string }[];
-  counts: Counts | undefined;
-  onCountsChange: () => void;
   canEdit: boolean;
   canApprove: boolean;
   canDeprecate: boolean;
@@ -67,6 +55,17 @@ export function MappingsTable({
     enabled: !!workspaceId,
   });
 
+  // counts live here, beside the search that narrows them: a tab reading
+  // "Rejected 1" over an empty list is the bug this prevents.
+  const countsQuery = useQuery({
+    ...trpc.mappings.counts.queryOptions({
+      workspaceId,
+      search: search.trim() || undefined,
+    }),
+    enabled: !!workspaceId,
+  });
+  const counts = countsQuery.data;
+
   const conflictsQuery = useQuery({
     ...trpc.mappings.conflicts.queryOptions({ workspaceId }),
     enabled: !!workspaceId && status === "active",
@@ -83,7 +82,7 @@ export function MappingsTable({
 
   const refresh = () => {
     query.refetch();
-    onCountsChange();
+    countsQuery.refetch();
     conflictsQuery.refetch();
   };
 
@@ -218,7 +217,9 @@ export function MappingsTable({
                           )}
                         </div>
                         {m.createdBy === "system" && (
-                          <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">Auto-learned</p>
+                          <p className="mt-0.5 text-[0.6875rem] text-muted-foreground">
+                            Auto-learned
+                          </p>
                         )}
                       </td>
                       <td className="px-4 py-3">

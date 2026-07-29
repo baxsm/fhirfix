@@ -103,6 +103,9 @@ export function FacetSidebar({
         {PRESETS.map((p) => (
           <Row key={p.key} active={preset === p.key} onClick={() => onPreset(p.key)}>
             {p.label}
+            <span className="font-mono text-[0.6875rem] tabular-nums opacity-70">
+              {filterFindings(findings, applyPreset(p.key), p.key).length}
+            </span>
           </Row>
         ))}
       </div>

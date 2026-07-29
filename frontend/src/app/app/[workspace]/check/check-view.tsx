@@ -42,10 +42,16 @@ function describeInput(raw: string): string {
   }
 }
 
-export function CheckView({ workspace }: { workspace: string }) {
+export function CheckView({
+  workspace,
+  workspaceId: serverWorkspaceId,
+}: {
+  workspace: string;
+  workspaceId?: string;
+}) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
-  const workspaceId = active?.id ?? "";
+  const workspaceId = serverWorkspaceId || active?.id || "";
 
   const router = useRouter();
   const trpc = useTRPC();

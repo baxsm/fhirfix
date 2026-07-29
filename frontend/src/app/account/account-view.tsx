@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/lib/auth-client";
 import { useTRPC } from "@/trpc/client";
 
@@ -60,6 +61,12 @@ export function AccountView() {
           description="Change the password used to sign in to your account."
         >
           <PasswordForm />
+        </SettingsSection>
+
+        <SettingsSection title="Notifications" description="Emails we send to you personally.">
+          <NotificationForm
+            initial={accountQuery.data?.notificationPrefs ?? { lowBalance: true }}
+          />
         </SettingsSection>
       </div>
     </div>
@@ -114,6 +121,52 @@ function ProfileForm({ initialName, email }: { initialName: string; email: strin
       <div className="flex justify-end">
         <Button type="submit" disabled={save.isPending || !name}>
           {save.isPending ? "Saving..." : "Save profile"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function NotificationForm({ initial }: { initial: { lowBalance: boolean } }) {
+  const trpc = useTRPC();
+  const [lowBalance, setLowBalance] = useState(initial.lowBalance);
+  useEffect(() => setLowBalance(initial.lowBalance), [initial.lowBalance]);
+
+  const save = useMutation(
+    trpc.account.notificationPrefs.mutationOptions({
+      onSuccess: () => toast.success("Notification settings saved"),
+      onError: (e) => toast.error(e.message ?? "Could not save your settings."),
+    }),
+  );
+
+  return (
+    <form
+      className="space-y-4"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate({ lowBalance });
+      }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Label htmlFor="notif-low-balance" className="cursor-pointer text-sm font-medium">
+            Low credit balance
+          </Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Email me when a workspace I bill for is running out of credits.
+          </p>
+        </div>
+        <Switch
+          id="notif-low-balance"
+          checked={lowBalance}
+          onCheckedChange={setLowBalance}
+          className="shrink-0"
+        />
+      </div>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={save.isPending}>
+          {save.isPending ? "Saving..." : "Save settings"}
         </Button>
       </div>
     </form>

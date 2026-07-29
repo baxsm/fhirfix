@@ -91,7 +91,13 @@ export function OverviewView({
             <section className="space-y-2">
               {failedRuns.length > 0 && (
                 <AttentionRow
-                  href={`${base}/runs`}
+                  // one failure goes straight to it; several go to the filtered list,
+                  // so "Review" never drops the user into the unfiltered run history.
+                  href={
+                    failedRuns.length === 1 && failedRuns[0]
+                      ? `${base}/runs/${failedRuns[0].id}`
+                      : `${base}/runs?status=failed`
+                  }
                   tone="danger"
                   icon={AlertTriangle}
                   title={`${failedRuns.length} ${failedRuns.length === 1 ? "run" : "runs"} failed`}

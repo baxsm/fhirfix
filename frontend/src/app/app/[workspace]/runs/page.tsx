@@ -2,8 +2,15 @@ import { resolveWorkspace } from "@/trpc/resolve-workspace";
 import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 import { RunsView } from "./runs-view";
 
-export default async function RunsPage({ params }: { params: Promise<{ workspace: string }> }) {
+export default async function RunsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ workspace: string }>;
+  searchParams: Promise<{ status?: string }>;
+}) {
   const { workspace } = await params;
+  const { status } = await searchParams;
 
   const workspaceId = await resolveWorkspace(workspace);
   if (workspaceId) {
@@ -12,7 +19,11 @@ export default async function RunsPage({ params }: { params: Promise<{ workspace
 
   return (
     <HydrateClient>
-      <RunsView workspace={workspace} workspaceId={workspaceId} />
+      <RunsView
+        workspace={workspace}
+        workspaceId={workspaceId}
+        initialFailedOnly={status === "failed"}
+      />
     </HydrateClient>
   );
 }
