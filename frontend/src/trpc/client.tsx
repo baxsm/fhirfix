@@ -16,8 +16,11 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
     createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
-          url: `${env.NEXT_PUBLIC_API_URL}/trpc`,
-          // send the Better Auth session cookie cross-origin.
+          // same-origin, proxied to the backend by the /trpc rewrite in
+          // next.config.ts. the session cookie is first-party to THIS origin
+          // (auth is proxied the same way), so a cross-origin call to the
+          // backend host simply never carries it and every call 401s.
+          url: "/trpc",
           fetch(url, options) {
             return fetch(url, { ...options, credentials: "include" });
           },

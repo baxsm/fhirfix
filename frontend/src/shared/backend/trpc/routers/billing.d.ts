@@ -12,8 +12,8 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -54,12 +54,12 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
                 spentThisCycleCents: number;
             };
             packs: {
-                id: "pack_10" | "pack_100" | "pack_25";
-                label: "$10" | "$100" | "$25";
+                id: "pack_10" | "pack_25" | "pack_100";
+                label: "$10" | "$25" | "$100";
                 cents: 1000 | 2500 | 10000;
             }[];
             plan: {
-                tier: "free" | "premium" | "team";
+                tier: "free" | "team" | "premium";
                 premiumCents: 49900;
                 premiumLabel: "$499";
                 purchasable: boolean;
@@ -86,15 +86,15 @@ export declare const billingRouter: import("@trpc/server").TRPCBuiltRouter<{
             offset?: number | undefined;
         };
         output: {
+            amountDollars: number;
+            balanceAfterDollars: number;
             id: string;
-            type: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
+            type: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
             amountMicro: number;
             balanceAfter: number;
             description: string;
             relatedRunId: string | null;
             createdAt: Date;
-            amountDollars: number;
-            balanceAfterDollars: number;
         }[];
         meta: object;
     }>;

@@ -293,7 +293,7 @@ export declare const scheduledCheck: import("drizzle-orm/pg-core").PgTableWithCo
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const driftAlert: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "drift_alert";
@@ -372,7 +372,7 @@ export declare const driftAlert: import("drizzle-orm/pg-core").PgTableWithColumn
             tableName: "drift_alert";
             dataType: "string";
             columnType: "PgText";
-            data: "ig_version_change" | "new_error_class" | "pass_rate_drop" | "unmapped_authority";
+            data: "pass_rate_drop" | "new_error_class" | "unmapped_authority" | "ig_version_change";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -389,7 +389,7 @@ export declare const driftAlert: import("drizzle-orm/pg-core").PgTableWithColumn
             tableName: "drift_alert";
             dataType: "string";
             columnType: "PgText";
-            data: "error" | "info" | "warning";
+            data: "error" | "warning" | "info";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -504,7 +504,7 @@ export declare const driftAlert: import("drizzle-orm/pg-core").PgTableWithColumn
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type ScheduledCheck = typeof scheduledCheck.$inferSelect;
 export type NewScheduledCheck = typeof scheduledCheck.$inferInsert;

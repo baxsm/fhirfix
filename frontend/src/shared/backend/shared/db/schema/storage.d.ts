@@ -58,7 +58,7 @@ export declare const storedObject: import("drizzle-orm/pg-core").PgTableWithColu
             tableName: "stored_object";
             dataType: "string";
             columnType: "PgText";
-            data: "corrected" | "evidence" | "export" | "input" | "signed_pdf";
+            data: "input" | "corrected" | "evidence" | "signed_pdf" | "export";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -177,7 +177,7 @@ export declare const storedObject: import("drizzle-orm/pg-core").PgTableWithColu
             tableName: "stored_object";
             dataType: "string";
             columnType: "PgText";
-            data: "failed" | "pending" | "stored";
+            data: "stored" | "pending" | "failed";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -241,7 +241,7 @@ export declare const storedObject: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type StoredObject = typeof storedObject.$inferSelect;
 export type NewStoredObject = typeof storedObject.$inferInsert;

@@ -157,7 +157,7 @@ export declare const conformancePacketRun: import("drizzle-orm/pg-core").PgTable
             tableName: "conformance_packet_run";
             dataType: "string";
             columnType: "PgText";
-            data: "cancelled" | "completed" | "failed" | "queued" | "running";
+            data: "queued" | "running" | "completed" | "failed" | "cancelled";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -220,7 +220,7 @@ export declare const conformancePacketRun: import("drizzle-orm/pg-core").PgTable
             tableName: "conformance_packet_run";
             dataType: "string";
             columnType: "PgText";
-            data: "fail" | "partial" | "pass";
+            data: "pass" | "fail" | "partial";
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -352,7 +352,7 @@ export declare const conformancePacketRun: import("drizzle-orm/pg-core").PgTable
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const evidenceBundle: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "evidence_bundle";
@@ -495,7 +495,7 @@ export declare const evidenceBundle: import("drizzle-orm/pg-core").PgTableWithCo
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const encryptedSecret: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "encrypted_secret";
@@ -570,7 +570,7 @@ export declare const encryptedSecret: import("drizzle-orm/pg-core").PgTableWithC
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type ConformancePacketRun = typeof conformancePacketRun.$inferSelect;
 export type NewConformancePacketRun = typeof conformancePacketRun.$inferInsert;

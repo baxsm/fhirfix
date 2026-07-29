@@ -41,7 +41,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "source_system" | "workspace";
+            data: "workspace" | "source_system";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -75,7 +75,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+            data: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -143,7 +143,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             tableName: "mapping_registry_entry";
             dataType: "string";
             columnType: "PgText";
-            data: "active" | "deprecated" | "rejected" | "suggested";
+            data: "suggested" | "active" | "deprecated" | "rejected";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -275,7 +275,7 @@ export declare const mappingRegistryEntry: import("drizzle-orm/pg-core").PgTable
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export type MappingRegistryEntry = typeof mappingRegistryEntry.$inferSelect;
 export type NewMappingRegistryEntry = typeof mappingRegistryEntry.$inferInsert;

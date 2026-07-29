@@ -12,8 +12,8 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -53,17 +53,17 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
             run: {
                 id: string;
                 workspaceId: string;
-                actorType: "api_key" | "scheduled" | "system" | "user";
+                actorType: "user" | "api_key" | "scheduled" | "system";
                 actorId: string | null;
-                source: "api" | "ci" | "scheduled" | "ui";
-                inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
+                source: "scheduled" | "ui" | "api" | "ci";
+                inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
                 fhirVersion: "R4" | "R4B" | "R5" | null;
                 profilesRequested: string[];
                 profilesApplied: string[];
                 terminologyServer: string | null;
                 engineVersion: string;
                 igVersions: Record<string, string>;
-                status: "completed" | "failed" | "queued" | "running";
+                status: "queued" | "running" | "completed" | "failed";
                 resourceCount: number;
                 conformanceScoreBefore: number | null;
                 conformanceScoreAfter: number | null;
@@ -85,8 +85,8 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 runId: string;
                 workspaceId: string;
-                severity: "error" | "info" | "warning";
-                category: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
+                severity: "error" | "warning" | "info";
+                category: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
                 ruleSource: string;
                 specCitation: string;
                 resourceType: string | null;
@@ -94,8 +94,8 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
                 rawValidatorMessage: string;
                 plainMessage: string;
                 suggestedFix: string;
-                fixConfidence: "auto" | "manual" | "one_click";
-                fixStatus: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
+                fixConfidence: "auto" | "one_click" | "manual";
+                fixStatus: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
                 dismissedBy: string | null;
                 dedupFingerprint: string;
                 occurrenceCount: number;
@@ -114,17 +114,17 @@ export declare const runRouter: import("@trpc/server").TRPCBuiltRouter<{
         output: {
             id: string;
             workspaceId: string;
-            actorType: "api_key" | "scheduled" | "system" | "user";
+            actorType: "user" | "api_key" | "scheduled" | "system";
             actorId: string | null;
-            source: "api" | "ci" | "scheduled" | "ui";
-            inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
+            source: "scheduled" | "ui" | "api" | "ci";
+            inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
             fhirVersion: "R4" | "R4B" | "R5" | null;
             profilesRequested: string[];
             profilesApplied: string[];
             terminologyServer: string | null;
             engineVersion: string;
             igVersions: Record<string, string>;
-            status: "completed" | "failed" | "queued" | "running";
+            status: "queued" | "running" | "completed" | "failed";
             resourceCount: number;
             conformanceScoreBefore: number | null;
             conformanceScoreAfter: number | null;
