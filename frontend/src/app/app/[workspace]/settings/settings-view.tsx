@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,13 +65,10 @@ export function SettingsView({
 
   return (
     <PageContainer>
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Members, roles, and defaults for{" "}
-          <span className="font-medium text-foreground">{active?.name ?? "this workspace"}</span>.
-        </p>
-      </header>
+      <PageHeader
+        title="Settings"
+        description="Members, roles, and defaults for this workspace."
+      />
 
       <div className="grid gap-8 md:grid-cols-[180px_1fr]">
         <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">

@@ -21,9 +21,17 @@ function rel(file: string): string {
   return file.slice(SRC.length + 1).replace(/\\/g, "/");
 }
 
-// marketing runs its own visual language and is exempt from the dashboard rules
+// marketing, docs and auth run their own visual language, outside the app shell
+const NOT_DASHBOARD = [
+  "components/marketing/",
+  "app/(marketing)/",
+  "app/(auth)/",
+  "app/docs/",
+  "components/docs/",
+];
+
 function dashboardFiles(): string[] {
-  return tsxFiles(SRC).filter((f) => !rel(f).startsWith("components/marketing/"));
+  return tsxFiles(SRC).filter((f) => !NOT_DASHBOARD.some((p) => rel(f).startsWith(p)));
 }
 
 const CONTENTS_ONLY = ["empty-state.tsx"];
@@ -81,6 +89,33 @@ describe("shared primitives are not re-implemented", () => {
         if (panel && retry) {
           offenders.push(`${rel(file)}: use <LoadError what="..." /> instead`);
           break;
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  // billing and settings shipped text-xl while every sibling page used text-lg,
+  // so same-level pages had different heading sizes. PageHeader is the size.
+  it("a page heading is not larger than PageHeader's", () => {
+    const offenders: string[] = [];
+    const exempt = [
+      // its own chrome, outside the dashboard shell
+      "app/account/account-view.tsx",
+      // full-page states, deliberately louder than a page heading
+      "app/app/new/new-workspace-view.tsx",
+      "app/error.tsx",
+      "app/not-found.tsx",
+      "components/dashboard/phase-placeholder.tsx",
+      "components/dashboard/workspace-not-found.tsx",
+    ];
+
+    for (const file of dashboardFiles()) {
+      if (exempt.includes(rel(file))) continue;
+      for (const line of readFileSync(file, "utf8").split("\n")) {
+        if (/<h1/.test(line) && /text-(xl|2xl|3xl)/.test(line)) {
+          offenders.push(`${rel(file)}: ${line.trim().slice(0, 60)}`);
         }
       }
     }
