@@ -1,4 +1,5 @@
 import { performAutoRecharge } from "@shared/db/auto-recharge";
+import { sweepExpiredBlobs } from "@shared/db/retention";
 import { setAutoRechargeHandler, setLowBalanceSender } from "@shared/db/runs";
 import { ENGINE_VERSION } from "@shared/engine";
 import { Worker } from "bullmq";
@@ -8,7 +9,7 @@ import { sendLowBalanceEmail } from "./email";
 import { env } from "./env";
 import { db, logger } from "./lib";
 import { chargeSavedMethod, isBillingConfigured, productIdForPack } from "./polar";
-import type { WebhookJob } from "./queues";
+import { registerRetentionSweep, type WebhookJob } from "./queues";
 import { executeRun, type RemediationJob } from "./run-service";
 import { executeScheduledCheck, type ScheduleJob } from "./schedule-service";
 import { syncSchedulers } from "./schedule-sync";
@@ -67,6 +68,17 @@ const conformanceWorker = new Worker<ConformanceJob>(
   { connection, concurrency: 1 },
 );
 
+// one at a time: the sweep is a bulk delete, and two of them racing would just
+// contend on the same rows.
+const retentionWorker = new Worker(
+  "retention",
+  async () => {
+    const { scanned, purged } = await sweepExpiredBlobs(db);
+    if (scanned > 0) logger.info("retention.sweep", `purged ${purged} of ${scanned} expired`);
+  },
+  { connection, concurrency: 1 },
+);
+
 const scheduleWorker = new Worker<ScheduleJob>(
   "schedule",
   async (job) => {
@@ -112,6 +124,7 @@ scheduleWorker.on("error", (err) => {
 logger.info("worker.start", `fhirfix remediation worker up (engine ${ENGINE_VERSION}), concurrency ${env.WORKER_CONCURRENCY}`);
 
 await syncSchedulers().catch((err) => logger.error("schedule.sync", String(err)));
+await registerRetentionSweep().catch((err) => logger.error("retention.register", String(err)));
 
 async function shutdown() {
   logger.info("worker.shutdown", "draining");
@@ -121,6 +134,7 @@ async function shutdown() {
     webhookWorker.close(),
     conformanceWorker.close(),
     scheduleWorker.close(),
+    retentionWorker.close(),
   ]);
   process.exit(0);
 }

@@ -2,6 +2,7 @@ import type { BlobStore } from "./blob";
 import type { Db } from "./client";
 export type RedactionPolicy = "off" | "on_ingest" | "required";
 export declare function redactionPolicyFor(db: Db, workspaceId: string): Promise<RedactionPolicy>;
+export declare function retentionExpiryFor(db: Db, workspaceId: string): Promise<Date>;
 export type StoredInput = {
     key: string | null;
     content: string;

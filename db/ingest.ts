@@ -17,6 +17,17 @@ export async function redactionPolicyFor(db: Db, workspaceId: string): Promise<R
   return (row?.policy ?? "on_ingest") as RedactionPolicy;
 }
 
+// when this workspace's artifacts should be swept, from its retention setting.
+export async function retentionExpiryFor(db: Db, workspaceId: string): Promise<Date> {
+  const [row] = await db
+    .select({ days: schema.workspaceSettings.dataRetentionDays })
+    .from(schema.workspaceSettings)
+    .where(eq(schema.workspaceSettings.workspaceId, workspaceId))
+    .limit(1);
+  const days = row?.days ?? 30;
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+}
+
 export type StoredInput = {
   key: string | null;
   content: string;
@@ -76,6 +87,9 @@ export async function storeRunInput(
   }
 
   const { sha256, sizeBytes } = await blobStore.put(key, effective, "application/json");
+  // stamped now so the sweep job has something to select on. without this the
+  // expiry index exists but never matches anything.
+  const retentionExpiresAt = await retentionExpiryFor(db, workspaceId);
   await db
     .insert(schema.storedObject)
     .values({
@@ -90,6 +104,7 @@ export async function storeRunInput(
       // what is ON DISK, not what arrived.
       containsPhi: hadPhi && !shouldRedact,
       uploadState: "stored",
+      retentionExpiresAt,
     })
     .onConflictDoUpdate({
       target: schema.storedObject.key,
@@ -100,6 +115,7 @@ export async function storeRunInput(
         sha256,
         containsPhi: hadPhi && !shouldRedact,
         uploadState: "stored",
+        retentionExpiresAt,
       },
     });
 

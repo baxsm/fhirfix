@@ -18,6 +18,7 @@
     "./mappings": "./mappings.ts",
     "./notifications": "./notifications.ts",
     "./phi": "./phi.ts",
+    "./retention": "./retention.ts",
     "./runs": "./runs.ts",
     "./webhooks": "./webhooks.ts"
   },

@@ -7,6 +7,19 @@ export const webhookQueue = new Queue("webhook", { connection });
 
 export const scheduleQueue = new Queue("schedule", { connection });
 export const remediationQueue = new Queue("remediation", { connection });
+export const retentionQueue = new Queue("retention", { connection });
+
+const RETENTION_SCHEDULER_ID = "retention:sweep";
+
+// one hourly sweep for the whole deployment. registering by a fixed id means a
+// worker restart re-registers the same scheduler rather than stacking new ones.
+export async function registerRetentionSweep(): Promise<void> {
+  await retentionQueue.upsertJobScheduler(
+    RETENTION_SCHEDULER_ID,
+    { pattern: "0 * * * *" },
+    { name: "sweep", opts: { removeOnComplete: 100, removeOnFail: 100 } },
+  );
+}
 
 export interface WebhookJob {
   event:
