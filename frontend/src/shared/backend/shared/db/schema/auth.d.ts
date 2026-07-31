@@ -139,7 +139,7 @@ export declare const user: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const session: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "session";
@@ -299,7 +299,7 @@ export declare const session: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const account: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "account";
@@ -527,7 +527,7 @@ export declare const account: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const verification: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "verification";
@@ -636,7 +636,7 @@ export declare const verification: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const organization: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "organization";
@@ -745,7 +745,7 @@ export declare const organization: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const member: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "member";
@@ -837,7 +837,7 @@ export declare const member: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
 }>;
 export declare const invitation: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "invitation";
@@ -980,13 +980,157 @@ export declare const invitation: import("drizzle-orm/pg-core").PgTableWithColumn
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: 'pg';
+    dialect: "pg";
+}>;
+export declare const ssoProvider: import("drizzle-orm/pg-core").PgTableWithColumns<{
+    name: "sso_provider";
+    schema: undefined;
+    columns: {
+        id: import("drizzle-orm/pg-core").PgColumn<{
+            name: "id";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: true;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        issuer: import("drizzle-orm/pg-core").PgColumn<{
+            name: "issuer";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        oidcConfig: import("drizzle-orm/pg-core").PgColumn<{
+            name: "oidc_config";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        samlConfig: import("drizzle-orm/pg-core").PgColumn<{
+            name: "saml_config";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        userId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "user_id";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        providerId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "provider_id";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        organizationId: import("drizzle-orm/pg-core").PgColumn<{
+            name: "organization_id";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+        domain: import("drizzle-orm/pg-core").PgColumn<{
+            name: "domain";
+            tableName: "sso_provider";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
+    };
+    dialect: "pg";
 }>;
 export declare const userRelations: import("drizzle-orm").Relations<"user", {
     sessions: import("drizzle-orm").Many<"session">;
     accounts: import("drizzle-orm").Many<"account">;
     members: import("drizzle-orm").Many<"member">;
     invitations: import("drizzle-orm").Many<"invitation">;
+    ssoProviders: import("drizzle-orm").Many<"sso_provider">;
 }>;
 export declare const sessionRelations: import("drizzle-orm").Relations<"session", {
     user: import("drizzle-orm").One<"user", true>;
@@ -1005,4 +1149,7 @@ export declare const memberRelations: import("drizzle-orm").Relations<"member", 
 export declare const invitationRelations: import("drizzle-orm").Relations<"invitation", {
     organization: import("drizzle-orm").One<"organization", true>;
     user: import("drizzle-orm").One<"user", true>;
+}>;
+export declare const ssoProviderRelations: import("drizzle-orm").Relations<"sso_provider", {
+    user: import("drizzle-orm").One<"user", false>;
 }>;

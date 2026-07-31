@@ -11,24 +11,24 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
         redactionPolicy: "off" | "on_ingest" | "required";
         dataRetentionDays: number;
         baaStatus: "none" | "requested" | "signed";
-        planTier: "free" | "premium" | "team";
+        planTier: "free" | "team" | "premium";
         createdAt: Date;
         updatedAt: Date;
     } | null;
     runs: {
         id: string;
         workspaceId: string;
-        actorType: "api_key" | "scheduled" | "system" | "user";
+        actorType: "user" | "api_key" | "scheduled" | "system";
         actorId: string | null;
-        source: "api" | "ci" | "scheduled" | "ui";
-        inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
+        source: "scheduled" | "ui" | "api" | "ci";
+        inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
         fhirVersion: "R4" | "R4B" | "R5" | null;
         profilesRequested: string[];
         profilesApplied: string[];
         terminologyServer: string | null;
         engineVersion: string;
         igVersions: Record<string, string>;
-        status: "completed" | "failed" | "queued" | "running";
+        status: "queued" | "running" | "completed" | "failed";
         resourceCount: number;
         conformanceScoreBefore: number | null;
         conformanceScoreAfter: number | null;
@@ -50,8 +50,8 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
         id: string;
         runId: string;
         workspaceId: string;
-        severity: "error" | "info" | "warning";
-        category: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
+        severity: "error" | "warning" | "info";
+        category: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
         ruleSource: string;
         specCitation: string;
         resourceType: string | null;
@@ -59,8 +59,8 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
         rawValidatorMessage: string;
         plainMessage: string;
         suggestedFix: string;
-        fixConfidence: "auto" | "manual" | "one_click";
-        fixStatus: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
+        fixConfidence: "auto" | "one_click" | "manual";
+        fixStatus: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
         dismissedBy: string | null;
         dedupFingerprint: string;
         occurrenceCount: number;
@@ -70,13 +70,13 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
     mappings: {
         id: string;
         workspaceId: string;
-        scope: "source_system" | "workspace";
+        scope: "workspace" | "source_system";
         sourceSystem: string | null;
-        type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+        type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
         sourceValue: string;
         targetValue: string;
         targetSystem: string | null;
-        status: "active" | "deprecated" | "rejected" | "suggested";
+        status: "suggested" | "active" | "deprecated" | "rejected";
         confidence: number | null;
         version: number;
         supersedesId: string | null;
@@ -88,7 +88,7 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
     ledger: {
         id: string;
         workspaceId: string;
-        type: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
+        type: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
         amountMicroCredits: number;
         balanceAfter: number;
         relatedRunId: string | null;
@@ -110,9 +110,9 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
     audit: {
         id: string;
         workspaceId: string;
-        actorType: "api_key" | "system" | "user";
+        actorType: "user" | "api_key" | "system";
         actorId: string | null;
-        action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+        action: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted";
         targetRef: string | null;
         ip: string | null;
         metadata: Record<string, unknown> | null;
@@ -151,14 +151,14 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
         infernoVersion: string;
         targetEndpoint: string;
         authConfigRef: string | null;
-        status: "cancelled" | "completed" | "failed" | "queued" | "running";
+        status: "queued" | "running" | "completed" | "failed" | "cancelled";
         resultsMatrix: schema.StoredMatrixCell[] | null;
         progress: Record<string, {
             total: number;
             completed: number;
             status: string;
         }>;
-        overallResult: "fail" | "partial" | "pass" | null;
+        overallResult: "pass" | "fail" | "partial" | null;
         passCount: number | null;
         failCount: number | null;
         previousRunId: string | null;
@@ -169,7 +169,7 @@ export declare function exportWorkspaceData(db: Db, workspaceId: string): Promis
     }[];
     artifacts: {
         key: string;
-        kind: "corrected" | "evidence" | "export" | "input" | "signed_pdf";
+        kind: "input" | "corrected" | "evidence" | "signed_pdf" | "export";
         sizeBytes: number;
         sha256: string;
         containsPhi: boolean;

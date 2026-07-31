@@ -105,7 +105,13 @@ export const auth = betterAuth({
     }),
     // enterprise sso. off unless switched on, because an unconfigured provider
     // would still expose /sso/* endpoints that can only fail.
-    ...(env.SSO_ENABLED ? [sso()] : []),
+    //
+    // trustEmailVerified: an assertion from a workspace's configured corporate
+    // IdP IS the proof of the address. without this the plugin hardcodes
+    // emailVerified=false, which would send an SSO user through our own email
+    // verification and defeat the point of single sign-on. it only applies to
+    // providers an admin registered, and only when the provider maps the field.
+    ...(env.SSO_ENABLED ? [sso({ trustEmailVerified: true })] : []),
   ],
 });
 
