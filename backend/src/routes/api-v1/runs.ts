@@ -2,6 +2,7 @@ import { redactionPolicyFor, resolveProfiles, storeRunInput } from "@shared/db/i
 import { getRun, getRunFindings, listRuns } from "@shared/db/runs";
 import { detectInput, ENGINE_VERSION } from "@shared/engine";
 import type { Context } from "hono";
+import { writeAudit } from "@/lib/audit";
 import { blobKey, blobStore } from "@/lib/blob";
 import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
@@ -69,6 +70,15 @@ export async function batchController(c: Context<ApiV1Env>) {
     { removeOnComplete: 1000, removeOnFail: 1000 },
   );
   c.set("runId", runId);
+  await writeAudit({
+    workspaceId,
+    action: "run.created",
+    actorType: "api_key",
+    actorId: apiKeyId,
+    targetRef: runId,
+    ip: c.get("ip") || null,
+    metadata: { inputType, source: "api" },
+  });
   logger.info("apiv1.batch", `queued ${runId} (${inputType})`);
   return c.json({ runId, status: "queued" }, 202);
 }
@@ -154,5 +164,18 @@ export async function getCorrectedController(c: Context<ApiV1Env>) {
     return apiError(c, 404, "no_artifact", "No corrected artifact for this run.");
   const body = await blobStore.get(row.correctedRef).catch(() => null);
   if (body == null) return apiError(c, 404, "no_artifact", "Corrected artifact unavailable.");
+
+  // the corrected artifact is the source data. the dashboard route audits this
+  // same read, so a key doing it must leave the same trail.
+  await writeAudit({
+    workspaceId,
+    action: "report.downloaded",
+    actorType: "api_key",
+    actorId: c.get("apiKeyId"),
+    targetRef: runId,
+    ip: c.get("ip") || null,
+    metadata: { kind: "corrected_artifact", via: "api" },
+  });
+
   return new Response(body, { headers: { "Content-Type": "application/octet-stream" } });
 }

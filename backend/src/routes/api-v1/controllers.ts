@@ -12,6 +12,7 @@ import {
 } from "@shared/engine";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
+import { writeAudit } from "@/lib/audit";
 import { blobKey, blobStore } from "@/lib/blob";
 import { db, schema } from "@/lib/db";
 import { engineDeps, ensureEngineWarm } from "@/lib/engine";
@@ -172,6 +173,19 @@ async function runAndPersist(
   }
 
   c.set("runId", runId);
+
+  // the same action the dashboard writes for the same event. an auditor asking
+  // who touched this data must get an answer whether it came from the ui or a key.
+  // deliberately after the insert, so idempotent replays above do not re-audit.
+  await writeAudit({
+    workspaceId,
+    action: "run.created",
+    actorType: "api_key",
+    actorId: apiKeyId,
+    targetRef: runId,
+    ip: c.get("ip") || null,
+    metadata: { inputType, source: "api" },
+  });
 
   await ensureEngineWarm();
   const mappings = await loadActiveMappings(db, workspaceId);

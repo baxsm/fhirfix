@@ -80,6 +80,38 @@ describe("audit coverage", () => {
     expect(suspects).toEqual([]);
   });
 
+  // a run created through the api went unaudited for a whole phase while the
+  // identical run from the dashboard wrote a row. an auditor asking "who touched
+  // this data" must get the same answer regardless of which door was used.
+  test("every sensitive api-v1 controller writes an audit row", () => {
+    const required = [
+      // validate/fix/convert all funnel through this one shared helper
+      { file: "controllers.ts", fn: "runAndPersist", action: "run.created" },
+      { file: "runs.ts", fn: "batchController", action: "run.created" },
+      { file: "runs.ts", fn: "getCorrectedController", action: "report.downloaded" },
+      { file: "report.ts", fn: "getReportController", action: "report.exported" },
+    ];
+    const missing: string[] = [];
+
+    for (const { file, fn, action } of required) {
+      const src = readFileSync(join(BACKEND_SRC, "routes", "api-v1", file), "utf8");
+      // slice from the function to the next top-level declaration
+      const start = src.indexOf(fn);
+      if (start === -1) {
+        missing.push(`${file}: ${fn} not found (renamed? update this test)`);
+        continue;
+      }
+      const rest = src.slice(start);
+      const end = rest.search(/\n(?:export )?(?:async )?function /);
+      const body = end === -1 ? rest : rest.slice(0, end);
+      if (!body.includes(`action: "${action}"`)) {
+        missing.push(`${file}:${fn} does not write ${action}`);
+      }
+    }
+
+    expect(missing).toEqual([]);
+  });
+
   // the audit page renders ACTION_LABELS[action]. a missing entry renders the
   // raw slug to whoever is answering an auditor.
   test("every declared action has a human label", () => {
