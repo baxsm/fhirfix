@@ -124,6 +124,23 @@ services:
     environment:
       SESSION_CACHE_DURATION: -1
 
+  # a real SAML identity provider to test enterprise sso against. sso is a
+  # protocol, not a vendor, so this stands in for okta/entra without needing a
+  # work domain to sign up. dev mode only: no tls, in-memory db, wiped on down.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    container_name: fhirfix-keycloak
+    profiles: ["sso"]
+    restart: unless-stopped
+    command: start-dev --http-port=8180
+    environment:
+      # renamed from KEYCLOAK_ADMIN in 26.x
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8180"
+
 volumes:
   fhirfix-pgdata:
   fhirfix-redisdata:

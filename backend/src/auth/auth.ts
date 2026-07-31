@@ -1,3 +1,4 @@
+import { sso } from "@better-auth/sso";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink, organization } from "better-auth/plugins";
@@ -102,6 +103,9 @@ export const auth = betterAuth({
         await sendEmail({ to: email, subject, html, text });
       },
     }),
+    // enterprise sso. off unless switched on, because an unconfigured provider
+    // would still expose /sso/* endpoints that can only fail.
+    ...(env.SSO_ENABLED ? [sso()] : []),
   ],
 });
 
