@@ -208,7 +208,8 @@ export const conformanceRouter = router({
       // regression tracking only means something against the SAME endpoint, so
       // link to the last completed packet for it automatically. nothing in the
       // ui ever sent previousRunId, which left the whole diff permanently empty.
-      const previousRunId = input.previousRunId ?? (await lastPacketFor(ctx.db, ctx.workspaceId, input.targetEndpoint));
+      const previousRunId =
+        input.previousRunId ?? (await lastPacketFor(ctx.db, ctx.workspaceId, input.targetEndpoint));
 
       const packetRunId = createId("packet");
       await ctx.db.insert(schema.conformancePacketRun).values({

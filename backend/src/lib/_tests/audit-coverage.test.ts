@@ -1,7 +1,7 @@
+import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { AUDIT_ACTIONS } from "@shared/db/schema";
-import { describe, expect, test } from "bun:test";
 
 const BACKEND_SRC = join(import.meta.dir, "..", "..");
 const WORKER_SRC = join(BACKEND_SRC, "..", "..", "worker", "src");

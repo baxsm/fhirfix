@@ -194,7 +194,9 @@ export function CheckView({
                         {s.kind}
                       </span>
                     </span>
-                    <span className="text-[0.6875rem] leading-snug text-muted-foreground">{s.hint}</span>
+                    <span className="text-[0.6875rem] leading-snug text-muted-foreground">
+                      {s.hint}
+                    </span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

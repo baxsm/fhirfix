@@ -3,9 +3,9 @@ import { grantTrialCredits } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
 import { generateKey } from "@/lib/api-key";
 import { db, schema } from "@/lib/db";
-import { SAMPLE_FIXTURES } from "./fixtures-samples";
 import { createId } from "@/lib/id";
 import { apiV1 } from "@/routes/api-v1/index";
+import { SAMPLE_FIXTURES } from "./fixtures-samples";
 
 const workspaces: string[] = [];
 const keyIds: string[] = [];

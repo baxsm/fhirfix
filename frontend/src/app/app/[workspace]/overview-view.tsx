@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { RefreshingNote } from "@/components/dashboard/refreshing-note";
+import { describeFailure } from "@/components/report/run-failure";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusDot } from "@/components/ui/status";
@@ -13,7 +14,6 @@ import { useListOrganizations } from "@/lib/auth-client";
 import { useDelayedFlag } from "@/lib/use-delayed-flag";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
-import { describeFailure } from "@/components/report/run-failure";
 import { isRealFailure } from "./runs/run-status";
 import { ScoreTrend } from "./score-trend";
 

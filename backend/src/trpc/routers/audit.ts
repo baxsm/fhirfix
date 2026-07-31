@@ -51,7 +51,9 @@ async function withActorNames<T extends { actorType: string; actorId: string | n
   rows: T[],
 ): Promise<(T & { actorName: string | null })[]> {
   const idsFor = (type: string) => [
-    ...new Set(rows.filter((r) => r.actorType === type && r.actorId).map((r) => r.actorId as string)),
+    ...new Set(
+      rows.filter((r) => r.actorType === type && r.actorId).map((r) => r.actorId as string),
+    ),
   ];
   const userIds = idsFor("user");
   const keyIds = idsFor("api_key");

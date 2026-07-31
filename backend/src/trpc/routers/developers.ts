@@ -7,7 +7,6 @@ import { generateKey } from "@/lib/api-key";
 import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
-import { logger } from "@/lib/logger";
 import { encryptSecret, generateWebhookSecret } from "@/lib/secret-crypto";
 import { dispatchWebhook } from "@/queues/index";
 import { router, workspaceProcedure } from "../trpc";

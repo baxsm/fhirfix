@@ -75,7 +75,11 @@ export async function createPremiumCheckout(args: {
 
 export type OffSessionResult =
   | { ok: true; orderId: string }
-  | { ok: false; reason: "no_payment_method" | "declined" | "not_enabled" | "error"; detail: string };
+  | {
+      ok: false;
+      reason: "no_payment_method" | "declined" | "not_enabled" | "error";
+      detail: string;
+    };
 
 // charge a saved payment method with no user present: create a draft order, then
 // finalize it. the order carries the same metadata as a checkout, so the existing

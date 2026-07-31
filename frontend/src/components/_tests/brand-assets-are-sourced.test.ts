@@ -52,8 +52,13 @@ describe("brand assets are sourced, never redrawn", () => {
       const brand = BRANDS.find((b) => name.includes(b));
       if (!brand) continue;
 
-      // a citation is a url in a comment naming where the paths were taken from
-      const cited = /\/\/[^\n]*https?:\/\/\S+/.test(src) || /\*[^\n]*https?:\/\/\S+/.test(src);
+      // a citation is a domain on a line that STARTS as a comment. matching a
+      // bare "//" anywhere is useless: every svg carries xmlns="http://www.w3.org
+      // /2000/svg", which made an earlier version of this check pass for any file.
+      // the protocol is optional, because formatters reflow "https://" off the line.
+      const cited = src
+        .split("\n")
+        .some((line) => /^\s*(\/\/|\*)/.test(line) && /\b[a-z0-9-]+\.[a-z]{2,}\/\S+/.test(line));
       if (!cited) {
         offenders.push(
           `${rel(file)}: draws the ${brand} mark with no source url in a comment. ` +

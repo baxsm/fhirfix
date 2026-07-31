@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PendingRows } from "@/components/ui/pending-rows";
-import { Skeleton } from "@/components/ui/skeleton";
 import { StatusDot } from "@/components/ui/status";
 import { Switch } from "@/components/ui/switch";
 import { useTRPC } from "@/trpc/client";

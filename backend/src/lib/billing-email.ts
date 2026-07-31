@@ -1,5 +1,5 @@
-import { env } from "./env";
 import { sendEmail } from "./email";
+import { env } from "./env";
 
 export async function sendLowBalanceEmail(args: {
   to: string;

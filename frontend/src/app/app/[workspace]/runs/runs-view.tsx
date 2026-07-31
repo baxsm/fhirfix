@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { useListOrganizations } from "@/lib/auth-client";
 import { useDelayedFlag } from "@/lib/use-delayed-flag";
-import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { isCancelled, isRealFailure, type Status } from "./run-status";
 
@@ -343,4 +342,3 @@ function EmptyRuns({ workspace }: { workspace: string }) {
     </div>
   );
 }
-

@@ -74,10 +74,7 @@ export function SettingsView({
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Settings"
-        description="Members, roles, and defaults for this workspace."
-      />
+      <PageHeader title="Settings" description="Members, roles, and defaults for this workspace." />
 
       <div className="grid gap-8 md:grid-cols-[180px_1fr]">
         <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
@@ -222,7 +219,10 @@ function BaaRow({
           {request.isPending ? "Sending..." : "Request a BAA"}
         </Button>
       ) : status === "signed" ? (
-        <Badge variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400">
+        <Badge
+          variant="outline"
+          className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400"
+        >
           <Check className="size-3" />
           Signed
         </Badge>

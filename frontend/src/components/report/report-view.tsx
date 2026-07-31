@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { useTRPC, useTRPCClient } from "@/trpc/client";
+import { useTRPC } from "@/trpc/client";
 import { DiffView } from "./diff-view";
 import {
   applyPreset,
@@ -137,7 +137,6 @@ export function ReportView({
   runMissing?: boolean;
 }) {
   const trpc = useTRPC();
-  const client = useTRPCClient();
 
   const query = useQuery({
     ...trpc.run.get.queryOptions({ workspaceId, runId }),

@@ -15,7 +15,9 @@ afterAll(async () => {
 });
 
 async function seed() {
-  await db.insert(schema.workspaceSettings).values({ id: createId("workspaceSettings"), workspaceId: ws });
+  await db
+    .insert(schema.workspaceSettings)
+    .values({ id: createId("workspaceSettings"), workspaceId: ws });
   const runId = createId("run");
   await db.insert(schema.run).values({
     id: runId,
@@ -100,7 +102,10 @@ describe("workspace deletion", () => {
 
     // PHI is gone.
     const runs = await db.select().from(schema.run).where(eq(schema.run.workspaceId, ws));
-    const findings = await db.select().from(schema.finding).where(eq(schema.finding.workspaceId, ws));
+    const findings = await db
+      .select()
+      .from(schema.finding)
+      .where(eq(schema.finding.workspaceId, ws));
     const blobs = await db
       .select()
       .from(schema.storedObject)

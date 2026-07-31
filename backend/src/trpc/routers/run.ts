@@ -19,7 +19,6 @@ const submitSchema = z.object({
   autoFix: z.boolean().default(true),
 });
 
-
 export const runRouter = router({
   submit: creditGatedProcedure.input(submitSchema).mutation(async ({ ctx, input }) => {
     const runId = createId("run");
@@ -275,5 +274,4 @@ export const runRouter = router({
       });
       return { cancelled: true as const, status: "failed" as const };
     }),
-
 });

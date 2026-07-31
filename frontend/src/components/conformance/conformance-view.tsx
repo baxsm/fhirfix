@@ -185,7 +185,7 @@ export function ConformanceView({
                   : null;
               const done = row.status === "completed";
               return (
-                // biome-ignore lint/a11y/useSemanticElements: the selected row is inert, not a button
+                // biome-ignore lint/a11y/noStaticElementInteractions: role, tabIndex and Enter/Space are set below
                 <div
                   key={row.id}
                   role={isSelected ? undefined : "button"}

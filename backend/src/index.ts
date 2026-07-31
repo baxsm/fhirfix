@@ -1,9 +1,5 @@
 import { trpcServer } from "@hono/trpc-server";
-import {
-  setAutoRechargeHandler,
-  setLowBalanceSender,
-  setLowBalanceWebhook,
-} from "@shared/db/runs";
+import { setAutoRechargeHandler, setLowBalanceSender, setLowBalanceWebhook } from "@shared/db/runs";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "@/auth/auth";
@@ -12,10 +8,10 @@ import { sendLowBalanceEmail } from "@/lib/billing-email";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
+import { dispatchWebhook } from "@/queues/index";
 import { apiV1 } from "@/routes/api-v1/index";
 import { exportRoutes } from "@/routes/export";
 import { polarWebhookRoutes } from "@/routes/polar-webhook";
-import { dispatchWebhook } from "@/queues/index";
 import { createTRPCContext } from "@/trpc/context";
 import { appRouter } from "@/trpc/routers/index";
 
