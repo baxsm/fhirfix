@@ -23,6 +23,7 @@ export const idPrefix = {
   apiRequestLog: "areq",
   notification: "ntf",
   audit: "aud",
+  ssoProvider: "sso",
 } as const;
 
 type IdKind = keyof typeof idPrefix;

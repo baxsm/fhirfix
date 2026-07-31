@@ -7,8 +7,11 @@ import { auth } from "@/auth/auth";
 import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { sendBaaRequestEmail } from "@/lib/baa-email";
 import { schema } from "@/lib/db";
+import { env } from "@/lib/env";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
+import { requirePremiumPlan } from "@/lib/require-premium";
+import { certFingerprint, parseIdpMetadata } from "@/lib/saml-metadata";
 import { enforceRole, protectedProcedure, router, workspaceProcedure } from "../trpc";
 
 const settingsUpdateSchema = z.object({
@@ -215,8 +218,193 @@ export const workspaceRouter = router({
       return { baaStatus: updated?.baaStatus ?? "requested" };
     }),
 
-  // SSO config is stubbed in phase 1 and built in phase 8. do not wire the plugin yet.
-  ssoGet: enforceRole("workspaceSettings", "view").query(() => {
-    return { configured: false as const };
+  // what the settings page shows. never returns the raw certificate: an admin
+  // compares the fingerprint against their IdP, they do not need the bytes back.
+  ssoGet: enforceRole("workspaceSettings", "view").query(async ({ ctx, input }) => {
+    if (!env.SSO_ENABLED) return { enabled: false as const, provider: null };
+
+    const [row] = await ctx.db
+      .select({
+        providerId: schema.ssoProvider.providerId,
+        issuer: schema.ssoProvider.issuer,
+        domain: schema.ssoProvider.domain,
+        samlConfig: schema.ssoProvider.samlConfig,
+      })
+      .from(schema.ssoProvider)
+      .where(eq(schema.ssoProvider.organizationId, input.workspaceId))
+      .limit(1);
+
+    if (!row) return { enabled: true as const, provider: null };
+
+    const cert = parseSamlCert(row.samlConfig);
+    return {
+      enabled: true as const,
+      provider: {
+        providerId: row.providerId,
+        issuer: row.issuer,
+        domain: row.domain,
+        entryPoint: parseSamlEntryPoint(row.samlConfig),
+        certFingerprint: cert ? await certFingerprint(cert) : null,
+      },
+    };
   }),
+
+  // owner only, and premium. registering an IdP means handing it the power to
+  // assert who a member is, which is a strictly stronger claim than any other
+  // workspace setting.
+  ssoUpsert: workspaceProcedure
+    .input(
+      z.object({
+        workspaceId: z.string(),
+        domain: z.string().min(1).max(253),
+        // either a metadata url we fetch, or the three fields typed by hand
+        metadataUrl: z.url().optional(),
+        issuer: z.string().optional(),
+        entryPoint: z.url().optional(),
+        cert: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!env.SSO_ENABLED) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "SSO is not enabled." });
+      }
+      if (ctx.role !== "owner") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only an owner can configure SSO." });
+      }
+      await requirePremiumPlan(ctx.db, input.workspaceId, "Single sign-on");
+
+      let idp: { entityId: string; entryPoint: string; cert: string } | null = null;
+
+      if (input.metadataUrl) {
+        const xml = await fetch(input.metadataUrl, { signal: AbortSignal.timeout(10_000) })
+          .then((r) => (r.ok ? r.text() : null))
+          .catch(() => null);
+        if (!xml) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Could not reach that metadata URL. Check it, or enter the details manually.",
+          });
+        }
+        idp = parseIdpMetadata(xml);
+        if (!idp) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "That URL did not return SAML metadata we could read.",
+          });
+        }
+      } else if (input.issuer && input.entryPoint && input.cert) {
+        idp = {
+          entityId: input.issuer,
+          entryPoint: input.entryPoint,
+          cert: input.cert.replace(/-----[A-Z ]+-----/g, "").replace(/\s/g, ""),
+        };
+      } else {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Provide a metadata URL, or the issuer, sign-on URL and certificate.",
+        });
+      }
+
+      // one provider per workspace. re-configuring replaces rather than stacks,
+      // otherwise a stale IdP would keep working after being "replaced".
+      const providerId = `ws-${input.workspaceId}`;
+      await ctx.db
+        .delete(schema.ssoProvider)
+        .where(eq(schema.ssoProvider.organizationId, input.workspaceId));
+
+      const sp = `${env.BETTER_AUTH_URL}/api/auth/sso/saml2/sp/metadata`;
+      const mapping = {
+        id: "nameID",
+        email: "email",
+        emailVerified: "emailVerified",
+        name: "displayName",
+        firstName: "givenName",
+        lastName: "surname",
+      };
+
+      await ctx.db.insert(schema.ssoProvider).values({
+        id: createId("ssoProvider"),
+        providerId,
+        issuer: idp.entityId,
+        domain: input.domain.toLowerCase(),
+        organizationId: input.workspaceId,
+        userId: ctx.user.id,
+        samlConfig: JSON.stringify({
+          issuer: idp.entityId,
+          entryPoint: idp.entryPoint,
+          cert: idp.cert,
+          callbackUrl: `${env.BETTER_AUTH_URL}/api/auth/sso/saml2/callback/${providerId}`,
+          audience: sp,
+          wantAssertionsSigned: true,
+          signatureAlgorithm: "sha256",
+          identifierFormat: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+          mapping,
+          idpMetadata: { entityID: idp.entityId, cert: idp.cert, entryPoint: idp.entryPoint },
+          spMetadata: {
+            entityID: sp,
+            callbackUrl: `${env.BETTER_AUTH_URL}/api/auth/sso/saml2/callback/${providerId}`,
+          },
+        }),
+      });
+
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "sso.configured",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.workspaceId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { issuer: idp.entityId, domain: input.domain.toLowerCase() },
+      });
+
+      logger.info("workspace.ssoUpsert", `${input.workspaceId} -> ${idp.entityId}`);
+      return { providerId, issuer: idp.entityId };
+    }),
+
+  ssoDelete: workspaceProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.role !== "owner") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only an owner can remove SSO." });
+      }
+      const [removed] = await ctx.db
+        .delete(schema.ssoProvider)
+        .where(eq(schema.ssoProvider.organizationId, input.workspaceId))
+        .returning({ issuer: schema.ssoProvider.issuer });
+
+      if (removed) {
+        await writeAudit({
+          workspaceId: input.workspaceId,
+          action: "sso.removed",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: input.workspaceId,
+          ip: ipFromHeaders(ctx.headers),
+          metadata: { issuer: removed.issuer },
+        });
+      }
+      return { removed: !!removed };
+    }),
 });
+
+// the stored samlConfig is a json blob owned by the plugin, so read it
+// defensively rather than trusting a shape we do not control.
+function parseSamlCert(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const cert = (JSON.parse(raw) as { cert?: unknown }).cert;
+    return typeof cert === "string" ? cert : null;
+  } catch {
+    return null;
+  }
+}
+
+function parseSamlEntryPoint(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const entry = (JSON.parse(raw) as { entryPoint?: unknown }).entryPoint;
+    return typeof entry === "string" ? entry : null;
+  } catch {
+    return null;
+  }
+}

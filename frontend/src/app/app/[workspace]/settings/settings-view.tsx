@@ -7,6 +7,7 @@ import {
   DatabaseBackup,
   Download,
   FileSignature,
+  KeyRound,
   SlidersHorizontal,
   Users,
 } from "lucide-react";
@@ -43,12 +44,14 @@ import { can, type WorkspaceRole } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { MembersSection } from "./members-section";
+import { SsoSection } from "./sso-section";
 
-type SectionId = "members" | "defaults" | "data";
+type SectionId = "members" | "defaults" | "sso" | "data";
 
 const SECTIONS: { id: SectionId; label: string; icon: typeof Users; hint: string }[] = [
   { id: "members", label: "Members", icon: Users, hint: "People and roles" },
   { id: "defaults", label: "Defaults", icon: SlidersHorizontal, hint: "PHI and retention" },
+  { id: "sso", label: "Single sign-on", icon: KeyRound, hint: "SAML identity provider" },
   { id: "data", label: "Data", icon: DatabaseBackup, hint: "Export and deletion" },
 ];
 
@@ -150,6 +153,15 @@ export function SettingsView({
                   Account settings
                 </Link>
               </SettingRow>
+            </SettingsSection>
+          )}
+
+          {section === "sso" && (
+            <SettingsSection
+              title="Single sign-on"
+              description="Let your team sign in through your own SAML identity provider."
+            >
+              <SsoSection workspaceId={workspaceId} isOwner={role === "owner"} />
             </SettingsSection>
           )}
 

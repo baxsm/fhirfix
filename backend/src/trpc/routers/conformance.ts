@@ -7,6 +7,7 @@ import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { blobStore } from "@/lib/blob";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
+import { requirePremiumPlan } from "@/lib/require-premium";
 import { encryptSecret } from "@/lib/secret-crypto";
 import { conformanceQueue } from "@/queues/index";
 import { router, workspaceProcedure } from "../trpc";
@@ -56,18 +57,7 @@ async function lastPacketFor(
 }
 
 async function requirePremium(db: Db, workspaceId: string): Promise<void> {
-  const [settings] = await db
-    .select({ planTier: schema.workspaceSettings.planTier })
-    .from(schema.workspaceSettings)
-    .where(eq(schema.workspaceSettings.workspaceId, workspaceId))
-    .limit(1);
-
-  if (settings?.planTier !== "premium") {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Conformance packets are a premium feature. Upgrade to run one.",
-    });
-  }
+  await requirePremiumPlan(db, workspaceId, "Conformance packets");
 }
 
 function assertHttpUrl(value: string): void {

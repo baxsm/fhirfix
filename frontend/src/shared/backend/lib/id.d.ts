@@ -17,6 +17,7 @@ export declare const idPrefix: {
     readonly apiRequestLog: "areq";
     readonly notification: "ntf";
     readonly audit: "aud";
+    readonly ssoProvider: "sso";
 };
 type IdKind = keyof typeof idPrefix;
 export declare function createId(kind: IdKind): string;

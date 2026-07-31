@@ -12,8 +12,8 @@ export declare const auditRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined | undefined;
-            userAgent?: string | null | undefined | undefined;
+            ipAddress?: string | null | undefined;
+            userAgent?: string | null | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const auditRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined | undefined;
+            image?: string | null | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -34,7 +34,7 @@ export declare const auditRouter: import("@trpc/server").TRPCBuiltRouter<{
     list: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
-            action?: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted" | undefined;
+            action?: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted" | undefined;
             actorId?: string | undefined;
             since?: string | undefined;
             cursor?: string | undefined;
@@ -43,8 +43,8 @@ export declare const auditRouter: import("@trpc/server").TRPCBuiltRouter<{
         output: {
             entries: ({
                 id: string;
-                action: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted";
-                actorType: "user" | "api_key" | "system";
+                action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+                actorType: "api_key" | "system" | "user";
                 actorId: string | null;
                 targetRef: string | null;
                 ip: string | null;
@@ -62,20 +62,20 @@ export declare const auditRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             workspaceId: string;
         };
-        output: ("login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted")[];
+        output: ("baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted")[];
         meta: object;
     }>;
     exportCsv: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
+            action?: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted" | undefined;
             actorId?: string | undefined;
-            action?: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted" | undefined;
             since?: string | undefined;
         };
         output: ({
             id: string;
-            action: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "workspace.deleted";
-            actorType: "user" | "api_key" | "system";
+            action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+            actorType: "api_key" | "system" | "user";
             actorId: string | null;
             targetRef: string | null;
             ip: string | null;

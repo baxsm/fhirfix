@@ -32,6 +32,8 @@ export const AUDIT_ACTIONS = [
   "packet.exported",
   "data.exported",
   "baa.requested",
+  "sso.configured",
+  "sso.removed",
   "workspace.deleted",
 ] as const;
 

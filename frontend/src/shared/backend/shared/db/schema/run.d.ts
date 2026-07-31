@@ -41,7 +41,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "user" | "api_key" | "scheduled" | "system";
+            data: "api_key" | "scheduled" | "system" | "user";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -75,7 +75,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "scheduled" | "ui" | "api" | "ci";
+            data: "api" | "ci" | "scheduled" | "ui";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -92,7 +92,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
+            data: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -217,7 +217,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "run";
             dataType: "string";
             columnType: "PgText";
-            data: "queued" | "running" | "completed" | "failed";
+            data: "completed" | "failed" | "queued" | "running";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -502,7 +502,7 @@ export declare const run: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "finding";
@@ -564,7 +564,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "error" | "warning" | "info";
+            data: "error" | "info" | "warning";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -581,7 +581,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
+            data: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -717,7 +717,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "auto" | "one_click" | "manual";
+            data: "auto" | "manual" | "one_click";
             driverParam: string;
             notNull: true;
             hasDefault: false;
@@ -734,7 +734,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             tableName: "finding";
             dataType: "string";
             columnType: "PgText";
-            data: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
+            data: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -832,7 +832,7 @@ export declare const finding: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export type Run = typeof run.$inferSelect;
 export type NewRun = typeof run.$inferInsert;
