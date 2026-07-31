@@ -31,6 +31,8 @@ export const ACTION_LABELS: Record<string, string> = {
   "baa.requested": "Requested a BAA",
   "sso.configured": "Configured single sign-on",
   "sso.removed": "Removed single sign-on",
+  "scim.enabled": "Enabled directory sync",
+  "scim.disabled": "Disabled directory sync",
   "workspace.deleted": "Deleted the workspace",
 };
 

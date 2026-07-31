@@ -1,7 +1,8 @@
+import { scim } from "@better-auth/scim";
 import { sso } from "@better-auth/sso";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink, organization } from "better-auth/plugins";
+import { admin, magicLink, organization } from "better-auth/plugins";
 import { recordLogin } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
@@ -111,7 +112,26 @@ export const auth = betterAuth({
     // emailVerified=false, which would send an SSO user through our own email
     // verification and defeat the point of single sign-on. it only applies to
     // providers an admin registered, and only when the provider maps the field.
-    ...(env.SSO_ENABLED ? [sso({ trustEmailVerified: true })] : []),
+    ...(env.SSO_ENABLED
+      ? [
+          sso({ trustEmailVerified: true }),
+          // directory provisioning rides on the same switch as sso: an IdP that
+          // pushes users is the same IdP that authenticates them.
+          //
+          // storeSCIMToken "hashed": the token is a bearer credential with the
+          // power to create and deactivate members, so the database keeps only
+          // a hash. the plugin's default is weaker; a leaked row must not be
+          // replayable. requiredRole owner matches ssoUpsert.
+          scim({ storeSCIMToken: "hashed", requiredRole: ["owner"] }),
+          // required BY scim, not wanted for its own sake. SCIM `active: false`
+          // maps to this plugin's `banned` field, the only enforced
+          // disabled-user state in better-auth, and the scim plugin rejects a
+          // deactivation it cannot honour rather than dropping it silently.
+          // deprovisioning is the whole point of scim, so this is not optional.
+          // adminRoles is empty: no one gets app-wide admin powers from it.
+          admin({ adminRoles: [] }),
+        ]
+      : []),
   ],
 });
 

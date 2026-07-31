@@ -361,6 +361,92 @@ export const workspaceRouter = router({
       return { providerId, issuer: idp.entityId };
     }),
 
+  // directory sync status. the token itself is stored hashed and is shown once
+  // at generation, so there is nothing here to give back.
+  scimGet: enforceRole("workspaceSettings", "view").query(async ({ ctx, input }) => {
+    if (!env.SSO_ENABLED) return { enabled: false as const, connected: false };
+    const [row] = await ctx.db
+      .select({ providerId: schema.scimProvider.providerId })
+      .from(schema.scimProvider)
+      .where(eq(schema.scimProvider.organizationId, input.workspaceId))
+      .limit(1);
+    return { enabled: true as const, connected: !!row, providerId: row?.providerId ?? null };
+  }),
+
+  // minted server-side rather than letting the client call the plugin directly:
+  // the audit row has to be written by whoever actually issues the credential,
+  // or a client that skips the follow-up call leaves no trail.
+  //
+  // the token is returned ONCE. it is stored hashed, so it cannot be shown again.
+  scimGenerate: workspaceProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!env.SSO_ENABLED) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "SSO is not enabled." });
+      }
+      if (ctx.role !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only an owner can enable directory sync.",
+        });
+      }
+      await requirePremiumPlan(ctx.db, input.workspaceId, "Directory sync");
+
+      // must not collide with the sso providerId (ws-...), which the plugin
+      // rejects outright. regenerating replaces the old row, so the previous
+      // token stops working the moment a new one is issued.
+      const providerId = `scim-${input.workspaceId}`;
+      await ctx.db
+        .delete(schema.scimProvider)
+        .where(eq(schema.scimProvider.organizationId, input.workspaceId));
+
+      const result = await auth.api.generateSCIMToken({
+        headers: ctx.headers,
+        body: { providerId, organizationId: input.workspaceId },
+      });
+
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "scim.enabled",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.workspaceId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { providerId },
+      });
+
+      logger.info("workspace.scimGenerate", `${input.workspaceId} token issued`);
+      return { scimToken: result.scimToken };
+    }),
+
+  scimRevoke: workspaceProcedure
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.role !== "owner") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only an owner can disable directory sync.",
+        });
+      }
+      const [removed] = await ctx.db
+        .delete(schema.scimProvider)
+        .where(eq(schema.scimProvider.organizationId, input.workspaceId))
+        .returning({ providerId: schema.scimProvider.providerId });
+
+      if (removed) {
+        await writeAudit({
+          workspaceId: input.workspaceId,
+          action: "scim.disabled",
+          actorType: "user",
+          actorId: ctx.user.id,
+          targetRef: input.workspaceId,
+          ip: ipFromHeaders(ctx.headers),
+          metadata: { providerId: removed.providerId },
+        });
+      }
+      return { removed: !!removed };
+    }),
+
   ssoDelete: workspaceProcedure
     .input(z.object({ workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {

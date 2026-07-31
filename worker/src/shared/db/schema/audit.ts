@@ -34,6 +34,8 @@ export const AUDIT_ACTIONS = [
   "baa.requested",
   "sso.configured",
   "sso.removed",
+  "scim.enabled",
+  "scim.disabled",
   "workspace.deleted",
 ] as const;
 

@@ -258,7 +258,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 workspaceId: string;
                 actorType: "api_key" | "system" | "user";
                 actorId: string | null;
-                action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+                action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "scim.disabled" | "scim.enabled" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
                 targetRef: string | null;
                 ip: string | null;
                 metadata: Record<string, unknown> | null;
@@ -376,6 +376,39 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
         output: {
             providerId: string;
             issuer: string;
+        };
+        meta: object;
+    }>;
+    scimGet: import("@trpc/server").TRPCQueryProcedure<{
+        input: {
+            workspaceId: string;
+        };
+        output: {
+            enabled: false;
+            connected: boolean;
+            providerId?: undefined;
+        } | {
+            enabled: true;
+            connected: boolean;
+            providerId: string | null;
+        };
+        meta: object;
+    }>;
+    scimGenerate: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            workspaceId: string;
+        };
+        output: {
+            scimToken: string;
+        };
+        meta: object;
+    }>;
+    scimRevoke: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            workspaceId: string;
+        };
+        output: {
+            removed: boolean;
         };
         meta: object;
     }>;

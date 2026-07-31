@@ -46,7 +46,10 @@ app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
 app.route("/api/v1", apiV1);
 
 // Better Auth owns all /api/auth/** routes (sign-in/up, verify, reset, org, etc).
-app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+// PUT/PATCH/DELETE are required by the SCIM 2.0 server the scim plugin mounts
+// under /api/auth/scim/v2: an IdP deprovisions a user with PATCH active=false,
+// which silently 404'd while this list was GET+POST only.
+app.on(["GET", "POST", "PUT", "PATCH", "DELETE"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 // authenticated report exports + corrected-artifact fetch (session-gated REST).
 app.route("/", exportRoutes);

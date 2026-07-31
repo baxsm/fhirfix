@@ -5,6 +5,7 @@ import { Check, Copy, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SettingRow } from "@/components/dashboard/settings-section";
+import { SecretReveal } from "@/components/developers/secret-reveal";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,101 @@ function CopyRow({ label, value }: { label: string; value: string }) {
           {copied ? "Copied" : "Copy"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+// SCIM directory sync. the token is hashed at rest, so it is shown exactly once
+// and never retrievable afterwards - the same contract as an api key.
+function ScimBlock({ workspaceId, isOwner }: { workspaceId: string; isOwner: boolean }) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const [issued, setIssued] = useState<string | null>(null);
+
+  const scimQuery = useQuery({
+    ...trpc.workspace.scimGet.queryOptions({ workspaceId }),
+    enabled: !!workspaceId,
+  });
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: trpc.workspace.scimGet.queryKey({ workspaceId }) });
+
+  const generate = useMutation(
+    trpc.workspace.scimGenerate.mutationOptions({
+      onSuccess: async ({ scimToken }) => {
+        setIssued(scimToken);
+        await invalidate();
+      },
+      onError: (e) => toast.error(e.message ?? "Could not create a token."),
+    }),
+  );
+
+  const revoke = useMutation(
+    trpc.workspace.scimRevoke.mutationOptions({
+      onSuccess: async () => {
+        setIssued(null);
+        await invalidate();
+        toast.success("Directory sync disabled.");
+      },
+      onError: (e) => toast.error(e.message ?? "Could not disable directory sync."),
+    }),
+  );
+
+  if (scimQuery.data?.enabled === false) return null;
+
+  const connected = scimQuery.data?.connected ?? false;
+  const baseUrl = `${env.NEXT_PUBLIC_API_URL}/api/auth/scim/v2`;
+
+  return (
+    <div className="space-y-3 border-t pt-3.5">
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium">Directory sync (SCIM)</p>
+        <p className="text-xs text-muted-foreground">
+          Let your provider create and deactivate members automatically.
+        </p>
+      </div>
+
+      {connected && <CopyRow label="SCIM base URL" value={baseUrl} />}
+
+      {issued ? (
+        <div className="space-y-2 rounded-md border border-emerald-600/30 bg-emerald-50/50 p-3 dark:bg-emerald-950/20">
+          <SecretReveal value={issued} label="Bearer token" />
+          <p className="text-xs text-muted-foreground">
+            Copy it now. You will not be able to see this token again.
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {connected ? "Connected." : "Not connected."}
+        </p>
+        <div className="flex gap-2">
+          {connected && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!isOwner || revoke.isPending}
+              onClick={() => revoke.mutate({ workspaceId })}
+            >
+              {revoke.isPending ? "Disabling..." : "Disable"}
+            </Button>
+          )}
+          <Button
+            variant={connected ? "outline" : "default"}
+            size="sm"
+            disabled={!isOwner || generate.isPending}
+            onClick={() => generate.mutate({ workspaceId })}
+          >
+            {generate.isPending ? "Creating..." : connected ? "Regenerate token" : "Create a token"}
+          </Button>
+        </div>
+      </div>
+      {connected && (
+        <p className="text-xs text-muted-foreground">
+          Regenerating immediately stops the previous token from working.
+        </p>
+      )}
     </div>
   );
 }
@@ -175,6 +271,10 @@ export function SsoSection({ workspaceId, isOwner }: { workspaceId: string; isOw
           <CopyRow label="Sign-on URL (ACS)" value={urls.acs} />
           <CopyRow label="Audience (SP entity ID)" value={urls.entityId} />
         </div>
+        {/* provisioning only makes sense once the IdP is trusted for sign-in,
+            so it lives inside the configured branch rather than beside it. */}
+        <ScimBlock workspaceId={workspaceId} isOwner={isOwner} />
+
         <div className="flex justify-end border-t pt-3.5">
           <Button
             variant="destructive"

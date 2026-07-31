@@ -29,6 +29,7 @@
     "db:seed": "bun run src/db/seed.ts"
   },
   "dependencies": {
+    "@better-auth/scim": "^1.6.25",
     "@better-auth/sso": "^1.6.25",
     "@hono/trpc-server": "0.4.2",
     "@polar-sh/sdk": "^0.48.1",

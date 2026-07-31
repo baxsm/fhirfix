@@ -349,7 +349,4253 @@ export declare const auth: import("better-auth").Auth<{
             max: number;
         }[];
         options: import("better-auth/plugins").MagicLinkOptions;
-    }, ...{
+    }, ...({
+        id: "admin";
+        version: string;
+        init(): {
+            options: {
+                databaseHooks: {
+                    user: {
+                        create: {
+                            before(user: {
+                                id: string;
+                                createdAt: Date;
+                                updatedAt: Date;
+                                email: string;
+                                emailVerified: boolean;
+                                name: string;
+                                image?: string | null | undefined;
+                            } & Record<string, unknown>): Promise<{
+                                data: {
+                                    id: string;
+                                    createdAt: Date;
+                                    updatedAt: Date;
+                                    email: string;
+                                    emailVerified: boolean;
+                                    name: string;
+                                    image?: string | null | undefined;
+                                    role: string;
+                                };
+                            }>;
+                        };
+                    };
+                    session: {
+                        create: {
+                            before(session: {
+                                id: string;
+                                createdAt: Date;
+                                updatedAt: Date;
+                                userId: string;
+                                expiresAt: Date;
+                                token: string;
+                                ipAddress?: string | null | undefined;
+                                userAgent?: string | null | undefined;
+                            } & Record<string, unknown>, ctx: import("better-auth").GenericEndpointContext | null): Promise<void>;
+                        };
+                    };
+                };
+            };
+        };
+        hooks: {
+            after: {
+                matcher(context: import("better-auth").HookEndpointContext): boolean;
+                handler: (inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<import("better-auth/plugins").SessionWithImpersonatedBy[] | undefined>;
+            }[];
+        };
+        endpoints: {
+            setRole: import("better-auth").StrictEndpoint<"/admin/set-role", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                    role: import("zod").ZodUnion<readonly [import("zod").ZodString, import("zod").ZodArray<import("zod").ZodString>]>;
+                }, import("zod/v4/core").$strip>;
+                requireHeaders: true;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    $Infer: {
+                        body: {
+                            userId: string;
+                            role: "admin" | "user" | ("admin" | "user")[];
+                        };
+                    };
+                };
+            }, {
+                user: import("better-auth/plugins").UserWithRole;
+            }>;
+            getUser: import("better-auth").StrictEndpoint<"/admin/get-user", {
+                method: "GET";
+                query: import("zod").ZodObject<{
+                    id: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, import("better-auth/plugins").UserWithRole>;
+            createUser: import("better-auth").StrictEndpoint<"/admin/create-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    email: import("zod").ZodString;
+                    password: import("zod").ZodOptional<import("zod").ZodString>;
+                    name: import("zod").ZodString;
+                    role: import("zod").ZodOptional<import("zod").ZodUnion<readonly [import("zod").ZodString, import("zod").ZodArray<import("zod").ZodString>]>>;
+                    data: import("zod").ZodOptional<import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodAny>>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    $Infer: {
+                        body: {
+                            email: string;
+                            password?: string | undefined;
+                            name: string;
+                            role?: "admin" | "user" | ("admin" | "user")[] | undefined;
+                            data?: Record<string, any> | undefined;
+                        };
+                    };
+                };
+            }, {
+                user: import("better-auth/plugins").UserWithRole;
+            }>;
+            adminUpdateUser: import("better-auth").StrictEndpoint<"/admin/update-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                    data: import("zod").ZodRecord<import("zod").ZodAny, import("zod").ZodAny>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, import("better-auth/plugins").UserWithRole>;
+            listUsers: import("better-auth").StrictEndpoint<"/admin/list-users", {
+                method: "GET";
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                query: import("zod").ZodObject<{
+                    searchValue: import("zod").ZodOptional<import("zod").ZodString>;
+                    searchField: import("zod").ZodOptional<import("zod").ZodEnum<{
+                        email: "email";
+                        name: "name";
+                    }>>;
+                    searchOperator: import("zod").ZodOptional<import("zod").ZodEnum<{
+                        contains: "contains";
+                        starts_with: "starts_with";
+                        ends_with: "ends_with";
+                    }>>;
+                    limit: import("zod").ZodOptional<import("zod").ZodUnion<[import("zod").ZodString, import("zod").ZodNumber]>>;
+                    offset: import("zod").ZodOptional<import("zod").ZodUnion<[import("zod").ZodString, import("zod").ZodNumber]>>;
+                    sortBy: import("zod").ZodOptional<import("zod").ZodString>;
+                    sortDirection: import("zod").ZodOptional<import("zod").ZodEnum<{
+                        asc: "asc";
+                        desc: "desc";
+                    }>>;
+                    filterField: import("zod").ZodOptional<import("zod").ZodString>;
+                    filterValue: import("zod").ZodOptional<import("zod").ZodUnion<[import("zod").ZodUnion<[import("zod").ZodUnion<[import("zod").ZodUnion<[import("zod").ZodString, import("zod").ZodNumber]>, import("zod").ZodBoolean]>, import("zod").ZodArray<import("zod").ZodString>]>, import("zod").ZodArray<import("zod").ZodNumber>]>>;
+                    filterOperator: import("zod").ZodOptional<import("zod").ZodEnum<{
+                        eq: "eq";
+                        ne: "ne";
+                        gt: "gt";
+                        gte: "gte";
+                        lt: "lt";
+                        lte: "lte";
+                        in: "in";
+                        not_in: "not_in";
+                        contains: "contains";
+                        starts_with: "starts_with";
+                        ends_with: "ends_with";
+                    }>>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                users: {
+                                                    type: string;
+                                                    items: {
+                                                        $ref: string;
+                                                    };
+                                                };
+                                                total: {
+                                                    type: string;
+                                                };
+                                                limit: {
+                                                    type: string;
+                                                };
+                                                offset: {
+                                                    type: string;
+                                                };
+                                            };
+                                            required: string[];
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                users: import("better-auth/plugins").UserWithRole[];
+                total: number;
+            }>;
+            listUserSessions: import("better-auth").StrictEndpoint<"/admin/list-user-sessions", {
+                method: "POST";
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                sessions: {
+                                                    type: string;
+                                                    items: {
+                                                        $ref: string;
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                sessions: import("better-auth/plugins").SessionWithImpersonatedBy[];
+            }>;
+            unbanUser: import("better-auth").StrictEndpoint<"/admin/unban-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                user: import("better-auth/plugins").UserWithRole;
+            }>;
+            banUser: import("better-auth").StrictEndpoint<"/admin/ban-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                    banReason: import("zod").ZodOptional<import("zod").ZodString>;
+                    banExpiresIn: import("zod").ZodOptional<import("zod").ZodNumber>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                user: import("better-auth/plugins").UserWithRole;
+            }>;
+            impersonateUser: import("better-auth").StrictEndpoint<"/admin/impersonate-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                session: {
+                                                    $ref: string;
+                                                };
+                                                user: {
+                                                    $ref: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                session: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    expiresAt: Date;
+                    token: string;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
+                };
+                user: import("better-auth/plugins").UserWithRole;
+            }>;
+            stopImpersonating: import("better-auth").StrictEndpoint<"/admin/stop-impersonating", {
+                method: "POST";
+                requireHeaders: true;
+            }, {
+                session: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    expiresAt: Date;
+                    token: string;
+                    ipAddress?: string | null | undefined;
+                    userAgent?: string | null | undefined;
+                } & Record<string, any>;
+                user: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    email: string;
+                    emailVerified: boolean;
+                    name: string;
+                    image?: string | null | undefined;
+                } & Record<string, any>;
+            }>;
+            revokeUserSession: import("better-auth").StrictEndpoint<"/admin/revoke-user-session", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    sessionToken: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                success: {
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                success: boolean;
+            }>;
+            revokeUserSessions: import("better-auth").StrictEndpoint<"/admin/revoke-user-sessions", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                success: {
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                success: boolean;
+            }>;
+            removeUser: import("better-auth").StrictEndpoint<"/admin/remove-user", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                success: {
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                success: boolean;
+            }>;
+            setUserPassword: import("better-auth").StrictEndpoint<"/admin/set-user-password", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    newPassword: import("zod").ZodString;
+                    userId: import("zod").ZodCoercedString<unknown>;
+                }, import("zod/v4/core").$strip>;
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        user: import("better-auth/plugins").UserWithRole;
+                        session: {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            200: {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                status: {
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                status: boolean;
+            }>;
+            userHasPermission: import("better-auth").StrictEndpoint<"/admin/has-permission", {
+                method: "POST";
+                body: import("zod").ZodIntersection<import("zod").ZodObject<{
+                    userId: import("zod").ZodOptional<import("zod").ZodCoercedString<unknown>>;
+                    role: import("zod").ZodOptional<import("zod").ZodString>;
+                }, import("zod/v4/core").$strip>, import("zod").ZodXor<readonly [import("zod").ZodObject<{
+                    permission: import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodArray<import("zod").ZodString>>;
+                }, import("zod/v4/core").$strip>, import("zod").ZodObject<{
+                    permissions: import("zod").ZodRecord<import("zod").ZodString, import("zod").ZodArray<import("zod").ZodString>>;
+                }, import("zod/v4/core").$strip>]>>;
+                metadata: {
+                    openapi: {
+                        description: string;
+                        requestBody: {
+                            content: {
+                                "application/json": {
+                                    schema: {
+                                        type: "object";
+                                        properties: {
+                                            permissions: {
+                                                type: string;
+                                                description: string;
+                                            };
+                                        };
+                                        required: string[];
+                                    };
+                                };
+                            };
+                        };
+                        responses: {
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                error: {
+                                                    type: string;
+                                                };
+                                                success: {
+                                                    type: string;
+                                                };
+                                            };
+                                            required: string[];
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    $Infer: {
+                        body: {
+                            permissions: {
+                                readonly user?: ("ban" | "create" | "delete" | "get" | "impersonate" | "impersonate-admins" | "list" | "set-email" | "set-password" | "set-role" | "update")[] | undefined;
+                                readonly session?: ("delete" | "list" | "revoke")[] | undefined;
+                            };
+                        } & {
+                            userId?: string | undefined;
+                            role?: "admin" | "user" | undefined;
+                        };
+                    };
+                };
+            }, {
+                error: null;
+                success: boolean;
+            }>;
+        };
+        $ERROR_CODES: {
+            USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: import("better-auth").RawError<"USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL">;
+            FAILED_TO_CREATE_USER: import("better-auth").RawError<"FAILED_TO_CREATE_USER">;
+            USER_ALREADY_EXISTS: import("better-auth").RawError<"USER_ALREADY_EXISTS">;
+            YOU_CANNOT_BAN_YOURSELF: import("better-auth").RawError<"YOU_CANNOT_BAN_YOURSELF">;
+            YOU_ARE_NOT_ALLOWED_TO_CHANGE_USERS_ROLE: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_CHANGE_USERS_ROLE">;
+            YOU_ARE_NOT_ALLOWED_TO_CREATE_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_CREATE_USERS">;
+            YOU_ARE_NOT_ALLOWED_TO_LIST_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_LIST_USERS">;
+            YOU_ARE_NOT_ALLOWED_TO_LIST_USERS_SESSIONS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_LIST_USERS_SESSIONS">;
+            YOU_ARE_NOT_ALLOWED_TO_BAN_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_BAN_USERS">;
+            YOU_ARE_NOT_ALLOWED_TO_IMPERSONATE_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_IMPERSONATE_USERS">;
+            YOU_ARE_NOT_ALLOWED_TO_REVOKE_USERS_SESSIONS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_REVOKE_USERS_SESSIONS">;
+            YOU_ARE_NOT_ALLOWED_TO_DELETE_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_DELETE_USERS">;
+            YOU_ARE_NOT_ALLOWED_TO_SET_USERS_PASSWORD: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_SET_USERS_PASSWORD">;
+            BANNED_USER: import("better-auth").RawError<"BANNED_USER">;
+            YOU_ARE_NOT_ALLOWED_TO_GET_USER: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_GET_USER">;
+            NO_DATA_TO_UPDATE: import("better-auth").RawError<"NO_DATA_TO_UPDATE">;
+            YOU_ARE_NOT_ALLOWED_TO_UPDATE_USERS: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_UPDATE_USERS">;
+            YOU_CANNOT_REMOVE_YOURSELF: import("better-auth").RawError<"YOU_CANNOT_REMOVE_YOURSELF">;
+            YOU_ARE_NOT_ALLOWED_TO_SET_NON_EXISTENT_VALUE: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_SET_NON_EXISTENT_VALUE">;
+            YOU_CANNOT_IMPERSONATE_ADMINS: import("better-auth").RawError<"YOU_CANNOT_IMPERSONATE_ADMINS">;
+            INVALID_ROLE_TYPE: import("better-auth").RawError<"INVALID_ROLE_TYPE">;
+            YOU_ARE_NOT_ALLOWED_TO_SET_USERS_EMAIL: import("better-auth").RawError<"YOU_ARE_NOT_ALLOWED_TO_SET_USERS_EMAIL">;
+            PASSWORD_CANNOT_BE_UPDATED_VIA_UPDATE_USER: import("better-auth").RawError<"PASSWORD_CANNOT_BE_UPDATED_VIA_UPDATE_USER">;
+        };
+        schema: {
+            user: {
+                fields: {
+                    role: {
+                        type: "string";
+                        required: false;
+                        input: false;
+                    };
+                    banned: {
+                        type: "boolean";
+                        defaultValue: false;
+                        required: false;
+                        input: false;
+                    };
+                    banReason: {
+                        type: "string";
+                        required: false;
+                        input: false;
+                    };
+                    banExpires: {
+                        type: "date";
+                        required: false;
+                        input: false;
+                    };
+                };
+            };
+            session: {
+                fields: {
+                    impersonatedBy: {
+                        type: "string";
+                        required: false;
+                        input: false;
+                    };
+                };
+            };
+        };
+        options: NoInfer<{
+            adminRoles: never[];
+        }>;
+    } | {
+        id: "scim";
+        version: string;
+        endpoints: {
+            generateSCIMToken: import("better-auth").StrictEndpoint<"/scim/generate-token", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    providerId: import("zod").ZodString;
+                    organizationId: import("zod").ZodOptional<import("zod").ZodString>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "201": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                scimToken: {
+                                                    description: string;
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        session: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                        user: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            email: string;
+                            emailVerified: boolean;
+                            name: string;
+                            image?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+            }, {
+                scimToken: string;
+            }>;
+            listSCIMProviderConnections: import("better-auth").StrictEndpoint<"/scim/list-provider-connections", {
+                method: "GET";
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        session: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                        user: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            email: string;
+                            emailVerified: boolean;
+                            name: string;
+                            image?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                providers: {
+                                                    type: string;
+                                                    items: {
+                                                        type: string;
+                                                        properties: {
+                                                            id: {
+                                                                type: string;
+                                                            };
+                                                            providerId: {
+                                                                type: string;
+                                                            };
+                                                            organizationId: {
+                                                                type: string;
+                                                                nullable: boolean;
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+            }, {
+                providers: {
+                    id: string;
+                    providerId: string;
+                    organizationId: string | null;
+                }[];
+            }>;
+            getSCIMProviderConnection: import("better-auth").StrictEndpoint<"/scim/get-provider-connection", {
+                method: "GET";
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        session: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                        user: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            email: string;
+                            emailVerified: boolean;
+                            name: string;
+                            image?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                query: import("zod").ZodObject<{
+                    providerId: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                id: {
+                                                    type: string;
+                                                };
+                                                providerId: {
+                                                    type: string;
+                                                };
+                                                organizationId: {
+                                                    type: string;
+                                                    nullable: boolean;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                            };
+                            "403": {
+                                description: string;
+                            };
+                        };
+                    };
+                };
+            }, {
+                id: string;
+                providerId: string;
+                organizationId: string | null;
+            }>;
+            deleteSCIMProviderConnection: import("better-auth").StrictEndpoint<"/scim/delete-provider-connection", {
+                method: "POST";
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    session: {
+                        session: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            userId: string;
+                            expiresAt: Date;
+                            token: string;
+                            ipAddress?: string | null | undefined;
+                            userAgent?: string | null | undefined;
+                        };
+                        user: Record<string, any> & {
+                            id: string;
+                            createdAt: Date;
+                            updatedAt: Date;
+                            email: string;
+                            emailVerified: boolean;
+                            name: string;
+                            image?: string | null | undefined;
+                        };
+                    };
+                }>)[];
+                body: import("zod").ZodObject<{
+                    providerId: import("zod").ZodString;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    openapi: {
+                        operationId: string;
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                success: {
+                                                    type: string;
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                            };
+                            "403": {
+                                description: string;
+                            };
+                        };
+                    };
+                };
+            }, {
+                success: boolean;
+            }>;
+            getSCIMUser: import("better-auth").StrictEndpoint<"/scim/v2/Users/:userId", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly id: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly created: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly lastModified: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly location: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly userName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly name: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly formatted: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly givenName: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly familyName: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly displayName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly active: {
+                                                    readonly type: "boolean";
+                                                };
+                                                readonly emails: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly value: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly primary: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, {
+                id: string;
+                externalId: string | undefined;
+                meta: {
+                    resourceType: string;
+                    created: Date;
+                    lastModified: Date;
+                    location: string;
+                };
+                userName: string;
+                name: {
+                    formatted: string;
+                };
+                displayName: string;
+                active: boolean;
+                emails: {
+                    primary: boolean;
+                    value: string;
+                }[];
+                schemas: string[];
+            }>;
+            createSCIMUser: import("better-auth").StrictEndpoint<"/scim/v2/Users", {
+                method: "POST";
+                body: import("zod").ZodObject<{
+                    userName: import("zod").ZodString;
+                    externalId: import("zod").ZodOptional<import("zod").ZodString>;
+                    name: import("zod").ZodOptional<import("zod").ZodObject<{
+                        formatted: import("zod").ZodOptional<import("zod").ZodString>;
+                        givenName: import("zod").ZodOptional<import("zod").ZodString>;
+                        familyName: import("zod").ZodOptional<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>;
+                    emails: import("zod").ZodOptional<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodEmail;
+                        primary: import("zod").ZodOptional<import("zod").ZodBoolean>;
+                    }, import("zod/v4/core").$strip>>>;
+                    active: import("zod").ZodOptional<import("zod").ZodBoolean>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "201": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly id: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly created: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly lastModified: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly location: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly userName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly name: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly formatted: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly givenName: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly familyName: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly displayName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly active: {
+                                                    readonly type: "boolean";
+                                                };
+                                                readonly emails: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly value: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly primary: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, {
+                id: string;
+                externalId: string | undefined;
+                meta: {
+                    resourceType: string;
+                    created: Date;
+                    lastModified: Date;
+                    location: string;
+                };
+                userName: string;
+                name: {
+                    formatted: string;
+                };
+                displayName: string;
+                active: boolean;
+                emails: {
+                    primary: boolean;
+                    value: string;
+                }[];
+                schemas: string[];
+            }>;
+            patchSCIMUser: import("better-auth").StrictEndpoint<"/scim/v2/Users/:userId", {
+                method: "PATCH";
+                body: import("zod").ZodObject<{
+                    schemas: import("zod").ZodArray<import("zod").ZodString>;
+                    Operations: import("zod").ZodArray<import("zod").ZodObject<{
+                        op: import("zod").ZodPipe<import("zod").ZodDefault<import("zod").ZodString>, import("zod").ZodEnum<{
+                            replace: "replace";
+                            add: "add";
+                            remove: "remove";
+                        }>>;
+                        path: import("zod").ZodOptional<import("zod").ZodString>;
+                        value: import("zod").ZodAny;
+                    }, import("zod/v4/core").$strip>>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "204": {
+                                description: string;
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, void>;
+            deleteSCIMUser: import("better-auth").StrictEndpoint<"/scim/v2/Users/:userId", {
+                method: "DELETE";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "204": {
+                                description: string;
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, void>;
+            updateSCIMUser: import("better-auth").StrictEndpoint<"/scim/v2/Users/:userId", {
+                method: "PUT";
+                body: import("zod").ZodObject<{
+                    userName: import("zod").ZodString;
+                    externalId: import("zod").ZodOptional<import("zod").ZodString>;
+                    name: import("zod").ZodOptional<import("zod").ZodObject<{
+                        formatted: import("zod").ZodOptional<import("zod").ZodString>;
+                        givenName: import("zod").ZodOptional<import("zod").ZodString>;
+                        familyName: import("zod").ZodOptional<import("zod").ZodString>;
+                    }, import("zod/v4/core").$strip>>;
+                    emails: import("zod").ZodOptional<import("zod").ZodArray<import("zod").ZodObject<{
+                        value: import("zod").ZodEmail;
+                        primary: import("zod").ZodOptional<import("zod").ZodBoolean>;
+                    }, import("zod/v4/core").$strip>>>;
+                    active: import("zod").ZodOptional<import("zod").ZodBoolean>;
+                }, import("zod/v4/core").$strip>;
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly id: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly created: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly lastModified: {
+                                                            readonly type: "string";
+                                                            readonly format: "date-time";
+                                                        };
+                                                        readonly location: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly userName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly name: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly formatted: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly givenName: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly familyName: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                                readonly displayName: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly active: {
+                                                    readonly type: "boolean";
+                                                };
+                                                readonly emails: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly value: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly primary: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, {
+                id: string;
+                externalId: string | undefined;
+                meta: {
+                    resourceType: string;
+                    created: Date;
+                    lastModified: Date;
+                    location: string;
+                };
+                userName: string;
+                name: {
+                    formatted: string;
+                };
+                displayName: string;
+                active: boolean;
+                emails: {
+                    primary: boolean;
+                    value: string;
+                }[];
+                schemas: string[];
+            }>;
+            listSCIMUsers: import("better-auth").StrictEndpoint<"/scim/v2/Users", {
+                method: "GET";
+                query: import("zod").ZodOptional<import("zod").ZodObject<{
+                    filter: import("zod").ZodOptional<import("zod").ZodString>;
+                }, import("zod/v4/core").$strip>>;
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                totalResults: {
+                                                    type: string;
+                                                };
+                                                itemsPerPage: {
+                                                    type: string;
+                                                };
+                                                startIndex: {
+                                                    type: string;
+                                                };
+                                                Resources: {
+                                                    type: string;
+                                                    items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly id: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly meta: {
+                                                                readonly type: "object";
+                                                                readonly properties: {
+                                                                    readonly resourceType: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                    readonly created: {
+                                                                        readonly type: "string";
+                                                                        readonly format: "date-time";
+                                                                    };
+                                                                    readonly lastModified: {
+                                                                        readonly type: "string";
+                                                                        readonly format: "date-time";
+                                                                    };
+                                                                    readonly location: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                };
+                                                            };
+                                                            readonly userName: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly name: {
+                                                                readonly type: "object";
+                                                                readonly properties: {
+                                                                    readonly formatted: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                    readonly givenName: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                    readonly familyName: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                };
+                                                            };
+                                                            readonly displayName: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly active: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                            readonly emails: {
+                                                                readonly type: "array";
+                                                                readonly items: {
+                                                                    readonly type: "object";
+                                                                    readonly properties: {
+                                                                        readonly value: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly primary: {
+                                                                            readonly type: "boolean";
+                                                                        };
+                                                                    };
+                                                                };
+                                                            };
+                                                            readonly schemas: {
+                                                                readonly type: "array";
+                                                                readonly items: {
+                                                                    readonly type: "string";
+                                                                };
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+                use: ((inputContext: import("better-auth").MiddlewareInputContext<import("better-auth").MiddlewareOptions>) => Promise<{
+                    authSCIMToken: string;
+                    scimProvider: Omit<import("@better-auth/scim").SCIMProvider, "id">;
+                }>)[];
+            }, {
+                readonly schemas: readonly ["urn:ietf:params:scim:api:messages:2.0:ListResponse"];
+                readonly totalResults: 0;
+                readonly startIndex: 1;
+                readonly itemsPerPage: 0;
+                readonly Resources: readonly [];
+            } | {
+                schemas: string[];
+                totalResults: number;
+                startIndex: number;
+                itemsPerPage: number;
+                Resources: {
+                    id: string;
+                    externalId: string | undefined;
+                    meta: {
+                        resourceType: string;
+                        created: Date;
+                        lastModified: Date;
+                        location: string;
+                    };
+                    userName: string;
+                    name: {
+                        formatted: string;
+                    };
+                    displayName: string;
+                    active: boolean;
+                    emails: {
+                        primary: boolean;
+                        value: string;
+                    }[];
+                    schemas: string[];
+                }[];
+            }>;
+            getSCIMServiceProviderConfig: import("better-auth").StrictEndpoint<"/scim/v2/ServiceProviderConfig", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly patch: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly bulk: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly filter: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly changePassword: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly sort: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly etag: {
+                                                    type: string;
+                                                    properties: {
+                                                        supported: {
+                                                            type: string;
+                                                        };
+                                                    };
+                                                };
+                                                readonly authenticationSchemes: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly name: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly description: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly specUri: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly type: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly primary: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+            }, {
+                patch: {
+                    supported: boolean;
+                };
+                bulk: {
+                    supported: boolean;
+                };
+                filter: {
+                    supported: boolean;
+                };
+                changePassword: {
+                    supported: boolean;
+                };
+                sort: {
+                    supported: boolean;
+                };
+                etag: {
+                    supported: boolean;
+                };
+                authenticationSchemes: {
+                    name: string;
+                    description: string;
+                    specUri: string;
+                    type: string;
+                    primary: boolean;
+                }[];
+                schemas: string[];
+                meta: {
+                    resourceType: string;
+                };
+            }>;
+            getSCIMSchemas: import("better-auth").StrictEndpoint<"/scim/v2/Schemas", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "array";
+                                            items: {
+                                                readonly type: "object";
+                                                readonly properties: {
+                                                    readonly id: {
+                                                        readonly type: "string";
+                                                    };
+                                                    readonly schemas: {
+                                                        readonly type: "array";
+                                                        readonly items: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                    readonly name: {
+                                                        readonly type: "string";
+                                                    };
+                                                    readonly description: {
+                                                        readonly type: "string";
+                                                    };
+                                                    readonly attributes: {
+                                                        readonly type: "array";
+                                                        readonly items: {
+                                                            readonly properties: {
+                                                                readonly subAttributes: {
+                                                                    readonly type: "array";
+                                                                    readonly items: {
+                                                                        readonly type: "object";
+                                                                        readonly properties: {
+                                                                            readonly name: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                            readonly type: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                            readonly multiValued: {
+                                                                                readonly type: "boolean";
+                                                                            };
+                                                                            readonly description: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                            readonly required: {
+                                                                                readonly type: "boolean";
+                                                                            };
+                                                                            readonly caseExact: {
+                                                                                readonly type: "boolean";
+                                                                            };
+                                                                            readonly mutability: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                            readonly returned: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                            readonly uniqueness: {
+                                                                                readonly type: "string";
+                                                                            };
+                                                                        };
+                                                                    };
+                                                                };
+                                                                readonly name: {
+                                                                    readonly type: "string";
+                                                                };
+                                                                readonly type: {
+                                                                    readonly type: "string";
+                                                                };
+                                                                readonly multiValued: {
+                                                                    readonly type: "boolean";
+                                                                };
+                                                                readonly description: {
+                                                                    readonly type: "string";
+                                                                };
+                                                                readonly required: {
+                                                                    readonly type: "boolean";
+                                                                };
+                                                                readonly caseExact: {
+                                                                    readonly type: "boolean";
+                                                                };
+                                                                readonly mutability: {
+                                                                    readonly type: "string";
+                                                                };
+                                                                readonly returned: {
+                                                                    readonly type: "string";
+                                                                };
+                                                                readonly uniqueness: {
+                                                                    readonly type: "string";
+                                                                };
+                                                            };
+                                                            readonly type: "object";
+                                                        };
+                                                    };
+                                                    readonly meta: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly resourceType: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly location: {
+                                                                readonly type: "string";
+                                                            };
+                                                        };
+                                                        readonly required: readonly ["resourceType", "location"];
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+            }, {
+                totalResults: number;
+                itemsPerPage: number;
+                startIndex: number;
+                schemas: string[];
+                Resources: {
+                    meta: {
+                        location: string;
+                        resourceType: string;
+                    };
+                    id: string;
+                    schemas: string[];
+                    name: string;
+                    description: string;
+                    attributes: ({
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        caseExact: boolean;
+                        mutability: string;
+                        returned: string;
+                        uniqueness: string;
+                        subAttributes?: undefined;
+                    } | {
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        mutability: string;
+                        returned: string;
+                        caseExact?: undefined;
+                        uniqueness?: undefined;
+                        subAttributes?: undefined;
+                    } | {
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        subAttributes: {
+                            name: string;
+                            type: string;
+                            multiValued: boolean;
+                            description: string;
+                            required: boolean;
+                            caseExact: boolean;
+                            mutability: string;
+                            returned: string;
+                            uniqueness: string;
+                        }[];
+                        caseExact?: undefined;
+                        mutability?: undefined;
+                        returned?: undefined;
+                        uniqueness?: undefined;
+                    } | {
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        subAttributes: ({
+                            name: string;
+                            type: string;
+                            multiValued: boolean;
+                            description: string;
+                            required: boolean;
+                            caseExact: boolean;
+                            mutability: string;
+                            returned: string;
+                            uniqueness: string;
+                        } | {
+                            name: string;
+                            type: string;
+                            multiValued: boolean;
+                            description: string;
+                            required: boolean;
+                            mutability: string;
+                            returned: string;
+                            caseExact?: undefined;
+                            uniqueness?: undefined;
+                        })[];
+                        mutability: string;
+                        returned: string;
+                        uniqueness: string;
+                        caseExact?: undefined;
+                    })[];
+                }[];
+            }>;
+            getSCIMSchema: import("better-auth").StrictEndpoint<"/scim/v2/Schemas/:schemaId", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly id: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly name: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly description: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly attributes: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly properties: {
+                                                            readonly subAttributes: {
+                                                                readonly type: "array";
+                                                                readonly items: {
+                                                                    readonly type: "object";
+                                                                    readonly properties: {
+                                                                        readonly name: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly type: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly multiValued: {
+                                                                            readonly type: "boolean";
+                                                                        };
+                                                                        readonly description: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly required: {
+                                                                            readonly type: "boolean";
+                                                                        };
+                                                                        readonly caseExact: {
+                                                                            readonly type: "boolean";
+                                                                        };
+                                                                        readonly mutability: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly returned: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                        readonly uniqueness: {
+                                                                            readonly type: "string";
+                                                                        };
+                                                                    };
+                                                                };
+                                                            };
+                                                            readonly name: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly type: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly multiValued: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                            readonly description: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly required: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                            readonly caseExact: {
+                                                                readonly type: "boolean";
+                                                            };
+                                                            readonly mutability: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly returned: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly uniqueness: {
+                                                                readonly type: "string";
+                                                            };
+                                                        };
+                                                        readonly type: "object";
+                                                    };
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly location: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                    readonly required: readonly ["resourceType", "location"];
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+            }, {
+                meta: {
+                    location: string;
+                    resourceType: string;
+                };
+                id: string;
+                schemas: string[];
+                name: string;
+                description: string;
+                attributes: ({
+                    name: string;
+                    type: string;
+                    multiValued: boolean;
+                    description: string;
+                    required: boolean;
+                    caseExact: boolean;
+                    mutability: string;
+                    returned: string;
+                    uniqueness: string;
+                    subAttributes?: undefined;
+                } | {
+                    name: string;
+                    type: string;
+                    multiValued: boolean;
+                    description: string;
+                    required: boolean;
+                    mutability: string;
+                    returned: string;
+                    caseExact?: undefined;
+                    uniqueness?: undefined;
+                    subAttributes?: undefined;
+                } | {
+                    name: string;
+                    type: string;
+                    multiValued: boolean;
+                    description: string;
+                    required: boolean;
+                    subAttributes: {
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        caseExact: boolean;
+                        mutability: string;
+                        returned: string;
+                        uniqueness: string;
+                    }[];
+                    caseExact?: undefined;
+                    mutability?: undefined;
+                    returned?: undefined;
+                    uniqueness?: undefined;
+                } | {
+                    name: string;
+                    type: string;
+                    multiValued: boolean;
+                    description: string;
+                    required: boolean;
+                    subAttributes: ({
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        caseExact: boolean;
+                        mutability: string;
+                        returned: string;
+                        uniqueness: string;
+                    } | {
+                        name: string;
+                        type: string;
+                        multiValued: boolean;
+                        description: string;
+                        required: boolean;
+                        mutability: string;
+                        returned: string;
+                        caseExact?: undefined;
+                        uniqueness?: undefined;
+                    })[];
+                    mutability: string;
+                    returned: string;
+                    uniqueness: string;
+                    caseExact?: undefined;
+                })[];
+            }>;
+            getSCIMResourceTypes: import("better-auth").StrictEndpoint<"/scim/v2/ResourceTypes", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            type: "object";
+                                            properties: {
+                                                totalResults: {
+                                                    type: string;
+                                                };
+                                                itemsPerPage: {
+                                                    type: string;
+                                                };
+                                                startIndex: {
+                                                    type: string;
+                                                };
+                                                Resources: {
+                                                    type: string;
+                                                    items: {
+                                                        readonly type: "object";
+                                                        readonly properties: {
+                                                            readonly schemas: {
+                                                                readonly type: "array";
+                                                                readonly items: {
+                                                                    readonly type: "string";
+                                                                };
+                                                            };
+                                                            readonly id: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly name: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly endpoint: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly description: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly schema: {
+                                                                readonly type: "string";
+                                                            };
+                                                            readonly meta: {
+                                                                readonly type: "object";
+                                                                readonly properties: {
+                                                                    readonly resourceType: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                    readonly location: {
+                                                                        readonly type: "string";
+                                                                    };
+                                                                };
+                                                            };
+                                                        };
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+            }, {
+                totalResults: number;
+                itemsPerPage: number;
+                startIndex: number;
+                schemas: string[];
+                Resources: {
+                    meta: {
+                        location: string;
+                        resourceType: string;
+                    };
+                    schemas: string[];
+                    id: string;
+                    name: string;
+                    endpoint: string;
+                    description: string;
+                    schema: string;
+                }[];
+            }>;
+            getSCIMResourceType: import("better-auth").StrictEndpoint<"/scim/v2/ResourceTypes/:resourceTypeId", {
+                method: "GET";
+                metadata: {
+                    allowedMediaTypes: string[];
+                    openapi: {
+                        summary: string;
+                        description: string;
+                        responses: {
+                            "400": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "401": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "403": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "404": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "429": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "500": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly status: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly detail: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly scimType: {
+                                                    readonly type: "string";
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                            "200": {
+                                description: string;
+                                content: {
+                                    "application/json": {
+                                        schema: {
+                                            readonly type: "object";
+                                            readonly properties: {
+                                                readonly schemas: {
+                                                    readonly type: "array";
+                                                    readonly items: {
+                                                        readonly type: "string";
+                                                    };
+                                                };
+                                                readonly id: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly name: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly endpoint: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly description: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly schema: {
+                                                    readonly type: "string";
+                                                };
+                                                readonly meta: {
+                                                    readonly type: "object";
+                                                    readonly properties: {
+                                                        readonly resourceType: {
+                                                            readonly type: "string";
+                                                        };
+                                                        readonly location: {
+                                                            readonly type: "string";
+                                                        };
+                                                    };
+                                                };
+                                            };
+                                        };
+                                    };
+                                };
+                            };
+                        };
+                    };
+                    scope: "server";
+                };
+            }, {
+                meta: {
+                    location: string;
+                    resourceType: string;
+                };
+                schemas: string[];
+                id: string;
+                name: string;
+                endpoint: string;
+                description: string;
+                schema: string;
+            }>;
+        };
+        schema: {
+            scimProvider: {
+                fields: {
+                    userId?: {
+                        type: "string";
+                        required: false;
+                    } | undefined;
+                    providerId: {
+                        type: "string";
+                        required: true;
+                        unique: true;
+                    };
+                    scimToken: {
+                        type: "string";
+                        required: true;
+                        unique: true;
+                    };
+                    organizationId: {
+                        type: "string";
+                        required: false;
+                    };
+                };
+            };
+        };
+        options: import("@better-auth/scim").SCIMOptions | undefined;
+    } | {
         id: "sso";
         version: string;
         endpoints: {
@@ -1371,6 +5617,6 @@ export declare const auth: import("better-auth").Auth<{
         options: NoInfer<{
             trustEmailVerified: true;
         }>;
-    }[]];
+    })[]];
 }>;
 export type Auth = typeof auth;
