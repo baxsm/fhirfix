@@ -10,6 +10,9 @@ export declare const env: {
     ZEPTOMAIL_FROM_ADDRESS: string;
     ZEPTOMAIL_FROM_NAME: string;
     COMPLIANCE_EMAIL: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    SSO_ENABLED: boolean;
     EMAIL_TEST_MODE: boolean;
     SENTRY_DSN: string;
     LOG_LEVEL: "debug" | "error" | "info" | "warn";
@@ -30,4 +33,5 @@ export declare const env: {
     IS_PRODUCTION: boolean;
     TRUSTED_ORIGIN_LIST: string[];
     VALIDATOR_URL_LIST: string[];
+    GOOGLE_ENABLED: boolean;
 };

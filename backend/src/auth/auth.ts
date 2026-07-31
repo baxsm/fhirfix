@@ -27,6 +27,26 @@ export const auth = betterAuth({
     },
   },
 
+  // absent credentials mean the key is simply not registered, so better-auth
+  // 404s /callback/google rather than half-offering a provider.
+  socialProviders: env.GOOGLE_ENABLED
+    ? {
+        google: {
+          clientId: env.GOOGLE_CLIENT_ID,
+          clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+      }
+    : {},
+
+  // a google account arrives with a verified email, so the address is already
+  // proven and must not be sent through our own verification flow.
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
+  },
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

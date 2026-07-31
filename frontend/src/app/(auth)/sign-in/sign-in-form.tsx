@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient, signIn } from "@/lib/auth-client";
+import { env } from "@/lib/env";
+import { GoogleButton } from "../google-button";
 
 const schema = z.object({
   email: z.email("Enter a valid email"),
@@ -64,6 +66,17 @@ export function SignInForm() {
         <h1 className="text-xl font-semibold tracking-tight">Sign in</h1>
         <p className="text-sm text-muted-foreground">Welcome back. Pick up where you left off.</p>
       </div>
+
+      {env.NEXT_PUBLIC_GOOGLE_ENABLED && (
+        <>
+          <GoogleButton next={searchParams.get("next")} />
+          <div className="flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">

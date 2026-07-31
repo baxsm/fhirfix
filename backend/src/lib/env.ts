@@ -5,6 +5,14 @@ const portSchema = z
   .string()
   .refine((val) => val.length > 0 && !Number.isNaN(Number(val)), "must be a number");
 
+// a credential slot that ships with a TEST_ placeholder. treating the
+// placeholder as empty is what keeps a half-configured provider switched off
+// rather than visibly broken.
+const placeholderAsEmpty = z
+  .string()
+  .default("")
+  .transform((v) => (v.startsWith("TEST_") ? "" : v));
+
 const baseEnv = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -23,6 +31,15 @@ const baseEnv = createEnv({
     ZEPTOMAIL_FROM_NAME: z.string().default("FHIRfix"),
     // where a BAA request lands. the same address the terms page publishes.
     COMPLIANCE_EMAIL: z.email().default("legal@fhirfix.dev"),
+
+    // a TEST_-prefixed value counts as unset, so a placeholder disables the
+    // provider instead of rendering a button that fails on click.
+    GOOGLE_CLIENT_ID: placeholderAsEmpty,
+    GOOGLE_CLIENT_SECRET: placeholderAsEmpty,
+    SSO_ENABLED: z
+      .string()
+      .default("false")
+      .transform((v) => v === "true"),
     EMAIL_TEST_MODE: z
       .string()
       .default("true")
@@ -67,4 +84,7 @@ export const env = {
   VALIDATOR_URL_LIST: baseEnv.VALIDATOR_URLS.split(",")
     .map((u) => u.trim())
     .filter(Boolean),
+  // one place decides whether google sign-in exists. both halves are required:
+  // an id without a secret is a button that fails at the callback.
+  GOOGLE_ENABLED: !!baseEnv.GOOGLE_CLIENT_ID && !!baseEnv.GOOGLE_CLIENT_SECRET,
 };

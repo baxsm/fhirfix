@@ -13,6 +13,20 @@ export declare const auth: import("better-auth").Auth<{
             };
         };
     };
+    socialProviders: {
+        google: {
+            clientId: string;
+            clientSecret: string;
+        };
+    } | {
+        google?: undefined;
+    };
+    account: {
+        accountLinking: {
+            enabled: true;
+            trustedProviders: "google"[];
+        };
+    };
     emailAndPassword: {
         enabled: true;
         requireEmailVerification: true;
