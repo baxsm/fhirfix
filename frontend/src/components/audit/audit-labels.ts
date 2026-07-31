@@ -28,6 +28,7 @@ export const ACTION_LABELS: Record<string, string> = {
   "packet.launched": "Launched a conformance packet",
   "packet.exported": "Exported an evidence packet",
   "data.exported": "Exported data",
+  "baa.requested": "Requested a BAA",
   "workspace.deleted": "Deleted the workspace",
 };
 

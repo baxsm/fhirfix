@@ -21,6 +21,8 @@ const baseEnv = createEnv({
     ZEPTOMAIL_TOKEN: z.string().default(""),
     ZEPTOMAIL_FROM_ADDRESS: z.email().default("no-reply@fhirfix.dev"),
     ZEPTOMAIL_FROM_NAME: z.string().default("FHIRfix"),
+    // where a BAA request lands. the same address the terms page publishes.
+    COMPLIANCE_EMAIL: z.email().default("legal@fhirfix.dev"),
     EMAIL_TEST_MODE: z
       .string()
       .default("true")

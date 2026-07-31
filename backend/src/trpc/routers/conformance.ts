@@ -259,6 +259,19 @@ export const conformanceRouter = router({
       }
 
       const content = await blobStore.get(evidence.bundleRef);
+
+      // an evidence bundle is what a payer hands to a regulator, so who took a
+      // copy is part of the record.
+      await writeAudit({
+        workspaceId: ctx.workspaceId,
+        action: "packet.exported",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.packetRunId,
+        ip: ipFromHeaders(ctx.headers),
+        metadata: { sha256: evidence.sha256 },
+      });
+
       return { content, sha256: evidence.sha256 };
     }),
 });

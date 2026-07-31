@@ -1,7 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, DatabaseBackup, Download, SlidersHorizontal, Users } from "lucide-react";
+import {
+  Bell,
+  Check,
+  DatabaseBackup,
+  Download,
+  FileSignature,
+  SlidersHorizontal,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +17,7 @@ import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SettingRow, SettingsSection } from "@/components/dashboard/settings-section";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -119,6 +128,16 @@ export function SettingsView({
                   }}
                 />
               )}
+
+              {/* a request to a person, not a saved default, so it sits after
+                  the form rather than under its save button. */}
+              {!wsQuery.isPending && (
+                <BaaRow
+                  workspaceId={workspaceId}
+                  canRequest={can(role, "workspaceSettings", "update")}
+                  status={wsQuery.data?.settings?.baaStatus ?? "none"}
+                />
+              )}
               {/* these emails go to a person, not a workspace, so the control
                   lives on the account. this row only points at it. */}
               <SettingRow
@@ -154,6 +173,65 @@ export function SettingsView({
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+// sits outside the defaults form on purpose: it is a request to a person, not a
+// setting you save, and nesting it would submit the form.
+function BaaRow({
+  workspaceId,
+  canRequest,
+  status,
+}: {
+  workspaceId: string;
+  canRequest: boolean;
+  status: "none" | "requested" | "signed";
+}) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const request = useMutation(
+    trpc.workspace.requestBaa.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: trpc.workspace.get.queryKey({ workspaceId }),
+        });
+        toast.success("BAA requested. We will email you the agreement.");
+      },
+      onError: (e) => toast.error(e.message ?? "Could not send the request."),
+    }),
+  );
+
+  const hint =
+    status === "signed"
+      ? "A signed agreement covers PHI processed in this workspace."
+      : status === "requested"
+        ? "We received the request and will email the agreement to you."
+        : "Required before you send PHI. We email the agreement to countersign.";
+
+  return (
+    <SettingRow label="Business Associate Agreement" hint={hint}>
+      {status === "none" ? (
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!canRequest || request.isPending}
+          onClick={() => request.mutate({ workspaceId })}
+        >
+          <FileSignature className="size-3.5" />
+          {request.isPending ? "Sending..." : "Request a BAA"}
+        </Button>
+      ) : status === "signed" ? (
+        <Badge variant="outline" className="border-emerald-600/30 text-emerald-700 dark:text-emerald-400">
+          <Check className="size-3" />
+          Signed
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-muted-foreground">
+          Requested
+        </Badge>
+      )}
+    </SettingRow>
   );
 }
 
@@ -370,7 +448,7 @@ function DefaultsSection({
       </SettingRow>
 
       {canEdit && (
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end border-t pt-4">
           <Button type="submit" disabled={save.isPending}>
             {save.isPending ? "Saving..." : "Save defaults"}
           </Button>

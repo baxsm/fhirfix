@@ -31,6 +31,7 @@ export const AUDIT_ACTIONS = [
   "packet.launched",
   "packet.exported",
   "data.exported",
+  "baa.requested",
   "workspace.deleted",
 ] as const;
 

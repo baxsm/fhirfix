@@ -258,7 +258,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 workspaceId: string;
                 actorType: "api_key" | "system" | "user";
                 actorId: string | null;
-                action: "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+                action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "settings.changed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
                 targetRef: string | null;
                 ip: string | null;
                 metadata: Record<string, unknown> | null;
@@ -331,6 +331,15 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             confirmSlug: string;
         };
         output: import("@shared/db/gdpr").DeletionSummary;
+        meta: object;
+    }>;
+    requestBaa: import("@trpc/server").TRPCMutationProcedure<{
+        input: {
+            workspaceId: string;
+        };
+        output: {
+            baaStatus: "none" | "requested" | "signed";
+        };
         meta: object;
     }>;
     ssoGet: import("@trpc/server").TRPCQueryProcedure<{

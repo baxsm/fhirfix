@@ -9,6 +9,7 @@ export declare const env: {
     ZEPTOMAIL_TOKEN: string;
     ZEPTOMAIL_FROM_ADDRESS: string;
     ZEPTOMAIL_FROM_NAME: string;
+    COMPLIANCE_EMAIL: string;
     EMAIL_TEST_MODE: boolean;
     SENTRY_DSN: string;
     LOG_LEVEL: "debug" | "error" | "info" | "warn";

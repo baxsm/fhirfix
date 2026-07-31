@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/auth/auth";
 import { ipFromHeaders, writeAudit } from "@/lib/audit";
+import { sendBaaRequestEmail } from "@/lib/baa-email";
 import { schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { logger } from "@/lib/logger";
@@ -152,6 +153,66 @@ export const workspaceRouter = router({
 
       logger.info("workspace.delete", `${org.slug} removed by ${ctx.user.id}`);
       return summary;
+    }),
+
+  // the terms page tells a customer to request a BAA here, so this has to reach
+  // a real person. status only moves to "requested" once the email is away.
+  requestBaa: enforceRole("workspaceSettings", "update")
+    .input(z.object({ workspaceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const [settings] = await ctx.db
+        .select({ baaStatus: schema.workspaceSettings.baaStatus })
+        .from(schema.workspaceSettings)
+        .where(eq(schema.workspaceSettings.workspaceId, input.workspaceId))
+        .limit(1);
+
+      if (!settings) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace settings not found." });
+      }
+      // already handled. re-requesting would mail the compliance inbox again for
+      // an agreement that is already in flight or signed.
+      if (settings.baaStatus !== "none") {
+        return { baaStatus: settings.baaStatus };
+      }
+
+      const [org] = await ctx.db
+        .select({ slug: schema.organization.slug, name: schema.organization.name })
+        .from(schema.organization)
+        .where(eq(schema.organization.id, input.workspaceId))
+        .limit(1);
+      if (!org) throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found." });
+
+      try {
+        await sendBaaRequestEmail({
+          workspaceName: org.name,
+          workspaceSlug: org.slug,
+          requestedByName: ctx.user.name || ctx.user.email,
+          requestedByEmail: ctx.user.email,
+        });
+      } catch (error) {
+        logger.error("workspace.requestBaa", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Could not send the request. Try again, or email legal@fhirfix.dev.",
+        });
+      }
+
+      const [updated] = await ctx.db
+        .update(schema.workspaceSettings)
+        .set({ baaStatus: "requested", updatedAt: new Date() })
+        .where(eq(schema.workspaceSettings.workspaceId, input.workspaceId))
+        .returning({ baaStatus: schema.workspaceSettings.baaStatus });
+
+      await writeAudit({
+        workspaceId: input.workspaceId,
+        action: "baa.requested",
+        actorType: "user",
+        actorId: ctx.user.id,
+        targetRef: input.workspaceId,
+        ip: ipFromHeaders(ctx.headers),
+      });
+
+      return { baaStatus: updated?.baaStatus ?? "requested" };
     }),
 
   // SSO config is stubbed in phase 1 and built in phase 8. do not wire the plugin yet.

@@ -1,5 +1,6 @@
 import { getRun, getRunFindings } from "@shared/db/runs";
 import type { Context } from "hono";
+import { writeAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import {
   type ReportBundle,
@@ -20,7 +21,22 @@ export async function getReportController(c: Context<ApiV1Env>) {
     return apiError(c, 404, "not_found", "Run not found.");
   }
 
+  if (format !== "json" && format !== "operationoutcome" && format !== "pdf") {
+    return apiError(c, 400, "unknown_format", "format must be json, operationoutcome, or pdf.");
+  }
+
   const findings = await getRunFindings(db, runId);
+
+  // same action the dashboard export writes. the actor is the key, not a person.
+  await writeAudit({
+    workspaceId,
+    action: "report.exported",
+    actorType: "api_key",
+    actorId: c.get("apiKeyId"),
+    targetRef: runId,
+    ip: c.get("ip") || null,
+    metadata: { format, via: "api" },
+  });
 
   const bundle: ReportBundle = { run, findings, profilesApplied: run.profilesApplied };
 
@@ -32,13 +48,10 @@ export async function getReportController(c: Context<ApiV1Env>) {
       headers: { "Content-Type": "application/fhir+json" },
     });
   }
-  if (format === "pdf") {
-    return new Response(toPdfReport(bundle), {
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${runId}.report.pdf"`,
-      },
-    });
-  }
-  return apiError(c, 400, "unknown_format", "format must be json, operationoutcome, or pdf.");
+  return new Response(toPdfReport(bundle), {
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${runId}.report.pdf"`,
+    },
+  });
 }
