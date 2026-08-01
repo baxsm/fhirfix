@@ -94,6 +94,21 @@ export class ValidatorPool {
     return this.states.filter((s) => s.ready).length;
   }
 
+  get instanceCount(): number {
+    return this.states.length;
+  }
+
+  // warmup() probes once at boot and the flags then go stale, so a status
+  // surface has to re-probe. refreshes the cached ready flags as a side effect.
+  async probeAll(): Promise<{ readyCount: number; total: number }> {
+    await Promise.all(
+      this.states.map(async (st) => {
+        st.ready = await this.probeReady(st);
+      }),
+    );
+    return { readyCount: this.readyCount, total: this.states.length };
+  }
+
   async validate(resource: unknown, profiles: string[]): Promise<OperationOutcome> {
     const st = await this.acquire();
     try {

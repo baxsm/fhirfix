@@ -6,6 +6,7 @@ import { auth } from "@/auth/auth";
 import { runAutoRecharge } from "@/lib/auto-recharge";
 import { sendLowBalanceEmail } from "@/lib/billing-email";
 import { env } from "@/lib/env";
+import { getHealthReport } from "@/lib/health";
 import { logger } from "@/lib/logger";
 import { initSentry } from "@/lib/sentry";
 import { dispatchWebhook } from "@/queues/index";
@@ -41,7 +42,22 @@ app.use("/trpc/*", dashboardCors);
 app.use("/api/auth/*", dashboardCors);
 app.use("/api/runs/*", dashboardCors);
 
+// liveness: the process answers. railway's healthcheckPath points here, and it
+// must not depend on postgres, because a deploy that cannot reach the db should
+// still come up and report why rather than being killed and retried forever.
 app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
+
+// readiness: the dependencies actually respond. draft-inadarei-api-health-check-06.
+// public and unauthenticated on purpose - it is what /status renders - so it
+// carries no counts, ids, or anything workspace-scoped.
+app.get("/health/ready", async (c) => {
+  const report = await getHealthReport();
+  // c.json() would overwrite the content-type, so the body is serialized here.
+  return c.body(JSON.stringify(report), report.status === "fail" ? 503 : 200, {
+    "Content-Type": "application/health+json",
+    "Cache-Control": "no-store",
+  });
+});
 
 app.route("/api/v1", apiV1);
 

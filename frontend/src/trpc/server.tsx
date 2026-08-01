@@ -6,7 +6,7 @@ import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { env } from "@/lib/env";
+import { serverApiUrl } from "@/lib/env";
 import { getQueryClient } from "./query-client";
 
 export const getServerQueryClient = cache(getQueryClient);
@@ -14,7 +14,7 @@ export const getServerQueryClient = cache(getQueryClient);
 export const serverApi = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: `${env.NEXT_PUBLIC_API_URL}/trpc`,
+      url: `${serverApiUrl()}/trpc`,
       async headers() {
         const store = await cookies();
         const header = store

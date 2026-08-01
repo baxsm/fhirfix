@@ -25,6 +25,11 @@ export declare class ValidatorPool {
     }>;
     private probeReady;
     get readyCount(): number;
+    get instanceCount(): number;
+    probeAll(): Promise<{
+        readyCount: number;
+        total: number;
+    }>;
     validate(resource: unknown, profiles: string[]): Promise<OperationOutcome>;
     private acquire;
 }
