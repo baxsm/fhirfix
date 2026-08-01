@@ -1,0 +1,148 @@
+# self-hosted FHIRfix. runs the whole product inside your own network, so
+# protected health data never leaves it.
+#
+#   cp .env.selfhost.example .env.selfhost
+#   # edit the secrets, then:
+#   docker compose -f docker-compose.selfhost.yml --env-file .env.selfhost up -d
+#
+# terminology defaults to the public tx.fhir.org. for a deployment where nothing
+# may leave the network, set TX_SERVER_URL to your own terminology server, or
+# DISABLE_TX=true to skip terminology checks entirely. see ops/self-hosting.md.
+#
+# the project name is deliberately not "fhirfix": that is what the development
+# docker-compose.yml uses, and sharing it makes `down -v` here delete the other
+# stack's containers and volumes.
+name: fhirfix-selfhost
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fhirfix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-fhirfix}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fhirfix} -d ${POSTGRES_DB:-fhirfix}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  validator:
+    image: infernocommunity/fhir-validator-service:v2.3.6
+    restart: unless-stopped
+    environment:
+      # unset by default, which leaves the service on its own default (tx.fhir.org).
+      TX_SERVER_URL: ${TX_SERVER_URL:-}
+      DISABLE_TX: ${DISABLE_TX:-}
+      JAVA_OPTS: ${VALIDATOR_JAVA_OPTS:--XX:MaxRAMPercentage=75.0}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:4567/igs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # the first boot loads US Core before it answers.
+      start_period: 90s
+
+  converter:
+    image: mcr.microsoft.com/healthcareapis/fhir-converter:1.0.476-preview
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health/check || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: 3001
+      DATABASE_URL: postgres://${POSTGRES_USER:-fhirfix}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fhirfix}
+      REDIS_URL: redis://redis:6379
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
+      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-http://localhost:3000}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      VALIDATOR_URLS: http://validator:4567
+      CONVERTER_URL: http://converter:8080
+      US_CORE_VERSION: ${US_CORE_VERSION:-6.1.0}
+      API_KEY_PEPPER: ${API_KEY_PEPPER:?set API_KEY_PEPPER}
+      WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY:?set WEBHOOK_ENCRYPTION_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-fhirfix}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fhirfix}
+      REDIS_URL: redis://redis:6379
+      VALIDATOR_URLS: http://validator:4567
+      CONVERTER_URL: http://converter:8080
+      US_CORE_VERSION: ${US_CORE_VERSION:-6.1.0}
+      API_KEY_PEPPER: ${API_KEY_PEPPER}
+      WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
+        NEXT_PUBLIC_SITE_URL: ${APP_URL:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:3001}
+      # server-rendered pages reach the backend over the compose network. the
+      # public url points at the host, which from inside this container is the
+      # container itself.
+      INTERNAL_API_URL: http://backend:3001
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  redisdata:

@@ -19,11 +19,13 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// each target project gets the shared packages it actually uses.
+// each target project gets the shared packages it actually uses. a project that
+// is not in the build context is skipped: the self-host images copy one service
+// each, so "absent" is a valid single-service build, not a broken checkout.
 const targets = [
   { project: "backend", shared: ["db", "engine"] },
   { project: "worker", shared: ["db", "engine"] },
-];
+].filter((t) => existsSync(join(root, t.project)));
 
 // source layout per shared package: what to copy, and where it lands.
 const sources = {
@@ -80,6 +82,13 @@ function vendorRouterTypes() {
   );
 }
 
+// a context with no backend/, no worker/ and no frontend/ is a broken checkout,
+// not a single-service build. having nothing at all to do would otherwise look
+// like a clean no-op and fail much later at import time.
+if (targets.length === 0 && !existsSync(join(root, "frontend"))) {
+  throw new Error("sync-shared: no project found (expected backend/, worker/ or frontend/)");
+}
+
 let count = 0;
 for (const { project, shared } of targets) {
   const sharedRoot = join(root, project, "src", "shared");
@@ -97,8 +106,24 @@ for (const { project, shared } of targets) {
   );
 }
 
-vendorRouterTypes();
+// only the frontend consumes the router types, and emitting them needs both the
+// backend source and bun. a single-service build context legitimately has
+// neither: the worker image copies no frontend, and the frontend image runs on
+// node with no bun. the emitted .d.ts tree is committed, so skipping refreshes
+// nothing rather than breaking the build.
+const hasBun = (() => {
+  try {
+    execFileSync("bun", ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+const canVendorRouterTypes =
+  hasBun && existsSync(join(root, "frontend")) && existsSync(join(root, "backend", "package.json"));
+if (canVendorRouterTypes) vendorRouterTypes();
 
 console.log(
-  `sync-shared: vendored ${count} shared package(s) into ${targets.length} project(s), plus router types into frontend.`,
+  `sync-shared: vendored ${count} shared package(s) into ${targets.length} project(s)` +
+    (canVendorRouterTypes ? ", plus router types into frontend." : "; router types skipped."),
 );
