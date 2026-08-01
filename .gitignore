@@ -14,6 +14,8 @@
 .env
 .env.*
 !.env.example
+# the self-host template ships with the product; it holds no real values.
+!.env.selfhost.example
 
 # dependencies (any service)
 **/node_modules/
@@ -74,3 +76,7 @@ TODO.md
 # design reference assets (local only, not shipped)
 *.mp4
 finsage-ref.mp4
+
+# database dumps. a dump is a full copy of production PHI, never commit one.
+/backups/
+*.dump
