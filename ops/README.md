@@ -1,7 +1,6 @@
 # Operations
 
-Backup, restore, and health checking. For running the whole product on your own
-infrastructure, see [self-hosting.md](self-hosting.md).
+Backup, restore, and health checking.
 
 ## Health endpoints
 
@@ -24,9 +23,6 @@ restarted forever.
 
 Probe results are cached for 15 seconds. The endpoint is public, so without the
 cache each caller would become a sidecar probe.
-
-The public `/status` page renders this endpoint. It is `force-dynamic`: a cached
-status page keeps reporting "operational" through an outage.
 
 ## Backups
 

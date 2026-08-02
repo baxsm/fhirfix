@@ -14,7 +14,6 @@
 .env
 .env.*
 !.env.example
-!.env.selfhost.example
 backups
 *.dump
 

@@ -14,8 +14,6 @@
 .env
 .env.*
 !.env.example
-# the self-host template ships with the product; it holds no real values.
-!.env.selfhost.example
 
 # dependencies (any service)
 **/node_modules/

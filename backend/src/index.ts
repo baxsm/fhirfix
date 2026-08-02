@@ -48,8 +48,8 @@ app.use("/api/runs/*", dashboardCors);
 app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
 
 // readiness: the dependencies actually respond. draft-inadarei-api-health-check-06.
-// public and unauthenticated on purpose - it is what /status renders - so it
-// carries no counts, ids, or anything workspace-scoped.
+// public and unauthenticated on purpose, so it carries no counts, ids, or
+// anything workspace-scoped.
 app.get("/health/ready", async (c) => {
   const report = await getHealthReport();
   // c.json() would overwrite the content-type, so the body is serialized here.
