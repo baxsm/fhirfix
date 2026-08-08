@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// the one failed-to-load panel. `what` names the thing, so the copy stays
-// specific without every view hand-rolling the same block.
+// the one failed-to-load panel; `what` names the thing so copy stays specific
 export function LoadError({
   what,
   onRetry,

@@ -120,8 +120,7 @@ export function CheckView({
       />
 
       {/* the whole card is the drop target, so a dragged file has an area the size of the panel */}
-      {/** biome-ignore lint/a11y/noStaticElementInteractions: drag events on the
-           shell; the focusable control inside is the textarea. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: the textarea inside is focusable */}
       <div
         onDragOver={(e) => {
           e.preventDefault();

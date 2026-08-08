@@ -25,11 +25,9 @@ export const runRouter = router({
     const inputType = detectInput(input.content).inputType;
     const key = blobKey(ctx.workspaceId, runId, "input");
 
-    // an unspecified profile set falls back to the workspace default, which is
-    // what that setting is for.
+    // unspecified profiles fall back to the workspace default
     const profiles = await resolveProfiles(ctx.db, ctx.workspaceId, input.profiles);
-    // one ingest path for every entry point: applies the workspace redaction
-    // policy and records whether what landed on disk actually carries PHI.
+    // shared ingest, so the redaction policy and the PHI flag cannot drift from the api
     const policy = await redactionPolicyFor(ctx.db, ctx.workspaceId);
     const stored = await storeRunInput(ctx.db, blobStore, {
       workspaceId: ctx.workspaceId,

@@ -55,8 +55,7 @@ export function MappingsTable({
     enabled: !!workspaceId,
   });
 
-  // counts live here, beside the search that narrows them: a tab reading
-  // "Rejected 1" over an empty list is the bug this prevents.
+  // counts sit beside the search that narrows them, so a tab cannot outlive its rows
   const countsQuery = useQuery({
     ...trpc.mappings.counts.queryOptions({
       workspaceId,

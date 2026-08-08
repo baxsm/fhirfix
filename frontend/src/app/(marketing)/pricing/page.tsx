@@ -85,8 +85,7 @@ export default function PricingPage() {
               </div>
               <p className="text-sm text-muted-foreground">{tier.tagline}</p>
             </div>
-            {/* only premium carries a fixed price. the slot is reserved on every
-                card so the three feature lists still start on one line. */}
+            {/* the slot is reserved on every card so the feature lists start on one line */}
             <div className="mt-4 min-h-[2.75rem]">
               {"price" in tier && tier.price ? (
                 <>

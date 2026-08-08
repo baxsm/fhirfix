@@ -99,8 +99,7 @@ export async function handleOrderPaid(order: ParsedOrder): Promise<void> {
   );
 }
 
-// the ONLY place plan_tier is written. an active premium subscription grants it,
-// and anything else (revoked, unpaid, past due) drops back to free.
+// the only place plan_tier is written; anything but an active subscription drops to free
 export async function handleSubscription(sub: ParsedSubscription): Promise<void> {
   const planTier = sub.active ? "premium" : "free";
   const updated = await db

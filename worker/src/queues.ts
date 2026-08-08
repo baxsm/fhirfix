@@ -11,8 +11,7 @@ export const retentionQueue = new Queue("retention", { connection });
 
 const RETENTION_SCHEDULER_ID = "retention:sweep";
 
-// one hourly sweep for the whole deployment. registering by a fixed id means a
-// worker restart re-registers the same scheduler rather than stacking new ones.
+// the fixed id must stay: a restart re-registers the scheduler rather than stacking one
 export async function registerRetentionSweep(): Promise<void> {
   await retentionQueue.upsertJobScheduler(
     RETENTION_SCHEDULER_ID,

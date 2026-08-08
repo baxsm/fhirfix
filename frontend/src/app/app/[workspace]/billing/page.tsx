@@ -4,8 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { resolveWorkspace } from "@/trpc/resolve-workspace";
 import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 
-// the ledger asks for one extra row to detect a next page, so the prefetch key
-// has to match LedgerTable's exactly or the client refetches on mount.
+// the prefetch key must match LedgerTable's exactly or the client refetches on mount
 const LEDGER_PAGE_SIZE = 12;
 const USAGE_DAYS = 30;
 

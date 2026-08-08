@@ -1,8 +1,7 @@
 import { sendEmail } from "./email";
 import { env } from "./env";
 
-// the request goes to the compliance inbox, not to the requester. a BAA is
-// countersigned by a human, so this email is the handoff to that person.
+// goes to the compliance inbox, not the requester: a baa is countersigned by a human
 export async function sendBaaRequestEmail(args: {
   workspaceName: string;
   workspaceSlug: string;

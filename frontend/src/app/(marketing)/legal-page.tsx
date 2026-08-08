@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-// shared shell for /terms and /privacy: same measure, same rhythm, so the two
-// documents read as one set rather than two separately-styled pages.
+// shared shell so /terms and /privacy read as one set
 export function LegalPage({
   title,
   updated,

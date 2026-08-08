@@ -44,8 +44,7 @@ export function AuditView({ workspaceId }: { workspaceId: string }) {
   const [cursor, setCursor] = useState<string | undefined>();
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  // only the actions this workspace has actually recorded, so the filter never
-  // offers a value that returns nothing.
+  // only recorded actions, so the filter never offers a value that returns nothing
   const actionsQuery = useQuery({
     ...trpc.audit.actions.queryOptions({ workspaceId }),
     enabled: !!workspaceId,

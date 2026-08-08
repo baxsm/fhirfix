@@ -165,8 +165,7 @@ export async function getCorrectedController(c: Context<ApiV1Env>) {
   const body = await blobStore.get(row.correctedRef).catch(() => null);
   if (body == null) return apiError(c, 404, "no_artifact", "Corrected artifact unavailable.");
 
-  // the corrected artifact is the source data. the dashboard route audits this
-  // same read, so a key doing it must leave the same trail.
+  // the dashboard audits this same read, so a key must leave the same trail
   await writeAudit({
     workspaceId,
     action: "report.downloaded",

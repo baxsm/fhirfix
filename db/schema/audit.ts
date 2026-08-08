@@ -1,8 +1,6 @@
 import { index, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-// the closed set of auditable actions. a new sensitive action adds a member here,
-// which is what the audit-coverage test greps against. mutations AND read/side-effect
-// actions (downloads, exports, shares, logins) both belong in this list.
+// closed set: reads with side effects (downloads, exports, logins) belong here too
 export const AUDIT_ACTIONS = [
   "login",
   "run.created",

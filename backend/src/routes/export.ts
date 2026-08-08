@@ -70,8 +70,7 @@ exportRoutes.get("/api/runs/:runId/export/:format", async (c) => {
     return c.json({ error: "unknown_format" }, 400);
   }
 
-  // a report carries findings from the source data, so taking one out of the
-  // product is an auditable read, not just a render.
+  // a report carries findings from source data, so exporting one is an auditable read
   await writeAudit({
     workspaceId: res.workspaceId,
     action: "report.exported",
@@ -126,8 +125,7 @@ exportRoutes.get("/api/runs/:runId/download", async (c) => {
   const body = await blobStore.get(res.correctedRef).catch(() => null);
   if (body == null) return c.json({ error: "no_artifact" }, 404);
 
-  // the corrected artifact is the source data itself, so this is the download
-  // an auditor most wants to see. only audited once the bytes actually exist.
+  // audited only once the bytes exist, since this returns the source data itself
   await writeAudit({
     workspaceId: res.workspaceId,
     action: "report.downloaded",

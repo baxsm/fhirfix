@@ -132,8 +132,7 @@ export const billingRouter = router({
         tier: settings?.planTier ?? "free",
         premiumCents: PRICING.premium.cents,
         premiumLabel: PRICING.premium.label,
-        // false when no product is configured, so the UI can say so honestly
-        // rather than offering a button that cannot work.
+        // false when no product is configured, so the ui does not offer a dead button
         purchasable: premiumProductId() != null,
       },
     };
@@ -275,8 +274,7 @@ export const billingRouter = router({
       return { url: checkout.url };
     }),
 
-  // premium is a recurring subscription, not a credit pack, so it gets its own
-  // checkout. the tier itself is granted by the subscription webhook, never here.
+  // the tier is granted by the subscription webhook, never here
   upgradeToPremium: workspaceProcedure
     .input(z.object({ workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {

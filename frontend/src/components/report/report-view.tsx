@@ -332,9 +332,7 @@ export function ReportView({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {/* a validate-only or failed run has no corrected artifact, and
-                    the download route 404s to a raw json page. offer it only
-                    when there is something to download. */}
+                {/* the download route 404s without a corrected artifact, so gate the item */}
                 {data?.corrected && (
                   <DropdownMenuItem asChild>
                     <a href={`${base}/download`}>Corrected FHIR</a>

@@ -25,8 +25,7 @@ function requireMappingPermission(role: string, action: MappingAction) {
 // live rows only: a superseded row is history and must never show up as current.
 const isLive = isNull(schema.mappingRegistryEntry.supersededById);
 
-// one definition, used by both `list` and `counts`. if they diverge, a tab count
-// stops matching the rows under it.
+// shared by list and counts; diverging makes a tab count stop matching its rows
 function searchFilter(search: string | undefined) {
   const term = search?.trim();
   if (!term) return undefined;
@@ -122,8 +121,7 @@ export const mappingsRouter = router({
       return findConflicts(rows);
     }),
 
-  // counts must honour the same search the list does, or a tab can read
-  // "Rejected 1" above an empty result and look broken.
+  // must honour the same search as the list, or a count sits above an empty result
   counts: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), search: z.string().optional() }))
     .query(async ({ ctx, input }) => {

@@ -129,8 +129,7 @@ export function SettingsView({
                 />
               )}
 
-              {/* a request to a person, not a saved default, so it sits after
-                  the form rather than under its save button. */}
+              {/* a request to a person, so it sits after the form, not under its save button */}
               {!wsQuery.isPending && (
                 <BaaRow
                   workspaceId={workspaceId}
@@ -138,8 +137,7 @@ export function SettingsView({
                   status={wsQuery.data?.settings?.baaStatus ?? "none"}
                 />
               )}
-              {/* these emails go to a person, not a workspace, so the control
-                  lives on the account. this row only points at it. */}
+              {/* the control lives on the account; this row only points at it */}
               <SettingRow
                 label="Notifications"
                 hint="Billing emails are sent to you personally, not to the workspace."

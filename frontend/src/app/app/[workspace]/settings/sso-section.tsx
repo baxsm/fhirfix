@@ -249,9 +249,7 @@ export function SsoSection({ workspaceId, isOwner }: { workspaceId: string; isOw
         <SettingRow label="Issuer" hint="The entity ID your provider asserts.">
           <span className="max-w-[22rem] truncate font-mono text-xs">{provider.issuer}</span>
         </SettingRow>
-        {/* 95 chars of hex. SettingRow's value slot is shrink-0, so a string
-            this long overflows the row instead of truncating. it gets its own
-            block and wraps. */}
+        {/* SettingRow's value slot is shrink-0, so 95 chars of hex needs its own block */}
         {provider.certFingerprint && (
           <div className="space-y-1 border-t py-3.5">
             <p className="text-sm font-medium">Certificate</p>
@@ -267,8 +265,7 @@ export function SsoSection({ workspaceId, isOwner }: { workspaceId: string; isOw
           <CopyRow label="Sign-on URL (ACS)" value={urls.acs} />
           <CopyRow label="Audience (SP entity ID)" value={urls.entityId} />
         </div>
-        {/* provisioning only makes sense once the IdP is trusted for sign-in,
-            so it lives inside the configured branch rather than beside it. */}
+        {/* provisioning needs a trusted IdP, so it stays inside the configured branch */}
         <ScimBlock workspaceId={workspaceId} isOwner={isOwner} />
 
         <div className="flex justify-end border-t pt-3.5">

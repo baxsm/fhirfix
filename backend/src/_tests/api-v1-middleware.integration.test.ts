@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { grantTrialCredits } from "@shared/db/ledger";
 import { eq, inArray } from "drizzle-orm";
-import { generateKey } from "@/lib/api-key";
+import { generateKey, hashKey } from "@/lib/api-key";
 import { db, schema } from "@/lib/db";
 import { createId } from "@/lib/id";
 import { apiV1 } from "@/routes/api-v1/index";
@@ -108,7 +108,7 @@ describe("api-v1 middleware chain", () => {
     await db
       .update(schema.apiKey)
       .set({ revokedAt: new Date() })
-      .where(eq(schema.apiKey.hashedKey, (await import("@/lib/api-key")).hashKey(full)));
+      .where(eq(schema.apiKey.hashedKey, hashKey(full)));
     const res = await call("/ping", full);
     expect(res.status).toBe(401);
   });

@@ -98,8 +98,7 @@ export class ValidatorPool {
     return this.states.length;
   }
 
-  // warmup() probes once at boot and the flags then go stale, so a status
-  // surface has to re-probe. refreshes the cached ready flags as a side effect.
+  // re-probes because warmup()'s boot flags go stale; refreshes the cached ready flags
   async probeAll(): Promise<{ readyCount: number; total: number }> {
     await Promise.all(
       this.states.map(async (st) => {

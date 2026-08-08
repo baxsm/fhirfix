@@ -1,7 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-// placeholder rows that keep a table's frame and header mounted while data loads,
-// so switching a filter never tears the header down and jumps the panel height
+// keeps the header mounted while data loads, so a filter change cannot jump the panel
 export function PendingRows({ columns, rows = 3 }: { columns: number; rows?: number }) {
   return (
     <tbody>

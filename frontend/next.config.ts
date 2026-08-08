@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
         source: "/api/auth/:path*",
         destination: `${process.env.NEXT_PUBLIC_API_URL}/api/auth/:path*`,
       },
-      // trpc is proxied for the same reason auth is: the session cookie is
-      // first-party to this origin, so a browser call straight to the backend
-      // host never carries it. server-side callers still use the backend url.
+      // must stay proxied: the session cookie is first-party, so a direct browser call 401s
       {
         source: "/trpc/:path*",
         destination: `${process.env.NEXT_PUBLIC_API_URL}/trpc/:path*`,

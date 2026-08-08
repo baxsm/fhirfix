@@ -15,16 +15,14 @@ describe("GoogleButton", () => {
     expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
   });
 
-  // svgl publishes this asset with "modifications are not permitted". the
-  // viewBox is google's own and is the tell if someone redraws or flattens it.
+  // the viewBox is google's own and is the tell if someone redraws the mark
   test("uses google's published mark, not a redraw", () => {
     const { container } = render(<GoogleButton />);
     const svg = container.querySelector("svg");
     expect(svg?.getAttribute("viewBox")).toBe("0 0 268.152 273.883");
   });
 
-  // 19 gradient/filter ids ship inside this svg. unprefixed, they would collide
-  // with any other inline svg on the page and silently repaint it.
+  // the gradient ids must stay prefixed or they collide with other inline svgs
   test("namespaces its gradient ids", () => {
     const { container } = render(<GoogleButton />);
     const ids = [...container.querySelectorAll("[id]")].map((el) => el.id);

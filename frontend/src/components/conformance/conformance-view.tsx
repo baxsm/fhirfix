@@ -41,8 +41,7 @@ export function ConformanceView({
     enabled: !!workspaceId,
   });
   const plan = summaryQuery.data?.plan;
-  // treat an unread plan as premium so the gate never flashes over a paying
-  // workspace while the summary is still loading.
+  // an unread plan counts as premium so the gate never flashes over a paying workspace
   const isPremium = plan == null || plan.tier === "premium";
 
   const upgrade = useMutation(
@@ -139,8 +138,7 @@ export function ConformanceView({
       ) : listQuery.isPending || !workspaceId ? (
         <Skeleton className="h-64 w-full rounded-xl" />
       ) : !isPremium ? (
-        // offering "New packet" on a free plan means offering a button that can
-        // only fail. say what the plan costs and let them buy it instead.
+        // a free plan gets the price, not a button that can only fail
         <div className="rounded-xl border border-border">
           <EmptyState
             icon={ShieldCheck}

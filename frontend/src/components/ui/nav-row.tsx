@@ -3,8 +3,7 @@
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
-// the one definition of a selectable row: sidebar nav, report facets, settings tabs.
-// selection is the violet wash, never a filled action colour and never a left rail.
+// selection is the violet wash, never a filled action colour and never a left rail
 export function NavRow({
   active,
   className,

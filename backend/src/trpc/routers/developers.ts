@@ -249,8 +249,7 @@ export const developersRouter = router({
       .mutation(async ({ ctx, input }) => {
         requireWebhookPermission(ctx.role);
         const event = (input.event ?? "run.completed") as WebhookEvent;
-        // the fan-out filters by subscription, so a test for an event nobody
-        // subscribed to silently reaches nothing. count first and say so.
+        // the fan-out filters by subscription, so an unsubscribed event reaches nothing
         const targets = await listEndpointsForEvent(ctx.db, ctx.workspaceId, event);
         if (targets.length > 0) {
           await dispatchWebhook({

@@ -44,9 +44,7 @@ export function AddCreditsDialog({
   const checkout = useMutation(
     trpc.billing.checkout.mutationOptions({
       onSuccess: async ({ url }) => {
-        // the checkout is an iframe on polar's domain, so it cannot be styled to
-        // match ours. embedding it still keeps the user on this page and lets the
-        // success event refresh the balance without a round trip through a redirect.
+        // code-split: the embed sdk is browser-only and must not load during ssr
         const { PolarEmbedCheckout } = await import("@polar-sh/checkout/embed");
         const embed = await PolarEmbedCheckout.create(url, {
           theme: resolvedTheme === "dark" ? "dark" : "light",

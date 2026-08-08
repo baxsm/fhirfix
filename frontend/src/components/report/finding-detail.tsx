@@ -25,8 +25,7 @@ const SEVERITY_COLOR: Record<Severity, string> = {
   info: "text-info",
 };
 
-// a diff nobody can locate the change in is worse than a short one: when the leaf
-// is not found, head the document rather than rendering all of it
+// when the leaf is not found, head the document rather than rendering all of it
 const FRAGMENT_FALLBACK_LINES = 11;
 
 function fragmentFor(fhirpath: string | null, before: string, after: string) {

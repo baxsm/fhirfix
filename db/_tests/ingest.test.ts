@@ -1,9 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { containsPhi, redactPhi } from "../phi";
 
-// storeRunInput needs a db and a blob store, so the policy decision itself is
-// exercised here through the two pure functions it composes. the wiring is
-// covered by the api-v1 integration tests.
+// the policy decision only; storeRunInput's wiring is covered by the api-v1 integration tests
 
 const patient = {
   resourceType: "Patient",

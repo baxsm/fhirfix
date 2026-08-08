@@ -8,8 +8,7 @@ import { createId } from "@/lib/id";
 const ws = `gdpr_test_${Date.now()}`;
 
 afterAll(async () => {
-  // the tombstone rows this test creates are append-only by design, so they are
-  // removed by id rather than left behind.
+  // tombstone rows are append-only by design, so they are removed by id
   await db.delete(schema.creditLedgerEntry).where(eq(schema.creditLedgerEntry.workspaceId, ws));
   await db.delete(schema.auditLogEntry).where(eq(schema.auditLogEntry.workspaceId, ws));
 });

@@ -118,8 +118,7 @@ export async function executeRun(job: RemediationJob): Promise<void> {
     logger.error("webhook.dispatch", String(err)),
   );
 
-  // a multi-resource input IS the batch. subscribers to batch.completed were
-  // previously never called, because only run.completed was ever dispatched.
+  // a multi-resource input is the batch, so batch.completed fires alongside run.completed
   if (result.inputType === "bundle" || result.inputType === "ndjson") {
     await dispatchWebhook({ event: "batch.completed", workspaceId, data: payload }).catch((err) =>
       logger.error("webhook.dispatch", String(err)),

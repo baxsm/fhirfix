@@ -159,8 +159,7 @@ function summaryLine({
   return `${runs} check${runs === 1 ? "" : "s"} run in this workspace. Everything completed.`;
 }
 
-// a failure states the actual cause and is the only tinted surface on the page.
-// the suggestion beside it is a line of text: they are not the same kind of news.
+// the only tinted surface on the page; a suggestion beside it stays plain text
 function FailureNotice({ runs, base }: { runs: RunRow[]; base: string }) {
   const first = runs[0];
   if (!first) return null;

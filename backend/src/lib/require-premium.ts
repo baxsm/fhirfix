@@ -3,8 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { schema } from "./db";
 
-// one definition of "is this workspace premium", so a second premium feature
-// cannot drift into a different answer than the first.
+// one definition, so a second premium feature cannot drift to a different answer
 export async function requirePremiumPlan(
   db: Db,
   workspaceId: string,

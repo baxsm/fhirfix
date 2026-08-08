@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 
-// no icon prop on purpose: a decorative glyph beside a heading that already
-// names the section is the single biggest "generic dashboard" tell here
+// no icon prop on purpose: a glyph beside a heading that names the section reads generic
 export function SettingsSection({
   title,
   description,

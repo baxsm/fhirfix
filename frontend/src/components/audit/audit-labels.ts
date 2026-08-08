@@ -58,7 +58,7 @@ type TargetFields = {
 };
 
 export function targetLabel(row: TargetFields): string {
-  // the whole page is one workspace, so naming it again in every row says nothing.
+  // the whole page is one workspace, so naming it again in every row says nothing
   if (row.targetRef && row.targetRef !== row.workspaceId) return row.targetRef;
   const changed = row.metadata?.changed;
   if (Array.isArray(changed) && changed.length > 0) return changed.join(", ");

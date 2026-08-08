@@ -15,8 +15,7 @@ export function MobileNav({ workspace, role }: { workspace: string; role: Worksp
   const [open, setOpen] = useState(false);
   const activeHref = activeNavItem(workspace, pathname)?.href;
 
-  // close first, navigate after: closing in response to the path change leaves
-  // radix's exit animation stuck running, so the overlay never unmounts
+  // must close before navigating or radix's exit animation leaves the overlay mounted
   const go = (href: string) => {
     setOpen(false);
     router.push(href);
@@ -29,9 +28,7 @@ export function MobileNav({ workspace, role }: { workspace: string; role: Worksp
           <Menu className="size-4" />
         </Button>
       </SheetTrigger>
-      {/* forceMount is off and the exit animation is disabled: radix waits for
-          animationend to unmount, and this animation never advances past frame 0,
-          which left an invisible overlay swallowing every tap */}
+      {/* must disable the exit animation or radix leaves an invisible overlay mounted */}
       <SheetContent side="left" className="w-64 p-0 data-[state=closed]:animate-none">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <nav className="flex h-full flex-col overflow-y-auto px-2.5 pt-12 pb-4">

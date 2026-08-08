@@ -27,8 +27,7 @@ export function productIdForPack(packId: string): string | null {
   return id.length > 0 ? id : null;
 }
 
-// create a draft order, then finalize it to charge the saved method off-session.
-// the metadata matches a checkout order, so order.paid credits by the same path.
+// metadata matches a checkout order, so order.paid credits by the same path
 export async function chargeSavedMethod(args: {
   packId: string;
   productId: string;

@@ -223,8 +223,7 @@ describe("willAuthenticate", () => {
     expect(willAuthenticate({ auth_type: "backend_services" })).toBe(false);
   });
 
-  // inferno never mints a token from a client secret, so this config would scan
-  // unauthenticated and report every requirement as failed
+  // inferno never mints a token from a client secret, so this scans unauthenticated
   it("rejects a client secret without a token, which would scan unauthenticated", () => {
     expect(willAuthenticate({ auth_type: "symmetric", token_url: "https://x/token" })).toBe(false);
   });

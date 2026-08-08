@@ -79,8 +79,7 @@ export function RunsView({
     enabled: !!workspaceId,
   });
 
-  // the filter lives in the URL so the overview's "run failed" banner can link
-  // straight to it, and so a refresh or a shared link keeps the same view.
+  // the filter lives in the url so a deep link or refresh keeps the same view
   const showFailedOnly = (next: boolean) => {
     setFailedOnly(next);
     setPage(0);
@@ -161,8 +160,7 @@ export function RunsView({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* a ?status=failed link can outlive the failure it pointed at, so say
-                      nothing is failing rather than showing a bare header and "0 of 0" */}
+                  {/* a ?status=failed link can outlive the failure, so say nothing is failing */}
                   {runs.length === 0 && (
                     <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={6} className="py-10 text-center">

@@ -9,9 +9,7 @@ const TONE: Record<Tone, { text: string; fill: string }> = {
   critical: { text: "text-destructive", fill: "bg-destructive/[0.06]" },
 };
 
-// per primer's Banner guidelines: inside a card, dialog or table a banner is
-// FLUSH - full bleed to the container edge with no border or radius of its own,
-// so it never reads as a second box. `-mx` values must match the parent padding.
+// must stay flush to the container edge or it reads as a second box; -mx matches parent padding
 export function InlineNote({
   tone = "warning",
   flush = false,

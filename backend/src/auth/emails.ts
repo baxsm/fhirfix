@@ -1,4 +1,4 @@
-// plain, product-voice transactional emails. no marketing language.
+// plain transactional emails, no marketing language
 
 type Email = { subject: string; html: string; text: string };
 
