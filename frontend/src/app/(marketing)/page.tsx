@@ -2,6 +2,7 @@ import { ComplianceSection } from "@/components/marketing/compliance-section";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { Hero } from "@/components/marketing/hero";
 import { PipelineSection } from "@/components/marketing/pipeline-section";
+import { ProductShot } from "@/components/marketing/product-shot";
 import { ReportPreview } from "@/components/marketing/report-preview";
 import { ScaleCards } from "@/components/marketing/scale-cards";
 import { StandardsBar } from "@/components/marketing/standards-bar";
@@ -38,6 +39,7 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero />
+      <ProductShot />
       <StandardsBar />
       <PipelineSection />
       <ReportPreview />

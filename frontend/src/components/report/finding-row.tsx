@@ -32,6 +32,7 @@ export function FindingListRow({
   return (
     <button
       type="button"
+      data-finding-row
       onClick={onSelect}
       aria-current={selected ? "true" : undefined}
       className={cn(

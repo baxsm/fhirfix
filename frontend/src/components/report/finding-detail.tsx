@@ -70,7 +70,7 @@ export function FindingDetail({
   const fragment = before && after ? fragmentFor(finding.fhirpath, before, after) : null;
 
   return (
-    <div className="flex flex-col">
+    <div data-finding-detail className="flex flex-col">
       <div className="flex items-start gap-2.5 border-b px-4 py-3">
         <Icon className={cn("mt-0.5 size-4 shrink-0", SEVERITY_COLOR[finding.severity])} />
         <div className="min-w-0 flex-1">
