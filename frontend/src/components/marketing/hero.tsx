@@ -14,7 +14,8 @@ export function Hero() {
 
             <h1 className="hero-in hero-in-1 mt-5 text-balance text-4xl font-semibold leading-[1.22] tracking-tight sm:text-[3.75rem] sm:leading-[1.18]">
               A wall of FHIR conformance errors, turned into a{" "}
-              <span className="box-decoration-clone bg-primary px-2 py-0.5 text-primary-foreground">
+              {/* must not wrap: a split highlight paints two disconnected blocks */}
+              <span className="whitespace-nowrap bg-primary px-2 py-0.5 text-primary-foreground">
                 ranked, fixable
               </span>{" "}
               report.
