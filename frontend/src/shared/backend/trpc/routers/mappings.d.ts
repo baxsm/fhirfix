@@ -12,8 +12,8 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -34,19 +34,19 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     list: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
-            status?: "active" | "deprecated" | "rejected" | "suggested" | undefined;
-            type?: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org" | undefined;
+            status?: "suggested" | "active" | "deprecated" | "rejected" | undefined;
+            type?: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org" | undefined;
             search?: string | undefined;
         };
         output: {
             id: string;
-            scope: "source_system" | "workspace";
+            scope: "workspace" | "source_system";
             sourceSystem: string | null;
-            type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+            type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
             sourceValue: string;
             targetValue: string;
             targetSystem: string | null;
-            status: "active" | "deprecated" | "rejected" | "suggested";
+            status: "suggested" | "active" | "deprecated" | "rejected";
             confidence: number | null;
             version: number;
             supersedesId: string | null;
@@ -86,7 +86,7 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
             version: number;
             targetValue: string;
             targetSystem: string | null;
-            status: "active" | "deprecated" | "rejected" | "suggested";
+            status: "suggested" | "active" | "deprecated" | "rejected";
             supersedesId: string | null;
             supersededById: string | null;
             createdBy: string;
@@ -98,12 +98,12 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             workspaceId: string;
-            scope?: "source_system" | "workspace" | undefined;
-            sourceSystem?: string | null | undefined;
-            type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+            type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
             sourceValue: string;
             targetValue: string;
             targetSystem?: string | null | undefined;
+            scope?: "workspace" | "source_system" | undefined;
+            sourceSystem?: string | null | undefined;
         };
         output: {
             id: string;
@@ -166,15 +166,15 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
     exportRows: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             workspaceId: string;
-            status?: "active" | "deprecated" | "rejected" | "suggested" | undefined;
-            type?: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org" | undefined;
+            status?: "suggested" | "active" | "deprecated" | "rejected" | undefined;
+            type?: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org" | undefined;
         };
         output: {
-            type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+            type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
             sourceValue: string;
             targetValue: string;
             targetSystem: string | null;
-            scope: "source_system" | "workspace";
+            scope: "workspace" | "source_system";
             sourceSystem: string | null;
         }[];
         meta: object;
@@ -183,12 +183,12 @@ export declare const mappingsRouter: import("@trpc/server").TRPCBuiltRouter<{
         input: {
             workspaceId: string;
             rows: {
-                scope?: "source_system" | "workspace" | undefined;
-                sourceSystem?: string | null | undefined;
-                type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
                 sourceValue: string;
                 targetValue: string;
                 targetSystem?: string | null | undefined;
+                scope?: "workspace" | "source_system" | undefined;
+                sourceSystem?: string | null | undefined;
             }[];
         };
         output: {

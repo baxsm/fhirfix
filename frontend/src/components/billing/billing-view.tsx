@@ -2,7 +2,6 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Plus, TrendingDown, Wallet, Zap } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PageContainer } from "@/components/dashboard/page-container";
@@ -27,9 +26,11 @@ const USAGE_DAYS = 30;
 export function BillingView({
   workspace,
   workspaceId: serverWorkspaceId,
+  returnedFromCheckout = false,
 }: {
   workspace: string;
   workspaceId?: string;
+  returnedFromCheckout?: boolean;
 }) {
   const { data: orgs } = useListOrganizations();
   const active = orgs?.find((o) => o.slug === workspace || o.id === workspace);
@@ -54,17 +55,17 @@ export function BillingView({
     window.setTimeout(() => summary.refetch(), 2000);
   }, [summary]);
 
-  // a wallet payment leaves the iframe and returns by redirect, not embedded
-  const params = useSearchParams();
+  // read on the server and passed down: useSearchParams suspends during ssr, which
+  // renders the skeleton on the server and the real panel on the client
   const toasted = useRef(false);
   useEffect(() => {
-    if (params.get("success") === "1" && !toasted.current) {
+    if (returnedFromCheckout && !toasted.current) {
       toasted.current = true;
       confirmPurchase();
       // drop the query param so a refresh does not re-toast.
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [params, confirmPurchase]);
+  }, [returnedFromCheckout, confirmPurchase]);
 
   return (
     <PageContainer>

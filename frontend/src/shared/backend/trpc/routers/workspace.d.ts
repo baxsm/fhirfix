@@ -12,8 +12,8 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             userId: string;
             expiresAt: Date;
             token: string;
-            ipAddress?: string | null | undefined;
-            userAgent?: string | null | undefined;
+            ipAddress?: string | null | undefined | undefined;
+            userAgent?: string | null | undefined | undefined;
             activeOrganizationId?: string | null | undefined;
         } | null;
         user: {
@@ -23,7 +23,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             email: string;
             emailVerified: boolean;
             name: string;
-            image?: string | null | undefined;
+            image?: string | null | undefined | undefined;
             notificationPrefs?: string | null | undefined;
         } | null;
     };
@@ -38,7 +38,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             slug: string;
             createdAt: Date;
-            logo?: string | null | undefined;
+            logo?: string | null | undefined | undefined;
             metadata?: any;
         }[];
         meta: object;
@@ -53,7 +53,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             name: string;
             slug: string;
             createdAt: Date;
-            logo?: string | null | undefined;
+            logo?: string | null | undefined | undefined;
             metadata?: any;
         } & {
             metadata: any;
@@ -76,7 +76,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 members: {
                     id: string;
                     organizationId: string;
-                    role: "admin" | "auditor" | "billing" | "member" | "owner";
+                    role: "member" | "billing" | "owner" | "admin" | "auditor";
                     createdAt: Date;
                     userId: string;
                     user: {
@@ -90,7 +90,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                     id: string;
                     organizationId: string;
                     email: string;
-                    role: "admin" | "auditor" | "billing" | "member" | "owner";
+                    role: "member" | "billing" | "owner" | "admin" | "auditor";
                     status: import("better-auth/plugins").InvitationStatus;
                     inviterId: string;
                     expiresAt: Date;
@@ -101,7 +101,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 name: string;
                 slug: string;
                 createdAt: Date;
-                logo?: string | null | undefined;
+                logo?: string | null | undefined | undefined;
                 metadata?: any;
             }) | null;
             settings: {
@@ -112,11 +112,11 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 redactionPolicy: "off" | "on_ingest" | "required";
                 dataRetentionDays: number;
                 baaStatus: "none" | "requested" | "signed";
-                planTier: "free" | "premium" | "team";
+                planTier: "free" | "team" | "premium";
                 createdAt: Date;
                 updatedAt: Date;
             } | null;
-            role: "admin" | "auditor" | "billing" | "member" | "owner";
+            role: "member" | "billing" | "owner" | "admin" | "auditor";
         };
         meta: object;
     }>;
@@ -136,7 +136,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             redactionPolicy: "off" | "on_ingest" | "required";
             dataRetentionDays: number;
             baaStatus: "none" | "requested" | "signed";
-            planTier: "free" | "premium" | "team";
+            planTier: "free" | "team" | "premium";
             createdAt: Date;
             updatedAt: Date;
         };
@@ -157,24 +157,24 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 redactionPolicy: "off" | "on_ingest" | "required";
                 dataRetentionDays: number;
                 baaStatus: "none" | "requested" | "signed";
-                planTier: "free" | "premium" | "team";
+                planTier: "free" | "team" | "premium";
                 createdAt: Date;
                 updatedAt: Date;
             } | null;
             runs: {
                 id: string;
                 workspaceId: string;
-                actorType: "api_key" | "scheduled" | "system" | "user";
+                actorType: "user" | "api_key" | "scheduled" | "system";
                 actorId: string | null;
-                source: "api" | "ci" | "scheduled" | "ui";
-                inputType: "bundle" | "fhir_json" | "fhir_xml" | "hl7v2" | "ndjson" | "zip";
+                source: "scheduled" | "ui" | "api" | "ci";
+                inputType: "hl7v2" | "fhir_json" | "fhir_xml" | "ndjson" | "bundle" | "zip";
                 fhirVersion: "R4" | "R4B" | "R5" | null;
                 profilesRequested: string[];
                 profilesApplied: string[];
                 terminologyServer: string | null;
                 engineVersion: string;
                 igVersions: Record<string, string>;
-                status: "completed" | "failed" | "queued" | "running";
+                status: "queued" | "running" | "completed" | "failed";
                 resourceCount: number;
                 conformanceScoreBefore: number | null;
                 conformanceScoreAfter: number | null;
@@ -196,8 +196,8 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 id: string;
                 runId: string;
                 workspaceId: string;
-                severity: "error" | "info" | "warning";
-                category: "cardinality" | "invariant" | "must_support" | "profile" | "reference" | "structural" | "terminology";
+                severity: "error" | "warning" | "info";
+                category: "structural" | "profile" | "terminology" | "cardinality" | "invariant" | "reference" | "must_support";
                 ruleSource: string;
                 specCitation: string;
                 resourceType: string | null;
@@ -205,8 +205,8 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 rawValidatorMessage: string;
                 plainMessage: string;
                 suggestedFix: string;
-                fixConfidence: "auto" | "manual" | "one_click";
-                fixStatus: "applied" | "dismissed" | "manual_needed" | "skipped" | "suggested";
+                fixConfidence: "auto" | "one_click" | "manual";
+                fixStatus: "applied" | "suggested" | "skipped" | "manual_needed" | "dismissed";
                 dismissedBy: string | null;
                 dedupFingerprint: string;
                 occurrenceCount: number;
@@ -216,13 +216,13 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             mappings: {
                 id: string;
                 workspaceId: string;
-                scope: "source_system" | "workspace";
+                scope: "workspace" | "source_system";
                 sourceSystem: string | null;
-                type: "authority_to_system" | "code_to_code" | "custom" | "facility_to_org";
+                type: "custom" | "authority_to_system" | "code_to_code" | "facility_to_org";
                 sourceValue: string;
                 targetValue: string;
                 targetSystem: string | null;
-                status: "active" | "deprecated" | "rejected" | "suggested";
+                status: "suggested" | "active" | "deprecated" | "rejected";
                 confidence: number | null;
                 version: number;
                 supersedesId: string | null;
@@ -234,7 +234,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             ledger: {
                 id: string;
                 workspaceId: string;
-                type: "adjustment" | "debit" | "expiry" | "grant" | "purchase" | "refund";
+                type: "purchase" | "debit" | "grant" | "refund" | "expiry" | "adjustment";
                 amountMicroCredits: number;
                 balanceAfter: number;
                 relatedRunId: string | null;
@@ -256,9 +256,9 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             audit: {
                 id: string;
                 workspaceId: string;
-                actorType: "api_key" | "system" | "user";
+                actorType: "user" | "api_key" | "system";
                 actorId: string | null;
-                action: "baa.requested" | "billing.auto_recharge_changed" | "billing.checkout_started" | "billing.spend_cap_changed" | "check.changed" | "check.created" | "check.deleted" | "data.exported" | "key.created" | "key.revoked" | "login" | "mapping.approved" | "mapping.changed" | "mapping.deprecated" | "mapping.imported" | "member.invited" | "member.removed" | "member.role_changed" | "packet.exported" | "packet.launched" | "report.downloaded" | "report.exported" | "run.cancelled" | "run.created" | "scim.disabled" | "scim.enabled" | "settings.changed" | "sso.configured" | "sso.removed" | "webhook.created" | "webhook.deleted" | "webhook.secret_rotated" | "workspace.deleted";
+                action: "login" | "run.created" | "run.cancelled" | "report.downloaded" | "report.exported" | "mapping.changed" | "mapping.approved" | "mapping.deprecated" | "mapping.imported" | "key.created" | "key.revoked" | "webhook.created" | "webhook.secret_rotated" | "webhook.deleted" | "member.invited" | "member.role_changed" | "member.removed" | "settings.changed" | "billing.checkout_started" | "billing.auto_recharge_changed" | "billing.spend_cap_changed" | "check.created" | "check.changed" | "check.deleted" | "packet.launched" | "packet.exported" | "data.exported" | "baa.requested" | "sso.configured" | "sso.removed" | "scim.enabled" | "scim.disabled" | "workspace.deleted";
                 targetRef: string | null;
                 ip: string | null;
                 metadata: Record<string, unknown> | null;
@@ -297,14 +297,14 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
                 infernoVersion: string;
                 targetEndpoint: string;
                 authConfigRef: string | null;
-                status: "cancelled" | "completed" | "failed" | "queued" | "running";
+                status: "queued" | "running" | "completed" | "failed" | "cancelled";
                 resultsMatrix: schema.StoredMatrixCell[] | null;
                 progress: Record<string, {
                     total: number;
                     completed: number;
                     status: string;
                 }>;
-                overallResult: "fail" | "partial" | "pass" | null;
+                overallResult: "pass" | "fail" | "partial" | null;
                 passCount: number | null;
                 failCount: number | null;
                 previousRunId: string | null;
@@ -315,7 +315,7 @@ export declare const workspaceRouter: import("@trpc/server").TRPCBuiltRouter<{
             }[];
             artifacts: {
                 key: string;
-                kind: "corrected" | "evidence" | "export" | "input" | "signed_pdf";
+                kind: "input" | "corrected" | "evidence" | "signed_pdf" | "export";
                 sizeBytes: number;
                 sha256: string;
                 containsPhi: boolean;

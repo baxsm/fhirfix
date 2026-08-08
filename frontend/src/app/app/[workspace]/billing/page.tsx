@@ -1,6 +1,4 @@
-import { Suspense } from "react";
 import { BillingView } from "@/components/billing/billing-view";
-import { Skeleton } from "@/components/ui/skeleton";
 import { resolveWorkspace } from "@/trpc/resolve-workspace";
 import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 
@@ -8,8 +6,15 @@ import { HydrateClient, prefetch, trpcServer } from "@/trpc/server";
 const LEDGER_PAGE_SIZE = 12;
 const USAGE_DAYS = 30;
 
-export default async function BillingPage({ params }: { params: Promise<{ workspace: string }> }) {
+export default async function BillingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ workspace: string }>;
+  searchParams: Promise<{ success?: string }>;
+}) {
   const { workspace } = await params;
+  const { success } = await searchParams;
   const workspaceId = await resolveWorkspace(workspace);
 
   if (workspaceId) {
@@ -28,10 +33,11 @@ export default async function BillingPage({ params }: { params: Promise<{ worksp
 
   return (
     <HydrateClient>
-      {/* BillingView reads ?success=1 with useSearchParams, which needs a boundary */}
-      <Suspense fallback={<Skeleton className="mx-auto h-64 max-w-5xl rounded-xl" />}>
-        <BillingView workspace={workspace} workspaceId={workspaceId} />
-      </Suspense>
+      <BillingView
+        workspace={workspace}
+        workspaceId={workspaceId}
+        returnedFromCheckout={success === "1"}
+      />
     </HydrateClient>
   );
 }
