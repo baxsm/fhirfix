@@ -74,10 +74,11 @@ export function MarketingFooter() {
       <div
         aria-hidden
         className="pointer-events-none relative select-none overflow-hidden px-5 sm:px-8"
-        style={{ height: "clamp(3.6rem, 13vw, 11rem)" }}
+        style={{ height: "clamp(3rem, 10vw, 8.5rem)" }}
       >
         <div className="mx-auto w-full max-w-6xl">
-          <span className="block text-center font-mono font-semibold leading-none tracking-tighter text-foreground/[0.11] [font-size:clamp(5rem,21vw,18rem)]">
+          {/* the cut must clear the baseline or the letterforms read as broken */}
+          <span className="block text-center font-mono font-semibold leading-[0.78] tracking-tighter text-foreground/[0.07] [font-size:clamp(4rem,17vw,14rem)]">
             FHIRfix
           </span>
         </div>
