@@ -6,8 +6,7 @@ import { ipFromHeaders, writeAudit } from "@/lib/audit";
 import { schema } from "@/lib/db";
 import { enforceRole, router } from "../trpc";
 
-// read-only by design. the table is append-only, so there is no update or delete
-// procedure here and there must never be one.
+// the table is append-only: there must never be an update or delete procedure here
 const auditView = enforceRole("audit", "view");
 
 const listInput = z.object({
@@ -44,8 +43,7 @@ const columns = {
   createdAt: schema.auditLogEntry.createdAt,
 };
 
-// an actor id is opaque to the person reading the log, so resolve user actors to
-// a name/email. api-key actors resolve to the key name.
+// an actor id is opaque to a reader, so resolve users to a name and keys to a key name
 async function withActorNames<T extends { actorType: string; actorId: string | null }>(
   db: Db,
   rows: T[],
@@ -95,8 +93,7 @@ export const auditRouter = router({
     return { entries: await withActorNames(ctx.db, page), nextCursor, hasMore };
   }),
 
-  // the distinct actions actually present, so the filter offers only real options
-  // instead of all 29 enum members on a workspace that has used five of them.
+  // only actions actually present, so the filter does not offer all 29 enum members
   actions: auditView.query(async ({ ctx }) => {
     const rows = await ctx.db
       .selectDistinct({ action: schema.auditLogEntry.action })

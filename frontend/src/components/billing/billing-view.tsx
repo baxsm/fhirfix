@@ -47,17 +47,14 @@ export function BillingView({
   const role = (wsQuery.data?.role ?? "member") as WorkspaceRole;
   const canManage = can(role, "billing", "manage");
 
-  // the ledger is credited by the order.paid webhook, which can land a moment
-  // after the checkout reports success. refetch once now and once shortly after,
-  // so the balance settles without the user reloading.
+  // order.paid can land after checkout reports success, so refetch twice
   const confirmPurchase = useCallback(() => {
     toast.success("Credits added to your workspace.");
     summary.refetch();
     window.setTimeout(() => summary.refetch(), 2000);
   }, [summary]);
 
-  // the embedded checkout stays on this page, but a redirect-based return (an
-  // older tab, or a wallet payment that leaves the iframe) still lands here.
+  // a wallet payment leaves the iframe and returns by redirect, not embedded
   const params = useSearchParams();
   const toasted = useRef(false);
   useEffect(() => {
@@ -289,8 +286,7 @@ function HeroTile({
   );
 }
 
-// invoices and the ledger answer the same question - where did the money go -
-// so they share one panel instead of stacking two identical ones
+// invoices and the ledger answer the same question, so they share one panel
 function HistorySection({ workspaceId }: { workspaceId: string }) {
   const [tab, setTab] = useState<"invoices" | "ledger">("invoices");
 

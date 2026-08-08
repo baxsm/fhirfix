@@ -2,9 +2,7 @@ import { z } from "zod";
 import { auth } from "@/auth/auth";
 import { protectedProcedure, router } from "../trpc";
 
-// only flags that something actually reads belong here. run-completion and
-// drift notifications are delivered to per-check channels, not to a user
-// account, so a per-user toggle for them would control nothing.
+// only flags something actually reads: per-check notifications have no user-level toggle
 const notificationPrefsSchema = z.object({
   lowBalance: z.boolean().default(true),
 });
@@ -18,8 +16,7 @@ const defaultPrefs: NotificationPrefs = {
 function parsePrefs(raw: unknown): NotificationPrefs {
   if (typeof raw !== "string" || raw.length === 0) return defaultPrefs;
   try {
-    // blobs written before the schema narrowed carry extra keys. zod strips
-    // them, but a hard parse on malformed json still falls back to defaults.
+    // malformed json falls back to defaults rather than throwing
     return notificationPrefsSchema.parse(JSON.parse(raw));
   } catch {
     return defaultPrefs;

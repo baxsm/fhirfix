@@ -1,5 +1,4 @@
-// an audit row is read by a person answering an auditor, so the action reads as
-// words. the raw slug stays available in the expanded detail.
+// read by a person answering an auditor, so actions read as words
 export const ACTION_LABELS: Record<string, string> = {
   login: "Signed in",
   "run.created": "Ran a check",
@@ -44,8 +43,7 @@ type ActorFields = {
 
 export function actorLabel(row: ActorFields): string {
   if (row.actorType === "system") return "System";
-  // the resolved name is the point of the column. an opaque id tells a reader
-  // nothing, so fall back to it only when the actor no longer exists.
+  // fall back to the opaque id only when the actor no longer exists
   if (row.actorName) {
     return row.actorType === "api_key" ? `${row.actorName} (API key)` : row.actorName;
   }

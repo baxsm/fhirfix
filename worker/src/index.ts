@@ -22,8 +22,7 @@ import { executeWebhook } from "./webhook-service";
 const connection = { url: env.REDIS_URL };
 const concurrency = Number(env.WORKER_CONCURRENCY);
 
-// runs complete here, so this is the process that hits the low-balance threshold
-// and the auto-recharge trigger.
+// runs complete here, so this process hits the low-balance and auto-recharge triggers
 setLowBalanceSender(sendLowBalanceEmail);
 setLowBalanceWebhook(({ workspaceId, threshold, balanceMicro }) =>
   dispatchWebhook({
@@ -69,8 +68,7 @@ const webhookWorker = new Worker<WebhookJob>(
   { connection, concurrency },
 );
 
-// one at a time: a packet run holds an inferno session for minutes, and inferno
-// rejects a second concurrent run on the same session with a 409
+// must stay serial: inferno 409s a second concurrent run on the same session
 const conformanceWorker = new Worker<ConformanceJob>(
   "conformance",
   async (job) => {
@@ -79,8 +77,7 @@ const conformanceWorker = new Worker<ConformanceJob>(
   { connection, concurrency: 1 },
 );
 
-// one at a time: the sweep is a bulk delete, and two of them racing would just
-// contend on the same rows.
+// must stay serial: two bulk deletes would contend on the same rows
 const retentionWorker = new Worker(
   "retention",
   async () => {

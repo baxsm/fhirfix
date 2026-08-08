@@ -1,10 +1,4 @@
-// Google's current brand mark, taken verbatim from svgl.app/library/google.svg
-// on 2026-07-31. svgl states plainly: "Modifications are not permitted."
-//
-// Do NOT redraw, simplify, flatten or re-tint this. An earlier version of this
-// file carried a hand-written approximation of the older flat "G", which was
-// both invented geometry AND a superseded logo. Gradient ids are prefixed
-// "gg-" so this cannot collide with other inline svgs on the page.
+// verbatim from svgl.app/library/google.svg on 2026-07-31; must not be redrawn or re-tinted
 
 export function GoogleMark({ className }: { className?: string }) {
   return (

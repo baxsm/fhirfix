@@ -50,25 +50,21 @@ function writtenActions(): Set<string> {
 }
 
 describe("audit coverage", () => {
-  // an action in the enum with no writer is a filter in the audit UI that can
-  // never match. report.downloaded, report.exported and packet.exported all
-  // shipped this way: labelled in the dropdown, never once recorded.
+  // an action with no writer is an audit filter that can never match
   test("every declared action has a writer", () => {
     const written = writtenActions();
     const orphans = AUDIT_ACTIONS.filter((a) => !written.has(a));
     expect(orphans).toEqual([]);
   });
 
-  // the reverse: a writer using a string not in the enum would insert a row the
-  // UI cannot label, and the $type cast means TS would not catch a stale slug.
+  // the $type cast hides a stale slug from tsc, so a writer off-enum needs catching here
   test("no writer invents an action outside the enum", () => {
     const declared = new Set<string>(AUDIT_ACTIONS);
     const suspects: string[] = [];
 
     for (const file of [...tsFiles(BACKEND_SRC), ...tsFiles(WORKER_SRC)]) {
       const src = readFileSync(file, "utf8");
-      // only look at action strings that sit inside a writeAudit call, so an
-      // unrelated `action: "create"` elsewhere is not a false positive
+      // must scope to writeAudit calls or an unrelated `action:` is a false positive
       for (const call of src.matchAll(/writeAudit\(\s*\{[\s\S]{0,400}?\}/g)) {
         const action = call[0].match(/action:\s*"([a-z._]+)"/)?.[1];
         if (action && !declared.has(action)) {
@@ -80,9 +76,7 @@ describe("audit coverage", () => {
     expect(suspects).toEqual([]);
   });
 
-  // a run created through the api went unaudited for a whole phase while the
-  // identical run from the dashboard wrote a row. an auditor asking "who touched
-  // this data" must get the same answer regardless of which door was used.
+  // the api and the dashboard must audit identically, or the answer depends on the door
   test("every sensitive api-v1 controller writes an audit row", () => {
     const required = [
       // validate/fix/convert all funnel through this one shared helper
@@ -112,8 +106,7 @@ describe("audit coverage", () => {
     expect(missing).toEqual([]);
   });
 
-  // the audit page renders ACTION_LABELS[action]. a missing entry renders the
-  // raw slug to whoever is answering an auditor.
+  // a missing label renders the raw slug to whoever is answering an auditor
   test("every declared action has a human label", () => {
     const labels = readFileSync(AUDIT_LABELS, "utf8");
     // a dotless slug is a valid identifier, so it is written as a bare key

@@ -4,10 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    // where the server renderer reaches the backend. in a container deployment
-    // the public url resolves to the frontend itself, so server-side fetches
-    // need the internal service name. defaults to the public url, which is
-    // correct everywhere the two are the same host.
+    // the internal service name: in a container the public url resolves to the frontend
     INTERNAL_API_URL: z.url().optional(),
   },
   client: {
@@ -15,8 +12,7 @@ export const env = createEnv({
     NEXT_PUBLIC_API_URL: z.url(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
     NEXT_PUBLIC_SITE_URL: z.url().optional(),
-    // mirrors the backend's GOOGLE_ENABLED. a TEST_ placeholder counts as unset,
-    // so the button is absent rather than present and broken.
+    // a TEST_ placeholder counts as unset, so the button is absent rather than broken
     NEXT_PUBLIC_GOOGLE_ENABLED: z
       .string()
       .default("false")
@@ -34,8 +30,7 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 });
 
-// the backend base url for calls made ON THE SERVER. never use this in code
-// that also runs in the browser: the internal host is not resolvable there.
+// server-only: the internal host is not resolvable from the browser
 export function serverApiUrl(): string {
   return process.env.INTERNAL_API_URL || env.NEXT_PUBLIC_API_URL;
 }

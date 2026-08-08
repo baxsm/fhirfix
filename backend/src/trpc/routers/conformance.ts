@@ -34,8 +34,7 @@ const authConfig = z
     },
   );
 
-// the most recent completed packet against this endpoint, for regression diffing.
-// endpoints are stored redacted, so compare the redacted form.
+// endpoints are stored redacted, so the comparison must use the redacted form
 async function lastPacketFor(
   db: Db,
   workspaceId: string,
@@ -195,9 +194,7 @@ export const conformanceRouter = router({
         authConfigRef = secretId;
       }
 
-      // regression tracking only means something against the SAME endpoint, so
-      // link to the last completed packet for it automatically. nothing in the
-      // ui ever sent previousRunId, which left the whole diff permanently empty.
+      // linked server-side: the ui never sends previousRunId, which leaves the diff empty
       const previousRunId =
         input.previousRunId ?? (await lastPacketFor(ctx.db, ctx.workspaceId, input.targetEndpoint));
 
@@ -251,8 +248,7 @@ export const conformanceRouter = router({
 
       const content = await blobStore.get(evidence.bundleRef);
 
-      // an evidence bundle is what a payer hands to a regulator, so who took a
-      // copy is part of the record.
+      // a payer hands this to a regulator, so who took a copy is part of the record
       await writeAudit({
         workspaceId: ctx.workspaceId,
         action: "packet.exported",

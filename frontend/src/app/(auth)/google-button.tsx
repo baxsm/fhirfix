@@ -17,14 +17,11 @@ export function GoogleButton({ next }: { next?: string | null }) {
       disabled={pending}
       onClick={async () => {
         setPending(true);
-        // read on click, not during render: window does not exist during SSR.
-        // the callback lands on the backend, which then sends the browser here,
-        // so a relative path would resolve against the backend origin.
+        // must be absolute and read on click: the callback resolves against the backend origin
         const origin = window.location.origin;
         const callbackURL = next?.startsWith("/app") ? `${origin}${next}` : `${origin}/app`;
         const { error } = await signIn.social({ provider: "google", callbackURL });
-        // on success the browser is already navigating away, so only a failure
-        // returns here and needs the button back.
+        // only a failure returns here; success is already navigating away
         if (error) {
           setPending(false);
           toast.error(error.message ?? "Could not sign in with Google.");

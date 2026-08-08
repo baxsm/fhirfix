@@ -69,16 +69,14 @@ describe("no card in card", () => {
 });
 
 describe("shared primitives are not re-implemented", () => {
-  // four views each hand-rolled this identical block, so fixing one never fixed
-  // the rest. ui/load-error.tsx is the one definition.
+  // ui/load-error.tsx is the one definition; hand-rolled copies drift apart
   it("no view hand-rolls the centred failed-to-load panel", () => {
     const offenders: string[] = [];
 
     for (const file of dashboardFiles()) {
       if (rel(file) === "components/ui/load-error.tsx") continue;
       const src = readFileSync(file, "utf8");
-      // match per JSX block, not per file: one file can hold a legitimate empty
-      // state AND a "Could not load" EmptyState without either being an offender
+      // must match per JSX block: one file can hold an empty state and a load error
       for (const block of src.split(/\n(?=(?:export )?function )/)) {
         if (!/Could not load/.test(block)) continue;
         const panel = /rounded-(md|lg|xl) border[^"]*bg-card[^"]*text-center/.test(block);
@@ -93,8 +91,7 @@ describe("shared primitives are not re-implemented", () => {
     expect(offenders).toEqual([]);
   });
 
-  // billing and settings shipped text-xl while every sibling page used text-lg,
-  // so same-level pages had different heading sizes. PageHeader is the size.
+  // PageHeader owns the heading size so same-level pages cannot diverge
   it("a page heading is not larger than PageHeader's", () => {
     const offenders: string[] = [];
     const exempt = [
@@ -121,8 +118,7 @@ describe("shared primitives are not re-implemented", () => {
   });
 
   it("a finding is not wrapped in a fixed-height scroller", () => {
-    // a cap on the wrapper forces an inner scroller per finding, which steals the
-    // page scroll. one report shipped with 39 nested scroll regions this way.
+    // a cap on the wrapper forces an inner scroller per finding, stealing the page scroll
     const offenders: string[] = [];
 
     for (const file of dashboardFiles()) {

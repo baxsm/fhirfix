@@ -185,8 +185,7 @@ export function SettingsView({
   );
 }
 
-// sits outside the defaults form on purpose: it is a request to a person, not a
-// setting you save, and nesting it would submit the form.
+// must sit outside the defaults form or triggering it submits the form
 function BaaRow({
   workspaceId,
   canRequest,
@@ -265,9 +264,7 @@ function DataSection({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [typed, setTyped] = useState("");
 
-  // fetched on demand through the client rather than a disabled useQuery:
-  // refetch() on a disabled query is a no-op in react-query v5, so the button
-  // would silently do nothing.
+  // refetch() on a disabled query is a no-op in react-query v5, so fetch on demand
   const queryClient = useQueryClient();
   const [exporting, setExporting] = useState(false);
 

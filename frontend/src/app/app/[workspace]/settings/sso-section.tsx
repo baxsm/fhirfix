@@ -14,8 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { env } from "@/lib/env";
 import { useTRPC } from "@/trpc/client";
 
-// the two values an admin pastes into their IdP. derived from the api url so a
-// deployed workspace shows its own host, never a hardcoded localhost.
+// derived from the api url so a deployed workspace never shows a hardcoded localhost
 function spUrls(providerId: string) {
   const base = `${env.NEXT_PUBLIC_API_URL}/api/auth/sso`;
   return {
@@ -52,8 +51,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-// SCIM directory sync. the token is hashed at rest, so it is shown exactly once
-// and never retrievable afterwards - the same contract as an api key.
+// the token is hashed at rest, so it is shown once and never retrievable after
 function ScimBlock({ workspaceId, isOwner }: { workspaceId: string; isOwner: boolean }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -161,8 +159,7 @@ export function SsoSection({ workspaceId, isOwner }: { workspaceId: string; isOw
   });
 
   const plan = summaryQuery.data?.plan;
-  // an unread plan counts as premium so the gate never flashes over a paying
-  // workspace while billing is still loading. same rule as the packets screen.
+  // an unread plan counts as premium so the gate never flashes over a paying workspace
   const isPremium = plan == null || plan.tier === "premium";
 
   const [manual, setManual] = useState(false);
@@ -206,8 +203,7 @@ export function SsoSection({ workspaceId, isOwner }: { workspaceId: string; isOw
 
   if (ssoQuery.isPending) return <Skeleton className="h-40 w-full" />;
 
-  // the deployment has SSO switched off entirely. saying so is more honest than
-  // rendering a form whose save can only fail.
+  // more honest than rendering a form whose save can only fail
   if (ssoQuery.data?.enabled === false) {
     return (
       <SettingRow

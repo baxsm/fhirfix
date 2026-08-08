@@ -21,9 +21,7 @@ function rel(file: string): string {
   return file.slice(SRC.length + 1).replace(/\\/g, "/");
 }
 
-// third-party marks whose geometry belongs to someone else. our own line art is
-// not on this list: drawing a chart line or a document outline is design work,
-// redrawing another company's logo from memory is a brand violation.
+// third-party marks only; our own line art is design work and stays off this list
 const BRANDS = [
   "google",
   "github",
@@ -39,8 +37,7 @@ const BRANDS = [
 ];
 
 describe("brand assets are sourced, never redrawn", () => {
-  // this test exists because a google "G" was once hand-written from memory and
-  // shipped. the four brand hexes were right and the path geometry was invented.
+  // a hand-written mark can carry the right brand hexes and invented geometry
   it("a file drawing a third-party mark cites where the asset came from", () => {
     const offenders: string[] = [];
 
@@ -52,10 +49,7 @@ describe("brand assets are sourced, never redrawn", () => {
       const brand = BRANDS.find((b) => name.includes(b));
       if (!brand) continue;
 
-      // a citation is a domain on a line that STARTS as a comment. matching a
-      // bare "//" anywhere is useless: every svg carries xmlns="http://www.w3.org
-      // /2000/svg", which made an earlier version of this check pass for any file.
-      // the protocol is optional, because formatters reflow "https://" off the line.
+      // must anchor to a comment-leading domain: every svg carries an xmlns url
       const cited = src
         .split("\n")
         .some((line) => /^\s*(\/\/|\*)/.test(line) && /\b[a-z0-9-]+\.[a-z]{2,}\/\S+/.test(line));
@@ -70,10 +64,7 @@ describe("brand assets are sourced, never redrawn", () => {
     expect(offenders).toEqual([]);
   });
 
-  // the specific asset that caused the rule. it was shipped twice wrong: first
-  // as invented path geometry, then as a real-but-superseded flat logo. the
-  // current mark is gradient-based, so a file of flat brand hexes means someone
-  // has "simplified" it back to a stale approximation.
+  // the current mark is gradient-based, so flat brand hexes mean a stale approximation
   it("the google mark is svgl's current asset, not a flattened redraw", () => {
     const src = readFileSync(join(SRC, "app", "(auth)", "google-mark.tsx"), "utf8");
     expect(src).toContain('viewBox="0 0 268.152 273.883"');

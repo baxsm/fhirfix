@@ -10,9 +10,7 @@ export function ipFromHeaders(headers: Headers): string | null {
   return fwd?.split(",")[0]?.trim() || null;
 }
 
-// a login is not scoped to one workspace, so it is recorded against every
-// workspace the user belongs to. an auditor reviewing one workspace still needs
-// to see that this person signed in.
+// a login is unscoped, so it is recorded against every workspace the user belongs to
 export async function recordLogin(args: { userId: string; ip: string | null }): Promise<void> {
   try {
     const memberships = await db
@@ -44,12 +42,10 @@ type AuditInput = {
   metadata?: Record<string, unknown>;
 };
 
-// a drizzle transaction handle exposes the same insert surface as the db, but is
-// a distinct type. picking insert off the db keeps both assignable.
+// picking insert off the db keeps a transaction handle assignable too
 type AuditWriter = Pick<typeof db, "insert">;
 
-// append-only write. never throws into the caller: losing an audit row must not
-// fail the action the user asked for, but it must be visible in the logs.
+// must never throw into the caller: a lost audit row cannot fail the user's action
 export async function writeAudit(entry: AuditInput, tx?: AuditWriter): Promise<void> {
   try {
     await (tx ?? db).insert(schema.auditLogEntry).values({
