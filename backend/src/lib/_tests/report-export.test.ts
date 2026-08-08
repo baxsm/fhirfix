@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { type ReportBundle, toJsonReport, toOperationOutcome, toPdfReport } from "../report-export";
 
-// biome-ignore lint/suspicious/noExplicitAny: test fixtures are shaped loosely
 const bundle: ReportBundle = {
   run: {
     id: "run_test",

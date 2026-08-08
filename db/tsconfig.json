@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext"],
-    "types": [],
+    "types": ["bun"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "allowImportingTsExtensions": true,

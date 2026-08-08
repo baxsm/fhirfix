@@ -1,0 +1,20 @@
+# text files are LF in the repo. without this, a windows checkout with
+# core.autocrlf=true stores CRLF and biome reports every file as a format error.
+* text=auto eol=lf
+
+# binaries must never be line-ending converted
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+
+# lockfiles are generated, keep them out of diffs and language stats
+bun.lock linguist-generated=true
+package-lock.json linguist-generated=true
