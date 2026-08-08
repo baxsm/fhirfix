@@ -3,6 +3,7 @@
 import { FileScan } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-client";
 import type { WorkspaceRole } from "@/lib/permissions";
@@ -36,7 +37,9 @@ export function Topbar({ workspace, workspaceName, role, user }: Props) {
         {trail.map((crumb, i) => {
           const isLast = i === trail.length - 1;
           return (
-            <span key={`${crumb.label}-${i}`} className="flex min-w-0 items-center gap-1.5">
+            // fragment, not a wrapper: a wrapper puts the separator on its own flex
+            // line where the nav's gap cannot reach it, and the crumbs collide
+            <Fragment key={`${crumb.label}-${i}`}>
               {i > 0 && <span className="shrink-0 text-muted-foreground/40">/</span>}
               {crumb.href && !isLast ? (
                 <Link
@@ -57,7 +60,7 @@ export function Topbar({ workspace, workspaceName, role, user }: Props) {
                   {crumb.label}
                 </span>
               )}
-            </span>
+            </Fragment>
           );
         })}
       </nav>
