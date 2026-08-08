@@ -101,3 +101,55 @@ describe("normalizeOutcome cardinality paths", () => {
     expect(normalizeOutcome(oo)[0]?.fhirpath).toBe("Patient");
   });
 });
+
+describe("normalizeOutcome rule vs spec", () => {
+  const issueWith = (extension: { url: string; valueCode?: string; valueString?: string }[]) => ({
+    resourceType: "OperationOutcome" as const,
+    issue: [
+      {
+        severity: "error" as const,
+        code: "structure",
+        details: { text: "Organization.active: minimum required = 1, but only found 0" },
+        expression: ["Organization"],
+        extension,
+      },
+    ],
+  });
+
+  it("reports the rule id and the source engine separately", () => {
+    const finding = normalizeOutcome(
+      issueWith([
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id",
+          valueCode: "Validation_VAL_Profile_Minimum",
+        },
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          valueString: "InstanceValidator",
+        },
+      ]),
+    )[0];
+    expect(finding?.ruleSource).toBe("Validation_VAL_Profile_Minimum");
+    expect(finding?.specCitation).toBe("InstanceValidator");
+  });
+
+  it("never repeats the rule id as the spec citation", () => {
+    // both rows render in the ui; the same string twice states one fact as two
+    const onlySource = normalizeOutcome(
+      issueWith([
+        {
+          url: "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source",
+          valueString: "TerminologyEngine",
+        },
+      ]),
+    )[0];
+    expect(onlySource?.ruleSource).toBe("TerminologyEngine");
+    expect(onlySource?.specCitation).not.toBe(onlySource?.ruleSource);
+  });
+
+  it("falls back to the base spec when the validator sends no extensions", () => {
+    const finding = normalizeOutcome(issueWith([]))[0];
+    expect(finding?.ruleSource).toBe("FHIR R4 base");
+    expect(finding?.specCitation).toBe("FHIR R4 base");
+  });
+});

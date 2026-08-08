@@ -91,10 +91,16 @@ function plainLanguage(
   return cleaned.length > 0 ? cleaned : `Conformance issue at ${path}.`;
 }
 
-// spec citation string shown next to a finding. best-effort from the message id.
-function specCitation(messageId?: string, source?: string): string {
+// the validator's rule identifier. also fingerprinted, so it must stay stable per rule
+function ruleSourceOf(messageId?: string, source?: string): string {
   if (messageId) return messageId;
   if (source) return source;
+  return "FHIR R4 base";
+}
+
+// which validator engine raised it. must not repeat ruleSource or the ui shows one fact twice
+function specCitationOf(messageId?: string, source?: string): string {
+  if (source && source !== ruleSourceOf(messageId, source)) return source;
   return "FHIR R4 base";
 }
 
@@ -132,8 +138,8 @@ export function normalizeOutcome(oo: OperationOutcome): EngineFinding[] {
     byFingerprint.set(fp, {
       severity: issue.severity,
       category,
-      ruleSource: specCitation(messageId, source),
-      specCitation: specCitation(messageId, source),
+      ruleSource: ruleSourceOf(messageId, source),
+      specCitation: specCitationOf(messageId, source),
       resourceType,
       fhirpath,
       rawValidatorMessage: issue.details?.text ?? issue.diagnostics ?? "(no message)",
