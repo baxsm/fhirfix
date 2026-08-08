@@ -29,8 +29,7 @@ export const auth = betterAuth({
     },
   },
 
-  // absent credentials mean the key is simply not registered, so better-auth
-  // 404s /callback/google rather than half-offering a provider.
+  // absent credentials leave the provider unregistered rather than half-offered
   socialProviders: env.GOOGLE_ENABLED
     ? {
         google: {
@@ -40,8 +39,7 @@ export const auth = betterAuth({
       }
     : {},
 
-  // a google account arrives with a verified email, so the address is already
-  // proven and must not be sent through our own verification flow.
+  // a google address is already proven and must not enter our own verification flow
   account: {
     accountLinking: {
       enabled: true,
@@ -67,9 +65,7 @@ export const auth = betterAuth({
     },
   },
 
-  // a login is an auditable event, but it is not a trpc mutation. a session row
-  // is created on every sign-in path (password, magic link, verification), so
-  // hooking session creation catches all of them in one place.
+  // hooks session creation because every sign-in path creates one, unlike a trpc mutation
   databaseHooks: {
     session: {
       create: {
@@ -104,31 +100,13 @@ export const auth = betterAuth({
         await sendEmail({ to: email, subject, html, text });
       },
     }),
-    // enterprise sso. off unless switched on, because an unconfigured provider
-    // would still expose /sso/* endpoints that can only fail.
-    //
-    // trustEmailVerified: an assertion from a workspace's configured corporate
-    // IdP IS the proof of the address. without this the plugin hardcodes
-    // emailVerified=false, which would send an SSO user through our own email
-    // verification and defeat the point of single sign-on. it only applies to
-    // providers an admin registered, and only when the provider maps the field.
+    // trustEmailVerified must stay on or an IdP-asserted address is re-verified by us
     ...(env.SSO_ENABLED
       ? [
           sso({ trustEmailVerified: true }),
-          // directory provisioning rides on the same switch as sso: an IdP that
-          // pushes users is the same IdP that authenticates them.
-          //
-          // storeSCIMToken "hashed": the token is a bearer credential with the
-          // power to create and deactivate members, so the database keeps only
-          // a hash. the plugin's default is weaker; a leaked row must not be
-          // replayable. requiredRole owner matches ssoUpsert.
+          // must stay "hashed": the token deactivates members, so a leaked row is replayable
           scim({ storeSCIMToken: "hashed", requiredRole: ["owner"] }),
-          // required BY scim, not wanted for its own sake. SCIM `active: false`
-          // maps to this plugin's `banned` field, the only enforced
-          // disabled-user state in better-auth, and the scim plugin rejects a
-          // deactivation it cannot honour rather than dropping it silently.
-          // deprovisioning is the whole point of scim, so this is not optional.
-          // adminRoles is empty: no one gets app-wide admin powers from it.
+          // required by scim: `active: false` maps to this plugin's `banned` field
           admin({ adminRoles: [] }),
         ]
       : []),

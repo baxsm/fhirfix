@@ -4,9 +4,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { redis } from "@/lib/redis";
 
-// draft-inadarei-api-health-check-06. "warn" is the state that matters here:
-// a degraded validator pool still serves runs, just slower, and reporting that
-// as "fail" would page someone for a system that is working.
+// draft-inadarei-api-health-check-06; "warn" exists so a degraded pool does not page
 export type CheckStatus = "pass" | "warn" | "fail";
 
 export interface ComponentCheck {
@@ -26,8 +24,7 @@ export interface HealthReport {
 }
 
 const PROBE_TIMEOUT_MS = 5_000;
-// the endpoint is public, so every caller must not become a sidecar probe.
-// one probe per window is enough for a page that renders a coarse state.
+// the endpoint is public, so a caller must not become a sidecar probe
 const CACHE_TTL_MS = 15_000;
 
 let cached: { at: number; report: HealthReport } | undefined;
@@ -44,8 +41,7 @@ async function withTimeout<T>(work: Promise<T>, fallback: T): Promise<T> {
   }
 }
 
-// a probe failure is operational detail, never PHI, but the driver message can
-// carry the connection string. only the error name crosses the boundary.
+// only the error name crosses the boundary; a driver message can carry the dsn
 function safeOutput(err: unknown): string {
   if (err instanceof Error) return err.name;
   return "unknown error";
@@ -140,17 +136,14 @@ async function checkConverter(): Promise<ComponentCheck> {
   };
 }
 
-// the overall status is the worst component status. exported because the
-// rollup is the part with a wrong answer worth catching: a pool that reports
-// "warn" must not drag the whole system to "fail" and page someone.
+// a "warn" component must not roll up to "fail" and page someone
 export function worst(statuses: CheckStatus[]): CheckStatus {
   if (statuses.includes("fail")) return "fail";
   if (statuses.includes("warn")) return "warn";
   return "pass";
 }
 
-// a partially-available validator pool still serves runs, so it is degraded
-// rather than down. exported for the same reason as worst().
+// a partial pool still serves runs, so it is degraded rather than down
 export function poolStatus(ready: number, total: number): CheckStatus {
   if (ready === 0) return "fail";
   return ready < total ? "warn" : "pass";

@@ -70,8 +70,7 @@ async function writeFindings(
   );
 }
 
-// a run started by a test-mode api key. only api-key runs can be test mode: the
-// dashboard and scheduled checks are always live.
+// only api-key runs can be test mode; dashboard and scheduled checks are always live
 async function isTestModeRun(db: Db, runId: string): Promise<boolean> {
   const [row] = await db
     .select({ mode: schema.apiKey.mode })
@@ -120,8 +119,7 @@ export async function persistCompletedRun(
 
   await writeFindings(db, runId, workspaceId, result);
 
-  // a test key must not spend real credits. the UI sells "live" as the mode that
-  // spends, so charging a test run would be taking money we said we would not.
+  // a test key must never spend real credits; the UI sells "live" as the paying mode
   const chargeMicro = (await isTestModeRun(db, runId))
     ? 0
     : priceForRun({ resourceCount: result.resourceCount });
@@ -144,8 +142,7 @@ export async function persistCompletedRun(
     })
     .where(eq(schema.run.id, runId));
 
-  // a free run posts no ledger entry at all. a zero-amount debit would clutter
-  // the ledger with rows that never moved the balance.
+  // a free run posts no ledger entry: a zero debit is a row that never moved the balance
   if (chargeMicro === 0) {
     const account = await ensureBillingAccount(db, workspaceId);
     return { chargeMicro: 0, balanceAfter: account?.balanceMicroCredits ?? 0 };
@@ -160,16 +157,14 @@ export async function persistCompletedRun(
     relatedRunId: runId,
   });
 
-  // top up first: a successful recharge means the balance is no longer low, so
-  // alerting before it would send a warning that is already out of date.
+  // must top up before alerting or the warning is already out of date when it sends
   const afterRecharge = await maybeAutoRecharge(db, workspaceId, balanceAfter);
   await maybeSendLowBalanceAlert(db, workspaceId, afterRecharge);
 
   return { chargeMicro, balanceAfter: afterRecharge };
 }
 
-// charging a card needs a payment provider, which db/ does not depend on. the
-// backend registers this at startup, same as the email transport.
+// injected at startup: db/ must not depend on a payment provider
 type AutoRechargeHandler = (args: {
   workspaceId: string;
   rechargeCents: number;
@@ -210,8 +205,7 @@ async function maybeAutoRecharge(
   return result.credited ? result.balanceMicro : balanceAfter;
 }
 
-// purchases since the start of the current calendar month, which is the window
-// the monthly spend cap is measured against.
+// calendar month to date, the window the monthly spend cap is measured against
 async function purchasesThisCycleCents(db: Db, workspaceId: string): Promise<number> {
   const now = new Date();
   const cycleStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -228,9 +222,7 @@ async function purchasesThisCycleCents(db: Db, workspaceId: string): Promise<num
   return rows.reduce((sum, r) => sum + centsFromMicro(r.amountMicro), 0);
 }
 
-// db/ has no email dependency of its own, so the process that owns a transport
-// (backend, worker) registers one at startup. unset means no alert can be sent,
-// which is recorded as a failure rather than a silent success.
+// injected at startup; unset is recorded as a send failure, never a silent success
 type LowBalanceSender = (args: {
   to: string;
   threshold: number;
@@ -243,8 +235,7 @@ export function setLowBalanceSender(sender: LowBalanceSender): void {
   sendLowBalanceEmail = sender;
 }
 
-// the credits.low webhook. subscribable in the dashboard but never dispatched
-// until this was wired, so an endpoint subscribed to it received nothing.
+// the credits.low webhook, dispatched alongside the email
 type LowBalanceWebhook = (args: {
   workspaceId: string;
   threshold: number;
@@ -309,8 +300,7 @@ export async function maybeSendLowBalanceAlert(
   const contact = await resolveBillingEmail(db, workspaceId, account.contactUserId);
   const target = contact?.email ?? null;
 
-  // the recipient turned these off. consume the threshold anyway: they asked not
-  // to be told, so re-firing at the same level later would ignore that.
+  // must consume the threshold even when opted out, or it re-fires at the same level
   if (contact && !contact.wantsAlert) {
     if (dispatchLowBalance) {
       await dispatchLowBalance({ workspaceId, threshold, balanceMicro: balanceAfter }).catch(
@@ -337,8 +327,7 @@ export async function maybeSendLowBalanceAlert(
     return;
   }
 
-  // send first, then record what actually happened. recording "sent" before the
-  // send is how the log ends up claiming deliveries that never occurred.
+  // must send before recording, or the log claims deliveries that never happened
   let status: "sent" | "failed" = "sent";
   let failure: string | undefined;
   try {
@@ -358,16 +347,14 @@ export async function maybeSendLowBalanceAlert(
     metadata: { dedup, threshold, balanceAfter, baselineMicro, ...(failure ? { failure } : {}) },
   });
 
-  // the webhook is a separate channel from the email: a failed email must not
-  // suppress it, and it is best-effort either way.
+  // a separate channel: a failed email must not suppress the webhook
   if (dispatchLowBalance) {
     await dispatchLowBalance({ workspaceId, threshold, balanceMicro: balanceAfter }).catch(
       () => {},
     );
   }
 
-  // only consume the threshold when the alert actually went out, so a transient
-  // failure does not permanently silence this level.
+  // only on a real send, so a transient failure cannot permanently silence this level
   if (status === "sent") {
     await db
       .update(schema.billingAccount)
@@ -376,9 +363,7 @@ export async function maybeSendLowBalanceAlert(
   }
 }
 
-// the billing contact email, else the workspace owner's. best-effort.
-// a user who turned low-balance emails off must not receive one. the prefs blob
-// is app-defined json on the user row; anything unparseable means "default on".
+// unparseable prefs mean "default on", so a bad blob never silences a real alert
 function wantsLowBalance(raw: unknown): boolean {
   if (typeof raw !== "string" || raw.length === 0) return true;
   try {

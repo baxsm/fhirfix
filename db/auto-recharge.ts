@@ -4,9 +4,7 @@ import { PRICING } from "./credits";
 import { recordNotification } from "./notifications";
 import * as schema from "./schema/index";
 
-// the provider call, injected so this module stays free of the polar sdk and of
-// any one service's env. both backend and worker complete runs, so both register
-// the same implementation rather than each keeping their own copy of the logic.
+// injected so this module stays free of the polar sdk and any one service's env
 export type OffSessionCharge = (args: {
   packId: string;
   productId: string;
@@ -22,9 +20,7 @@ export type AutoRechargeConfig = {
   onError?: (context: string, detail: string) => void;
 };
 
-// charges the workspace's saved payment method for the configured top-up. the
-// ledger is NOT credited here: the order.paid webhook does that, so a manual
-// checkout and an auto-recharge credit by exactly one path.
+// must not credit the ledger here; order.paid does that so crediting has one path
 export async function performAutoRecharge(
   db: Db,
   config: AutoRechargeConfig,
@@ -76,9 +72,7 @@ export async function performAutoRecharge(
     return { credited: false, balanceMicro };
   }
 
-  // the charge succeeded, but order.paid credits the ledger and may not have
-  // landed yet. re-read: if the webhook already ran the balance is current, and
-  // if it has not, reporting the pre-charge balance is still true right now.
+  // re-read because order.paid may not have landed; either value is true right now
   const [after] = await db
     .select({ balanceMicroCredits: schema.billingAccount.balanceMicroCredits })
     .from(schema.billingAccount)

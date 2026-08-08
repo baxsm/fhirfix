@@ -55,9 +55,7 @@ export function premiumProductId(): string | null {
   return env.POLAR_PRODUCT_PREMIUM.length > 0 ? env.POLAR_PRODUCT_PREMIUM : null;
 }
 
-// the premium plan is a recurring subscription, so it uses its own checkout with
-// the workspace tagged in metadata - that tag is how the subscription webhook
-// knows which workspace to grant the tier to.
+// the workspace metadata tag is how the subscription webhook knows who to grant
 export async function createPremiumCheckout(args: {
   productId: string;
   workspaceId: string;
@@ -81,9 +79,7 @@ export type OffSessionResult =
       detail: string;
     };
 
-// charge a saved payment method with no user present: create a draft order, then
-// finalize it. the order carries the same metadata as a checkout, so the existing
-// order.paid webhook credits the ledger by the same path.
+// carries the same metadata as a checkout so order.paid credits by the same path
 export async function chargeSavedMethod(args: {
   packId: string;
   productId: string;
@@ -108,8 +104,7 @@ export async function chargeSavedMethod(args: {
   } catch (error) {
     const status = (error as { statusCode?: number })?.statusCode;
     const detail = error instanceof Error ? error.message : String(error);
-    // 402 is a decline or a missing/unusable method; 403 means the organization
-    // is not approved for off-session charges at all.
+    // 402 is a decline; 403 means the org is not approved for off-session charges
     if (status === 402) return { ok: false, reason: "declined", detail };
     if (status === 403) return { ok: false, reason: "not_enabled", detail };
     return { ok: false, reason: "error", detail };
@@ -126,8 +121,7 @@ export type ParsedOrder = {
 
 export type ParsedSubscription = {
   workspaceId: string;
-  // true while the plan should be honoured. "canceled" means it will not renew,
-  // but access runs to the end of the paid period, so only revoked/unpaid drop it.
+  // "canceled" still runs to the end of the paid period; only revoked/unpaid drop access
   active: boolean;
 };
 
@@ -156,8 +150,7 @@ export function parseWebhook(
     if (!workspaceId || data.productId !== env.POLAR_PRODUCT_PREMIUM) {
       return { kind: "ignored" };
     }
-    // trust the status on the payload rather than the event name: `updated` can
-    // carry any status, and a re-sent event must not flip the tier the wrong way.
+    // trust the payload status, not the event name: a re-sent `updated` carries any status
     const active = data.status === "active" || data.status === "trialing";
     return { kind: "subscription", subscription: { workspaceId, active } };
   }

@@ -5,9 +5,7 @@ const portSchema = z
   .string()
   .refine((val) => val.length > 0 && !Number.isNaN(Number(val)), "must be a number");
 
-// a credential slot that ships with a TEST_ placeholder. treating the
-// placeholder as empty is what keeps a half-configured provider switched off
-// rather than visibly broken.
+// a TEST_ placeholder counts as empty, so a half-configured provider stays off
 const placeholderAsEmpty = z
   .string()
   .default("")
@@ -32,8 +30,7 @@ const baseEnv = createEnv({
     // where a BAA request lands. the same address the terms page publishes.
     COMPLIANCE_EMAIL: z.email().default("legal@fhirfix.dev"),
 
-    // a TEST_-prefixed value counts as unset, so a placeholder disables the
-    // provider instead of rendering a button that fails on click.
+    // a placeholder disables the provider rather than rendering a button that fails
     GOOGLE_CLIENT_ID: placeholderAsEmpty,
     GOOGLE_CLIENT_SECRET: placeholderAsEmpty,
     SSO_ENABLED: z
@@ -62,8 +59,7 @@ const baseEnv = createEnv({
     POLAR_PRODUCT_PACK_10: z.string().default(""),
     POLAR_PRODUCT_PACK_25: z.string().default(""),
     POLAR_PRODUCT_PACK_100: z.string().default(""),
-    // recurring product for the premium plan. unset means premium cannot be
-    // bought, which is the honest state until the product exists in Polar.
+    // unset means premium cannot be bought, the honest state until it exists in polar
     POLAR_PRODUCT_PREMIUM: z.string().default(""),
     // absolute url of the frontend, used to build Polar success/return urls.
     APP_URL: z.url().default("http://localhost:3000"),
@@ -84,7 +80,6 @@ export const env = {
   VALIDATOR_URL_LIST: baseEnv.VALIDATOR_URLS.split(",")
     .map((u) => u.trim())
     .filter(Boolean),
-  // one place decides whether google sign-in exists. both halves are required:
-  // an id without a secret is a button that fails at the callback.
+  // both halves required: an id without a secret is a button that fails at the callback
   GOOGLE_ENABLED: !!baseEnv.GOOGLE_CLIENT_ID && !!baseEnv.GOOGLE_CLIENT_SECRET,
 };

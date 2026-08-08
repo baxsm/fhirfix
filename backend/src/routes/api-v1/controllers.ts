@@ -116,9 +116,7 @@ async function runAndPersist(
   const runId = createId("run");
   const inputType = detectInput(input).inputType;
   const inputKey = blobKey(workspaceId, runId, "input");
-  // shared ingest: applies the workspace redaction policy and records whether
-  // the stored bytes actually carry PHI.
-  // unspecified profiles fall back to the workspace default.
+  // shared ingest, so the redaction policy and the PHI flag cannot drift from the dashboard
   const runProfiles = await resolveProfiles(db, workspaceId, profiles);
   const policy = await redactionPolicyFor(db, workspaceId);
   const stored = await storeRunInput(db, blobStore, {
@@ -174,9 +172,7 @@ async function runAndPersist(
 
   c.set("runId", runId);
 
-  // the same action the dashboard writes for the same event. an auditor asking
-  // who touched this data must get an answer whether it came from the ui or a key.
-  // deliberately after the insert, so idempotent replays above do not re-audit.
+  // must stay after the insert so idempotent replays do not re-audit
   await writeAudit({
     workspaceId,
     action: "run.created",
@@ -192,8 +188,7 @@ async function runAndPersist(
 
   let result: RemediationResult;
   try {
-    // stored.content, not the raw body: under a redacting policy the engine must
-    // see the redacted copy, or a fix gets derived from PHI we promised to drop.
+    // must be stored.content, not the raw body, or a fix derives from PHI we dropped
     result = await runRemediation(
       { raw: stored.content, mappings, profiles: runProfiles, autoFix },
       engineDeps,

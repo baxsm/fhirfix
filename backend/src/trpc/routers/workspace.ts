@@ -109,8 +109,7 @@ export const workspaceRouter = router({
       return archive;
     }),
 
-  // irreversible. owner only, and the caller must type the slug back to us so a
-  // misdirected click cannot destroy a workspace.
+  // irreversible: owner only, and the slug must be typed back to us
   delete: workspaceProcedure
     .input(z.object({ workspaceId: z.string(), confirmSlug: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -134,8 +133,7 @@ export const workspaceRouter = router({
         });
       }
 
-      // written BEFORE the delete: afterwards this workspace's rows are detached,
-      // so an entry written after would land on the tombstone and lose the name.
+      // must be written before the delete or the entry lands on the tombstone
       await writeAudit({
         workspaceId: input.workspaceId,
         action: "workspace.deleted",
@@ -158,8 +156,7 @@ export const workspaceRouter = router({
       return summary;
     }),
 
-  // the terms page tells a customer to request a BAA here, so this has to reach
-  // a real person. status only moves to "requested" once the email is away.
+  // status only moves to "requested" once the email is away
   requestBaa: enforceRole("workspaceSettings", "update")
     .input(z.object({ workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -172,8 +169,7 @@ export const workspaceRouter = router({
       if (!settings) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Workspace settings not found." });
       }
-      // already handled. re-requesting would mail the compliance inbox again for
-      // an agreement that is already in flight or signed.
+      // re-requesting would mail compliance again for an agreement already in flight
       if (settings.baaStatus !== "none") {
         return { baaStatus: settings.baaStatus };
       }
@@ -218,8 +214,7 @@ export const workspaceRouter = router({
       return { baaStatus: updated?.baaStatus ?? "requested" };
     }),
 
-  // what the settings page shows. never returns the raw certificate: an admin
-  // compares the fingerprint against their IdP, they do not need the bytes back.
+  // must never return the raw certificate; the fingerprint is what an admin compares
   ssoGet: enforceRole("workspaceSettings", "view").query(async ({ ctx, input }) => {
     if (!env.SSO_ENABLED) return { enabled: false as const, provider: null };
 
@@ -249,9 +244,7 @@ export const workspaceRouter = router({
     };
   }),
 
-  // owner only, and premium. registering an IdP means handing it the power to
-  // assert who a member is, which is a strictly stronger claim than any other
-  // workspace setting.
+  // owner only: an IdP asserts who a member is, a stronger claim than any other setting
   ssoUpsert: workspaceProcedure
     .input(
       z.object({
@@ -305,8 +298,7 @@ export const workspaceRouter = router({
         });
       }
 
-      // one provider per workspace. re-configuring replaces rather than stacks,
-      // otherwise a stale IdP would keep working after being "replaced".
+      // must replace, not stack, or a "replaced" IdP keeps working
       const providerId = `ws-${input.workspaceId}`;
       await ctx.db
         .delete(schema.ssoProvider)
@@ -361,8 +353,7 @@ export const workspaceRouter = router({
       return { providerId, issuer: idp.entityId };
     }),
 
-  // directory sync status. the token itself is stored hashed and is shown once
-  // at generation, so there is nothing here to give back.
+  // the token is hashed and shown once at generation, so there is nothing to give back
   scimGet: enforceRole("workspaceSettings", "view").query(async ({ ctx, input }) => {
     if (!env.SSO_ENABLED) return { enabled: false as const, connected: false };
     const [row] = await ctx.db
@@ -373,11 +364,7 @@ export const workspaceRouter = router({
     return { enabled: true as const, connected: !!row, providerId: row?.providerId ?? null };
   }),
 
-  // minted server-side rather than letting the client call the plugin directly:
-  // the audit row has to be written by whoever actually issues the credential,
-  // or a client that skips the follow-up call leaves no trail.
-  //
-  // the token is returned ONCE. it is stored hashed, so it cannot be shown again.
+  // minted server-side so the issuer writes the audit row; returned once, stored hashed
   scimGenerate: workspaceProcedure
     .input(z.object({ workspaceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -392,9 +379,7 @@ export const workspaceRouter = router({
       }
       await requirePremiumPlan(ctx.db, input.workspaceId, "Directory sync");
 
-      // must not collide with the sso providerId (ws-...), which the plugin
-      // rejects outright. regenerating replaces the old row, so the previous
-      // token stops working the moment a new one is issued.
+      // must not collide with the sso providerId (ws-...), which the plugin rejects
       const providerId = `scim-${input.workspaceId}`;
       await ctx.db
         .delete(schema.scimProvider)
@@ -473,8 +458,7 @@ export const workspaceRouter = router({
     }),
 });
 
-// the stored samlConfig is a json blob owned by the plugin, so read it
-// defensively rather than trusting a shape we do not control.
+// the plugin owns this json blob, so read it defensively
 function parseSamlCert(raw: string | null): string | null {
   if (!raw) return null;
   try {

@@ -6,15 +6,11 @@ export type IdpMetadata = {
   cert: string;
 };
 
-// every SAML IdP publishes the same three facts in its descriptor. extracted by
-// pattern rather than a full XML parse: fast-xml-parser is only present here as
-// a transitive dep of the sso plugin, and taking a direct dependency on someone
-// else's transitive tree breaks the moment they swap parsers.
+// pattern-matched, not parsed: fast-xml-parser is the sso plugin's transitive dep, not ours
 export function parseIdpMetadata(xml: string): IdpMetadata | null {
   const entityId = xml.match(/entityID="([^"]+)"/)?.[1];
 
-  // prefer the HTTP-POST binding: that is the one we send users through. an IdP
-  // usually lists Redirect first, so taking the first match would pick wrong.
+  // must prefer HTTP-POST; an IdP usually lists Redirect first so the first match is wrong
   const post = xml.match(
     /<[^>]*SingleSignOnService[^>]*HTTP-POST[^>]*Location="([^"]+)"|<[^>]*SingleSignOnService[^>]*Location="([^"]+)"[^>]*HTTP-POST/,
   );
@@ -39,8 +35,7 @@ export function parseIdpMetadata(xml: string): IdpMetadata | null {
   return { entityId, entryPoint, cert };
 }
 
-// the fingerprint an admin can compare against what their IdP shows, without us
-// ever displaying the full certificate back to them.
+// what an admin compares against their IdP, so the full certificate is never shown back
 export async function certFingerprint(cert: string): Promise<string> {
   const der = Uint8Array.from(atob(cert), (c) => c.charCodeAt(0));
   const hash = await crypto.subtle.digest("SHA-256", der);

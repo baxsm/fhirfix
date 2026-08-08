@@ -4,12 +4,7 @@ import * as schema from "./schema/index";
 
 export type SweepResult = { scanned: number; purged: number };
 
-// hard-delete the BYTES of expired artifacts, keeping the tracking row.
-//
-// the row stays because it is the record that something existed and was
-// disposed of - an auditor asking "what happened to run X's input" gets
-// "purged on this date", not a missing row. `content` is nulled, which is the
-// actual deletion: blobs live in postgres (see blob.ts), not on a disk.
+// nulls the bytes but keeps the row: an auditor must still see it was purged
 export async function sweepExpiredBlobs(db: Db, now = new Date()): Promise<SweepResult> {
   const expired = await db
     .select({ key: schema.storedObject.key })
@@ -29,8 +24,7 @@ export async function sweepExpiredBlobs(db: Db, now = new Date()): Promise<Sweep
 
   const result = await db
     .update(schema.storedObject)
-    // deletedAt IS the tombstone. uploadState describes the upload, not the
-    // lifecycle, and has no "deleted" member.
+    // deletedAt is the tombstone; uploadState describes the upload, not the lifecycle
     .set({ content: null, deletedAt: now })
     .where(
       and(
@@ -45,8 +39,7 @@ export async function sweepExpiredBlobs(db: Db, now = new Date()): Promise<Sweep
   return { scanned: expired.length, purged: result.length };
 }
 
-// how many artifacts are due, without deleting anything. used by tests and by
-// an operator checking the job is keeping up.
+// counts what is due without deleting it
 export async function countExpiredBlobs(db: Db, now = new Date()): Promise<number> {
   const [row] = await db
     .select({ n: sql<number>`count(*)::int` })

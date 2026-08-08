@@ -42,14 +42,10 @@ app.use("/trpc/*", dashboardCors);
 app.use("/api/auth/*", dashboardCors);
 app.use("/api/runs/*", dashboardCors);
 
-// liveness: the process answers. railway's healthcheckPath points here, and it
-// must not depend on postgres, because a deploy that cannot reach the db should
-// still come up and report why rather than being killed and retried forever.
+// must not touch postgres: a deploy that cannot reach the db still has to come up
 app.get("/health", (c) => c.json({ ok: true, service: "fhirfix-backend" }));
 
-// readiness: the dependencies actually respond. draft-inadarei-api-health-check-06.
-// public and unauthenticated on purpose, so it carries no counts, ids, or
-// anything workspace-scoped.
+// public and unauthenticated, so it must carry no counts, ids, or workspace scope
 app.get("/health/ready", async (c) => {
   const report = await getHealthReport();
   // c.json() would overwrite the content-type, so the body is serialized here.
@@ -61,10 +57,7 @@ app.get("/health/ready", async (c) => {
 
 app.route("/api/v1", apiV1);
 
-// Better Auth owns all /api/auth/** routes (sign-in/up, verify, reset, org, etc).
-// PUT/PATCH/DELETE are required by the SCIM 2.0 server the scim plugin mounts
-// under /api/auth/scim/v2: an IdP deprovisions a user with PATCH active=false,
-// which silently 404'd while this list was GET+POST only.
+// PUT/PATCH/DELETE are required by scim: an IdP deprovisions with PATCH active=false
 app.on(["GET", "POST", "PUT", "PATCH", "DELETE"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 // authenticated report exports + corrected-artifact fetch (session-gated REST).

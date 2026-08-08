@@ -2,9 +2,7 @@ import { eq } from "drizzle-orm";
 import type { Db } from "./client";
 import * as schema from "./schema/index";
 
-// the portability archive. everything the workspace put in, in a form they can
-// take elsewhere. blob CONTENT is deliberately excluded: artifacts are fetched
-// per-run and can be gigabytes, so the archive names them rather than inlining.
+// names artifacts rather than inlining them; blob content can be gigabytes
 export async function exportWorkspaceData(db: Db, workspaceId: string) {
   const [settings] = await db
     .select()
@@ -41,8 +39,7 @@ export async function exportWorkspaceData(db: Db, workspaceId: string) {
     .select()
     .from(schema.conformancePacketRun)
     .where(eq(schema.conformancePacketRun.workspaceId, workspaceId));
-  // artifacts are listed WITHOUT content: keys and hashes, so the export stays
-  // a manifest rather than a multi-gigabyte blob dump.
+  // keys and hashes only, so the export stays a manifest
   const artifacts = await db
     .select({
       key: schema.storedObject.key,
@@ -81,16 +78,10 @@ export type DeletionSummary = {
   evidenceRetained: number;
 };
 
-// the tombstone workspace id that append-only rows are re-pointed at. it is not
-// a real workspace, so nothing can read those rows through a normal query, but
-// the financial and audit record still exists for reconciliation.
+// tombstone id for detached append-only rows; not a real workspace, so nothing reads them
 export const CLOSED_WORKSPACE = "workspace_deleted";
 
-// right-to-erasure reconciled with append-only immutability:
-// - PHI-bearing rows (runs, findings, artifact bytes) are HARD deleted
-// - credit ledger, audit log and evidence bundles SURVIVE, detached from the
-//   workspace and stripped of anything identifying, because they are the
-//   financial and compliance record. deleting them would break reconciliation.
+// PHI rows are hard deleted; ledger, audit and evidence survive detached for reconciliation
 export async function deleteWorkspaceData(
   db: Db,
   workspaceId: string,
@@ -105,8 +96,7 @@ export async function deleteWorkspaceData(
     .where(eq(schema.finding.workspaceId, workspaceId))
     .returning({ id: schema.finding.id });
 
-  // artifact bytes go, the tracking rows go with them: unlike the retention
-  // sweep, a deleted workspace keeps no manifest.
+  // unlike the retention sweep, a deleted workspace keeps no manifest
   await db.delete(schema.storedObject).where(eq(schema.storedObject.workspaceId, workspaceId));
 
   const runs = await db
@@ -148,8 +138,7 @@ export async function deleteWorkspaceData(
     .where(eq(schema.evidenceBundle.workspaceId, workspaceId))
     .returning({ id: schema.evidenceBundle.id });
 
-  // the packet run itself names a customer endpoint, so it goes; its immutable
-  // evidence bundle is what survives.
+  // the run names a customer endpoint so it goes; the evidence bundle survives
   await db
     .delete(schema.conformancePacketRun)
     .where(eq(schema.conformancePacketRun.workspaceId, workspaceId));
