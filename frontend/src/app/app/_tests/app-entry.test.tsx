@@ -32,13 +32,16 @@ describe("AppEntry", () => {
     // sends the user straight back here and the two bounce forever
     render(<AppEntry />);
     await waitFor(() => expect(signOut).toHaveBeenCalled());
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/sign-in"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/sign-in?signedout=1"));
   });
 
   test("still leaves for sign-in when the sign-out call fails", async () => {
+    // the cookie survives a failed sign-out, so the flag is the only thing that
+    // stops proxy.ts bouncing the user back here. without it this state is a
+    // permanent lockout, escapable only by clearing cookies by hand.
     signOut.mockImplementationOnce(() => Promise.reject(new Error("network")));
     render(<AppEntry />);
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/sign-in"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/sign-in?signedout=1"));
   });
 
   test("sends a signed-in user to their first workspace", async () => {

@@ -17,7 +17,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (hasSession && (pathname === "/sign-in" || pathname === "/sign-up")) {
+  // the cookie can outlive the session row, and only the client can tell. it
+  // asks to stay put with ?signedout=1, which is what stops sign-in bouncing
+  // back to /app while the app bounces here: an unbreakable loop.
+  const signedOut = request.nextUrl.searchParams.get("signedout") === "1";
+
+  if (hasSession && !signedOut && (pathname === "/sign-in" || pathname === "/sign-up")) {
     const url = request.nextUrl.clone();
     url.pathname = "/app";
     url.search = "";

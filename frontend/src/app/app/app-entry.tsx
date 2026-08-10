@@ -15,11 +15,12 @@ export function AppEntry() {
     leaving.current = true;
 
     // the cookie outlives the session row, and proxy.ts redirects on the cookie
-    // alone, so signing out first is what stops /sign-in bouncing back to here
+    // alone. sign out to clear it, but carry ?signedout=1 either way: if the
+    // request fails the cookie survives and the flag is the only way out.
     if (!session) {
       signOut()
         .catch(() => {})
-        .finally(() => router.replace("/sign-in"));
+        .finally(() => router.replace("/sign-in?signedout=1"));
       return;
     }
 

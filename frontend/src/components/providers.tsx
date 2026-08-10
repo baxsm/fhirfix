@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // light-only on purpose: there is no theme toggle and nothing sets .dark.
+  // the provider stays because sonner and the polar embed read a theme.
   return (
     <ThemeProvider attribute="class" forcedTheme="light" disableTransitionOnChange>
       <TRPCReactProvider>
