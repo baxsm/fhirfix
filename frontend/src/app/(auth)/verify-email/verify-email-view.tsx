@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { AuthCard } from "../auth-card";
 
 export function VerifyEmailView() {
   const params = useSearchParams();
@@ -30,30 +31,31 @@ export function VerifyEmailView() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">Verify your email</h1>
-        <p className="text-sm text-muted-foreground">
-          {email ? (
-            <>
-              We sent a verification link to{" "}
-              <span className="font-medium text-foreground">{email}</span>. Open it to activate your
-              account.
-            </>
-          ) : (
-            "We sent you a verification link. Open it to activate your account."
-          )}
-        </p>
-      </div>
+    <AuthCard
+      title="Verify your email"
+      description={
+        email ? (
+          <>
+            We sent a verification link to{" "}
+            <span className="font-medium text-foreground">{email}</span>. Open it to activate your
+            account.
+          </>
+        ) : (
+          "We sent you a verification link. Open it to activate your account."
+        )
+      }
+      footer={
+        <a
+          href="/sign-in"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Back to sign in
+        </a>
+      }
+    >
       <Button variant="outline" className="w-full" onClick={resend} disabled={pending}>
         {pending ? "Sending..." : "Resend verification email"}
       </Button>
-      <a
-        href="/sign-in"
-        className="block text-center text-sm text-muted-foreground hover:underline"
-      >
-        Back to sign in
-      </a>
-    </div>
+    </AuthCard>
   );
 }

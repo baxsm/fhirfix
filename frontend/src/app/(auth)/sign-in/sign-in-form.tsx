@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient, signIn } from "@/lib/auth-client";
 import { env } from "@/lib/env";
+import { AuthCard } from "../auth-card";
 import { GoogleButton } from "../google-button";
 
 const schema = z.object({
@@ -61,12 +62,21 @@ export function SignInForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">Sign in</h1>
-        <p className="text-sm text-muted-foreground">Welcome back. Pick up where you left off.</p>
-      </div>
-
+    <AuthCard
+      title="Sign in"
+      description="Pick up where you left off."
+      footer={
+        <>
+          New to FHIRfix?{" "}
+          <a
+            href="/sign-up"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Create an account
+          </a>
+        </>
+      }
+    >
       {env.NEXT_PUBLIC_GOOGLE_ENABLED && (
         <>
           <GoogleButton next={searchParams.get("next")} />
@@ -124,16 +134,6 @@ export function SignInForm() {
           </Button>
         </form>
       </Form>
-
-      <p className="text-center text-sm text-muted-foreground">
-        New to FHIRfix?{" "}
-        <a
-          href="/sign-up"
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Create an account
-        </a>
-      </p>
-    </div>
+    </AuthCard>
   );
 }

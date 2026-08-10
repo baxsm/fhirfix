@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { env } from "@/lib/env";
+import { AuthCard } from "../auth-card";
 
 const requestSchema = z.object({ email: z.email("Enter a valid email") });
 const resetSchema = z.object({ password: z.string().min(8, "At least 8 characters").max(128) });
@@ -52,26 +53,34 @@ function RequestReset() {
 
   if (sent) {
     return (
-      <div className="space-y-3">
-        <h1 className="text-xl font-semibold tracking-tight">Check your email</h1>
-        <p className="text-sm text-muted-foreground">
-          If an account exists for that address, a reset link is on its way. The link expires soon.
-        </p>
-        <a href="/sign-in" className="text-sm font-medium underline-offset-4 hover:underline">
-          Back to sign in
-        </a>
-      </div>
+      <AuthCard
+        title="Check your email"
+        description="If an account exists for that address, a reset link is on its way. The link expires soon."
+        footer={
+          <a
+            href="/sign-in"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Back to sign in
+          </a>
+        }
+      />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">Reset your password</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email and we will send a reset link.
-        </p>
-      </div>
+    <AuthCard
+      title="Reset your password"
+      description="Enter your email and we will send a reset link."
+      footer={
+        <a
+          href="/sign-in"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Back to sign in
+        </a>
+      }
+    >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
           <FormField
@@ -92,13 +101,7 @@ function RequestReset() {
           </Button>
         </form>
       </Form>
-      <a
-        href="/sign-in"
-        className="block text-center text-sm text-muted-foreground hover:underline"
-      >
-        Back to sign in
-      </a>
-    </div>
+    </AuthCard>
   );
 }
 
@@ -123,11 +126,7 @@ function SetNewPassword({ token }: { token: string }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">Set a new password</h1>
-        <p className="text-sm text-muted-foreground">Choose a password you have not used before.</p>
-      </div>
+    <AuthCard title="Set a new password" description="Choose a password you have not used before.">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
           <FormField
@@ -148,6 +147,6 @@ function SetNewPassword({ token }: { token: string }) {
           </Button>
         </form>
       </Form>
-    </div>
+    </AuthCard>
   );
 }

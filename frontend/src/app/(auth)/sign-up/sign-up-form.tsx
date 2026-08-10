@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
 import { env } from "@/lib/env";
+import { AuthCard } from "../auth-card";
 import { GoogleButton } from "../google-button";
 
 const schema = z.object({
@@ -55,14 +56,21 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1.5">
-        <h1 className="text-xl font-semibold tracking-tight">Create your account</h1>
-        <p className="text-sm text-muted-foreground">
-          Start with free trial credits. No card required.
-        </p>
-      </div>
-
+    <AuthCard
+      title="Create your account"
+      description="Start with free trial credits. No card required."
+      footer={
+        <>
+          Already have an account?{" "}
+          <a
+            href="/sign-in"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Sign in
+          </a>
+        </>
+      }
+    >
       {env.NEXT_PUBLIC_GOOGLE_ENABLED && (
         <>
           <GoogleButton />
@@ -125,16 +133,6 @@ export function SignUpForm() {
           </Button>
         </form>
       </Form>
-
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <a
-          href="/sign-in"
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Sign in
-        </a>
-      </p>
-    </div>
+    </AuthCard>
   );
 }
