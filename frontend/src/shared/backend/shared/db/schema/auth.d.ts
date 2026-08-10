@@ -207,7 +207,7 @@ export declare const user: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const session: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "session";
@@ -384,7 +384,7 @@ export declare const session: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const account: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "account";
@@ -612,7 +612,7 @@ export declare const account: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const verification: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "verification";
@@ -721,7 +721,7 @@ export declare const verification: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const organization: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "organization";
@@ -830,7 +830,7 @@ export declare const organization: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const member: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "member";
@@ -922,7 +922,7 @@ export declare const member: import("drizzle-orm/pg-core").PgTableWithColumns<{
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const invitation: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "invitation";
@@ -1065,7 +1065,7 @@ export declare const invitation: import("drizzle-orm/pg-core").PgTableWithColumn
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const ssoProvider: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "sso_provider";
@@ -1208,7 +1208,7 @@ export declare const ssoProvider: import("drizzle-orm/pg-core").PgTableWithColum
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const scimProvider: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "scim_provider";
@@ -1283,7 +1283,7 @@ export declare const scimProvider: import("drizzle-orm/pg-core").PgTableWithColu
             generated: undefined;
         }, {}, {}>;
     };
-    dialect: "pg";
+    dialect: 'pg';
 }>;
 export declare const userRelations: import("drizzle-orm").Relations<"user", {
     sessions: import("drizzle-orm").Many<"session">;
